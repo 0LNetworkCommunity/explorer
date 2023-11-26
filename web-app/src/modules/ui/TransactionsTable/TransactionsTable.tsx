@@ -1,56 +1,13 @@
 import { FC } from "react";
-import { Types } from "aptos";
-import BlockMetadataTransactionRow from "./BlockMetadataTransactionRow";
-import StateCheckpointTransactionRow from "./StateCheckpointTransactionRow";
 import UserTransactionRow from "./UserTransactionRow";
 
-type TransactionCellProps = {
-  transaction: Types.Transaction;
-  address?: string;
-};
-
-function SequenceNumberCell({transaction}: TransactionCellProps) {
-  return (
-    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-      {"sequence_number" in transaction && transaction.sequence_number}
-    </td>
-  );
-}
-
-const TransactionCells = Object.freeze({
-  sequenceNum: SequenceNumberCell,
-});
-
-type TransactionColumn = keyof typeof TransactionCells;
-
-interface TransactionRowProps {
-  transaction: Types.Transaction;
-};
-
-const TransactionRow: FC<TransactionRowProps> = ({ transaction }) => {
-  switch (transaction.type) {
-    case "block_metadata_transaction":
-      return <BlockMetadataTransactionRow transaction={transaction as Types.BlockMetadataTransaction} />;
-    case "state_checkpoint_transaction":
-      return <StateCheckpointTransactionRow transaction={transaction as Types.StateCheckpointTransaction} />;
-    case "user_transaction":
-      return <UserTransactionRow transaction={transaction as Types.UserTransaction} />;
-
-    default:
-      return (
-        <tr>
-          <td></td>
-          <td>{transaction.type}</td>
-          <td></td>
-          <td></td>
-        </tr>
-      );
-  }
-}
-
 interface Props {
-  transactions: Types.Transaction[]
-  columns?: TransactionColumn[];
+  transactions: {
+    hash: string;
+    version: number;
+    timestamp: number;
+    sender: string;
+  }[];
 }
 
 const TransactionsTable: FC<Props> = ({ transactions }) => {
@@ -66,9 +23,6 @@ const TransactionsTable: FC<Props> = ({ transactions }) => {
                       Version
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Type
-                    </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Timestamp
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
@@ -78,7 +32,7 @@ const TransactionsTable: FC<Props> = ({ transactions }) => {
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {transactions.map((transaction, index) => (
-                    <TransactionRow key={`${index}-${transaction.hash}`} transaction={transaction} />
+                    <UserTransactionRow key={`${index}-${transaction.hash}`} transaction={transaction} />
                   ))}
                 </tbody>
               </table>

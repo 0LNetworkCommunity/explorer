@@ -2,7 +2,7 @@ import { FC } from "react";
 import { Link } from "react-router-dom";
 
 interface Props {
-  version: string
+  version: number
 }
 
 const VersionCell: FC<Props> = ({ version }) => {
@@ -12,7 +12,7 @@ const VersionCell: FC<Props> = ({ version }) => {
         to={`/transactions/${version}`}
         className="text-blue-600 hover:text-blue-900 hover:underline"
       >
-        {parseInt(version, 10).toLocaleString()}
+        {version.toLocaleString()}
       </Link>
     </td>
   );

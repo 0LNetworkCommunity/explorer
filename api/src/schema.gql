@@ -1,0 +1,37 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type UserTransaction {
+  hash: String!
+  version: Float!
+  gasUsed: Float!
+  success: Boolean!
+  vmStatus: String!
+  sender: String!
+  sequenceNumber: Float!
+  maxGasAmount: Float!
+  gasUnitPrice: Float!
+  expirationTimestamp: Float!
+  moduleAddress: String!
+  moduleName: String!
+  functionName: String!
+  arguments: [String!]!
+  timestamp: Float!
+}
+
+type UserTransactionCollection {
+  size: Float!
+  items: [UserTransaction!]!
+}
+
+type Module {
+  address: String!
+  name: String!
+  functions: [String!]!
+}
+
+type Query {
+  userTransactions(limit: Int!, offset: Int!, order: String!): UserTransactionCollection!
+  modules: [Module!]!
+}

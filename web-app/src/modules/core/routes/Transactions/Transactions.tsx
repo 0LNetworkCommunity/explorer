@@ -3,7 +3,7 @@ import { gql, useQuery } from "@apollo/client";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import { NavLink, useSearchParams } from "react-router-dom";
 import clsx from "clsx";
-import UserTransactionRow from "../../../ui/TransactionsTable/UserTransactionRow";
+import UserTransactionRow from "../../../ui/UserTransactionsTable/UserTransactionRow";
 import Page from "../../../ui/Page/Page";
 
 const ITEM_PER_PAGE = 10;
@@ -29,7 +29,7 @@ const TransactionsPage: FC = () => {
   const [searchParams] = useSearchParams();
   const page = parseInt(searchParams.get("page") ?? "1", 10);
 
-  const { loading, error, data } = useQuery<{
+  const { data } = useQuery<{
     userTransactions: {
       size: number;
       items: {

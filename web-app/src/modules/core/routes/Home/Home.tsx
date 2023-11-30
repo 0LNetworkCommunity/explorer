@@ -4,7 +4,7 @@ import { gql, useQuery } from "@apollo/client";
 import clsx from "clsx";
 import Page from "../../../ui/Page/Page";
 import Stats from "./Stats";
-import TransactionsTable from "../../../ui/TransactionsTable";
+import TransactionsTable from "../../../ui/UserTransactionsTable";
 
 const GET_USER_TRANSACTIONS = gql`
   query GetUserTransactions {

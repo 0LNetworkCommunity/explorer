@@ -108,7 +108,7 @@ ENGINE = MergeTree
 PRIMARY KEY ("version");
 
 CREATE TABLE "user_transaction_v7" (
-	"version" UInt64,
+  "version" UInt64,
   "hash" UInt256,
   "gas_used" UInt64,
   "success" Boolean,
@@ -149,7 +149,22 @@ CREATE TABLE "block_metadata_transaction_v7" (
   `round` UInt64,
   `previous_block_votes_bitvec` String,
   `proposer` UInt256,
-  `failed_proposer_indices` UInt32,
+  `failed_proposer_indices` Array(UInt32),
+  `timestamp` UInt64
+)
+ENGINE = MergeTree
+ORDER BY version;
+
+CREATE TABLE "state_checkpoint_transaction_v7" (
+  `version` UInt64,
+  `hash` UInt256,
+  `state_change_hash` UInt256,
+  `event_root_hash` UInt256,
+  `state_checkpoint_hash` Nullable(UInt256),
+  `gas_used` UInt64,
+  `success` Boolean,
+  `vm_status` String,
+  `accumulator_root_hash` UInt256,
   `timestamp` UInt64
 )
 ENGINE = MergeTree

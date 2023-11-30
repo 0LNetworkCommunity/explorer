@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
 import { OnModuleInit } from '@nestjs/common';
 import { Job, Queue } from 'bullmq';
@@ -159,25 +160,28 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     timestamp: string,
     events: Types.Event[]
   ) {
-    const payload = csvStringify(events.map((event) => {
-      const [moduleAddress, moduleName, ...rest] = event.type.split('::');
-      const structName = rest.join('::');
+    const chunks = _.chunk(events, 1_000);
+    for (const events of chunks) {
+      const payload = csvStringify(
+        events.map((event) => {
+          const [moduleAddress, moduleName, ...rest] = event.type.split("::");
+          const structName = rest.join("::");
 
-      return [
-        version,
-        timestamp,
-        event.guid.creation_number,
-        event.guid.account_address.substring(2).padStart(64, '00'),
-        event.sequence_number,
-        moduleAddress.substring(2).padStart(64, '00'),
-        moduleName,
-        structName,
-        JSON.stringify(event.data),
-      ];
-    }));
+          return [
+            version,
+            timestamp,
+            event.guid.creation_number,
+            event.guid.account_address.substring(2),
+            event.sequence_number,
+            moduleAddress.substring(2),
+            moduleName,
+            structName,
+            JSON.stringify(event.data),
+          ];
+        }),
+      );
 
-    await this.clichouseService.client.command({
-      query: `
+      const query = `
         INSERT INTO "event_v7" (
           "version",
           "timestamp",
@@ -215,7 +219,141 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
             $$,
             $$${payload}$$
           )
-      `,
+      `;
+
+      console.log(query);
+
+      await this.clichouseService.client.command({
+        query,
+      });
+    }
+  }
+
+  private async ingestBlockMetadataTransaction(transaction: Types.Transaction_BlockMetadataTransaction) {
+    const payload = csvStringify([
+      [
+        transaction.id.substring(2),
+        transaction.version,
+        transaction.hash.substring(2),
+        transaction.epoch,
+        transaction.round,
+        transaction.previous_block_votes_bitvec,
+        transaction.proposer.substring(2),
+        JSON.stringify(transaction.failed_proposer_indices),
+        transaction.timestamp,
+      ]
+    ]);
+    const query = `
+        INSERT INTO "block_metadata_transaction_v7" (
+          "id",
+          "version",
+          "hash",
+          "epoch",
+          "round",
+          "previous_block_votes_bitvec",
+          "proposer",
+          "failed_proposer_indices",
+          "timestamp"
+        )
+        SELECT
+          reinterpretAsUInt256(reverse(unhex("id"))),
+          "version",
+          reinterpretAsUInt256(reverse(unhex("hash"))),
+          "epoch",
+          "round",
+          unhex("previous_block_votes_bitvec"),
+          reinterpretAsUInt256(reverse(unhex("proposer"))),
+          "failed_proposer_indices",
+          "timestamp"
+        FROM
+          format(
+            CSV,
+            $$
+              id String,
+              version UInt64,
+              hash String,
+              epoch UInt64,
+              round UInt64,
+              previous_block_votes_bitvec String,
+              proposer String,
+              failed_proposer_indices Array(UInt32),
+              timestamp UInt64
+            $$,
+            $$${payload}$$
+          )
+    `;
+
+    await this.clichouseService.client.command({
+      query,
+    });
+  }
+
+  private async ingestStateCheckpointTransaction(transaction: Types.Transaction_StateCheckpointTransaction) {
+    const payload = csvStringify([
+      [
+        transaction.version,
+        transaction.hash.substring(2),
+        transaction.state_change_hash.substring(2),
+        transaction.event_root_hash.substring(2),
+        transaction.state_checkpoint_hash
+          ? transaction.state_checkpoint_hash.substring(2)
+          : '',
+        transaction.gas_used,
+        transaction.success,
+        transaction.vm_status,
+        transaction.accumulator_root_hash.substring(2),
+        transaction.timestamp,
+      ],
+    ]);
+    const query = `
+      INSERT INTO "state_checkpoint_transaction_v7" (
+        "version",
+        "hash",
+        "state_change_hash",
+        "event_root_hash",
+        "state_checkpoint_hash",
+        "gas_used",
+        "success",
+        "vm_status",
+        "accumulator_root_hash",
+        "timestamp"
+      )
+      SELECT
+        "version",
+        reinterpretAsUInt256(reverse(unhex("hash"))),
+        reinterpretAsUInt256(reverse(unhex("state_change_hash"))),
+        reinterpretAsUInt256(reverse(unhex("event_root_hash"))),
+
+        empty("state_checkpoint_hash")
+          ? null
+          : reinterpretAsUInt256(reverse(unhex("state_checkpoint_hash"))),
+
+        "gas_used",
+        "success",
+        "vm_status",
+        reinterpretAsUInt256(reverse(unhex("accumulator_root_hash"))),
+        "timestamp"
+      FROM
+        format(
+          CSV,
+          $$
+            version UInt64,
+            hash String,
+            state_change_hash String,
+            event_root_hash String,
+            state_checkpoint_hash String,
+            gas_used UInt64,
+            success Boolean,
+            vm_status String,
+            accumulator_root_hash String,
+            timestamp UInt64
+          $$,
+          $$${payload}$$
+        )
+    `;
+
+    await this.clichouseService.client.command({
+      query,
     });
   }
 
@@ -225,37 +363,26 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       case "genesis_transaction": {
         const genesisTransaction = transaction as Types.Transaction_GenesisTransaction;
 
-        console.log(genesisTransaction);
-
         await this.ingestEvents(
           genesisTransaction.version,
           '0',
           genesisTransaction.events,
         );
-
-        throw new Error(`Unsupported transaction type ${transaction.type}`);
       } break;
 
       case "block_metadata_transaction": {
         const blockMetadataTransaction = transaction as Types.Transaction_BlockMetadataTransaction;
-
-        console.log(blockMetadataTransaction);
-
         await this.ingestEvents(
           blockMetadataTransaction.version,
           blockMetadataTransaction.timestamp,
           blockMetadataTransaction.events,
         );
-
-        throw new Error(`Unsupported transaction type ${transaction.type}`);
+        await this.ingestBlockMetadataTransaction(blockMetadataTransaction);
       } break;
       
       case "state_checkpoint_transaction": {
         const stateCheckpointTransaction = transaction as Types.Transaction_StateCheckpointTransaction;
-
-        console.log(stateCheckpointTransaction);
-
-        throw new Error(`Unsupported transaction type ${transaction.type}`);
+        await this.ingestStateCheckpointTransaction(stateCheckpointTransaction);
       } break;
 
       default:

@@ -8,6 +8,7 @@ import config from "../config/config.js";
 import { AppService } from "./app.service.js";
 import { ClickhouseModule } from "../clickhouse/clickhouse.module.js";
 import { OlModule } from "../ol/ol.module.js";
+import { S3Module } from "../s3/s3.module.js";
 
 @Module({
   imports: [
@@ -18,9 +19,10 @@ import { OlModule } from "../ol/ol.module.js";
 
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      autoSchemaFile: join(process.cwd(), "src/schema.gql"),
     }),
 
+    S3Module,
     ClickhouseModule,
     OlModule,
   ],

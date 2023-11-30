@@ -1,28 +1,38 @@
-import { BullModule } from '@nestjs/bullmq';
+import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";
 
-import { redisClient } from '../redis/redis.service.js';
+import { redisClient } from "../redis/redis.service.js";
 import { UserTransactionsResolver } from "./user-transactions.resolver.js";
 import { ClickhouseModule } from "../clickhouse/clickhouse.module.js";
 import { ModulesResolver } from "./modules.resolver.js";
-import { OlVersionProcessor } from './ol-version.processor.js';
+import { OlVersionProcessor } from "./ol-version.processor.js";
 import { OlService } from "./ol.service.js";
+import { OlVersionBatchProcessor } from "./ol-version-batch.processor.js";
+import { S3Module } from "../s3/s3.module.js";
 
 @Module({
   imports: [
+    S3Module,
     ClickhouseModule,
 
     BullModule.registerQueue({
-      name: 'ol-version-v7',
+      name: "ol-version-batch-v7",
       connection: redisClient(),
     }),
+
+    // BullModule.registerQueue({
+    //   name: 'ol-version-v7',
+    //   connection: redisClient(),
+    // }),
   ],
   providers: [
     UserTransactionsResolver,
     ModulesResolver,
 
     OlService,
-    OlVersionProcessor
+    // OlVersionProcessor
+
+    OlVersionBatchProcessor,
   ],
   controllers: [],
   exports: [OlService],

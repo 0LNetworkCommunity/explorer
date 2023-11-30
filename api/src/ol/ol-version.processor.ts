@@ -42,10 +42,10 @@ export interface VersionJobData {
   version: string;
 }
 
-@Processor('ol-version-v7')
+@Processor("ol-version-v7")
 export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   public constructor(
-    @InjectQueue('ol-version-v7')
+    @InjectQueue("ol-version-v7")
     private readonly olVersionQueue: Queue,
 
     private readonly olService: OlService,
@@ -73,15 +73,15 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
 
   public async process(job: Job<VersionJobData, any, string>) {
     switch (job.name) {
-      case 'getMissingVersions':
+      case "getMissingVersions":
         await this.getMissingVersions();
         break;
 
-      case 'version':
+      case "version":
         await this.processVersion(job.data.version);
         break;
 
-      case 'fetchLatestVersion':
+      case "fetchLatestVersion":
         await this.fetchLatestVersion();
         break;
 
@@ -108,15 +108,19 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
 
     const version = ledgerInfo.ledger_version;
 
-    await this.olVersionQueue.add('version', { version } as VersionJobData, {
+    await this.olVersionQueue.add("version", { version } as VersionJobData, {
       jobId: `__version__${version}`,
     });
 
     const v = parseInt(version, 10);
     for (let i = 0; i <= v; ++i) {
-      await this.olVersionQueue.add('version', { version: `${i}` } as VersionJobData, {
-        jobId: `__version__${i}`,
-      });
+      await this.olVersionQueue.add(
+        "version",
+        { version: `${i}` } as VersionJobData,
+        {
+          jobId: `__version__${i}`,
+        },
+      );
     }
   }
 
@@ -131,7 +135,9 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
 
     const missingVersions: BN[] = [];
     for (
-      let i = lastBatchIngestedVersion ? lastBatchIngestedVersion.add(ONE) : ZERO;
+      let i = lastBatchIngestedVersion
+        ? lastBatchIngestedVersion.add(ONE)
+        : ZERO;
       i.lt(latestVersion);
       i = i.add(new BN(ONE))
     ) {
@@ -144,7 +150,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
 
     await this.olVersionQueue.addBulk(
       missingVersions.map((version) => ({
-        name: 'version',
+        name: "version",
         data: {
           version: version.toString(),
         },
@@ -158,7 +164,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   private async ingestEvents(
     version: string,
     timestamp: string,
-    events: Types.Event[]
+    events: Types.Event[],
   ) {
     const chunks = _.chunk(events, 1_000);
     for (const events of chunks) {
@@ -227,7 +233,9 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     }
   }
 
-  private async ingestBlockMetadataTransaction(transaction: Types.Transaction_BlockMetadataTransaction) {
+  private async ingestBlockMetadataTransaction(
+    transaction: Types.Transaction_BlockMetadataTransaction,
+  ) {
     const payload = csvStringify([
       [
         transaction.id.substring(2),
@@ -239,7 +247,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
         transaction.proposer.substring(2),
         JSON.stringify(transaction.failed_proposer_indices),
         transaction.timestamp,
-      ]
+      ],
     ]);
     const query = `
         INSERT INTO "block_metadata_transaction_v7" (
@@ -286,7 +294,9 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     });
   }
 
-  private async ingestStateCheckpointTransaction(transaction: Types.Transaction_StateCheckpointTransaction) {
+  private async ingestStateCheckpointTransaction(
+    transaction: Types.Transaction_StateCheckpointTransaction,
+  ) {
     const payload = csvStringify([
       [
         transaction.version,
@@ -295,7 +305,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
         transaction.event_root_hash.substring(2),
         transaction.state_checkpoint_hash
           ? transaction.state_checkpoint_hash.substring(2)
-          : '',
+          : "",
         transaction.gas_used,
         transaction.success,
         transaction.vm_status,
@@ -355,36 +365,169 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     });
   }
 
+  private async ingestUserTransaction(transaction: Types.Transaction_UserTransaction) {
+    console.log(transaction);
+
+    if (transaction.payload.type !== 'entry_function_payload') {
+      throw new Error(`unsupported user_transaction payload: ${transaction.payload.type}`);
+    }
+
+    const transactionPayload = transaction.payload as Types.EntryFunctionPayload;
+
+    const [moduleAddress, moduleName, ...rest] = transactionPayload.function.split('::');
+    const functionName = rest.join('::');
+
+    const payload = csvStringify([
+      [
+        transaction.version,
+        transaction.hash.substring(2),
+        transaction.gas_used,
+        transaction.success,
+        transaction.vm_status,
+        transaction.sender.substring(2),
+        transaction.sequence_number,
+        transaction.max_gas_amount,
+        transaction.gas_unit_price,
+        transaction.expiration_timestamp_secs,
+        moduleAddress.substring(2),
+        moduleName,
+        functionName,
+        JSON.stringify(transactionPayload.type_arguments),
+        JSON.stringify(transactionPayload.arguments),
+        transaction.payload.type,
+        transaction.timestamp,
+
+        // transaction.state_change_hash.substring(2),
+        // transaction.event_root_hash.substring(2),
+        // transaction.state_checkpoint_hash
+        //   ? transaction.state_checkpoint_hash.substring(2)
+        //   : "",
+        // transaction.accumulator_root_hash.substring(2),
+
+      ],
+    ]);
+    const query = `
+      INSERT INTO "user_transaction_v7" (
+        "version",
+        "hash",
+        "gas_used",
+        "success",
+        "vm_status",
+        "sender",
+        "sequence_number",
+        "max_gas_amount",
+        "gas_unit_price",
+        "expiration_timestamp",
+        "module_address",
+        "module_name",
+        "function_name",
+        "type_arguments",
+        "arguments",
+        "type",
+        "timestamp"
+      )
+      SELECT
+        "version",
+        reinterpretAsUInt256(reverse(unhex("hash"))),
+        "gas_used",
+        "success",
+        "vm_status",
+        reinterpretAsUInt256(reverse(unhex("sender"))),
+        "sequence_number",
+        "max_gas_amount",
+        "gas_unit_price",
+        "expiration_timestamp",
+        reinterpretAsUInt256(reverse(unhex("module_address"))),
+        "module_name",
+        "function_name",
+        "type_arguments",
+        "arguments",
+        "type",
+        "timestamp"
+      FROM
+        format(
+          CSV,
+          $$
+            version UInt64,
+            hash String,
+            gas_used UInt64,
+            success Boolean,
+            vm_status String,
+            sender String,
+            sequence_number UInt64,
+            max_gas_amount UInt64,
+            gas_unit_price UInt64,
+            expiration_timestamp UInt64,
+            module_address String,
+            module_name String,
+            function_name String,
+            type_arguments String,
+            arguments String,
+            type String,
+            timestamp UInt64
+          $$,
+          $$${payload}$$
+        )
+    `;
+
+    await this.clichouseService.client.command({
+      query,
+    });
+  }
+
   private async ingestTransaction(transaction: Types.Transaction) {
     if (transaction.type === "pending_transaction") {
       return;
     }
 
     switch (transaction.type) {
-      case "genesis_transaction": {
-        const genesisTransaction = transaction as Types.Transaction_GenesisTransaction;
+      case "genesis_transaction":
+        {
+          const genesisTransaction =
+            transaction as Types.Transaction_GenesisTransaction;
+
+          await this.ingestEvents(
+            genesisTransaction.version,
+            "0",
+            genesisTransaction.events,
+          );
+          genesisTransaction.version;
+        }
+        break;
+
+      case "block_metadata_transaction":
+        {
+          const blockMetadataTransaction =
+            transaction as Types.Transaction_BlockMetadataTransaction;
+          await this.ingestEvents(
+            blockMetadataTransaction.version,
+            blockMetadataTransaction.timestamp,
+            blockMetadataTransaction.events,
+          );
+          await this.ingestBlockMetadataTransaction(blockMetadataTransaction);
+        }
+        break;
+
+      case "state_checkpoint_transaction":
+        {
+          const stateCheckpointTransaction =
+            transaction as Types.Transaction_StateCheckpointTransaction;
+          await this.ingestStateCheckpointTransaction(
+            stateCheckpointTransaction,
+          );
+        }
+        break;
+
+      case "user_transaction": {
+        const userTransaction = transaction as Types.Transaction_UserTransaction;
 
         await this.ingestEvents(
-          genesisTransaction.version,
-          '0',
-          genesisTransaction.events,
+          userTransaction.version,
+          userTransaction.timestamp,
+          userTransaction.events,
         );
-        genesisTransaction.version
-      } break;
 
-      case "block_metadata_transaction": {
-        const blockMetadataTransaction = transaction as Types.Transaction_BlockMetadataTransaction;
-        await this.ingestEvents(
-          blockMetadataTransaction.version,
-          blockMetadataTransaction.timestamp,
-          blockMetadataTransaction.events,
-        );
-        await this.ingestBlockMetadataTransaction(blockMetadataTransaction);
-      } break;
-      
-      case "state_checkpoint_transaction": {
-        const stateCheckpointTransaction = transaction as Types.Transaction_StateCheckpointTransaction;
-        await this.ingestStateCheckpointTransaction(stateCheckpointTransaction);
+        await this.ingestUserTransaction(userTransaction);
       } break;
 
       default:

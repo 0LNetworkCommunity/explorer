@@ -121,7 +121,9 @@ CREATE TABLE "user_transaction_v7" (
   "module_address" UInt256,
   "module_name" String,
   "function_name" String,
-  "arguments" Array(String),
+  "type_arguments" String,
+  "arguments" String,
+  "type" String,
   "timestamp" UInt64
 )
 ENGINE = MergeTree

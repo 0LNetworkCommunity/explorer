@@ -16,7 +16,7 @@ type UserTransaction {
   moduleAddress: String!
   moduleName: String!
   functionName: String!
-  arguments: [String!]!
+  arguments: String!
   timestamp: Float!
 }
 

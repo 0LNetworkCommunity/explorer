@@ -41,7 +41,7 @@ export class UserTransactionsResolver {
               "vm_status",
               "sequence_number",
               hex("sender") as "sender",
-              arrayMap(x -> hex(x), "arguments") as "arguments",
+              "arguments",
               "sequence_number",
               "arguments",
               "max_gas_amount",
@@ -71,7 +71,7 @@ export class UserTransactionsResolver {
               vm_status: string;
               sender: string;
               sequence_number: string;
-              arguments: string[];
+              arguments: string;
               max_gas_amount: string;
               gas_unit_price: string;
               expiration_timestamp: string;

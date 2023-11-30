@@ -11,9 +11,12 @@ const GET_USER_TRANSACTIONS = gql`
     userTransactions(limit: 10, offset: 0, order: "DESC") {
       items {
         version
-        hash
         sender
+        moduleAddress
+        moduleName
+        functionName
         timestamp
+        success
       }
     }
   }

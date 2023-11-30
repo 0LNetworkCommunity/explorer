@@ -14,7 +14,7 @@ interface GqlUserTransactionInput {
   moduleAddress: string;
   moduleName: string;
   functionName: string;
-  arguments: string[];
+  arguments: string;
   timestamp: number;
 }
 
@@ -77,8 +77,8 @@ export class GqlUserTransaction {
   @Field(() => String)
   public functionName: string;
 
-  @Field(() => [String])
-  public arguments: string[];
+  @Field(() => String)
+  public arguments: string;
 
   @Field(() => Number)
   public timestamp: number;

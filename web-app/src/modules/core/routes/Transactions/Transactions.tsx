@@ -14,9 +14,12 @@ const GET_USER_TRANSACTIONS = gql`
       size
       items {
         version
-        hash
         sender
+        moduleAddress
+        moduleName
+        functionName
         timestamp
+        success
       }
     }
   }
@@ -26,19 +29,17 @@ const TransactionsPage: FC = () => {
   const [searchParams] = useSearchParams();
   const page = parseInt(searchParams.get("page") ?? "1", 10);
 
-  console.log({
-    limit: ITEM_PER_PAGE,
-    offset: (page - 1) * ITEM_PER_PAGE,
-  });
-
   const { loading, error, data } = useQuery<{
     userTransactions: {
       size: number;
       items: {
-        hash: string;
         version: number;
+        moduleAddress: string;
+        moduleName: string;
+        functionName: string;
         timestamp: number;
         sender: string;
+        success: boolean;
       }[];
     };
   }>(GET_USER_TRANSACTIONS, {
@@ -52,51 +53,58 @@ const TransactionsPage: FC = () => {
     return <Page title="Transactions" />;
   }
 
-  const pages = new Array(Math.ceil(data.userTransactions.size / ITEM_PER_PAGE))
+  let pageCount = Math.ceil(data.userTransactions.size / ITEM_PER_PAGE);
+  let pages: (null | number)[] = new Array(pageCount)
     .fill(0)
     .map((_, index) => index + 1);
+  
+  pages = pages.slice(Math.max(page - 3, 0), page + 2);
+
+  if (pages[0] !== 1) {
+    pages.unshift(null);
+    pages.unshift(1);
+  }
+  if (pages[pages.length - 1] !== pageCount) {
+    pages.push(null);
+    pages.push(pageCount);
+  }
+
   console.log(pages);
 
   return (
-    <Page title="Transactions">
+    <Page>
       <div className="mt-2 flow-root">
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
               <table className="min-w-full divide-y divide-gray-300">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 text-left text-sm font-semibold text-gray-900">
                   <tr>
-                    <th
-                      scope="col"
-                      className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-                    >
+                    <th scope="col" className="px-3 py-2">
                       Version
                     </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
-                      Timestamp
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
+                    <th scope="col" className="px-3 py-2">
                       Sender
+                    </th>
+                    <th scope="col" className="px-3 py-2">
+                      Method
+                    </th>
+                    <th scope="col" className="px-3 py-2 text-right">
+                      Age
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {data.userTransactions.items.map((transaction, index) => (
+                  {data.userTransactions.items.map((transaction) => (
                     <UserTransactionRow
-                      key={`${index}-${transaction.hash}`}
+                      key={transaction.version}
                       transaction={transaction}
                     />
                   ))}
                 </tbody>
               </table>
 
-              <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+              <div className="flex items-center justify-between border-t border-gray-200 bg-white px-2 py-2">
                 <div className="flex flex-1 justify-between sm:hidden">
                   <NavLink
                     to={`/transactions?page=${page - 1}`}
@@ -138,25 +146,43 @@ const TransactionsPage: FC = () => {
                         />
                       </NavLink>
 
-                      {pages.map((it) => (
-                        <NavLink
-                          key={it}
-                          to={`/transactions?page=${it}`}
-                          className={clsx(
-                            "relative inline-flex items-center",
-                            "px-4 py-2",
-                            "text-sm font-semibold text-gray-900",
-                            "ring-1 ring-inset ring-gray-300",
-                            "focus:z-20 focus:outline-offset-0",
+                      {pages.map((it, index) => {
+                        if (it === null) {
+                          return (
+                            <span
+                              key={`void-${index}`}
+                              className={clsx(
+                                "relative inline-flex items-center",
+                                "px-4 py-2",
+                                "text-sm font-semibold text-gray-700",
+                                "ring-1 ring-inset ring-gray-300 focus:outline-offset-0"
+                              )}
+                            >
+                              ...
+                            </span>
+                          );
+                        }
 
-                            page === it
-                              ? "z-10 bg-primary-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
-                              : "hover:bg-gray-50"
-                          )}
-                        >
-                          {it}
-                        </NavLink>
-                      ))}
+                        return (
+                          <NavLink
+                            key={it}
+                            to={`/transactions?page=${it}`}
+                            className={clsx(
+                              "relative inline-flex items-center",
+                              "px-4 py-2",
+                              "text-sm font-semibold text-gray-900",
+                              "ring-1 ring-inset ring-gray-300",
+                              "focus:z-20 focus:outline-offset-0",
+
+                              page === it
+                                ? "z-10 bg-primary-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+                                : "hover:bg-gray-50"
+                            )}
+                          >
+                            {it}
+                          </NavLink>
+                        );
+                      })}
 
                       <NavLink
                         to={`/transactions?page=${page + 1}`}

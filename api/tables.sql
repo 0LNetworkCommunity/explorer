@@ -169,3 +169,16 @@ CREATE TABLE "state_checkpoint_transaction_v7" (
 )
 ENGINE = MergeTree
 ORDER BY version;
+
+CREATE TABLE "ingested_files_v7"
+(
+    `name` String
+)
+ENGINE = MergeTree
+PRIMARY KEY ("name");
+
+CREATE TABLE "ingested_versions_v7" (
+	`version` UInt64
+)
+ENGINE = MergeTree
+PRIMARY KEY ("version");

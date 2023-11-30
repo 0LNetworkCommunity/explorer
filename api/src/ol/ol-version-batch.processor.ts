@@ -6,17 +6,11 @@ import { writeFile, mkdir, mkdtemp } from "node:fs/promises";
 import { InjectQueue, Processor, WorkerHost } from "@nestjs/bullmq";
 import { OnModuleInit } from "@nestjs/common";
 import { Job, Queue } from "bullmq";
-import { Types } from "aptos";
 
 import { OlService } from "./ol.service.js";
 import { cleanUp } from "../utils.js";
 import { S3Service } from "../s3/s3.service.js";
-
-type NotPendingTransaction =
-  | Types.UserTransaction
-  | Types.GenesisTransaction
-  | Types.BlockMetadataTransaction
-  | Types.StateCheckpointTransaction;
+import { NotPendingTransaction } from "./types.js";
 
 const execFile = util.promisify(execFileNative);
 

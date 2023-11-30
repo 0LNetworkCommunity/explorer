@@ -78,7 +78,7 @@ export class S3Service {
       }
 
       const prefixLength = prefix.length;
-      files.push(...res.Contents.map((it) => it.Key.substring(prefixLength)));
+      files.push(...res.Contents.map((it) => it.Key!.substring(prefixLength)));
 
       if (!res.NextMarker) {
         break;

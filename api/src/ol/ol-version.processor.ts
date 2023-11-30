@@ -366,8 +366,6 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   private async ingestUserTransaction(transaction: Types.Transaction_UserTransaction) {
-    console.log(transaction);
-
     if (transaction.payload.type !== 'entry_function_payload') {
       throw new Error(`unsupported user_transaction payload: ${transaction.payload.type}`);
     }

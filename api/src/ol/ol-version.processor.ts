@@ -60,13 +60,13 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   public async onModuleInit() {
     await this.olVersionQueue.add('getMissingVersions', undefined, {
       repeat: {
-        every: 10 * 1_000, // 10 seconds
+        every: 30 * 1_000, // 30 seconds
       },
     });
 
     await this.olVersionQueue.add('fetchLatestVersion', undefined, {
       repeat: {
-        every: 10 * 1_000, // 10 seconds
+        every: 30 * 1_000, // 30 seconds
       },
     });
   }
@@ -111,17 +111,6 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     await this.olVersionQueue.add("version", { version } as VersionJobData, {
       jobId: `__version__${version}`,
     });
-
-    const v = parseInt(version, 10);
-    for (let i = 0; i <= v; ++i) {
-      await this.olVersionQueue.add(
-        "version",
-        { version: `${i}` } as VersionJobData,
-        {
-          jobId: `__version__${i}`,
-        },
-      );
-    }
   }
 
   private async getMissingVersions() {

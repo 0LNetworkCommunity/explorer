@@ -69,8 +69,6 @@ const TransactionsPage: FC = () => {
     pages.push(pageCount);
   }
 
-  console.log(pages);
-
   return (
     <Page>
       <div className="mt-2 flow-root">

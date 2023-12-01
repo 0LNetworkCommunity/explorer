@@ -4,7 +4,7 @@ import Transaction from "./routes/Transaction";
 import Home from "./routes/Home";
 import Account from "./routes/Account";
 import AccountOverview from "./routes/Account/Overview";
-import AccountTransactions from "./routes/Account/Transactions";
+import AccountTransactions from "./routes/Account/UserTransactions";
 import AccountResources from "./routes/Account/Resources";
 import AccountModules from "./routes/Account/Modules";
 import Block from "./routes/Block";

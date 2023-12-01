@@ -1,11 +1,29 @@
 import { FC, useEffect, useState } from "react";
 import Page from "../../../ui/Page/Page";
-import { NavLink, Outlet, useParams } from "react-router-dom";
+import { NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
 import clsx from "clsx";
 import useAptos from "../../../aptos";
+import { normalizeHexString } from "../../../../utils";
 
-const Account: FC = () => {
-  const accountAddress = useParams().accountAddress!;
+const AccountWrapper: FC = () => {
+  const location = useLocation();
+  const pathnames = location.pathname.split('/');
+  const accountAddress = pathnames[2];
+  const cleanAccountAddress = normalizeHexString(accountAddress);
+  if (accountAddress !== cleanAccountAddress) {
+    pathnames[2] = cleanAccountAddress;
+    return <Navigate to={pathnames.join('/')} replace={true} />
+  }
+  return (
+    <Account accountAddress={accountAddress} />
+  );
+};
+
+interface Props {
+  accountAddress: string;
+}
+
+const Account: FC<Props> = ({ accountAddress }) => {
   const aptos = useAptos();
 
   const [balance, setBalance] = useState('');
@@ -20,7 +38,10 @@ const Account: FC = () => {
 
   useEffect(() => {
     const load = async () => {
-      const res = await aptos.getAccountResource(accountAddress, '0x1::coin::CoinStore<0x1::libra_coin::LibraCoin>');
+      const res = await aptos.getAccountResource(
+        `0x${accountAddress}`,
+        "0x1::coin::CoinStore<0x1::libra_coin::LibraCoin>"
+      );
       const balance = (res.data as any).coin.value / 1e6;
       setBalance(`${balance.toLocaleString()}`);
     };
@@ -29,7 +50,10 @@ const Account: FC = () => {
 
   useEffect(() => {
     const load = async () => {
-      const res = await aptos.getAccountResource(accountAddress, '0x1::slow_wallet::SlowWallet');
+      const res = await aptos.getAccountResource(
+        `0x${accountAddress}`,
+        "0x1::slow_wallet::SlowWallet"
+      );
       const data = res.data as { transferred: string; unlocked: string };
 
       const transferred = (parseInt(data.transferred, 10) / 1e6).toLocaleString();
@@ -75,4 +99,4 @@ const Account: FC = () => {
   );
 };
 
-export default Account;
+export default AccountWrapper;

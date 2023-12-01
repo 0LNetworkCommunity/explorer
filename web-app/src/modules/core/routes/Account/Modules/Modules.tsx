@@ -14,7 +14,7 @@ const Modules: FC = () => {
 
   useEffect(() => {
     const load = async () => {
-      const modules = await aptos.getAccountModules(accountAddress!);
+      const modules = await aptos.getAccountModules(`0x${accountAddress!}`);
       console.log(modules);
       setModules(modules);
     };

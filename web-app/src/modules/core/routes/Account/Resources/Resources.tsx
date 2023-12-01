@@ -67,7 +67,7 @@ const Resources: FC = () => {
 
   useEffect(() => {
     const load = async () => {
-      const resources = await aptos.getAccountResources(accountAddress!);
+      const resources = await aptos.getAccountResources(`0x${accountAddress!}`);
 
       const tree: Tree = new Tree();
       const keys = resources.map((resource) => splitResourceName(resource.type));

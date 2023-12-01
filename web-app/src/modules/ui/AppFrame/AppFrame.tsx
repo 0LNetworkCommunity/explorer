@@ -3,7 +3,10 @@ import clsx from "clsx";
 import Logo from "../Logo/Logo";
 import { Link, NavLink } from "react-router-dom";
 
-const navigation = [{ name: "Transactions", to: "/transactions" }];
+const navigation = [
+  { name: "Transactions", to: "/transactions" },
+  { name: "Validators", to: "/validators" },
+];
 
 const AppFrame: FC<PropsWithChildren> = ({ children }) => {
   return (

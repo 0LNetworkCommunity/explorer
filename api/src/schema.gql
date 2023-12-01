@@ -31,7 +31,56 @@ type Module {
   functions: [String!]!
 }
 
+type ValidatorGrade {
+  compliant: Boolean!
+  proposedBlocks: Float!
+  failedBlocks: Float!
+  ratio: Float!
+}
+
+type Validator {
+  inSet: Boolean!
+  address: String!
+  votingPower: Float!
+  failedProposals: Float!
+  successfulProposals: Float!
+  account: Account!
+  vouches: [Vouch!]!
+  grade: ValidatorGrade!
+  currentBid: ValidatorCurrentBid!
+}
+
+type Vouch {
+  epoch: Float!
+  address: String!
+  inSet: Boolean!
+  account: Account!
+}
+
+type ValidatorCurrentBid {
+  currentBid: Float!
+  expirationEpoch: Float!
+}
+
+type Account {
+  address: String!
+  balance: Float!
+  slowWallet: SlowWallet
+}
+
+type SlowWallet {
+  transferred: Float!
+  unlocked: Float!
+}
+
+type SystemInfo {
+  consensusReward: Float!
+}
+
 type Query {
   userTransactions(limit: Int!, offset: Int!, order: String!): UserTransactionCollection!
   modules: [Module!]!
+  account(address: String!): Account!
+  validators: [Validator!]!
+  systemInfo: SystemInfo!
 }

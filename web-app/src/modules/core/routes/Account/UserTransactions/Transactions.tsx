@@ -12,9 +12,12 @@ const Transactions: FC = () => {
 
   useEffect(() => {
     const load = async () => {
-      const transactions = await aptos.getAccountTransactions(accountAddress!, {
-        limit: 10,
-      });
+      const transactions = await aptos.getAccountTransactions(
+        `0x${accountAddress!}`,
+        {
+          limit: 10,
+        }
+      );
       setTransaction(transactions);
     };
     load();

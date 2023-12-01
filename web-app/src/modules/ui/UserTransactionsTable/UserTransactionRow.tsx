@@ -2,6 +2,7 @@ import { FC } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
 import clsx from "clsx";
+import AccountAddress from "../AccountAddress";
 
 interface Props {
   transaction: {
@@ -14,13 +15,6 @@ interface Props {
     success: boolean;
   };
 }
-
-const HexString: FC<{ value: string }> = ({ value: address }) => {
-  const prefix = address.substring(0, 4);
-  const suffix = address.substring(address.length - 4);
-
-  return <>{`${prefix}…${suffix}`}</>;
-};
 
 const UserTransactionRow: FC<Props> = ({ transaction }) => {
   const age = new Date(transaction.timestamp / 1_000);
@@ -38,13 +32,7 @@ const UserTransactionRow: FC<Props> = ({ transaction }) => {
         </Link>
       </td>
       <td className="px-3 py-2">
-        <Link
-          to={`/accounts/${transaction.sender}`}
-          className="text-blue-600 hover:text-blue-900 hover:underline"
-          title={transaction.sender}
-        >
-          <HexString value={transaction.sender} />
-        </Link>
+        <AccountAddress  address={transaction.sender} />
       </td>
       <td className="px-3 py-2">
         <span className="font-mono">

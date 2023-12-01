@@ -11,6 +11,12 @@ import { S3Module } from "../s3/s3.module.js";
 import { OlVersionBatchProcessor } from "./ol-version-batch.processor.js";
 import { OlVersionProcessor } from "./ol-version.processor.js";
 import { OlDbModule } from "../ol-db/ol-db.module.js";
+import { ValidatorsResolver } from "./validators.resolver.js";
+import { ValidatorResolver } from "./validator.resvoler.js";
+import { AccountResolver } from "./account.resolver.js";
+import { VouchResolver } from "./vouch.resolver.js";
+import { AccountsResolver } from "./accounts.resolver.js";
+import { SystemInfoResolver } from "./system-info.resolver.js";
 
 @Module({
   imports: [
@@ -18,23 +24,31 @@ import { OlDbModule } from "../ol-db/ol-db.module.js";
     ClickhouseModule,
     OlDbModule,
 
-    BullModule.registerQueue({
-      name: "ol-version-batch-v7",
-      connection: redisClient(),
-    }),
+    // BullModule.registerQueue({
+    //   name: "ol-version-batch-v7",
+    //   connection: redisClient(),
+    // }),
 
-    BullModule.registerQueue({
-      name: "ol-version-v7",
-      connection: redisClient(),
-    }),
+    // BullModule.registerQueue({
+    //   name: "ol-version-v7",
+    //   connection: redisClient(),
+    // }),
   ],
   providers: [
     UserTransactionsResolver,
     ModulesResolver,
 
+    AccountResolver,
+    AccountsResolver,
+
+    ValidatorResolver,
+    ValidatorsResolver,
+    VouchResolver,
+    SystemInfoResolver,
+
     OlService,
-    OlVersionProcessor,
-    OlVersionBatchProcessor,
+    // OlVersionProcessor,
+    // OlVersionBatchProcessor,
   ],
   controllers: [],
   exports: [OlService],

@@ -24,15 +24,15 @@ import { SystemInfoResolver } from "./system-info.resolver.js";
     ClickhouseModule,
     OlDbModule,
 
-    // BullModule.registerQueue({
-    //   name: "ol-version-batch-v7",
-    //   connection: redisClient(),
-    // }),
+    BullModule.registerQueue({
+      name: "ol-version-batch-v7",
+      connection: redisClient(),
+    }),
 
-    // BullModule.registerQueue({
-    //   name: "ol-version-v7",
-    //   connection: redisClient(),
-    // }),
+    BullModule.registerQueue({
+      name: "ol-version-v7",
+      connection: redisClient(),
+    }),
   ],
   providers: [
     UserTransactionsResolver,
@@ -47,8 +47,8 @@ import { SystemInfoResolver } from "./system-info.resolver.js";
     SystemInfoResolver,
 
     OlService,
-    // OlVersionProcessor,
-    // OlVersionBatchProcessor,
+    OlVersionProcessor,
+    OlVersionBatchProcessor,
   ],
   controllers: [],
   exports: [OlService],

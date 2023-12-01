@@ -1,4 +1,4 @@
-import { FC, useEffect } from "react";
+import { FC } from "react";
 import { gql, useQuery } from "@apollo/client";
 import _ from "lodash";
 import Page from "../../../ui/Page";
@@ -6,7 +6,6 @@ import AccountAddress from "../../../ui/AccountAddress";
 import clsx from "clsx";
 import { LIBRA_SIGN } from "../../../../contants";
 import { CheckIcon, XMarkIcon } from "@heroicons/react/20/solid";
-import useAptos from "../../../aptos";
 
 const GET_VALIDATORS = gql`
   query GetValidators {
@@ -37,16 +36,6 @@ const GET_VALIDATORS = gql`
 `;
 
 const Validators: FC = () => {
-  const aptos = useAptos();
-
-  useEffect(() => {
-    const load = async () => {
-
-    };
-    load();
-
-  }, []);
-
   const { loading, data, error } = useQuery<{
     validators: {
       address: string;
@@ -84,8 +73,6 @@ const Validators: FC = () => {
   if (data) {
     const validatorSet = data.validators.filter((it) => it.inSet)
     const eligible = data.validators.length - validatorSet.length;
-    const bids = validatorSet.map((validator) => validator.currentBid);
-    const lowestBid = _.minBy(bids, 'currentBid');
 
     return (
       <Page>
@@ -106,14 +93,6 @@ const Validators: FC = () => {
                 </dt>
                 <dd className="order-first text-3xl tracking-tight text-gray-900 font-mono">
                   {eligible}
-                </dd>
-              </div>
-              <div className="flex flex-col bg-gray-400/5 p-4">
-                <dt className="text-sm font-semibold leading-6 text-gray-600">
-                  Lowest Bid
-                </dt>
-                <dd className="order-first text-3xl tracking-tight text-gray-900 font-mono">
-                  {lowestBid!.currentBid.toLocaleString()}
                 </dd>
               </div>
             </dl>

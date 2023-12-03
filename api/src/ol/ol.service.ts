@@ -66,18 +66,28 @@ export class OlService {
   }
 
   public async getValidatorGrade(address: string): Promise<ValidatorGrade> {
-    const res = await this.aptosClient.view({
-      function: "0x1::grade::get_validator_grade",
-      type_arguments: [],
-      arguments: [address],
-    });
-    const payload = res as [boolean, string, string, { value: string }];
-    return {
-      compliant: payload[0],
-      proposedBlocks: parseInt(payload[1], 10),
-      failedBlocks: parseInt(payload[2], 10),
-      ratio: parseInt(payload[3].value, 10),
-    };
+    try {
+      const res = await this.aptosClient.view({
+        function: "0x1::grade::get_validator_grade",
+        type_arguments: [],
+        arguments: [address],
+      });
+      const payload = res as [boolean, string, string, { value: string }];
+      return {
+        compliant: payload[0],
+        proposedBlocks: parseInt(payload[1], 10),
+        failedBlocks: parseInt(payload[2], 10),
+        ratio: parseInt(payload[3].value, 10),
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        compliant: false,
+        proposedBlocks: -1,
+        failedBlocks: -1,
+        ratio: -1,
+      };
+    }
   }
 
   public async getAllVouchers(address: string) {

@@ -1,7 +1,7 @@
 stages:
   - build-web-app
 
-build:
+build-web-app:
   stage: build-web-app
   image: docker:24.0.7
   services:

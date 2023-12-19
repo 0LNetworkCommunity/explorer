@@ -22,7 +22,7 @@ RUN npm run build
 
 FROM nginx:1.25
 
-COPY --from=builder /app/build /app
+COPY --from=builder /app/dist /app
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80

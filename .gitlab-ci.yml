@@ -2,7 +2,7 @@ stages:
   - build-web-app
 
 build:
-  stage: build
+  stage: build-web-app
   image: docker:24.0.7
   services:
     - docker:24.0.7-dind

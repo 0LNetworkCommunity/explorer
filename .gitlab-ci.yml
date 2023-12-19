@@ -1,8 +1,8 @@
 stages:
-  - build-web-app
+  - build
 
 build-web-app:
-  stage: build-web-app
+  stage: build
   image: docker:24.0.7
   services:
     - docker:24.0.7-dind
@@ -19,5 +19,20 @@ build-web-app:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-stages:
-  - build-web-app
+build-api:
+  stage: build
+  image: docker:24.0.7
+  services:
+    - docker:24.0.7-dind
+  variables:
+    IMAGE_TAG: $CI_REGISTRY_IMAGE/api:$CI_COMMIT_SHORT_SHA
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - cd api
+    - docker build
+      --build-arg CI_COMMIT_SHA="$CI_COMMIT_SHA"
+      --file ./Dockerfile
+      --tag $IMAGE_TAG .
+    - docker push $IMAGE_TAG
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

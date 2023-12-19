@@ -29,8 +29,6 @@ ENV CLICKHOUSE_HTTP_PASSWORD="********************************"
 ENV CLICKHOUSE_PORT="8123"
 ENV CLICKHOUSE_DATABASE="olfyi"
 
-REDIS_HOST="127.0.0.1"
-
 EXPOSE 3000
 
 CMD ["npm", "run", "start:prod"]

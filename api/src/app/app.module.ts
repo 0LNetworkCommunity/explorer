@@ -9,7 +9,7 @@ import { AppService } from "./app.service.js";
 import { ClickhouseModule } from "../clickhouse/clickhouse.module.js";
 import { OlModule } from "../ol/ol.module.js";
 import { S3Module } from "../s3/s3.module.js";
-// import { NodeWatcherModule } from "../node-watcher/node-watcher.module.js";
+import { NodeWatcherModule } from "../node-watcher/node-watcher.module.js";
 
 @Module({
   imports: [
@@ -27,7 +27,7 @@ import { S3Module } from "../s3/s3.module.js";
     S3Module,
     ClickhouseModule,
     OlModule,
-    // NodeWatcherModule,
+    NodeWatcherModule,
   ],
   controllers: [],
   providers: [AppService],

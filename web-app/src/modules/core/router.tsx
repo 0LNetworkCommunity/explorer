@@ -11,6 +11,7 @@ import Block from "./routes/Block";
 import Root from "./Root";
 import Validators from "./routes/Validators";
 import Test from "./routes/Test";
+import Module from "./routes/Account/Modules/Module";
 
 const router = createBrowserRouter([
   {
@@ -40,6 +41,12 @@ const router = createBrowserRouter([
           {
             path: "modules",
             element: <AccountModules />,
+            children: [
+              {
+                path: ":moduleName",
+                element: <Module />,
+              }
+            ],
           },
         ],
       },

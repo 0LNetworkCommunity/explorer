@@ -92,7 +92,7 @@ const Account: FC<Props> = ({ accountAddress }) => {
           ))}
         </nav>
       </div>
-      <div className="mt-6">
+      <div>
         <Outlet />
       </div>
     </Page>

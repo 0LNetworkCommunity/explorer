@@ -47,6 +47,7 @@ import { SystemInfoResolver } from "./system-info.resolver.js";
     SystemInfoResolver,
 
     OlService,
+
     OlVersionProcessor,
     OlVersionBatchProcessor,
   ],

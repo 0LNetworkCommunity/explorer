@@ -1,21 +1,9 @@
 import { Query, Resolver } from "@nestjs/graphql";
 import _ from "lodash";
-import { OlService } from "./ol.service.js";
-import { GqlValidator } from "./models/validator.model.js";
 import Bluebird from "bluebird";
 
-interface ValidatorSet {
-  active_validators: {
-    addr: string;
-    config: {
-      consensus_pubkey: string;
-      fullnode_addresses: string;
-      network_addresses: string;
-      validator_index: string;
-    };
-    voting_power: string;
-  }[];
-}
+import { OlService } from "./ol.service.js";
+import { GqlValidator } from "./models/validator.model.js";
 
 interface ValidatorPerformance {
   validators: {
@@ -30,36 +18,32 @@ export class ValidatorsResolver {
 
   @Query(() => [GqlValidator])
   async validators(): Promise<GqlValidator[]> {
-    const [validatorSetRes, validatorPerformanceRes] = await Promise.all([
-      this.olService.aptosClient.getAccountResource(
-        "0x01",
-        "0x1::stake::ValidatorSet",
-      ),
-      this.olService.aptosClient.getAccountResource(
+    const validatorPerformanceRes =
+      await this.olService.aptosClient.getAccountResource(
         "0x01",
         "0x1::stake::ValidatorPerformance",
-      ),
-    ]);
+      );
 
-    const validatorSet = validatorSetRes.data as ValidatorSet;
+    const validatorSet = await this.olService.getValidatorSet();
     const validatorPerformances =
       validatorPerformanceRes.data as ValidatorPerformance;
 
-    const currentValidators = validatorSet.active_validators.map(
+    const currentValidators = validatorSet.activeValidators.map(
       (validator) => {
-        const validatorIndex = parseInt(validator.config.validator_index, 10);
         const validatorPerformance =
-          validatorPerformances.validators[validatorIndex];
+          validatorPerformances.validators[validator.config.validatorIndex];
 
         return new GqlValidator({
           address: validator.addr.substring(2).toUpperCase(),
-          votingPower: parseInt(validator.voting_power, 10),
+          votingPower: validator.votingPower,
           failedProposals: parseInt(validatorPerformance.failed_proposals, 10),
           successfulProposals: parseInt(
             validatorPerformance.successful_proposals,
             10,
           ),
           inSet: true,
+          networkAddresses: validator.config.networkAddresses,
+          fullnodeAddresses: validator.config.fullnodeAddresses,
         });
       },
     );

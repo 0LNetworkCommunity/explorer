@@ -1,13 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
-interface GqlValidatorInput {
-  address: string;
-  votingPower: number;
-  failedProposals: number;
-  successfulProposals: number;
-  inSet: boolean;
-}
-
 interface GqlValidatorGradeInpt {
   compliant: boolean;
   proposedBlocks: number;
@@ -37,6 +29,16 @@ export class GqlValidatorGrade {
   public ratio: number;
 }
 
+interface GqlValidatorInput {
+  address: string;
+  votingPower: number;
+  failedProposals: number;
+  successfulProposals: number;
+  inSet: boolean;
+  networkAddresses?: string;
+  fullnodeAddresses?: string;
+}
+
 @ObjectType('Validator')
 export class GqlValidator {
   public constructor(input: GqlValidatorInput) {
@@ -45,6 +47,8 @@ export class GqlValidator {
     this.failedProposals = input.failedProposals;
     this.successfulProposals = input.successfulProposals;
     this.inSet = input.inSet;
+    this.networkAddresses = input.networkAddresses;
+    this.fullnodeAddresses = input.fullnodeAddresses;
   }
 
   @Field(() => Boolean)
@@ -52,6 +56,12 @@ export class GqlValidator {
 
   @Field(() => String)
   public address: string;
+
+  @Field(() => String, { nullable: true })
+  public networkAddresses?: string;
+
+  @Field(() => String, { nullable: true })
+  public fullnodeAddresses?: string;
 
   @Field(() => Number)
   public votingPower: number;

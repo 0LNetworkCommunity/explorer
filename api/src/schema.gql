@@ -41,6 +41,8 @@ type ValidatorGrade {
 type Validator {
   inSet: Boolean!
   address: String!
+  networkAddresses: String
+  fullnodeAddresses: String
   votingPower: Float!
   failedProposals: Float!
   successfulProposals: Float!
@@ -65,6 +67,7 @@ type ValidatorCurrentBid {
 type Account {
   address: String!
   balance: Float!
+  creationDate: String!
   slowWallet: SlowWallet
 }
 

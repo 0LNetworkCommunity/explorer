@@ -3,27 +3,8 @@ import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
 import { OlConfig } from "../config/config.interface.js";
-
-export interface ValidatorGrade {
-  compliant: boolean;
-  proposedBlocks: number;
-  failedBlocks: number;
-  ratio: number;
-}
-
-export interface CurrentBid {
-  currentBid: number;
-  expirationEpoch: number;
-}
-
-export interface ConsensusReward {
-  clearingBid: number;
-  entryFee: number;
-  medianHistory: [number, number];
-  medianWinBid: number;
-  netReward: number;
-  nominalReward: number;
-}
+import { ConsensusReward, RawValidatorSet, ValidatorGrade, ValidatorSet } from "./types.js";
+import { NetworkAddresses } from "./network-addresses.js";
 
 @Injectable()
 export class OlService {
@@ -132,6 +113,32 @@ export class OlService {
       medianWinBid: parseInt(consensusRewardRes.median_win_bid),
       netReward: parseInt(consensusRewardRes.net_reward, 10),
       nominalReward: parseInt(consensusRewardRes.nominal_reward, 10),
+    };
+  }
+
+  public async getValidatorSet(): Promise<ValidatorSet> {
+    const res = await this.aptosClient.getAccountResource(
+      "0x1",
+      "0x1::stake::ValidatorSet",
+    );
+    const data = res.data as RawValidatorSet;
+
+    return {
+      activeValidators: data.active_validators.map((validator) => {
+        const fullnodeAddresses = Buffer.from(validator.config.fullnode_addresses.substring(2), 'hex');
+        const networkAddresses = Buffer.from(validator.config.network_addresses.substring(2), 'hex');
+
+        return {
+          addr: validator.addr,
+          votingPower: parseInt(validator.voting_power, 10),
+          config: {
+            consensusPubkey: validator.config.consensus_pubkey,
+            fullnodeAddresses: NetworkAddresses.fromBytes(fullnodeAddresses)?.toString(),
+            networkAddresses: NetworkAddresses.fromBytes(networkAddresses)?.toString(),
+            validatorIndex: parseInt(validator.config.validator_index, 10),
+          },
+        };
+      }),
     };
   }
 }

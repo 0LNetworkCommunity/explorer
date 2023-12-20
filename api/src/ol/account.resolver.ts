@@ -3,6 +3,7 @@ import { OlService } from "./ol.service.js";
 import { GqlAccount } from "./models/account.model.js";
 import { GqlSlowWallet } from "./models/slow-wallet.model.js";
 import { ApiError } from "aptos";
+import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
 
 export interface CoinStoreResource {
   coin: {
@@ -35,7 +36,10 @@ export interface SlowWalletResource {
 
 @Resolver(GqlAccount)
 export class AccountResolver {
-  public constructor(private readonly olService: OlService) {}
+  public constructor(
+    private readonly olService: OlService,
+    private readonly clickhouseService: ClickhouseService,
+    ) {}
 
   @Query(() => GqlAccount)
   public async account(
@@ -52,6 +56,30 @@ export class AccountResolver {
     );
     const balance = parseInt((res.data as CoinStoreResource).coin.value, 10) / 1e6;
     return balance;
+  }
+
+  @ResolveField(() => String)
+  public async creationDate(@Parent() account: GqlAccount): Promise<string> {
+    if (account.address.length === 32) {
+      const res = await this.clickhouseService.client.query({
+        query: `
+          SELECT "timestamp_usecs"
+          FROM "create_account"
+          WHERE "created_address" = unhex({address:String})
+          LIMIT 1
+        `,
+        query_params: {
+          address: account.address,
+        },
+        format: "JSONEachRow",
+      });
+      const rows: { timestamp_usecs: string }[] = await res.json();
+      if (rows.length) {
+        return new Date(parseInt(rows[0].timestamp_usecs, 10) / 1_000).toISOString();
+      }
+    }
+
+    return "";
   }
 
   @ResolveField(() => GqlSlowWallet, { nullable: true })

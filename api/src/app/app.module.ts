@@ -9,6 +9,7 @@ import { AppService } from "./app.service.js";
 import { ClickhouseModule } from "../clickhouse/clickhouse.module.js";
 import { OlModule } from "../ol/ol.module.js";
 import { S3Module } from "../s3/s3.module.js";
+// import { NodeWatcherModule } from "../node-watcher/node-watcher.module.js";
 
 @Module({
   imports: [
@@ -20,11 +21,13 @@ import { S3Module } from "../s3/s3.module.js";
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), "src/schema.gql"),
+      playground: true,
     }),
 
     S3Module,
     ClickhouseModule,
     OlModule,
+    // NodeWatcherModule,
   ],
   controllers: [],
   providers: [AppService],

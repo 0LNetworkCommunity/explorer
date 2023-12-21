@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { Link, NavLink, useParams } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import { Types } from "aptos";
 
 import useAptos from "../../../../../aptos";

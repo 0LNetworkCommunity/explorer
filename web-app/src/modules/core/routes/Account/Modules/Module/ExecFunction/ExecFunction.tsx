@@ -7,7 +7,7 @@ interface Props {
   func: Types.MoveFunction;
 }
 
-const ExecFunction: FC<Props> = ({ module, func }) => {
+const ExecFunction: FC<Props> = ({ func }) => {
   return (
     <form>
       {func.params.map((param, index) => {

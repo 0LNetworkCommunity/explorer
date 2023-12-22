@@ -51,9 +51,14 @@ export class OlService {
       const res = await this.aptosClient.view({
         function: "0x1::grade::get_validator_grade",
         type_arguments: [],
-        arguments: [address],
+        arguments: [address, "0"],
       });
-      const payload = res as [boolean, string, string, { value: string }];
+      const payload = res as [
+        boolean,
+        string,
+        string,
+        { value: string },
+      ];
       return {
         compliant: payload[0],
         proposedBlocks: parseInt(payload[1], 10),

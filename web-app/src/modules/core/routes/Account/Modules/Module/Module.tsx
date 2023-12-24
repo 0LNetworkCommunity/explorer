@@ -41,19 +41,21 @@ const Module: FC = () => {
     return (
       <div className="flex flex-col w-full px-4 py-3">
         <h1
-          className={clsx("text-3xl font-bold tracking-tight text-slate-900")}
+          className={clsx("text-3xl font-bold tracking-tight text-slate-900 pb-2")}
         >
           {moduleName}
         </h1>
 
-        <ul role="list" className="space-y-3 mb-3">
+        <ul className="space-y-3">
           {module.abi?.exposed_functions.map((func) => {
             return func.is_view ? (
               <li
                 key={func.name}
                 className="overflow-hidden bg-white px-3 py-2 shadow sm:rounded-md"
               >
-                <h3 className="font-semibold">{func.name}</h3>
+                <div className="border-b pb-2">
+                  <h3 className="font-semibold font-medium">{func.name}</h3>
+                </div>
                 <ViewFunction module={module} func={func} />
               </li>
             ) : import.meta.env.VITE_FEATURE_WALLET === "true" ? (
@@ -61,14 +63,16 @@ const Module: FC = () => {
                 key={func.name}
                 className="overflow-hidden bg-white px-3 py-2 shadow sm:rounded-md"
               >
-                <h3 className="font-semibold">{func.name}</h3>
+                <div className="border-b pb-2">
+                  <h3 className="font-semibold font-medium">{func.name}</h3>
+                </div>
                 <ExecFunction module={module} func={func} />
               </li>
             ) : null;
           })}
         </ul>
 
-        <div className="max-w-6xl">
+        <div className="max-w-6xl pt-2">
           <DetailsTable>
             <div>
               <div className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900"></div>

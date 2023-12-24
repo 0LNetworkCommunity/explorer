@@ -12,6 +12,7 @@ interface Props {
 const ViewFunction: FC<Props> = ({ module, func }) => {
   const aptos = useAptos();
   const [args, setArgs] = useState<string[]>([]);
+  const [genericParams, setGenericParams] = useState<string[]>([]);
   const [result, setResult] = useState<string>();
 
   useEffect(() => {
@@ -23,7 +24,7 @@ const ViewFunction: FC<Props> = ({ module, func }) => {
 
     const res = await aptos.view({
       function: `${module.abi!.address}::${module.abi!.name}::${func.name}`,
-      type_arguments: [],
+      type_arguments: genericParams,
       arguments: args,
     });
     setResult(JSON.stringify(res, null, 2));
@@ -31,34 +32,84 @@ const ViewFunction: FC<Props> = ({ module, func }) => {
 
   return (
     <div>
-      <form onSubmit={onSubmit}>
-        {func.params.map((param, index) => {
-          return (
-            <div key={index} className="py-3">
-              <label>
-                <div className="block text-sm font-medium leading-6 text-gray-900">
-                  {param}
+      <form className="divide-y divide-gray-200 space-y-3" onSubmit={onSubmit}>
+        {func.generic_type_params.length > 0 && (
+          <div className="py-2">
+            <h3 className="text-sm text-slate-600">
+              Generic params
+            </h3>
+
+            <div className="p-2">
+              {func.generic_type_params.map((_, index) => (
+                <div key={index} className="py-3">
+                  <label>
+                    <div className="block text-sm text-gray-900">
+                      {`Generic param #${index + 1}`}
+                    </div>
+                    <input
+                      type="text"
+                      className={clsx(
+                        "px-2",
+                        "block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm",
+                        "ring-1 ring-inset ring-gray-300 placeholder:text-gray-400",
+                        "focus:ring-2 focus:ring-inset focus:ring-indigo-600"
+                      )}
+                      value={genericParams[index]}
+                      onChange={(event) => {
+                        setGenericParams((prev) => {
+                          const newGenericParams = [...prev];
+                          newGenericParams[index] = event.target.value;
+                          return newGenericParams;
+                        });
+                      }}
+                    />
+                  </label>
                 </div>
-                <input
-                  type="text"
-                  className={clsx(
-                    "block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm",
-                    "ring-1 ring-inset ring-gray-300 placeholder:text-gray-400",
-                    "focus:ring-2 focus:ring-inset focus:ring-indigo-600"
-                  )}
-                  value={args[index]}
-                  onChange={(event) => {
-                    setArgs((prev) => {
-                      const newArgs = [...prev];
-                      newArgs[index] = event.target.value;
-                      return newArgs;
-                    });
-                  }}
-                />
-              </label>
+              ))}
             </div>
-          );
-        })}
+            
+
+          </div>
+        )}
+
+        {func.params.length > 0 && (
+          <div className="py-2">
+            <h3 className="text-sm text-slate-600">
+              Params
+            </h3>
+
+            <div className="p-2">
+              {func.params.map((param, index) => {
+                return (
+                  <div key={index} className="py-3">
+                    <label>
+                      <div className="block text-sm font-medium leading-6 text-gray-900">
+                        {param}
+                      </div>
+                      <input
+                        type="text"
+                        className={clsx(
+                          "px-2",
+                          "block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm",
+                          "ring-1 ring-inset ring-gray-300 placeholder:text-gray-400",
+                          "focus:ring-2 focus:ring-inset focus:ring-indigo-600"
+                        )}
+                        value={args[index]}
+                        onChange={(event) => {
+                          setArgs((prev) => {
+                            const newArgs = [...prev];
+                            newArgs[index] = event.target.value;
+                            return newArgs;
+                          });
+                        }}
+                      />
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <button
           type="submit"
@@ -76,8 +127,10 @@ const ViewFunction: FC<Props> = ({ module, func }) => {
         </button>
       </form>
       {result && (
-        <div>
-          <div>Result:</div>
+        <div className="py-3">
+          <h3 className="text-base font-medium text-slate-900">
+            Result
+          </h3>
           <Code lang="js">{result}</Code>
         </div>
       )}

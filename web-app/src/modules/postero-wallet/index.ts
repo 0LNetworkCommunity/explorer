@@ -103,8 +103,8 @@ export class PosteroWallet implements AdapterPlugin {
   }
 
   public async signTransaction(
-    transaction: Types.TransactionPayload,
-    options?: TransactionOptions
+    _transaction: Types.TransactionPayload,
+    _options?: TransactionOptions
   ): Promise<Uint8Array | null> {
     const res = await this.provider.signTransaction({
       EntryFunction: {

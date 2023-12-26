@@ -39,13 +39,17 @@ export class AccountResolver {
   public constructor(
     private readonly olService: OlService,
     private readonly clickhouseService: ClickhouseService,
-    ) {}
+  ) {}
 
-  @Query(() => GqlAccount)
+  @Query(() => GqlAccount, { nullable: true })
   public async account(
     @Args({ name: "address", type: () => String }) address: string,
-  ): Promise<GqlAccount> {
-    return new GqlAccount(address);
+  ): Promise<GqlAccount | null> {
+    const accountExists = await this.olService.accountExists(`0x${address}`);
+    if (accountExists) {
+      return new GqlAccount(address);
+    }
+    return null;
   }
 
   @ResolveField(() => Float)

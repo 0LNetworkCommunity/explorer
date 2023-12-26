@@ -78,9 +78,6 @@ export const useTotalSupply = (): Money | undefined => {
 
   useEffect(() => {
     const load = async () => {
-      const modules = await aptos.getAccountModules("0x1");
-      console.log('modules', modules);
-
       const res = await aptos.getAccountResource(
         "0x1",
         "0x1::coin::CoinInfo<0x1::libra_coin::LibraCoin>"

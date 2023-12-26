@@ -8,7 +8,7 @@ import TransactionsTable from "../../../ui/UserTransactionsTable";
 
 const GET_USER_TRANSACTIONS = gql`
   query GetUserTransactions {
-    userTransactions(limit: 10, offset: 0, order: "DESC") {
+    userTransactions(limit: 20, offset: 0, order: "DESC") {
       items {
         version
         sender
@@ -38,8 +38,7 @@ const Home: FC = () => {
   return (
     <Page>
       <Stats />
-      <section className="mt-8">
-        <h2 className="text-xl font-bold text-slate-900">Transactions</h2>
+      <section className="mt-2">
         <Transactions />
 
         <div className="flex p-4 items-center justify-center">

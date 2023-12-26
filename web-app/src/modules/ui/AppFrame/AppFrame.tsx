@@ -1,7 +1,9 @@
 import { FC, PropsWithChildren } from "react";
 import clsx from "clsx";
-import Logo from "../Logo/Logo";
 import { Link, NavLink } from "react-router-dom";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import Logo from "../Logo/Logo";
+import { PosteroWalletName } from "../../postero-wallet";
 
 const navigation = [
   { name: "Transactions", to: "/transactions" },
@@ -9,16 +11,22 @@ const navigation = [
 ];
 
 const AppFrame: FC<PropsWithChildren> = ({ children }) => {
+  const aptosWallet = useWallet();
+
+  const connectWallet = () => {
+    aptosWallet.connect(PosteroWalletName);
+  };
+
   return (
     <>
       <div className="min-h-full">
         <nav className="bg-primary-500">
           <div className="px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 items-center justify-between">
+            <div className="flex h-11 items-center justify-between">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <Link to="/">
-                    <Logo className="h-8 w-8" />
+                    <Logo className="h-6 w-6" />
                   </Link>
                 </div>
                 <div className="ml-10 flex items-baseline space-x-4">
@@ -32,7 +40,7 @@ const AppFrame: FC<PropsWithChildren> = ({ children }) => {
                           isActive
                             ? "bg-primary-700 text-white"
                             : "text-white hover:underline",
-                          "rounded-md px-3 py-2 text-md font-medium",
+                          "rounded-md px-3 py-1 text-sm"
                         )
                       }
                     >
@@ -40,6 +48,41 @@ const AppFrame: FC<PropsWithChildren> = ({ children }) => {
                     </NavLink>
                   ))}
                 </div>
+              </div>
+
+              <div className="flex items-center">
+                {import.meta.env.VITE_FEATURE_WALLET === "true" && (
+                  <div className="ml-10 flex items-baseline space-x-4">
+                    {aptosWallet.account ? (
+                      <>
+                        <div>{aptosWallet.account.address}</div>
+                        <button
+                          type="button"
+                          className={clsx(
+                            "text-white hover:underline",
+                            "rounded-md px-3 py-1"
+                          )}
+                          onClick={() => {
+                            aptosWallet.disconnect();
+                          }}
+                        >
+                          Disconnect
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        className={clsx(
+                          "text-white hover:underline",
+                          "rounded-md px-3 py-1 text-sm"
+                        )}
+                        onClick={connectWallet}
+                      >
+                        Connect
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

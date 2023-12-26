@@ -83,7 +83,7 @@ type SystemInfo {
 type Query {
   userTransactions(limit: Int!, offset: Int!, order: String!): UserTransactionCollection!
   modules: [Module!]!
-  account(address: String!): Account!
+  account(address: String!): Account
   validators: [Validator!]!
   systemInfo: SystemInfo!
 }

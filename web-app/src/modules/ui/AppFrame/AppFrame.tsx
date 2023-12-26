@@ -55,12 +55,14 @@ const AppFrame: FC<PropsWithChildren> = ({ children }) => {
                   <div className="ml-10 flex items-baseline space-x-4">
                     {aptosWallet.account ? (
                       <>
-                        <div>{aptosWallet.account.address}</div>
+                        <div className="text-sm">
+                          {aptosWallet.account.address}
+                        </div>
                         <button
                           type="button"
                           className={clsx(
                             "text-white hover:underline",
-                            "rounded-md px-3 py-1"
+                            "rounded-md text-sm px-3 py-1"
                           )}
                           onClick={() => {
                             aptosWallet.disconnect();

@@ -24,6 +24,15 @@ export class OlService {
     return addresses[0] as string[];
   }
 
+  public async accountExists(address: string): Promise<boolean> {
+    const res = await this.aptosClient.view({
+      function: "0x1::account::exists_at",
+      type_arguments: [],
+      arguments: [address],
+    });
+    return res[0] as boolean;
+  }
+
   public async getEligibleValidators(): Promise<string[]> {
     const addresses = await this.aptosClient.view({
       function: "0x1::validator_universe::get_eligible_validators",

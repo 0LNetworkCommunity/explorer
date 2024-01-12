@@ -50,7 +50,7 @@ const TransactionsPage: FC = () => {
   });
 
   if (!data) {
-    return <Page title="Transactions" />;
+    return <Page />;
   }
 
   let pageCount = Math.ceil(data.userTransactions.size / ITEM_PER_PAGE);

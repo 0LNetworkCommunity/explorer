@@ -8,6 +8,7 @@ import type {
   WalletName,
 } from "@aptos-labs/wallet-adapter-core";
 import { Network, Types, TxnBuilderTypes, BCS } from "aptos";
+import "./postero";
 
 import goose from "./goose";
 

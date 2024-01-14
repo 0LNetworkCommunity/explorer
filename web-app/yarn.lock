@@ -38,21 +38,34 @@
     axios "1.6.2"
     got "^11.8.6"
 
-"@aptos-labs/wallet-adapter-core@3.4.0":
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/@aptos-labs/wallet-adapter-core/-/wallet-adapter-core-3.4.0.tgz#59b2241e44e00fafe5e7ff0ac9dce7dd7e6323fb"
-  integrity sha512-iBuvwc1pIDJfAEhJNww0TYxEqxCebZHcBkmrSPdTy7FCa64HP7xXZHm9Ynwr2aKv//CzgX0ukf+/cbX1Kv8haQ==
+"@aptos-labs/ts-sdk@^1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@aptos-labs/ts-sdk/-/ts-sdk-1.4.0.tgz#783badd85d3c95d20dc58955a9276e1c4de8e644"
+  integrity sha512-t1GKynd5wGghi16AJORHTrjYRUBotRv85NH5FtOSadQWQ5/YlOSwVxCqq9U0ijRWzGz3VM0ndGsjBcCLfwNkUA==
+  dependencies:
+    "@aptos-labs/aptos-client" "^0.1.0"
+    "@noble/curves" "^1.2.0"
+    "@noble/hashes" "^1.3.3"
+    "@scure/bip32" "^1.3.3"
+    "@scure/bip39" "^1.2.1"
+    form-data "^4.0.0"
+    tweetnacl "^1.0.3"
+
+"@aptos-labs/wallet-adapter-core@3.5.0":
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/@aptos-labs/wallet-adapter-core/-/wallet-adapter-core-3.5.0.tgz#8abcf95ce9f865592d070475124e807f1eda0bc8"
+  integrity sha512-aA2kND9ikLOVx8yMS804S/atLZqmPe+Ldw/v9yG5osTHm+samv9H1NBha0rRGvArndeBcN4dGl9C/nc/SXyNcQ==
   dependencies:
     buffer "^6.0.3"
     eventemitter3 "^4.0.7"
     tweetnacl "^1.0.3"
 
 "@aptos-labs/wallet-adapter-react@^2.1.6":
-  version "2.1.6"
-  resolved "https://registry.yarnpkg.com/@aptos-labs/wallet-adapter-react/-/wallet-adapter-react-2.1.6.tgz#874648bc92c56c90b869abaf3c37a73b0c4148cf"
-  integrity sha512-qGAy95Kw6NL35nMDpyFwYCSSaeoyTxBiOd77FYRaVjTaNFC38oeLKF683OPbM0LmBHVyTbJYV+tdkyKENznJnA==
+  version "2.1.7"
+  resolved "https://registry.yarnpkg.com/@aptos-labs/wallet-adapter-react/-/wallet-adapter-react-2.1.7.tgz#2823cb0d6f317abf8602cac2f48efacc4f5bea77"
+  integrity sha512-iolreseC171F1w5SHZHR32NY+wEE595wh09yzTSgBTc3/A/FYCfXbb6ZZQVYI3ofVo01zL0/wKNxbEMWS9t+ZA==
   dependencies:
-    "@aptos-labs/wallet-adapter-core" "3.4.0"
+    "@aptos-labs/wallet-adapter-core" "3.5.0"
 
 "@babel/runtime@^7.21.0":
   version "7.23.8"
@@ -289,7 +302,14 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@noble/hashes@1.3.3", "@noble/hashes@^1.3.2", "@noble/hashes@~1.3.0":
+"@noble/curves@^1.2.0", "@noble/curves@~1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@noble/curves/-/curves-1.3.0.tgz#01be46da4fd195822dab821e72f71bf4aeec635e"
+  integrity sha512-t01iSXPuN+Eqzb4eBX0S5oubSqXbK/xXa1Ne18Hj8f9pStxztHCE2gfboSp/dZRLSqfuLpRK2nDXDK+W9puocA==
+  dependencies:
+    "@noble/hashes" "1.3.3"
+
+"@noble/hashes@1.3.3", "@noble/hashes@^1.3.2", "@noble/hashes@^1.3.3", "@noble/hashes@~1.3.0", "@noble/hashes@~1.3.2":
   version "1.3.3"
   resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.3.3.tgz#39908da56a4adc270147bb07968bf3b16cfe1699"
   integrity sha512-V7/fPHgl+jsVPXqqeOzT8egNj2iBIVt+ECeMMG8TdcnTikP3oaBtUVqpT/gYCR68aEBJSF+XbYUxStjbFMqIIA==
@@ -390,10 +410,19 @@
   resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.9.5.tgz#10491ccf4f63c814d4149e0316541476ea603602"
   integrity sha512-1q+mykKE3Vot1kaFJIDoUFv5TuW+QQVaf2FmTT9krg86pQrGStOSJJ0Zil7CFagyxDuouTepzt5Y5TVzyajOdQ==
 
-"@scure/base@~1.1.0":
+"@scure/base@~1.1.0", "@scure/base@~1.1.4":
   version "1.1.5"
   resolved "https://registry.yarnpkg.com/@scure/base/-/base-1.1.5.tgz#1d85d17269fe97694b9c592552dd9e5e33552157"
   integrity sha512-Brj9FiG2W1MRQSTB212YVPRrcbjkv48FoZi/u4l/zds/ieRrqsh7aUf6CLwkAq61oKXr/ZlTzlY66gLIj3TFTQ==
+
+"@scure/bip32@^1.3.3":
+  version "1.3.3"
+  resolved "https://registry.yarnpkg.com/@scure/bip32/-/bip32-1.3.3.tgz#a9624991dc8767087c57999a5d79488f48eae6c8"
+  integrity sha512-LJaN3HwRbfQK0X1xFSi0Q9amqOgzQnnDngIt+ZlsBC3Bm7/nE7K0kwshZHyaru79yIVRv/e1mQAjZyuZG6jOFQ==
+  dependencies:
+    "@noble/curves" "~1.3.0"
+    "@noble/hashes" "~1.3.2"
+    "@scure/base" "~1.1.4"
 
 "@scure/bip39@1.2.1":
   version "1.2.1"
@@ -402,6 +431,14 @@
   dependencies:
     "@noble/hashes" "~1.3.0"
     "@scure/base" "~1.1.0"
+
+"@scure/bip39@^1.2.1":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@scure/bip39/-/bip39-1.2.2.tgz#f3426813f4ced11a47489cbcf7294aa963966527"
+  integrity sha512-HYf9TUXG80beW+hGAt3TRM8wU6pQoYur9iNypTROm42dorCGmLnFe3eWjz3gOq6G62H2WRh0FCzAR1PI+29zIA==
+  dependencies:
+    "@noble/hashes" "~1.3.2"
+    "@scure/base" "~1.1.4"
 
 "@sindresorhus/is@^4.0.0":
   version "4.6.0"
@@ -1095,9 +1132,9 @@ eastasianwidth@^0.2.0:
   integrity sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==
 
 electron-to-chromium@^1.4.601:
-  version "1.4.629"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.629.tgz#9cbffe1b08a5627b6a25118360f7fd3965416caf"
-  integrity sha512-5UUkr3k3CZ/k+9Sw7vaaIMyOzMC0XbPyprKI3n0tbKDqkzTDOjK4izm7DxlkueRMim6ZZQ1ja9F7hoFVplHihA==
+  version "1.4.630"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.630.tgz#1d9f4169653784997bec98975e11a2c05214ce39"
+  integrity sha512-osHqhtjojpCsACVnuD11xO5g9xaCyw7Qqn/C2KParkMv42i8jrJJgx3g7mkHfpxwhy9MnOJr8+pKOdZ7qzgizg==
 
 emoji-regex@^8.0.0:
   version "8.0.0"

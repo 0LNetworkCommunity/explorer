@@ -113,9 +113,10 @@ export class PosteroWallet implements AdapterPlugin {
       entryFunc.serialize(serializer);
       const value = serializer.getBytes();
 
-      const res = await this.provider.signAndSubmitTransaction(
-        Buffer.from(value).toString("base64")
-      );
+      const res = await this.provider.signAndSubmitTransaction({
+        type: "entry_function_payload",
+        payload: Buffer.from(value).toString("base64"),
+      });
       console.log(res);
     }
 

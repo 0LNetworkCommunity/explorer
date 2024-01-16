@@ -1,3 +1,5 @@
+import process from "node:process";
+
 import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";
 
@@ -18,21 +20,27 @@ import { VouchResolver } from "./vouch.resolver.js";
 import { AccountsResolver } from "./accounts.resolver.js";
 import { SystemInfoResolver } from "./system-info.resolver.js";
 
+const roles = process.env.ROLES!.split(",");
+
 @Module({
   imports: [
     S3Module,
     ClickhouseModule,
     OlDbModule,
 
-    // BullModule.registerQueue({
-    //   name: "ol-version-batch-v7",
-    //   connection: redisClient(),
-    // }),
+    ...(roles.includes("worker")
+      ? [
+          BullModule.registerQueue({
+            name: "ol-version-batch-v7",
+            connection: redisClient(),
+          }),
 
-    // BullModule.registerQueue({
-    //   name: "ol-version-v7",
-    //   connection: redisClient(),
-    // }),
+          BullModule.registerQueue({
+            name: "ol-version-v7",
+            connection: redisClient(),
+          }),
+        ]
+      : []),
   ],
   providers: [
     UserTransactionsResolver,
@@ -48,8 +56,9 @@ import { SystemInfoResolver } from "./system-info.resolver.js";
 
     OlService,
 
-    // OlVersionProcessor,
-    // OlVersionBatchProcessor,
+    ...(roles.includes("worker")
+      ? [OlVersionProcessor, OlVersionBatchProcessor]
+      : []),
   ],
   controllers: [],
   exports: [OlService],

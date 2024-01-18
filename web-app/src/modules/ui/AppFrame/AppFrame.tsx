@@ -8,6 +8,7 @@ import { PosteroWalletName } from "../../postero-wallet";
 const navigation = [
   { name: "Transactions", to: "/transactions" },
   { name: "Validators", to: "/validators" },
+  { name: "Coin Stats", to: "/coinstats" },
 ];
 
 const AppFrame: FC<PropsWithChildren> = ({ children }) => {

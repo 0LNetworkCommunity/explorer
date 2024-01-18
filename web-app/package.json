@@ -21,6 +21,8 @@
     "clsx": "^2.0.0",
     "d3-format": "^3.1.0",
     "date-fns": "^2.30.0",
+    "echarts": "^5.4.3",
+    "echarts-for-react": "^3.0.2",
     "graphql": "^16.8.1",
     "lodash": "^4.17.21",
     "posthog-js": "^1.96.1",

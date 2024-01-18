@@ -12,6 +12,7 @@ import Root from "./Root";
 import Validators from "./routes/Validators";
 import Test from "./routes/Test";
 import Module from "./routes/Account/Modules/Module";
+import Coinstats from "./routes/Coinstats";
 
 const router = createBrowserRouter([
   {
@@ -65,6 +66,10 @@ const router = createBrowserRouter([
       {
         path: "/validators",
         element: <Validators />,
+      },
+      {
+        path: "/coinstats",
+        element: <Coinstats />,
       },
       {
         path: "/test",

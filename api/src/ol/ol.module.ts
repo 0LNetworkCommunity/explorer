@@ -19,6 +19,7 @@ import { AccountResolver } from "./account.resolver.js";
 import { VouchResolver } from "./vouch.resolver.js";
 import { AccountsResolver } from "./accounts.resolver.js";
 import { SystemInfoResolver } from "./system-info.resolver.js";
+import { TransformerProcessor } from "./transformer.processor.js";
 
 const roles = process.env.ROLES!.split(",");
 
@@ -28,12 +29,17 @@ const roles = process.env.ROLES!.split(",");
     ClickhouseModule,
     OlDbModule,
 
+    BullModule.registerQueue({
+      name: "transformer",
+      connection: redisClient(),
+    }),
+
     ...(roles.includes("worker")
       ? [
-          BullModule.registerQueue({
-            name: "ol-version-batch-v7",
-            connection: redisClient(),
-          }),
+          // BullModule.registerQueue({
+          //   name: "ol-version-batch-v7",
+          //   connection: redisClient(),
+          // }),
 
           BullModule.registerQueue({
             name: "ol-version-v7",
@@ -57,8 +63,13 @@ const roles = process.env.ROLES!.split(",");
     OlService,
 
     ...(roles.includes("worker")
-      ? [OlVersionProcessor, OlVersionBatchProcessor]
+      ? [
+        OlVersionProcessor, 
+        // OlVersionBatchProcessor
+      ]
       : []),
+
+    TransformerProcessor,
   ],
   controllers: [],
   exports: [OlService],

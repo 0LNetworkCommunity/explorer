@@ -9,7 +9,7 @@ import * as d3 from 'd3-array';
 import { OlService } from './ol.service.js';
 import { OlDbService } from '../ol-db/ol-db.service.js';
 
-import { Types } from 'aptos';
+import { BCS, Types } from 'aptos';
 import { ClickhouseService } from '../clickhouse/clickhouse.service.js';
 import { NotPendingTransaction } from "./types.js";
 
@@ -58,17 +58,23 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   public async onModuleInit() {
-    await this.olVersionQueue.add('getMissingVersions', undefined, {
-      repeat: {
-        every: 30 * 1_000, // 30 seconds
-      },
-    });
+    // const version = "10914227";
 
-    await this.olVersionQueue.add('fetchLatestVersion', undefined, {
-      repeat: {
-        every: 30 * 1_000, // 30 seconds
-      },
-    });
+    // await this.olVersionQueue.add("version", { version } as VersionJobData, {
+    //   jobId: `__version__${version}`,
+    // });
+
+    // await this.olVersionQueue.add('getMissingVersions', undefined, {
+    //   repeat: {
+    //     every: 30 * 1_000, // 30 seconds
+    //   },
+    // });
+
+    // await this.olVersionQueue.add('fetchLatestVersion', undefined, {
+    //   repeat: {
+    //     every: 30 * 1_000, // 30 seconds
+    //   },
+    // });
   }
 
   public async process(job: Job<VersionJobData, any, string>) {
@@ -225,6 +231,49 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   private async ingestBlockMetadataTransaction(
     transaction: Types.Transaction_BlockMetadataTransaction,
   ) {
+    const libraCoinTotalSupplyChange = transaction.changes.find((it) => {
+      const change = it as Types.WriteSetChange_WriteTableItem;
+      return (
+        change.handle === "0xfc074a2b7638a50ba678ce381a2350a28264f4da004603adb8dc36d125750108" &&
+        change.key === "0xa7e1af6d61e958dbefe8f35550aab562f8923634cd7f438bc5190e99ca5fb07c"
+      );
+    }) as Types.WriteSetChange_WriteTableItem;
+
+    if (libraCoinTotalSupplyChange) {
+      const payload = csvStringify([
+        [
+          '0x1::coin::CoinInfo<0x1::libra_coin::LibraCoin>',
+          transaction.version,
+          libraCoinTotalSupplyChange.value.substring(2)
+        ],
+      ]);
+      const query = `
+        INSERT INTO "coin_total_supply" (
+          "coin_type",
+          "version",
+          "amount"
+        )
+        SELECT
+          "coin_type",
+          "version",
+          reinterpretAsUInt128(unhex("amount")) 
+        FROM
+          format(
+            CSV,
+            $$
+              coin_type String,
+              version UInt64,
+              amount String
+            $$,
+            $$${payload}$$
+        )
+      `;
+
+      await this.clichouseService.client.command({
+        query,
+      });
+    }
+
     const payload = csvStringify([
       [
         transaction.id.substring(2),
@@ -238,44 +287,45 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
         transaction.timestamp,
       ],
     ]);
+
     const query = `
-        INSERT INTO "block_metadata_transaction_v7" (
-          "id",
-          "version",
-          "hash",
-          "epoch",
-          "round",
-          "previous_block_votes_bitvec",
-          "proposer",
-          "failed_proposer_indices",
-          "timestamp"
+      INSERT INTO "block_metadata_transaction_v7" (
+        "id",
+        "version",
+        "hash",
+        "epoch",
+        "round",
+        "previous_block_votes_bitvec",
+        "proposer",
+        "failed_proposer_indices",
+        "timestamp"
+      )
+      SELECT
+        reinterpretAsUInt256(reverse(unhex("id"))),
+        "version",
+        reinterpretAsUInt256(reverse(unhex("hash"))),
+        "epoch",
+        "round",
+        unhex("previous_block_votes_bitvec"),
+        reinterpretAsUInt256(reverse(unhex("proposer"))),
+        "failed_proposer_indices",
+        "timestamp"
+      FROM
+        format(
+          CSV,
+          $$
+            id String,
+            version UInt64,
+            hash String,
+            epoch UInt64,
+            round UInt64,
+            previous_block_votes_bitvec String,
+            proposer String,
+            failed_proposer_indices Array(UInt32),
+            timestamp UInt64
+          $$,
+          $$${payload}$$
         )
-        SELECT
-          reinterpretAsUInt256(reverse(unhex("id"))),
-          "version",
-          reinterpretAsUInt256(reverse(unhex("hash"))),
-          "epoch",
-          "round",
-          unhex("previous_block_votes_bitvec"),
-          reinterpretAsUInt256(reverse(unhex("proposer"))),
-          "failed_proposer_indices",
-          "timestamp"
-        FROM
-          format(
-            CSV,
-            $$
-              id String,
-              version UInt64,
-              hash String,
-              epoch UInt64,
-              round UInt64,
-              previous_block_votes_bitvec String,
-              proposer String,
-              failed_proposer_indices Array(UInt32),
-              timestamp UInt64
-            $$,
-            $$${payload}$$
-          )
     `;
 
     await this.clichouseService.client.command({

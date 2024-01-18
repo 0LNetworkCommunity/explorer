@@ -10,7 +10,8 @@ export default (): Config => {
     },
 
     ol: {
-      provider: "https://rpc.0l.fyi",
+      // provider: "https://rpc.0l.fyi",
+      provider: "https://rpc.openlibra.space:8080/",
     },
 
     s3: {

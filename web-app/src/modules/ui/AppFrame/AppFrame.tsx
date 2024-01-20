@@ -1,4 +1,5 @@
-import { FC, PropsWithChildren } from "react";
+import { FC, PropsWithChildren, useState, useEffect } from "react";
+import { useNavigate, useLocation } from 'react-router-dom';
 import clsx from "clsx";
 import { Link, NavLink } from "react-router-dom";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
@@ -12,9 +13,33 @@ const navigation = [
 
 const AppFrame: FC<PropsWithChildren> = ({ children }) => {
   const aptosWallet = useWallet();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchAddress, setSearchAddress] = useState('');
+
+  useEffect(() => {
+    // Clear search input when navigating to the home page
+    if (location.pathname === '/') {
+      setSearchAddress('');
+    }
+  }, [location.pathname]);
 
   const connectWallet = () => {
     aptosWallet.connect(PosteroWalletName);
+  };
+
+  const handleSearch = () => {
+    // Check if the length is 32, 34, 62, or 64 characters
+    const validLengths = [32, 34, 62, 64];
+    if (validLengths.includes(searchAddress.trim().length)) {
+      navigate(`/accounts/${searchAddress.trim()}/resources`);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   return (
@@ -52,7 +77,7 @@ const AppFrame: FC<PropsWithChildren> = ({ children }) => {
 
               <div className="flex items-center">
                 {import.meta.env.VITE_FEATURE_WALLET === "true" && (
-                  <div className="ml-10 flex items-baseline space-x-4">
+                  <div className="flex items-baseline space-x-4">
                     {aptosWallet.account ? (
                       <>
                         <div className="text-sm">
@@ -85,6 +110,26 @@ const AppFrame: FC<PropsWithChildren> = ({ children }) => {
                     )}
                   </div>
                 )}
+                <div className="ml-auto flex items-center">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search address"
+                      value={searchAddress}
+                      onChange={(e) => setSearchAddress(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      className="rounded-l-md px-3 py-1 text-sm border border-r-0"
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 bg-primary-700 hover:bg-primary-600 text-white border border-primary-700 flex items-center justify-center p-2 transition duration-150 ease-in-out"
+                      onClick={handleSearch}
+                      style={{ width: '2.5rem' }} // Adjust the width as needed
+                    >
+                      🔍
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

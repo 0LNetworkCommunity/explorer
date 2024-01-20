@@ -124,7 +124,7 @@ const AppFrame: FC<PropsWithChildren> = ({ children }) => {
                       type="button"
                       className="absolute inset-y-0 right-0 bg-primary-700 hover:bg-primary-600 text-white border border-primary-700 flex items-center justify-center p-2 transition duration-150 ease-in-out"
                       onClick={handleSearch}
-                      style={{ width: '2.5rem' }} // Adjust the width as needed
+                      style={{ width: '2.5rem' }}
                     >
                       🔍
                     </button>

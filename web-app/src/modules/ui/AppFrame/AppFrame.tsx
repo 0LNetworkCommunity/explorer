@@ -121,7 +121,8 @@ const AppFrame: FC<PropsWithChildren> = ({ children }) => {
                       <input
                         id="search"
                         className={clsx(
-                          "block w-full rounded-md border-0 bg-white py-1 pl-10 pr-3 text-gray-900",
+                          "block w-full rounded-md border-0 bg-white py-1 pl-10 pr-3",
+                          "text-gray-900 text-sm",
                           "focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-600"
                         )}
                         placeholder="Search Address"

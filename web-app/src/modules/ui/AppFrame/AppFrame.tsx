@@ -1,10 +1,11 @@
-import { FC, PropsWithChildren, useState, useEffect } from "react";
-import { useNavigate, useLocation } from 'react-router-dom';
+import { FC, PropsWithChildren, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import { Link, NavLink } from "react-router-dom";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import Logo from "../Logo/Logo";
 import { PosteroWalletName } from "../../postero-wallet";
+import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 
 const navigation = [
   { name: "Transactions", to: "/transactions" },
@@ -14,31 +15,25 @@ const navigation = [
 const AppFrame: FC<PropsWithChildren> = ({ children }) => {
   const aptosWallet = useWallet();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [searchAddress, setSearchAddress] = useState('');
-
-  useEffect(() => {
-    // Clear search input when navigating to the home page
-    if (location.pathname === '/') {
-      setSearchAddress('');
-    }
-  }, [location.pathname]);
+  const [searchAddress, setSearchAddress] = useState("");
+  const searchInput = useRef<HTMLInputElement>(null);
 
   const connectWallet = () => {
     aptosWallet.connect(PosteroWalletName);
   };
 
-  const handleSearch = () => {
+  const onSearch = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const input = searchAddress.trim();
     // Check if the length is 32, 34, 62, or 64 characters
     const validLengths = [32, 34, 62, 64];
-    if (validLengths.includes(searchAddress.trim().length)) {
-      navigate(`/accounts/${searchAddress.trim()}/resources`);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleSearch();
+    if (validLengths.includes(input.length)) {
+      navigate(`/accounts/${encodeURIComponent(input)}/resources`);
+      setSearchAddress('');
+      if (searchInput.current) {
+        searchInput.current.blur();
+      }
     }
   };
 
@@ -110,25 +105,36 @@ const AppFrame: FC<PropsWithChildren> = ({ children }) => {
                     )}
                   </div>
                 )}
-                <div className="ml-auto flex items-center">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Search address"
-                      value={searchAddress}
-                      onChange={(e) => setSearchAddress(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      className="rounded-l-md px-3 py-1 text-sm border border-r-0"
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-0 bg-primary-700 hover:bg-primary-600 text-white border border-primary-700 flex items-center justify-center p-2 transition duration-150 ease-in-out"
-                      onClick={handleSearch}
-                      style={{ width: '2.5rem' }}
-                    >
-                      🔍
-                    </button>
-                  </div>
+
+                <div className="flex flex-1 justify-center px-2 ml-6">
+                  <form
+                    className="w-full max-w-lg lg:max-w-xs"
+                    onSubmit={onSearch}
+                  >
+                    <div className="relative text-gray-400 focus-within:text-gray-600">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <MagnifyingGlassIcon
+                          className="h-5 w-5"
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <input
+                        id="search"
+                        className={clsx(
+                          "block w-full rounded-md border-0 bg-white py-1 pl-10 pr-3 text-gray-900",
+                          "focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-600"
+                        )}
+                        placeholder="Search Address"
+                        type="search"
+                        name="search"
+                        ref={searchInput}
+                        value={searchAddress}
+                        onChange={(event) =>
+                          setSearchAddress(event.target.value)
+                        }
+                      />
+                    </div>
+                  </form>
                 </div>
               </div>
             </div>

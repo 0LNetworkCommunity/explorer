@@ -1,4 +1,4 @@
-INSERT INTO "block_metadata_transaction_v7" (
+INSERT INTO "block_metadata_transaction" (
   "id",
   "version",
   "hash",

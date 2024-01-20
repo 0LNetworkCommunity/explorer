@@ -1,7 +1,8 @@
-import process from "node:process";
+import process, { stdout } from "node:process";
+import os from "node:os";
 import fs from "node:fs";
 import pathUtil from "node:path";
-import { spawn } from "node:child_process";
+import { spawn, exec } from "node:child_process";
 import { URL } from "node:url";
 
 import axios, { AxiosError } from "axios";
@@ -10,36 +11,15 @@ import _ from "lodash";
 import { InjectQueue, Processor, WorkerHost } from "@nestjs/bullmq";
 import { OnModuleInit } from "@nestjs/common";
 import { Job, Queue } from "bullmq";
+import { Readable, pipeline } from "node:stream";
 
 @Processor("transformer")
-export class TransformerProcessor extends WorkerHost implements OnModuleInit {
-  private insertQueries = new Map<string, string>();
-
+export class TransformerProcessor extends WorkerHost {
   public constructor(
     @InjectQueue("transformer")
     private readonly transformerQueue: Queue,
   ) {
     super();
-  }
-
-  async onModuleInit() {
-    this.transformerQueue.add(
-      "transform",
-      { id: 0 },
-      { jobId: "__transform::0" },
-    );
-
-    const dirname = pathUtil.dirname(new URL(import.meta.url).pathname);
-    const queriesDir = pathUtil.join(dirname, "queries");
-    const files = await fs.promises.readdir(queriesDir);
-    for (const file of files) {
-      const query = await fs.promises.readFile(
-        pathUtil.join(queriesDir, file),
-        "utf-8",
-      );
-      const queryName = file.split(".")[0];
-      this.insertQueries.set(queryName, query);
-    }
   }
 
   public async process(job: Job<any, any, string>) {
@@ -172,32 +152,59 @@ export class TransformerProcessor extends WorkerHost implements OnModuleInit {
       });
     });
 
+    const dirname = pathUtil.dirname(new URL(import.meta.url).pathname);
+    const queriesDir = pathUtil.join(dirname, "queries");
+
     const files = await fs.promises.readdir(dest);
     for (const file of files) {
       const queryName = file.split(".")[0];
-      const query = this.insertQueries.get(queryName);
-      if (!query) {
-        continue;
-      }
+      
+      const clickhouseClient = os.platform() === "darwin" ? "clickhouse client" : "clickhouse-client";
 
-      try {
-        await axios({
-          method: "POST",
-          url: `http://127.0.0.1:8123/?${qs.stringify({
-            query: this.insertQueries.get("event")!,
-            database: "olfyi",
-          })}`,
-          maxRedirects: 0,
-          data: fs.createReadStream(pathUtil.join(dest, file)),
-        });
-      } catch (error) {
-        if (error.isAxiosError) {
-          const axiosError = error as AxiosError;
-          console.error(axiosError.response?.status);
-          console.error(axiosError.response?.data);
+      await new Promise<void>((resolve, reject) => {
+        exec(
+          [
+            `cat ${pathUtil.join(dest, file)} | `,
+            clickhouseClient,
+            '-h "127.0.0.1"',
+            "--port 9000",
+            '-u "default"',
+            "-d olfyi",
+            `--query="$(cat ${queriesDir}/${queryName}.sql)"`,
+          ].join(" "),
+          (error, stdout, stderr) => {
+            console.log(stdout);
+            console.error(stderr);
 
-        }
-      }
+            if (error) {
+              reject(error);
+            } else {
+              resolve();
+            }
+          },
+        );
+      });
+
+      // try {
+      //   await axios({
+      //     method: "POST",
+      //     url: `http://127.0.0.1:8123/?${qs.stringify({
+      //       query: this.insertQueries.get("event")!,
+      //       database: "olfyi",
+      //     })}`,
+      //     maxRedirects: 0,
+      //     data: fs.createReadStream(pathUtil.join(dest, file)),
+      //   });
+      // } catch (error) {
+      //   if (error.isAxiosError) {
+      //     console.log(file);
+
+      //     const axiosError = error as AxiosError;
+      //     console.error(axiosError.response?.status);
+      //     console.error(axiosError.response?.data);
+
+      //   }
+      // }
     }
   }
 }

@@ -271,7 +271,7 @@ export class OlDbService {
     const resultSet = await this.clichouseService.client.query({
       query: `
         SELECT DISTINCT "version"
-        FROM "ingested_versions_v7"
+        FROM "ingested_versions"
         ${after !== undefined ? `WHERE "version" > ${after.toString()}` : ""}
         ORDER BY "version"
       `,

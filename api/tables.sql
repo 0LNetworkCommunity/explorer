@@ -1,112 +1,4 @@
-CREATE TABLE "create_account"
-(
-    "version" UInt64,
-    "timestamp_usecs" UInt64,
-    "role_id" UInt64,
-    "created_address" Binary(16)
-)
-ENGINE = MergeTree
-PRIMARY KEY ("created_address");
-
-CREATE TABLE "burn"
-(
-    "version" UInt64,
-    "timestamp_usecs" UInt64,
-    "amount" UInt64,
-    "currency" String,
-    "preburn_address" Binary(16)
-)
-ENGINE = MergeTree
-ORDER BY "version";
-
-
-CREATE TABLE "received_payment"
-(
-    "version" UInt64,
-    "timestamp_usecs" UInt64,
-    "amount" UInt64,
-    "currency" String,
-    "sender" Binary(16),
-    "receiver" Binary(16),
-    "metadata" String
-)
-ENGINE = MergeTree
-PRIMARY KEY ("version");
-
-
-CREATE TABLE "sent_payment"
-(
-    "version" UInt64,
-    "timestamp_usecs" UInt64,
-    "amount" UInt64,
-    "currency" String,
-    "sender" Binary(16),
-    "receiver" Binary(16),
-    "metadata" String
-)
-ENGINE = MergeTree
-PRIMARY KEY ("version");
-
-CREATE TABLE "mint"
-(
-    "version" UInt64,
-    "timestamp_usecs" UInt64,
-    "amount" UInt64,
-    "currency" String
-)
-ENGINE = MergeTree
-PRIMARY KEY ("version");
-
-CREATE TABLE "user_transaction"
-(
-    "version" UInt64,
-    "timestamp_usecs" UInt64,
-    "sender" Binary(16),
-    -- "signature_scheme" String,
-    -- "signature" String,
-    -- "public_key" String,
-    "sequence_number" UInt64,
-    "max_gas_amount" UInt64,
-    "gas_unit_price" UInt64,
-    "gas_currency" String,
-    -- "expiration_timestamp_secs" UInt64,
-    -- "script_hash" String,
-    -- "script_bytes" String,
-    "module_address" Binary(16),
-    "module_name" String,
-    "function_name" String,
-    "arguments" Array(String),
-    "vm_status" String,
-    "gas_used" UInt64
-)
-ENGINE = MergeTree
-ORDER BY "version";
-
-CREATE TABLE "ingested_files"
-(
-    "name" String
-)
-ENGINE = MergeTree
-PRIMARY KEY ("name");
-
-create table "ingested_versions" (
-	version UInt64
-)
-ENGINE = MergeTree
-PRIMARY KEY ("version");
-
-create table "new_block" (
-	"version" UInt64,
-    "timestamp_usecs" UInt64,
-    "round" UInt64,
-    "proposer" String,
-    "proposed_time" UInt64,
-    "gas_used" UInt64
-)
-ENGINE = MergeTree
-PRIMARY KEY ("version");
-
-CREATE TABLE "user_transaction_v7" (
+CREATE TABLE "user_transaction" (
   "version" UInt64,
   "hash" UInt256,
   "gas_used" UInt64,
@@ -122,13 +14,31 @@ CREATE TABLE "user_transaction_v7" (
   "function_name" String,
   "type_arguments" String,
   "arguments" String,
-  "type" String,
   "timestamp" UInt64
 )
 ENGINE = MergeTree
 ORDER BY "version";
 
-CREATE TABLE "event_v7" (
+CREATE TABLE "script" (
+  "version" UInt64,
+  "hash" UInt256,
+  "gas_used" UInt64,
+  "success" Boolean,
+  "vm_status" String,
+  "sender" UInt256,
+  "sequence_number" UInt64,
+  "max_gas_amount" UInt64,
+  "gas_unit_price" UInt64,
+  "expiration_timestamp" UInt64,
+  "type_arguments" String,
+  "arguments" String,
+  "abi" String,
+  "timestamp" UInt64
+)
+ENGINE = MergeTree
+ORDER BY "version";
+
+CREATE TABLE "event" (
 	"version" UInt64,
 	"timestamp" UInt64,
 	"creation_number" UInt64,
@@ -142,7 +52,7 @@ CREATE TABLE "event_v7" (
 ENGINE = MergeTree
 ORDER BY "version";
 
-CREATE TABLE "block_metadata_transaction_v7" (
+CREATE TABLE "block_metadata_transaction" (
   `id` UInt256,
   `version` UInt64,
   `hash` UInt256,
@@ -156,40 +66,66 @@ CREATE TABLE "block_metadata_transaction_v7" (
 ENGINE = MergeTree
 ORDER BY version;
 
-CREATE TABLE "state_checkpoint_transaction_v7" (
-  `version` UInt64,
-  `hash` UInt256,
-  `state_change_hash` UInt256,
-  `event_root_hash` UInt256,
-  `state_checkpoint_hash` Nullable(UInt256),
-  `gas_used` UInt64,
-  `success` Boolean,
-  `vm_status` String,
-  `accumulator_root_hash` UInt256,
-  `timestamp` UInt64
-)
-ENGINE = MergeTree
-ORDER BY version;
+-- CREATE TABLE "state_checkpoint_transaction" (
+--   `version` UInt64,
+--   `hash` UInt256,
+--   `state_change_hash` UInt256,
+--   `event_root_hash` UInt256,
+--   `state_checkpoint_hash` Nullable(UInt256),
+--   `gas_used` UInt64,
+--   `success` Boolean,
+--   `vm_status` String,
+--   `accumulator_root_hash` UInt256,
+--   `timestamp` UInt64
+-- )
+-- ENGINE = MergeTree
+-- ORDER BY version;
 
-CREATE TABLE "ingested_files_v7"
+CREATE TABLE "ingested_files"
 (
     `name` String
 )
 ENGINE = MergeTree
 PRIMARY KEY ("name");
 
-CREATE TABLE "ingested_versions_v7" (
+CREATE TABLE "ingested_versions" (
 	`version` UInt64
 )
 ENGINE = MergeTree
 PRIMARY KEY ("version");
 
-CREATE TABLE "coin_total_supply"
+CREATE TABLE "total_supply"
 (
-    "coin_type" String,
     "version" UInt64,
-    "amount" UInt128
+    "timestamp" UInt64,
+    "amount" UInt128,
+    "change_index" UInt64
 )
 ENGINE = MergeTree
-PRIMARY KEY ("coin_type", "version")
-ORDER BY ("coin_type", "version");
+PRIMARY KEY ("version", "change_index")
+ORDER BY ("version", "change_index");
+
+CREATE TABLE "coin_balance"
+(
+    "version" UInt64,
+    "timestamp" UInt64,
+    "address" UInt256,
+    "balance" UInt128,
+    "change_index" UInt64,
+    "coin_address" UInt256,
+    "coin_module" String,
+    "coin_name" String
+)
+ENGINE = MergeTree
+PRIMARY KEY (
+    "coin_address",
+    "coin_module", "coin_name",
+    "version", "change_index",
+    "address"
+)
+ORDER BY (
+    "coin_address",
+    "coin_module", "coin_name",
+    "version", "change_index",
+    "address"
+);

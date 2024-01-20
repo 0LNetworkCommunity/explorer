@@ -1,12 +1,20 @@
-// import util from "node:util";
-// import { execFile as execFileNative } from "node:child_process";
+import pathUtil from "node:path";
+import { execFile as execFileNative } from "node:child_process";
+import util from "node:util";
+import os from "node:os";
+import fs from "node:fs";
 
-import { Injectable, OnApplicationShutdown } from '@nestjs/common';
+import {
+  Injectable,
+  OnApplicationShutdown,
+  OnModuleInit,
+} from "@nestjs/common";
 import { createClient, ClickHouseClient } from "@clickhouse/client";
 import { ConfigService } from "@nestjs/config";
+
 import { ClickhouseConfig } from "../config/config.interface.js";
 
-// const execFile = util.promisify(execFileNative);
+const execFile = util.promisify(execFileNative);
 
 export interface ClickhouseQueryResponse<T> {
   meta: { name: string; type: string }[];
@@ -16,19 +24,21 @@ export interface ClickhouseQueryResponse<T> {
 }
 
 @Injectable()
-export class ClickhouseService implements OnApplicationShutdown {
+export class ClickhouseService implements OnModuleInit, OnApplicationShutdown {
+  private insertQueriesFiles = new Map<string, string>();
+
   public readonly client: ClickHouseClient;
 
   private readonly config: ClickhouseConfig;
 
   public constructor(config: ConfigService) {
-    const clickhouseConfig = config.get<ClickhouseConfig>('clickhouse')!;
+    const clickhouseConfig = config.get<ClickhouseConfig>("clickhouse")!;
 
     this.config = clickhouseConfig;
 
-    let protocol = 'http';
+    let protocol = "http";
     if (clickhouseConfig.port === 443) {
-      protocol = 'https';
+      protocol = "https";
     }
 
     const host = `${protocol}://${clickhouseConfig.httpHost}:${clickhouseConfig.port}`;
@@ -41,51 +51,45 @@ export class ClickhouseService implements OnApplicationShutdown {
     });
   }
 
+  public async onModuleInit() {
+    const dirname = pathUtil.dirname(new URL(import.meta.url).pathname);
+    const queriesDir = pathUtil.join(dirname, "queries");
+    const files = await fs.promises.readdir(queriesDir);
+    for (const file of files) {
+      const queryName = file.split(".")[0];
+      this.insertQueriesFiles.set(queryName, pathUtil.join(queriesDir, file));
+    }
+  }
+
   public onApplicationShutdown() {
     this.client.close();
   }
 
-  // public async insertParquetFile(path: string, table: string) {
-  //   const clickhouseConfig = this.config;
+  public async insertParquetFile(path: string): Promise<boolean> {
+    const queryName = pathUtil.basename(path).split(".")[0];
 
-  //   await execFile('sh', [
-  //     '-c',
-  //     `cat ${path} |
-  //       clickhouse-client \
-  //         -h "${clickhouseConfig.httpHost}" \
-  //         --port 9000 \
-  //         -u "${clickhouseConfig.httpUsername}" \
-  //         --password "${clickhouseConfig.httpPassword}" \
-  //         --query="INSERT INTO "${clickhouseConfig.database}"."${table}" FORMAT Parquet"
-  //     `,
-  //   ]);
-  // }
+    const queryPath = this.insertQueriesFiles.get(queryName);
+    if (!queryPath) {
+      return false;
+    }
 
-  // public exec(query: string) {
-  //   return new Promise<void>(async (resolve, reject) => {
-  //     const res = await this.client.exec({
-  //       query,
-  //     });
+    const clickhouseConfig = this.config;
 
-  //     let resolved = false;
+    const clickhouseClient =
+      os.platform() === "darwin" ? "clickhouse client" : "clickhouse-client";
 
-  //     res.stream.on('data', (chunk) => {
-  //       console.log('chunk', chunk);
-  //     });
-
-  //     res.stream.on('end', () => {
-  //       if (!resolved) {
-  //         resolved = true;
-  //         resolve();
-  //       }
-  //     });
-
-  //     res.stream.on('error', (error) => {
-  //       if (!resolved) {
-  //         resolved = true;
-  //         reject(error);
-  //       }
-  //     });
-  //   });
-  // }
+    await execFile("sh", [
+      "-c",
+      `cat ${path} |
+         ${clickhouseClient} \
+         -h "${clickhouseConfig.httpHost}" \
+         --port 9000 \
+         -d "${clickhouseConfig.database}" \
+         -u "${clickhouseConfig.httpUsername}" \
+         --password "${clickhouseConfig.httpPassword}" \
+         --query="$(cat ${queryPath})"
+      `,
+    ]);
+    return true;
+  }
 }

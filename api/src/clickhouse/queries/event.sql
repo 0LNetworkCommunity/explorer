@@ -1,4 +1,4 @@
-INSERT INTO "event_v7" (
+INSERT INTO "event" (
   "version",
   "timestamp",
   "creation_number",

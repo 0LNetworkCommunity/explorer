@@ -4,6 +4,7 @@ import { NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
 import clsx from "clsx";
 import useAptos from "../../../aptos";
 import { normalizeHexString } from "../../../../utils";
+import HistoricalBalance from "./HistoricalBalance";
 
 const AccountWrapper: FC = () => {
   const location = useLocation();
@@ -71,6 +72,9 @@ const Account: FC<Props> = ({ accountAddress }) => {
         {`Balance: ${balance}`}
         {slowWallet && ` | ${slowWallet}`}
       </div>
+
+      <HistoricalBalance address={accountAddress} />
+
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8" aria-label="Tabs">
           {tabs.map((tab) => (

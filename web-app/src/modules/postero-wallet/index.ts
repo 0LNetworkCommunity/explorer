@@ -96,7 +96,7 @@ export class PosteroWallet implements AdapterPlugin {
 
   public async signAndSubmitTransaction(
     transaction: Types.TransactionPayload,
-    options?: any
+    // options?: any
   ): Promise<{ hash: Types.HexEncodedBytes }> {
     if (transaction.type === "entry_function_payload") {
       const entryFunctionPayload = transaction as Types.EntryFunctionPayload;

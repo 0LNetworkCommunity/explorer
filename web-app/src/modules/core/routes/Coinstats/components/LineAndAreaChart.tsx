@@ -1,6 +1,6 @@
 import ReactECharts from 'echarts-for-react'
 
-const LineChart = ({ data, title }) => {
+const LineAndAreaChart = ({ data, title }) => {
   const option = {
     title: {
       text: title,
@@ -71,12 +71,16 @@ const LineChart = ({ data, title }) => {
         },
         lineStyle: {
           width: 3
+        },
+        areaStyle: { // Add this for the area fill
+          opacity: 0.3, // Adjust as needed for transparency
+          color: '#1e90ff'
         }
-      },
+      }
     ]
   };
 
   return <ReactECharts option={option} style={{ height: 400 }} />;
 };
 
-export default LineChart;
+export default LineAndAreaChart;

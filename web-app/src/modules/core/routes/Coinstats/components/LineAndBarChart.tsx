@@ -1,6 +1,6 @@
 import ReactECharts from 'echarts-for-react'
 
-const LineChart = ({ data, title }) => {
+const LineAndBarChart = ({ data, title }) => {
   const option = {
     title: {
       text: title,
@@ -73,10 +73,18 @@ const LineChart = ({ data, title }) => {
           width: 3
         }
       },
+      {
+        data: data.map(item => item.value),
+        type: 'bar',
+        barWidth: '60%',
+        itemStyle: {
+          color: '#E8595C'
+        }
+      }
     ]
   };
 
   return <ReactECharts option={option} style={{ height: 400 }} />;
 };
 
-export default LineChart;
+export default LineAndBarChart;

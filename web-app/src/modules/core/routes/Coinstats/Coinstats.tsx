@@ -3,7 +3,10 @@ import './Coinstats.css';
 import mockedData from './mockedData';
 
 import KPIComponent from './components/KPIComponent';
+import BarChart from './components/BarChart';
 import PieChart from './components/PieChart';
+import LineAndBarChart from './components/LineAndBarChart';
+import LineAndAreaChart from './components/LineAndAreaChart';
 import LineChart from './components/LineChart';
 import StackedBarChart from './components/StackedBarChart';
 
@@ -15,8 +18,9 @@ const mockData = {
       { value: mockedData.lastEpochBurn, title: "Last Epoch Burn", unit: "Ƚ" },
     ],
     charts: [
-      { type: "LineChart", data: mockedData.burnOverTime, title: "Burn Over Time" },
-      { type: "LineChart", data: mockedData.circulatingSupplyOverTime, title: "Circulating Supply Over Time" },
+      { type: "LineAndAreaChart", data: mockedData.burnOverTime, title: "Burn Over Time" },
+      { type: "LineAndAreaChart", data: mockedData.circulatingSupplyOverTime, title: "Circulating Supply Over Time" },
+      { type: "PieChart", data: mockedData.supplyAllocation, title: "Total Supply" },
       { type: "StackedBarChart", data: mockedData.totalSupplyAllocationOverTime, title: "Total Supply Allocation Over Time" }
     ]
   },
@@ -27,7 +31,7 @@ const mockData = {
       { value: mockedData.currentSeatCount, title: "Seat Count" }
     ],
     charts: [
-      { type: "LineChart", data: mockedData.seatsOverTime, title: "Seats Over Time" },
+      { type: "BarChart", data: mockedData.seatsOverTime, title: "Seats Over Time" },
       { type: "LineChart", data: mockedData.rewardsOverTime, title: "Rewards Over Time" }
     ]
   },
@@ -49,7 +53,7 @@ const mockData = {
     ],
     charts: [
       { type: "LineChart", data: mockedData.unlockedOverTime, title: "Unlock Over Time" },
-      { type: "LineChart", data: mockedData.slowWalletsOverTime, title: "Slow wallets count Over Time" },
+      { type: "LineAndBarChart", data: mockedData.slowWalletsOverTime, title: "Slow wallets count Over Time" },
     ]
   }
 };
@@ -67,10 +71,16 @@ const ChartComponent = ({ type, data, title }) => {
 
   const renderChart = () => {
     switch (type) {
+      case 'BarChart':
+        return <BarChart data={data} title={title} />;
       case 'PieChart':
         return <PieChart data={data} title={title} />;
       case 'LineChart':
         return <LineChart data={data} title={title} />;
+      case 'LineAndBarChart':
+        return <LineAndBarChart data={data} title={title} />;
+      case 'LineAndAreaChart':
+        return <LineAndAreaChart data={data} title={title} />;
       case 'StackedBarChart':
         return <StackedBarChart data={data} title={title} />;
       default:

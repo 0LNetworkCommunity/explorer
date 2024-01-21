@@ -143,7 +143,7 @@ export default {
   lastEpochUnlocked: { nominal: 600000, percentage: 0.0006 },
   communityWalletsBalance: { nominal: 44776366902.9375, percentage: 44.7763 },
   communityWalletsChange: { nominal: 600000, percentage: 0.0006 },
-  lastEpochRewards: { nominal: 193211, percentage: 0.000019 },
+  lastEpochRewards: { nominal: 3117, percentage: 0.00003 },
   currentWinningBid: 2703,
   currentSeatCount: 15,
   currentEpoch: 36,

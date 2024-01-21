@@ -6,7 +6,7 @@ const PieChart = ({ data, title }) => {
   const option = {
     title: {
       text: title,
-      subtext: 'Total supply as of Jan 17th, 2024: Ƚ99.853B',
+      // subtext: 'Total supply as of Jan 17th, 2024: Ƚ99.853B',
       left: 'center',
       textStyle: {
         color: '#333',
@@ -29,7 +29,7 @@ const PieChart = ({ data, title }) => {
         name: title,
         type: 'pie',
         radius: '55%',
-        center: ['50%', '55%'],
+        center: ['50%', '50%'],
         data: data,
         emphasis: {
           itemStyle: {

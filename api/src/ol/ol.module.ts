@@ -11,15 +11,13 @@ import { OlService } from "./ol.service.js";
 import { S3Module } from "../s3/s3.module.js";
 
 import { OlVersionBatchProcessor } from "./ol-version-batch.processor.js";
-import { OlVersionProcessor } from "./ol-version.processor.js";
+// import { OlVersionProcessor } from "./ol-version.processor.js";
 import { OlDbModule } from "../ol-db/ol-db.module.js";
 import { ValidatorsResolver } from "./validators.resolver.js";
 import { ValidatorResolver } from "./validator.resvoler.js";
 import { AccountResolver } from "./account.resolver.js";
 import { VouchResolver } from "./vouch.resolver.js";
 import { AccountsResolver } from "./accounts.resolver.js";
-import { SystemInfoResolver } from "./system-info.resolver.js";
-import { TransformerProcessor } from "./transformer.processor.js";
 import { TransformerService } from "./transformer.service.js";
 import { OlParquetProducerProcessor } from "./ol-parquet-producer.processor.js";
 import { OlClickhouseIngestorProcessor } from "./ol-clickhouse-ingestor.processor.js";
@@ -68,21 +66,18 @@ const roles = process.env.ROLES!.split(",");
     ValidatorResolver,
     ValidatorsResolver,
     VouchResolver,
-    SystemInfoResolver,
 
     OlService,
     TransformerService,
 
     ...(roles.includes("worker")
       ? [
-        OlVersionProcessor, 
-        // OlVersionBatchProcessor
+        // OlVersionProcessor, 
+        OlVersionBatchProcessor,
         OlParquetProducerProcessor,
         OlClickhouseIngestorProcessor,
       ]
       : []),
-
-    // TransformerProcessor,
   ],
   controllers: [OlController],
   exports: [OlService, TransformerService],

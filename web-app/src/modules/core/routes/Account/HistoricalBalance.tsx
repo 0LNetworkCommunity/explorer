@@ -28,15 +28,14 @@ const HistoricalBalance: FC<Props> = ({ address }) => {
   }, [address]);
 
   return (
-    <div className="p-4">
-      <Chart
-        className={clsx(
-          "w-full rounded-md shadow overflow-hidden h-[800px]",
-          "bg-white"
-        )}
-        data={data}
-      />
-    </div>
+    <Chart
+      className={clsx(
+        "w-full rounded-md shadow overflow-hidden h-[500px]",
+        "ring-1 ring-black ring-opacity-5",
+        "bg-white"
+      )}
+      data={data}
+    />
   );
 };
 

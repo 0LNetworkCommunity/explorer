@@ -129,3 +129,164 @@ ORDER BY (
     "version", "change_index",
     "address"
 );
+
+CREATE TABLE "tower_list"
+(
+  "version" UInt64,
+  "timestamp" UInt64,
+  "change_index" UInt64,
+  "list_count" UInt64
+)
+ENGINE = MergeTree
+PRIMARY KEY (
+  "version", "change_index"
+)
+ORDER BY (
+  "version", "change_index"
+);
+
+CREATE TABLE "burn_tracker"
+(
+    "version" UInt64,
+    "timestamp" UInt64,
+    "change_index" UInt64,
+    "address" UInt256,
+    "burn_at_last_calc" UInt64,
+    "cumu_burn" UInt64,
+    "prev_balance" UInt64,
+    "prev_supply" UInt64
+)
+ENGINE = MergeTree
+PRIMARY KEY (
+    "version", "change_index",
+    "address"
+)
+ORDER BY (
+    "version", "change_index",
+    "address"
+);
+
+CREATE TABLE "burn_counter"
+(
+    "version" UInt64,
+    "timestamp" UInt64,
+    "change_index" UInt64,
+    "lifetime_burned" UInt64,
+    "lifetime_recycled" UInt64
+)
+ENGINE = MergeTree
+PRIMARY KEY (
+    "version", "change_index"
+)
+ORDER BY (
+    "version", "change_index"
+);
+
+
+CREATE TABLE "slow_wallet"
+(
+    "version" UInt64,
+    "timestamp" UInt64,
+    "change_index" UInt64,
+    "address" UInt256,
+
+    "unlocked" UInt64,
+    "transferred" UInt64
+)
+ENGINE = MergeTree
+PRIMARY KEY (
+    "version", "change_index",
+    "address"
+)
+ORDER BY (
+    "version", "change_index",
+    "address"
+);
+
+CREATE TABLE "epoch_fee_maker_registry"
+(
+    "version" UInt64,
+    "timestamp" UInt64,
+    "change_index" UInt64,
+
+    "epoch_fees_made" UInt64
+)
+ENGINE = MergeTree
+PRIMARY KEY (
+    "version", "change_index"
+)
+ORDER BY (
+    "version", "change_index"
+);
+
+CREATE TABLE "slow_wallet_list"
+(
+    "version" UInt64,
+    "timestamp" UInt64,
+    "change_index" UInt64,
+
+    "list_count" UInt64
+)
+ENGINE = MergeTree
+PRIMARY KEY (
+    "version", "change_index"
+)
+ORDER BY (
+    "version", "change_index"
+);
+
+CREATE TABLE "vdf_difficulty"
+(
+    "version" UInt64,
+    "timestamp" UInt64,
+    "change_index" UInt64,
+
+    "difficulty" UInt64
+)
+ENGINE = MergeTree
+PRIMARY KEY (
+    "version", "change_index"
+)
+ORDER BY (
+    "version", "change_index"
+);
+
+CREATE TABLE "consensus_reward"
+(
+    "version" UInt64,
+    "timestamp" UInt64,
+    "change_index" UInt64,
+
+    "nominal_reward" UInt64,
+    "net_reward" UInt64,
+    "entry_fee" UInt64,
+    "clearing_bid" UInt64,
+    "median_win_bid" UInt64,
+    "median_history" Array(UInt64)
+)
+ENGINE = MergeTree
+PRIMARY KEY (
+    "version", "change_index"
+)
+ORDER BY (
+    "version", "change_index"
+);
+
+CREATE TABLE "boundary_status"
+(
+    "version" UInt64,
+    "timestamp" UInt64,
+    "change_index" UInt64,
+
+    "incoming_fees" UInt64,
+    "outgoing_nominal_reward_to_vals" UInt64,
+    "outgoing_total_reward" UInt64,
+    "system_fees_collected" UInt64
+)
+ENGINE = MergeTree
+PRIMARY KEY (
+    "version", "change_index"
+)
+ORDER BY (
+    "version", "change_index"
+);

@@ -125,8 +125,6 @@ export class OlClickhouseIngestorProcessor
 
     for (const file of files) {
       if (file.endsWith(".parquet")) {
-        console.log('>>', file);
-
         if (
           await this.clickhouseService.insertParquetFile(
             pathUtil.join(archiveDir, file),

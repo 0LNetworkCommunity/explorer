@@ -73,8 +73,6 @@ const Account: FC<Props> = ({ accountAddress }) => {
         {slowWallet && ` | ${slowWallet}`}
       </div>
 
-      <HistoricalBalance address={accountAddress} />
-
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8" aria-label="Tabs">
           {tabs.map((tab) => (

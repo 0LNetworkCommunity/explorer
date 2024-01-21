@@ -4,7 +4,6 @@ import { NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
 import clsx from "clsx";
 import useAptos from "../../../aptos";
 import { normalizeHexString } from "../../../../utils";
-import HistoricalBalance from "./HistoricalBalance";
 
 const AccountWrapper: FC = () => {
   const location = useLocation();

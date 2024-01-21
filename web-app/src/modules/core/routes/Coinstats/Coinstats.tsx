@@ -19,8 +19,8 @@ const mockData = {
     ],
     charts: [
       { type: "LineAndAreaChart", data: mockedData.burnOverTime, title: "Burn Over Time" },
-      { type: "LineAndAreaChart", data: mockedData.circulatingSupplyOverTime, title: "Circulating Supply Over Time" },
       { type: "PieChart", data: mockedData.supplyAllocation, title: "Total Supply" },
+      { type: "LineAndAreaChart", data: mockedData.circulatingSupplyOverTime, title: "Circulating Supply Over Time" },
       { type: "StackedBarChart", data: mockedData.totalSupplyAllocationOverTime, title: "Total Supply Allocation Over Time" }
     ]
   },

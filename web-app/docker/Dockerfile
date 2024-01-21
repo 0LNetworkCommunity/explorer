@@ -2,7 +2,7 @@
 #              FIRST STAGE              #
 #########################################
 
-FROM node:18.14.2 AS builder
+FROM node:v20.11.0 AS builder
 WORKDIR /app
 
 ARG CI_COMMIT_SHA=""

@@ -96,6 +96,7 @@ export const useTotalSupply = (): Money | undefined => {
         aggregatorData.handle,
         tableItemRequest
       );
+      console.log('totalSupplyStr', totalSupplyStr);
       let totalSupply = parseInt(totalSupplyStr, 10);
       totalSupply = totalSupply / Math.pow(10, coinInfo.decimals);
 

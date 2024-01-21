@@ -1,3 +1,4 @@
+import { Buffer } from "buffer";
 import type {
   AccountInfo,
   AdapterPlugin,
@@ -6,9 +7,14 @@ import type {
   SignMessageResponse,
   WalletName,
 } from "@aptos-labs/wallet-adapter-core";
+import { Network, Types, TxnBuilderTypes, BCS } from "aptos";
+import "./postero";
+
 import goose from "./goose";
-import { Network, Types } from "aptos";
+
 export const PosteroWalletName = "Postero" as WalletName<"Postero">;
+
+const { EntryFunction } = TxnBuilderTypes;
 
 interface SelectWalletEvent {
   jsonrpc: "2.0";
@@ -27,6 +33,7 @@ interface PosteroProvider {
   disconnect: () => Promise<void>;
   signMessage: (message: string) => Promise<string>;
   signTransaction: (transaction: any) => Promise<string>;
+  signAndSubmitTransaction: (transaction: any) => Promise<string>;
   onEvent: (callback: EventListener) => () => void;
 }
 
@@ -71,8 +78,8 @@ export class PosteroWallet implements AdapterPlugin {
     return `https://wallet.0l.fyi/explore?link=${data.url}`;
   }
 
-  public connect(): Promise<AccountInfo> {
-    return this.provider.connect();
+  public async connect(): Promise<AccountInfo> {
+    return await this.provider.connect();
   }
 
   public async disconnect(): Promise<void> {
@@ -89,9 +96,31 @@ export class PosteroWallet implements AdapterPlugin {
 
   public async signAndSubmitTransaction(
     transaction: Types.TransactionPayload,
-    options?: any
+    // options?: any
   ): Promise<{ hash: Types.HexEncodedBytes }> {
-    console.log("signAndSubmitTransaction", transaction, options);
+    if (transaction.type === "entry_function_payload") {
+      const entryFunctionPayload = transaction as Types.EntryFunctionPayload;
+      const [moduleAddress, moduleName, ...rest] =
+        entryFunctionPayload.function.split("::");
+      const moduleFunction = rest.join("::");
+
+      const entryFunc = EntryFunction.natural(
+        `${moduleAddress}::${moduleName}`,
+        moduleFunction,
+        [],
+        entryFunctionPayload.arguments
+      );
+      const serializer = new BCS.Serializer();
+      entryFunc.serialize(serializer);
+      const value = serializer.getBytes();
+
+      const res = await this.provider.signAndSubmitTransaction({
+        type: "entry_function_payload",
+        payload: Buffer.from(value).toString("base64"),
+      });
+      console.log(res);
+    }
+
     throw new Error("Method not implemented.");
   }
 
@@ -103,24 +132,26 @@ export class PosteroWallet implements AdapterPlugin {
   }
 
   public async signTransaction(
-    _transaction: Types.TransactionPayload,
-    _options?: TransactionOptions
+    transaction: Types.TransactionPayload,
+    options?: TransactionOptions
   ): Promise<Uint8Array | null> {
-    const res = await this.provider.signTransaction({
-      EntryFunction: {
-        module: {
-          address:
-            "00000000000000000000000000000000d0383924341821f9e43a6cff46f0a74e",
-          name: "message",
-        },
-        function: "set_message",
-        ty_args: [],
-        args: [
-          [14, 72, 101, 108, 108, 111, 44, 87, 111, 114, 108, 100, 32, 51, 33],
-        ],
-      },
-    });
-    console.log("res", res);
+    console.log(transaction, options);
+
+    // const res = await this.provider.signTransaction({
+    //   EntryFunction: {
+    //     module: {
+    //       address:
+    //         "00000000000000000000000000000000d0383924341821f9e43a6cff46f0a74e",
+    //       name: "message",
+    //     },
+    //     function: "set_message",
+    //     ty_args: [],
+    //     args: [
+    //       [14, 72, 101, 108, 108, 111, 44, 87, 111, 114, 108, 100, 32, 51, 33],
+    //     ],
+    //   },
+    // });
+    // console.log("res", res);
     return null;
   }
 

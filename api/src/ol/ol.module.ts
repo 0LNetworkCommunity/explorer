@@ -1,3 +1,5 @@
+import process from "node:process";
+
 import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";
 
@@ -17,6 +19,9 @@ import { AccountResolver } from "./account.resolver.js";
 import { VouchResolver } from "./vouch.resolver.js";
 import { AccountsResolver } from "./accounts.resolver.js";
 import { SystemInfoResolver } from "./system-info.resolver.js";
+import { TransformerProcessor } from "./transformer.processor.js";
+
+const roles = process.env.ROLES!.split(",");
 
 @Module({
   imports: [
@@ -25,14 +30,23 @@ import { SystemInfoResolver } from "./system-info.resolver.js";
     OlDbModule,
 
     BullModule.registerQueue({
-      name: "ol-version-batch-v7",
+      name: "transformer",
       connection: redisClient(),
     }),
 
-    BullModule.registerQueue({
-      name: "ol-version-v7",
-      connection: redisClient(),
-    }),
+    ...(roles.includes("worker")
+      ? [
+          // BullModule.registerQueue({
+          //   name: "ol-version-batch-v7",
+          //   connection: redisClient(),
+          // }),
+
+          BullModule.registerQueue({
+            name: "ol-version-v7",
+            connection: redisClient(),
+          }),
+        ]
+      : []),
   ],
   providers: [
     UserTransactionsResolver,
@@ -48,8 +62,14 @@ import { SystemInfoResolver } from "./system-info.resolver.js";
 
     OlService,
 
-    OlVersionProcessor,
-    OlVersionBatchProcessor,
+    ...(roles.includes("worker")
+      ? [
+        OlVersionProcessor, 
+        // OlVersionBatchProcessor
+      ]
+      : []),
+
+    TransformerProcessor,
   ],
   controllers: [],
   exports: [OlService],

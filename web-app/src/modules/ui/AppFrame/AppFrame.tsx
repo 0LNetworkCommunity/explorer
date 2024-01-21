@@ -1,9 +1,11 @@
-import { FC, PropsWithChildren } from "react";
+import { FC, PropsWithChildren, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import { Link, NavLink } from "react-router-dom";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import Logo from "../Logo/Logo";
 import { PosteroWalletName } from "../../postero-wallet";
+import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 
 const navigation = [
   { name: "Transactions", to: "/transactions" },
@@ -13,9 +15,27 @@ const navigation = [
 
 const AppFrame: FC<PropsWithChildren> = ({ children }) => {
   const aptosWallet = useWallet();
+  const navigate = useNavigate();
+  const [searchAddress, setSearchAddress] = useState("");
+  const searchInput = useRef<HTMLInputElement>(null);
 
   const connectWallet = () => {
     aptosWallet.connect(PosteroWalletName);
+  };
+
+  const onSearch = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const input = searchAddress.trim();
+    // Check if the length is 32, 34, 62, or 64 characters
+    const validLengths = [32, 34, 62, 64];
+    if (validLengths.includes(input.length)) {
+      navigate(`/accounts/${encodeURIComponent(input)}/resources`);
+      setSearchAddress('');
+      if (searchInput.current) {
+        searchInput.current.blur();
+      }
+    }
   };
 
   return (
@@ -53,7 +73,7 @@ const AppFrame: FC<PropsWithChildren> = ({ children }) => {
 
               <div className="flex items-center">
                 {import.meta.env.VITE_FEATURE_WALLET === "true" && (
-                  <div className="ml-10 flex items-baseline space-x-4">
+                  <div className="flex items-baseline space-x-4">
                     {aptosWallet.account ? (
                       <>
                         <div className="text-sm">
@@ -86,6 +106,37 @@ const AppFrame: FC<PropsWithChildren> = ({ children }) => {
                     )}
                   </div>
                 )}
+
+                <div className="flex flex-1 justify-center px-2 ml-6">
+                  <form
+                    className="w-full max-w-lg lg:max-w-xs"
+                    onSubmit={onSearch}
+                  >
+                    <div className="relative text-gray-400 focus-within:text-gray-600">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <MagnifyingGlassIcon
+                          className="h-5 w-5"
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <input
+                        id="search"
+                        className={clsx(
+                          "block w-full rounded-md border-0 bg-white py-1 pl-10 pr-3 text-gray-900",
+                          "focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-600"
+                        )}
+                        placeholder="Search Address"
+                        type="search"
+                        name="search"
+                        ref={searchInput}
+                        value={searchAddress}
+                        onChange={(event) =>
+                          setSearchAddress(event.target.value)
+                        }
+                      />
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
           </div>

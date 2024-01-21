@@ -47,7 +47,6 @@ CREATE TABLE "sent_payment"
 ENGINE = MergeTree
 PRIMARY KEY ("version");
 
-
 CREATE TABLE "mint"
 (
     "version" UInt64,
@@ -151,7 +150,7 @@ CREATE TABLE "block_metadata_transaction_v7" (
   `round` UInt64,
   `previous_block_votes_bitvec` String,
   `proposer` UInt256,
-  `failed_proposer_indices` Array(UInt32),
+--   `failed_proposer_indices` Array(UInt32),
   `timestamp` UInt64
 )
 ENGINE = MergeTree
@@ -184,3 +183,13 @@ CREATE TABLE "ingested_versions_v7" (
 )
 ENGINE = MergeTree
 PRIMARY KEY ("version");
+
+CREATE TABLE "coin_total_supply"
+(
+    "coin_type" String,
+    "version" UInt64,
+    "amount" UInt128
+)
+ENGINE = MergeTree
+PRIMARY KEY ("coin_type", "version")
+ORDER BY ("coin_type", "version");

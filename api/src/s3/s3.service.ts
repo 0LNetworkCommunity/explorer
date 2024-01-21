@@ -2,7 +2,15 @@ import fs from "node:fs";
 import Bluebird from "bluebird";
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GetObjectCommand, GetObjectCommandOutput, ListObjectsCommand, PutObjectCommand, PutObjectCommandOutput, S3Client, StorageClass } from '@aws-sdk/client-s3';
+import {
+  GetObjectCommand,
+  GetObjectCommandOutput,
+  ListObjectsCommand,
+  PutObjectCommand,
+  PutObjectCommandOutput,
+  S3Client,
+  StorageClass,
+} from "@aws-sdk/client-s3";
 import { S3Config } from '../config/config.interface.js';
 
 @Injectable()

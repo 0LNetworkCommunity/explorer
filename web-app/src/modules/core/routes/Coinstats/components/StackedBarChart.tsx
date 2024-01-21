@@ -17,6 +17,14 @@ const StackedBarChart = ({ data, title }) => {
       trigger: 'axis',
       axisPointer: {
         type: 'shadow'
+      },
+      formatter: function (params) {
+        const total = params.reduce((sum, item) => sum + item.data, 0);
+        let tooltipContent = `Total Supply: ${total.toLocaleString('en-US')}<br/>`;
+        params.forEach(param => {
+          tooltipContent += `${param.marker} ${param.seriesName}: ${param.data.toLocaleString('en-US')}<br/>`;
+        });
+        return tooltipContent;
       }
     },
     legend: {

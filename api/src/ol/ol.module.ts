@@ -11,7 +11,7 @@ import { OlService } from "./ol.service.js";
 import { S3Module } from "../s3/s3.module.js";
 
 import { OlVersionBatchProcessor } from "./ol-version-batch.processor.js";
-// import { OlVersionProcessor } from "./ol-version.processor.js";
+import { OlVersionProcessor } from "./ol-version.processor.js";
 import { OlDbModule } from "../ol-db/ol-db.module.js";
 import { ValidatorsResolver } from "./validators.resolver.js";
 import { ValidatorResolver } from "./validator.resvoler.js";
@@ -20,7 +20,7 @@ import { VouchResolver } from "./vouch.resolver.js";
 import { AccountsResolver } from "./accounts.resolver.js";
 import { TransformerService } from "./transformer.service.js";
 import { OlParquetProducerProcessor } from "./ol-parquet-producer.processor.js";
-import { OlClickhouseIngestorProcessor } from "./ol-clickhouse-ingestor.processor.js";
+// import { OlClickhouseIngestorProcessor } from "./ol-clickhouse-ingestor.processor.js";
 import { OlController } from './ol.controller.js';
 
 const roles = process.env.ROLES!.split(",");
@@ -72,10 +72,10 @@ const roles = process.env.ROLES!.split(",");
 
     ...(roles.includes("worker")
       ? [
-        // OlVersionProcessor, 
+        OlVersionProcessor,
         OlVersionBatchProcessor,
         OlParquetProducerProcessor,
-        OlClickhouseIngestorProcessor,
+        // OlClickhouseIngestorProcessor,
       ]
       : []),
   ],

@@ -22,10 +22,6 @@ impl TotalSupplyCollection {
     pub fn push(&mut self, version: u64, timestamp: u64, amount: Vec<u8>, change_index: u64) {
         self.version.push(version);
         self.timestamp.push(timestamp);
-
-        let mut amount = amount;
-        amount.reverse();
-
         self.amount.push(amount);
         self.change_index.push(change_index);
     }

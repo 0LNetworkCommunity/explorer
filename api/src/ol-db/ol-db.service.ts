@@ -251,7 +251,7 @@ export class OlDbService {
               )[2]
             )
           ) AS "last_batch_ingested_version"
-        FROM "ingested_files_v7"
+        FROM "ingested_files"
       `,
       format: "JSON",
     });

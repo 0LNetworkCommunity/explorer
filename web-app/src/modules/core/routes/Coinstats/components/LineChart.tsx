@@ -40,7 +40,7 @@ const LineChart = ({ data, title }) => {
       },
       axisLine: {
         lineStyle: {
-          color: '#E8595C'
+          // color: '#E8595C'
         }
       }
     },
@@ -48,12 +48,12 @@ const LineChart = ({ data, title }) => {
       type: 'value',
       axisLine: {
         lineStyle: {
-          color: '#E8595C'
+          // color: '#E8595C'
         }
       },
       splitLine: {
         lineStyle: {
-          color: '#ced6e0'
+          // color: '#ced6e0'
         }
       }
     },
@@ -61,7 +61,7 @@ const LineChart = ({ data, title }) => {
       {
         data: data.map(item => item.value),
         type: 'line',
-        smooth: true,
+        smooth: false,
         symbol: 'circle',
         symbolSize: 8,
         itemStyle: {

@@ -9,19 +9,34 @@ import LineAndBarChart from './components/LineAndBarChart';
 import LineAndAreaChart from './components/LineAndAreaChart';
 import LineChart from './components/LineChart';
 import StackedBarChart from './components/StackedBarChart';
+import StackedAreaChart from './components/StackedAreaChart';
+
 
 const mockData = {
   supply: {
     kpis: [
+      // { value: mockedData.changeInCirculatingSupply, title: "Circulating supply change from previous epoch", unit: "Ƚ" }, // last epoch delta
       { value: mockedData.circulatingSupply, title: "Circulating supply", unit: "Ƚ" },
-      { value: mockedData.changeInCirculatingSupply, title: "Circulating supply change from previous epoch", unit: "Ƚ" }, // last epoch delta
-      { value: mockedData.lastEpochBurn, title: "Last Epoch Burn", unit: "Ƚ" },
+      // { value: mockedData.lastEpochBurn, title: "Last Epoch Burn", unit: "Ƚ" },
     ],
-    charts: [
-      { type: "LineAndAreaChart", data: mockedData.burnOverTime, title: "Burn Over Time" },
-      { type: "PieChart", data: mockedData.supplyAllocation, title: "Total Supply" },
-      { type: "LineAndAreaChart", data: mockedData.circulatingSupplyOverTime, title: "Circulating Supply Over Time" },
-      { type: "StackedBarChart", data: mockedData.totalSupplyAllocationOverTime, title: "Total Supply Allocation Over Time" }
+    chartRows: [
+      [
+        { type: "PieChart", data: mockedData.individualsCapital, title: "Individuals capital" },
+        { type: "PieChart", data: mockedData.supplyAllocation, title: "Total Supply" },
+        { type: "PieChart", data: mockedData.communityCapital, title: "Community capital" }
+      ],
+      [
+        { type: "StackedAreaChart", data: mockedData.dailyTransactedVolume, title: "Daily transfer volume by account category" },
+        { type: "BarChart", data: mockedData.accountsOnChainOverTime, title: "Accounts on chain over time" }
+      ],
+      [
+        { type: "StackedBarChart", data: mockedData.totalSupplyAllocationOverTime, title: "Total Supply Allocation Over Time" }
+      ],
+      [
+        { type: "LineAndAreaChart", data: mockedData.burnOverTime, title: "Burn Over Time" },
+        { type: "LineAndAreaChart", data: mockedData.circulatingSupplyOverTime, title: "Circulating Supply Over Time" },
+
+      ],
     ]
   },
   validators: {
@@ -30,9 +45,11 @@ const mockData = {
       { value: mockedData.currentWinningBid, title: "Winning Bid", unit: "Ƚ" },
       { value: mockedData.currentSeatCount, title: "Seat Count" }
     ],
-    charts: [
-      { type: "BarChart", data: mockedData.seatsOverTime, title: "Seats Over Time" },
-      { type: "LineChart", data: mockedData.rewardsOverTime, title: "Rewards Over Time" }
+    chartRows: [
+      [
+        { type: "BarChart", data: mockedData.seatsOverTime, title: "Seats Over Time" },
+        { type: "LineChart", data: mockedData.rewardsOverTime, title: "Rewards Over Time" }
+      ]
     ]
   },
   communityWallets: {
@@ -40,9 +57,11 @@ const mockData = {
       { value: mockedData.communityWalletsBalance, title: "Community Wallets Balance", unit: "Ƚ" },
       { value: mockedData.communityWalletsChange, title: "Community Wallets change from previous epoch", unit: "Ƚ" }
     ],
-    charts: [
-      { type: "LineChart", data: mockedData.communityWalletsBalanceOverTime, title: "Community wallets balance Over Time" },
-      { type: "PieChart", data: mockedData.communityWalletsSupply, title: "Community wallets breakdown" }
+    chartRows: [
+      [
+        { type: "LineChart", data: mockedData.communityWalletsBalanceOverTime, title: "Community wallets balance Over Time" },
+        { type: "PieChart", data: mockedData.communityWalletsSupply, title: "Community wallets breakdown" }
+      ]
     ]
   },
   slowWallets: {
@@ -51,9 +70,11 @@ const mockData = {
       { value: mockedData.currentLockedOnSlowWallets, title: "Locked on Slow wallets", unit: "Ƚ" },
       { value: mockedData.lastEpochUnlocked, title: "Last Epoch Unlocked", unit: "Ƚ" },
     ],
-    charts: [
-      { type: "LineChart", data: mockedData.unlockedOverTime, title: "Unlock Over Time" },
-      { type: "LineAndBarChart", data: mockedData.slowWalletsOverTime, title: "Slow wallets count Over Time" },
+    chartRows: [
+      [
+        { type: "LineChart", data: mockedData.unlockedOverTime, title: "Unlock Over Time" },
+        { type: "LineAndBarChart", data: mockedData.slowWalletsOverTime, title: "Slow wallets count Over Time" },
+      ]
     ]
   }
 };
@@ -83,6 +104,8 @@ const ChartComponent = ({ type, data, title }) => {
         return <LineAndAreaChart data={data} title={title} />;
       case 'StackedBarChart':
         return <StackedBarChart data={data} title={title} />;
+      case 'StackedAreaChart':
+        return <StackedAreaChart data={data} categories={data.categories} />;
       default:
         return null;
     }
@@ -110,7 +133,7 @@ const Section = ({ title, data }) => {
   return (
     <div className="section-container">
       <h2 className="section-title">{title}</h2>
-      {data.kpis && data.kpis.length > 0 && (
+      {data.kpis && (
         <div className="kpi-row">
           {data.kpis.map((kpi, index) => (
             <KPIComponent
@@ -122,13 +145,13 @@ const Section = ({ title, data }) => {
           ))}
         </div>
       )}
-      {data.charts && data.charts.length > 0 && (
-        <div className="charts-row">
-          {data.charts.map((chart, index) => (
-            <ChartComponent key={index} type={chart.type} data={chart.data} title={chart.title} />
+      {data.chartRows && data.chartRows.map((row, rowIndex) => (
+        <div key={rowIndex} className="charts-row">
+          {row.map((chart, chartIndex) => (
+            <ChartComponent key={chartIndex} type={chart.type} data={chart.data} title={chart.title} />
           ))}
         </div>
-      )}
+      ))}
     </div>
   );
 };

@@ -1,12 +1,23 @@
-import ReactECharts from 'echarts-for-react'
+import ReactECharts from 'echarts-for-react';
 
-const colorPalette = ['#E8595C', '#188BE9', '#002FA7', '#80DED9', '#F0F7FE', '#FC8452', '#9A60B4', '#EA7CCC'];
+const colorPalette = ['#E8595C', '#188BE9', '#002FA7', '#80DED9', '#FC8452', '#9A60B4', '#EA7CCC'];
+
+// Create a mapping from names to colors
+const colorMapping = {
+  'Community Wallets': '#E8595C',
+  'Locked': '#188BE9',
+  'Infrastructure escrow': '#002FA7',
+  'Circulating': '#80DED9',
+};
 
 const PieChart = ({ data, title }) => {
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+  const formattedTotal = new Intl.NumberFormat('en-US').format(total);
+
   const option = {
     title: {
       text: title,
-      // subtext: 'Total supply as of Jan 17th, 2024: Ƚ99.853B',
+      subtext: `Total: Ƚ${formattedTotal}`,
       left: 'center',
       textStyle: {
         color: '#333',
@@ -30,7 +41,14 @@ const PieChart = ({ data, title }) => {
         type: 'pie',
         radius: '55%',
         center: ['50%', '50%'],
-        data: data,
+        data: data.map((item, index) => {
+          return {
+            ...item,
+            itemStyle: {
+              color: colorMapping[item.name] ?? colorPalette[index % colorPalette.length]
+            }
+          };
+        }),
         emphasis: {
           itemStyle: {
             shadowBlur: 10,

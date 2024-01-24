@@ -40,7 +40,7 @@ const LineAndAreaChart = ({ data, title }) => {
       },
       axisLine: {
         lineStyle: {
-          color: '#E8595C'
+          // color: '#E8595C'
         }
       }
     },
@@ -48,12 +48,12 @@ const LineAndAreaChart = ({ data, title }) => {
       type: 'value',
       axisLine: {
         lineStyle: {
-          color: '#E8595C'
+          // color: '#E8595C'
         }
       },
       splitLine: {
         lineStyle: {
-          color: '#ced6e0'
+          // color: '#ced6e0'
         }
       }
     },

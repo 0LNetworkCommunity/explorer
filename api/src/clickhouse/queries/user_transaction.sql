@@ -1,0 +1,55 @@
+INSERT INTO "user_transaction" (
+  "version",
+  "hash",
+  "gas_used",
+  "success",
+  "vm_status",
+  "sender",
+  "sequence_number",
+  "max_gas_amount",
+  "gas_unit_price",
+  "expiration_timestamp",
+  "module_address",
+  "module_name",
+  "function_name",
+  "type_arguments",
+  "arguments",
+  "timestamp"
+)
+SELECT
+  "version",
+  "hash",
+  "gas_used",
+  "success",
+  "vm_status",
+  "sender",
+  "sequence_number",
+  "max_gas_amount",
+  "gas_unit_price",
+  "expiration_timestamp",
+  "module_address",
+  "module_name",
+  "function_name",
+  "type_arguments",
+  "arguments",
+  "timestamp"
+FROM
+  input('
+      version UInt64,
+      hash UInt256,
+      gas_used UInt64,
+      success Boolean,
+      vm_status String,
+      sender UInt256,
+      sequence_number UInt64,
+      max_gas_amount UInt64,
+      gas_unit_price UInt64,
+      expiration_timestamp UInt64,
+      module_address UInt256,
+      module_name String,
+      function_name String,
+      type_arguments String,
+      arguments String,
+      timestamp UInt64
+  ')
+  FORMAT Parquet

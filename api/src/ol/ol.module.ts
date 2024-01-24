@@ -18,8 +18,10 @@ import { ValidatorResolver } from "./validator.resvoler.js";
 import { AccountResolver } from "./account.resolver.js";
 import { VouchResolver } from "./vouch.resolver.js";
 import { AccountsResolver } from "./accounts.resolver.js";
-import { SystemInfoResolver } from "./system-info.resolver.js";
-import { TransformerProcessor } from "./transformer.processor.js";
+import { TransformerService } from "./transformer.service.js";
+import { OlParquetProducerProcessor } from "./ol-parquet-producer.processor.js";
+// import { OlClickhouseIngestorProcessor } from "./ol-clickhouse-ingestor.processor.js";
+import { OlController } from './ol.controller.js';
 
 const roles = process.env.ROLES!.split(",");
 
@@ -30,23 +32,29 @@ const roles = process.env.ROLES!.split(",");
     OlDbModule,
 
     BullModule.registerQueue({
+      name: "ol-clickhouse-ingestor",
+      connection: redisClient(),
+    }),
+
+    BullModule.registerQueue({
       name: "transformer",
       connection: redisClient(),
     }),
 
-    ...(roles.includes("worker")
-      ? [
-          // BullModule.registerQueue({
-          //   name: "ol-version-batch-v7",
-          //   connection: redisClient(),
-          // }),
+    BullModule.registerQueue({
+      name: "ol-parquet-producer",
+      connection: redisClient(),
+    }),
 
-          BullModule.registerQueue({
-            name: "ol-version-v7",
-            connection: redisClient(),
-          }),
-        ]
-      : []),
+    BullModule.registerQueue({
+      name: "ol-version-batch",
+      connection: redisClient(),
+    }),
+
+    BullModule.registerQueue({
+      name: "ol-version",
+      connection: redisClient(),
+    }),
   ],
   providers: [
     UserTransactionsResolver,
@@ -58,20 +66,20 @@ const roles = process.env.ROLES!.split(",");
     ValidatorResolver,
     ValidatorsResolver,
     VouchResolver,
-    SystemInfoResolver,
 
     OlService,
+    TransformerService,
 
     ...(roles.includes("worker")
       ? [
-        OlVersionProcessor, 
-        // OlVersionBatchProcessor
+        OlVersionProcessor,
+        OlVersionBatchProcessor,
+        OlParquetProducerProcessor,
+        // OlClickhouseIngestorProcessor,
       ]
       : []),
-
-    TransformerProcessor,
   ],
-  controllers: [],
-  exports: [OlService],
+  controllers: [OlController],
+  exports: [OlService, TransformerService],
 })
 export class OlModule {}

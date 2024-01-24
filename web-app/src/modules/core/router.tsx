@@ -13,6 +13,7 @@ import Validators from "./routes/Validators";
 import Test from "./routes/Test";
 import Module from "./routes/Account/Modules/Module";
 import Coinstats from "./routes/Coinstats";
+import TotalSupply from "./routes/TotalSupply";
 
 const router = createBrowserRouter([
   {
@@ -70,6 +71,10 @@ const router = createBrowserRouter([
       {
         path: "/coinstats",
         element: <Coinstats />,
+      },
+      {
+        path: "/total-supply",
+        element: <TotalSupply />,
       },
       {
         path: "/test",

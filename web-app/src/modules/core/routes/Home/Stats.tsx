@@ -20,8 +20,12 @@ const Stats: FC = () => {
     const load = async () => {
       timeout = undefined;
 
-      const blockResource = await aptos.getAccountResource('0x1', '0x1::block::BlockResource');
-      const epochIntervalMs = parseInt((blockResource.data as any).epoch_interval, 10) / 1_000;
+      const blockResource = await aptos.getAccountResource(
+        "0x1",
+        "0x1::block::BlockResource"
+      );
+      const epochIntervalMs =
+        parseInt((blockResource.data as any).epoch_interval, 10) / 1_000;
 
       const events = await aptos.getEventsByEventHandle(
         "0x1",
@@ -30,8 +34,12 @@ const Stats: FC = () => {
         { limit: 1 }
       );
       const lastEvent = events[0];
-      const lastEpochBlock = await aptos.getBlockByVersion(parseInt((lastEvent as any).version, 10));
-      const lastEpochBlockTimestamp = Math.floor(parseInt(lastEpochBlock.block_timestamp, 10) / 1_000);
+      const lastEpochBlock = await aptos.getBlockByVersion(
+        parseInt((lastEvent as any).version, 10)
+      );
+      const lastEpochBlockTimestamp = Math.floor(
+        parseInt(lastEpochBlock.block_timestamp, 10) / 1_000
+      );
       const nextEpoch = new Date(lastEpochBlockTimestamp + epochIntervalMs);
 
       setNextEpoch(nextEpoch);
@@ -57,13 +65,15 @@ const Stats: FC = () => {
   return (
     <dl className="grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl text-center grid-cols-5">
       <div className="flex flex-col bg-gray-400/5 p-4">
-        <dt className="text-sm font-semibold leading-6 text-gray-600">
-          Total Supply
-        </dt>
-        <dd className="order-first text-3xl tracking-tight text-gray-900 font-mono">
-          {totalSupply &&
-            `${d3Format(".2")(Math.floor(totalSupply.amount / 1e9))}B`}
-        </dd>
+        <Link to={`/total-supply`} className="hover:underline">
+          <dt className="text-sm font-semibold leading-6 text-gray-600">
+            Total Supply
+          </dt>
+          <dd className="order-first text-3xl tracking-tight text-gray-900 font-mono">
+            {totalSupply &&
+              `${d3Format(".2")(Math.floor(totalSupply.amount / 1e9))}B`}
+          </dd>
+        </Link>
       </div>
       <div className="flex flex-col bg-gray-400/5 p-4">
         {ledgerInfo && (

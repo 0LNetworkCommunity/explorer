@@ -251,7 +251,7 @@ export class OlDbService {
               )[2]
             )
           ) AS "last_batch_ingested_version"
-        FROM "ingested_files_v7"
+        FROM "ingested_files"
       `,
       format: "JSON",
     });
@@ -271,7 +271,7 @@ export class OlDbService {
     const resultSet = await this.clichouseService.client.query({
       query: `
         SELECT DISTINCT "version"
-        FROM "ingested_versions_v7"
+        FROM "ingested_versions"
         ${after !== undefined ? `WHERE "version" > ${after.toString()}` : ""}
         ORDER BY "version"
       `,

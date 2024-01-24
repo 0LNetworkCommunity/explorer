@@ -1,4 +1,4 @@
-INSERT INTO "user_transaction_v7" (
+INSERT INTO "script" (
   "version",
   "hash",
   "gas_used",
@@ -9,50 +9,41 @@ INSERT INTO "user_transaction_v7" (
   "max_gas_amount",
   "gas_unit_price",
   "expiration_timestamp",
-  "module_address",
-  "module_name",
-  "function_name",
   "type_arguments",
   "arguments",
-  "type",
+  "abi",
   "timestamp"
 )
 SELECT
   "version",
-  reinterpretAsUInt256(reverse(unhex("hash"))),
+  "hash",
   "gas_used",
   "success",
   "vm_status",
-  reinterpretAsUInt256(reverse(unhex("sender"))),
+  "sender",
   "sequence_number",
   "max_gas_amount",
   "gas_unit_price",
   "expiration_timestamp",
-  reinterpretAsUInt256(reverse(unhex("module_address"))),
-  "module_name",
-  "function_name",
   "type_arguments",
   "arguments",
-  "type",
+  "abi",
   "timestamp"
 FROM
   input('
       version UInt64,
-      hash String,
+      hash UInt256,
       gas_used UInt64,
       success Boolean,
       vm_status String,
-      sender String,
+      sender UInt256,
       sequence_number UInt64,
       max_gas_amount UInt64,
       gas_unit_price UInt64,
       expiration_timestamp UInt64,
-      module_address String,
-      module_name String,
-      function_name String,
       type_arguments String,
       arguments String,
-      type String,
+      abi String,
       timestamp UInt64
   ')
   FORMAT Parquet

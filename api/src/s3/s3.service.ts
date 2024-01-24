@@ -22,7 +22,7 @@ export class S3Service {
   private readonly storageClass: string;
 
   public constructor(configService: ConfigService) {
-    const config = configService.get<S3Config>('s3')!;
+    const config = configService.get<S3Config>("s3")!;
 
     this.client = new S3Client({
       region: config.region,
@@ -40,7 +40,7 @@ export class S3Service {
   public upload(path: string, dest: string): Promise<PutObjectCommandOutput> {
     return Bluebird.any([
       Bluebird.delay(10 * 60 * 1_000).then(() => {
-        throw new Error('upload timeout');
+        throw new Error("upload timeout");
       }),
       this.client.send(
         new PutObjectCommand({
@@ -53,7 +53,7 @@ export class S3Service {
     ]);
   }
 
-  public download(key: string): Promise<GetObjectCommandOutput> {
+  public async download(key: string): Promise<GetObjectCommandOutput> {
     return Bluebird.any([
       Bluebird.delay(10 * 60 * 1_000).then(() => {
         throw new Error('download timeout');

@@ -18,7 +18,7 @@ export interface VersionBatchJobData {
   index: number;
 }
 
-@Processor("ol-version-batch-v7")
+@Processor("ol-version-batch")
 export class OlVersionBatchProcessor
   extends WorkerHost
   implements OnModuleInit
@@ -89,7 +89,7 @@ export class OlVersionBatchProcessor
     private readonly s3Service: S3Service,
     private readonly olService: OlService,
 
-    @InjectQueue("ol-version-batch-v7")
+    @InjectQueue("ol-version-batch")
     private readonly olVersionBatchQueue: Queue,
   ) {
     super();
@@ -210,7 +210,6 @@ export class OlVersionBatchProcessor
 
   private async getMissingBatchTransactions() {
     const files = await this.s3Service.listFiles(`transactions/`);
-    console.log(files);
 
     const ledgerInfo = await this.olService.aptosClient.getLedgerInfo();
     const version = parseInt(ledgerInfo.ledger_version, 10);

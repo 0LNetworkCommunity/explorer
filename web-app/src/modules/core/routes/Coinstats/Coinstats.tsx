@@ -4,6 +4,8 @@ import mockedData from './mockedData';
 
 import KPIComponent from './components/KPIComponent';
 import BarChart from './components/BarChart';
+import BarChartLockedConcentration from './components/BarChartLockedConcentration';
+import BarChartSupplyConcentration from './components/BarChartSupplyConcentration';
 import PieChart from './components/PieChart';
 import LineAndBarChart from './components/LineAndBarChart';
 import LineAndAreaChart from './components/LineAndAreaChart';
@@ -26,16 +28,19 @@ const mockData = {
         { type: "PieChart", data: mockedData.communityCapital, title: "Community capital" }
       ],
       [
-        { type: "StackedAreaChart", data: mockedData.dailyTransactedVolume, title: "Daily transfer volume by account category" },
-        { type: "BarChart", data: mockedData.accountsOnChainOverTime, title: "Accounts on chain over time" }
+        { type: "BarChartSupplyConcentration", data: mockedData.liquidityConcentrationLiquid, title: "Individuals capital concentration" },
+        { type: "BarChartLockedConcentration", data: mockedData.liquidityConcentrationLocked, title: "Individuals capital concentration" },
       ],
       [
         { type: "StackedBarChart", data: mockedData.totalSupplyAllocationOverTime, title: "Total Supply Allocation Over Time" }
       ],
       [
+        { type: "StackedAreaChart", data: mockedData.dailyTransactedVolume, title: "Daily transfer volume by account category" },
+        { type: "BarChart", data: mockedData.accountsOnChainOverTime, title: "Accounts on chain over time" }
+      ],
+      [
         { type: "LineAndAreaChart", data: mockedData.burnOverTime, title: "Burn Over Time" },
         { type: "LineAndAreaChart", data: mockedData.circulatingSupplyOverTime, title: "Circulating Supply Over Time" },
-
       ],
     ]
   },
@@ -106,6 +111,10 @@ const ChartComponent = ({ type, data, title }) => {
         return <StackedBarChart data={data} title={title} />;
       case 'StackedAreaChart':
         return <StackedAreaChart data={data} categories={data.categories} />;
+      case 'BarChartSupplyConcentration':
+        return <BarChartSupplyConcentration data={data} title={title} />;
+      case 'BarChartLockedConcentration':
+        return <BarChartLockedConcentration data={data} title={title} />;
       default:
         return null;
     }

@@ -205,6 +205,51 @@ export default {
     { "epoch": 19, "value": 980 },
     { "epoch": 20, "value": 1000 }
   ],
+  liquidityConcentrationLiquid: [
+    { name: "0 - 250", value: 8491 },
+    { name: "251 - 500", value: 393 },
+    { name: "501 - 2,500", value: 1211 },
+    { name: "2,501 - 5,000", value: 873 },
+    { name: "5,001 - 25,000", value: 2404 },
+    { name: "25,001 - 50,000", value: 1298 },
+    { name: "50,001 - 250,000", value: 2679 },
+    { name: "250,001 - 500,000", value: 1036 },
+    { name: "500,001 - 2,500,000", value: 617 },
+    { name: "2,500,001 - 5,000,000", value: 158 },
+    { name: "5,000,001 - 25,000,000", value: 98 },
+    { name: "25,000,001 and above", value: 80 }
+  ],
+  liquidityConcentrationLocked: {
+    accountsLocked: [
+      { name: "0 - 250", value: 0 },
+      { name: "251 - 500", value: 0 },
+      { name: "501 - 2,500", value: 0 },
+      { name: "2,501 - 5,000", value: 0 },
+      { name: "5,001 - 25,000", value: 1 },
+      { name: "25,001 - 50,000", value: 4 },
+      { name: "50,001 - 250,000", value: 14 },
+      { name: "250,001 - 500,000", value: 19 },
+      { name: "500,001 - 2,500,000", value: 30 },
+      { name: "2,500,001 - 5,000,000", value: 47 },
+      { name: "5,000,001 - 25,000,000", value: 41 },
+      { name: "25,000,001 and above", value: 20 }
+    ],
+    avgTotalVestingTime: [
+      { name: "0 - 250", value: 0.001 },
+      { name: "251 - 500", value: 0.004 },
+      { name: "501 - 2,500", value: 0.016 },
+      { name: "2,501 - 5,000", value: 0.042 },
+      { name: "5,001 - 25,000", value: 0.169 },
+      { name: "25,001 - 50,000", value: 0.422 },
+      { name: "50,001 - 250,000", value: 1.690 },
+      { name: "250,001 - 500,000", value: 4.227 },
+      { name: "500,001 - 2,500,000", value: 16.90 },
+      { name: "2,500,001 - 5,000,000", value: 42.27 },
+      { name: "5,000,001 - 25,000,000", value: 169.0 },
+      { name: "25,000,001 and above", value: 460 }
+    ]
+  },
+
   circulatingSupply: { nominal: 9002769502.90007, percentage: 9.0027 },
   changeInCirculatingSupply: { nominal: -25029, percentage: -0.0025 },
   lastEpochBurn: { nominal: 500000, percentage: 0.00005 },

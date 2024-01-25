@@ -7,8 +7,8 @@ const StackedAreaChart = ({ data, categories }) => {
   const transformDataForSeries = (data, categories) => {
     return categories.map((category, index) => {
       const baseColor = colorPalette[index % colorPalette.length];
-      const lighterColor = echarts.color.lift(baseColor, 0.3);
-      const darkerColor = echarts.color.lift(baseColor, -0.3);
+      const lighterColor = echarts.color.lift(baseColor, 0.0);
+      const darkerColor = echarts.color.lift(baseColor, -0.0);
 
       return {
         name: category,

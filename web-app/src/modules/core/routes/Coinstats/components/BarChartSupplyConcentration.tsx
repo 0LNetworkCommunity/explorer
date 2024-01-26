@@ -1,6 +1,15 @@
 import ReactECharts from 'echarts-for-react';
+import { FC } from 'react';
 
-const BarChartSupplyConcentration = ({ data, title }) => {
+interface Props {
+  title: string;
+  data: {
+    name: string;
+    value: number;
+  }[];
+}
+
+const BarChartSupplyConcentration: FC<Props> = ({ data, title }) => {
   const option = {
     title: {
       text: title,

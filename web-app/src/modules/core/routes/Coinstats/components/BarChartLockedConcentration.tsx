@@ -1,83 +1,97 @@
-import ReactECharts from 'echarts-for-react';
+import { FC } from "react";
+import ReactECharts from "echarts-for-react";
 
-const BarChartLockedConcentration = ({ data, title }) => {
+interface Props {
+  data: {
+    accountsLocked: {
+      name: string;
+      value: number;
+    }[];
+    avgTotalVestingTime: {
+      value: number;
+    }[];
+  };
+  title: string;
+}
+
+const BarChartLockedConcentration: FC<Props> = ({ data, title }) => {
   const option = {
     title: {
       text: title,
-      subtext: 'Unique slow wallets on chain in each size category',
-      left: 'center',
+      subtext: "Unique slow wallets on chain in each size category",
+      left: "center",
       textStyle: {
-        color: '#333',
-        fontWeight: 'bold',
-        fontSize: 16
+        color: "#333",
+        fontWeight: "bold",
+        fontSize: 16,
       },
       subtextStyle: {
-        color: '#555',
-        fontSize: 12
-      }
+        color: "#555",
+        fontSize: 12,
+      },
     },
     tooltip: {
-      trigger: 'axis',
+      trigger: "axis",
       axisPointer: {
-        type: 'shadow'
-      }
+        type: "shadow",
+      },
     },
     grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      containLabel: true
+      left: "3%",
+      right: "4%",
+      bottom: "3%",
+      containLabel: true,
     },
     xAxis: {
-      type: 'category',
-      data: data.accountsLocked.map(item => item.name),
+      type: "category",
+      data: data.accountsLocked.map((item) => item.name),
       axisTick: {
-        alignWithLabel: true
+        alignWithLabel: true,
       },
       axisLabel: {
-        rotate: 45
-      }
+        rotate: 45,
+      },
     },
     yAxis: [
       {
-        type: 'value',
-        name: '# of accounts'
+        type: "value",
+        name: "# of accounts",
       },
       {
-        type: 'value',
-        name: 'Average Time to fully vest',
-        position: 'right',
+        type: "value",
+        name: "Average Time to fully vest",
+        position: "right",
         axisLine: {
           show: true,
           lineStyle: {
-            color: '#188BE9'
-          }
+            color: "#188BE9",
+          },
         },
         axisLabel: {
-          formatter: '{value} months'
-        }
-      }
+          formatter: "{value} months",
+        },
+      },
     ],
     series: [
       {
-        name: 'Locked',
-        data: data.accountsLocked.map(item => item.value),
-        type: 'bar',
-        barWidth: '30%',
+        name: "Locked",
+        data: data.accountsLocked.map((item) => item.value),
+        type: "bar",
+        barWidth: "30%",
         itemStyle: {
-          color: '#188BE9'
-        }
+          color: "#188BE9",
+        },
       },
       {
-        name: 'AVG vesting time (months)',
-        data: data.avgTotalVestingTime.map(item => item.value),
-        type: 'line',
+        name: "AVG vesting time (months)",
+        data: data.avgTotalVestingTime.map((item) => item.value),
+        type: "line",
         yAxisIndex: 1,
         itemStyle: {
-          color: '#E8595C'
-        }
-      }
-    ]
+          color: "#E8595C",
+        },
+      },
+    ],
   };
 
   return <ReactECharts option={option} style={{ height: 400 }} />;

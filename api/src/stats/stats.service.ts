@@ -12,7 +12,6 @@ export class StatsService {
   private readonly olService: OlService;
 
   public async getStats() /*: Promise<Stats>*/ {
-
     const communityWallets = await this.olService.getCommunityWallets();
     console.log(communityWallets);
 

@@ -1,79 +1,85 @@
-import ReactECharts from 'echarts-for-react'
+import { FC } from "react";
+import ReactECharts from "echarts-for-react";
 
-const LineChart = ({ data, title }) => {
+interface Props {
+  title: string;
+  data: { value: number; epoch: number }[];
+}
+
+const LineChart: FC<Props> = ({ data, title }) => {
   const option = {
     title: {
       text: title,
-      left: 'center',
+      left: "center",
       textStyle: {
-        color: '#333',
-        fontWeight: 'bold',
-        fontSize: 16
-      }
+        color: "#333",
+        fontWeight: "bold",
+        fontSize: 16,
+      },
     },
     tooltip: {
-      trigger: 'axis',
+      trigger: "axis",
       axisPointer: {
-        type: 'cross',
+        type: "cross",
         label: {
-          backgroundColor: '#6a7985'
-        }
+          backgroundColor: "#6a7985",
+        },
       },
-      formatter: params => {
+      formatter: (params: { axisValueLabel: string; data: number }[]) => {
         const epoch = params[0].axisValueLabel;
         const value = params[0].data;
         return `${epoch}<br/>${value}`;
-      }
+      },
     },
     grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      containLabel: true
+      left: "3%",
+      right: "4%",
+      bottom: "3%",
+      containLabel: true,
     },
     xAxis: {
-      type: 'category',
+      type: "category",
       boundaryGap: true,
-      data: data.map(item => `Epoch ${item.epoch}`),
+      data: data.map((item) => `Epoch ${item.epoch}`),
       axisTick: {
-        alignWithLabel: true
+        alignWithLabel: true,
       },
       axisLine: {
         lineStyle: {
           // color: '#E8595C'
-        }
-      }
+        },
+      },
     },
     yAxis: {
-      type: 'value',
+      type: "value",
       axisLine: {
         lineStyle: {
           // color: '#E8595C'
-        }
+        },
       },
       splitLine: {
         lineStyle: {
           // color: '#ced6e0'
-        }
-      }
+        },
+      },
     },
     series: [
       {
-        data: data.map(item => item.value),
-        type: 'line',
+        data: data.map((item) => item.value),
+        type: "line",
         smooth: false,
-        symbol: 'circle',
+        symbol: "circle",
         symbolSize: 8,
         itemStyle: {
-          color: '#1e90ff',
-          borderColor: '#fff',
-          borderWidth: 2
+          color: "#1e90ff",
+          borderColor: "#fff",
+          borderWidth: 2,
         },
         lineStyle: {
-          width: 3
-        }
+          width: 3,
+        },
       },
-    ]
+    ],
   };
 
   return <ReactECharts option={option} style={{ height: 400 }} />;

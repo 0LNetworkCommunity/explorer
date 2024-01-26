@@ -52,3 +52,8 @@ export interface RawValidatorSet {
     voting_power: string;
   }[];
 }
+
+export interface RawDonorVoiceRegistry {
+  liquidation_queue: unknown[];
+  list: string[]
+}

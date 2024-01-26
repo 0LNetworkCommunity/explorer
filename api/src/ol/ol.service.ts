@@ -3,7 +3,7 @@ import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
 import { OlConfig } from "../config/config.interface.js";
-import { ConsensusReward, RawValidatorSet, ValidatorGrade, ValidatorSet } from "./types.js";
+import { ConsensusReward, RawDonorVoiceRegistry, RawValidatorSet, ValidatorGrade, ValidatorSet } from "./types.js";
 import { NetworkAddresses } from "./network-addresses.js";
 
 @Injectable()
@@ -62,12 +62,7 @@ export class OlService {
         type_arguments: [],
         arguments: [address, "0"],
       });
-      const payload = res as [
-        boolean,
-        string,
-        string,
-        { value: string },
-      ];
+      const payload = res as [boolean, string, string, { value: string }];
       return {
         compliant: payload[0],
         proposedBlocks: parseInt(payload[1], 10),
@@ -139,20 +134,37 @@ export class OlService {
 
     return {
       activeValidators: data.active_validators.map((validator) => {
-        const fullnodeAddresses = Buffer.from(validator.config.fullnode_addresses.substring(2), 'hex');
-        const networkAddresses = Buffer.from(validator.config.network_addresses.substring(2), 'hex');
+        const fullnodeAddresses = Buffer.from(
+          validator.config.fullnode_addresses.substring(2),
+          "hex",
+        );
+        const networkAddresses = Buffer.from(
+          validator.config.network_addresses.substring(2),
+          "hex",
+        );
 
         return {
           addr: validator.addr,
           votingPower: parseInt(validator.voting_power, 10),
           config: {
             consensusPubkey: validator.config.consensus_pubkey,
-            fullnodeAddresses: NetworkAddresses.fromBytes(fullnodeAddresses)?.toString(),
-            networkAddresses: NetworkAddresses.fromBytes(networkAddresses)?.toString(),
+            fullnodeAddresses:
+              NetworkAddresses.fromBytes(fullnodeAddresses)?.toString(),
+            networkAddresses:
+              NetworkAddresses.fromBytes(networkAddresses)?.toString(),
             validatorIndex: parseInt(validator.config.validator_index, 10),
           },
         };
       }),
     };
+  }
+
+  public async getCommunityWallets(): Promise<string[]> {
+    const res = await this.aptosClient.getAccountResource(
+      "0x1",
+      "0x1::donor_voice::Registry",
+    );
+    const data = res.data as RawDonorVoiceRegistry;
+    return data.list.map((it) => it.substring(2));
   }
 }

@@ -11,6 +11,7 @@ import { OlModule } from "../ol/ol.module.js";
 import { S3Module } from "../s3/s3.module.js";
 import { NodeWatcherModule } from "../node-watcher/node-watcher.module.js";
 import { GraphQLModule } from "../graphql/graphql.module.js";
+import { StatsModule } from "../stats/stats.module.js";
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { GraphQLModule } from "../graphql/graphql.module.js";
     ClickhouseModule,
     OlModule,
     NodeWatcherModule,
+    StatsModule,
   ],
   controllers: [],
   providers: [AppService],

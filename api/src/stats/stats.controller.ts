@@ -280,6 +280,7 @@ export class StatsController {
       },
 
       circulatingSupply: { nominal: 9002769502.90007, percentage: 9.0027 },
+      totalBurned: { nominal: 186072011.027, percentage: 0.0018 },
       changeInCirculatingSupply: { nominal: -25029, percentage: -0.0025 },
       lastEpochBurn: { nominal: 500000, percentage: 0.00005 },
       currentLockedOnSlowWallets: {

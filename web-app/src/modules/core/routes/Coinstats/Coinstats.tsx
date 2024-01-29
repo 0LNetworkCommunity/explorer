@@ -15,6 +15,11 @@ const getData = async () => {
           title: "Circulating supply",
           unit: "Ƚ",
         },
+        {
+          value: data.totalBurned,
+          title: "Total burned since Genesis",
+          unit: "Ƚ",
+        },
         // { value: mockedData.lastEpochBurn, title: "Last Epoch Burn", unit: "Ƚ" },
       ],
       chartRows: [

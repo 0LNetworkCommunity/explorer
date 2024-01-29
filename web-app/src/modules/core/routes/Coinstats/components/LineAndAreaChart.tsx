@@ -40,7 +40,11 @@ const LineAndAreaChart: FC<Props> = ({ data, title }) => {
     xAxis: {
       type: "category",
       boundaryGap: true,
-      data: data.map((item: { epoch: string }) => `Epoch ${item.epoch}`),
+      data: data.map((item: { timestamp: number }) => {
+        const date = new Date(item.timestamp * 1000);
+        const isoString = date.toISOString();
+        return isoString.slice(0, 19);
+      }),
       axisTick: {
         alignWithLabel: true,
       },

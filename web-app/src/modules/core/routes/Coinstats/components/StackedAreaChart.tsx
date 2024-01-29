@@ -7,7 +7,7 @@ interface Props {
   data: Record<
     string,
     {
-      epoch: number;
+      timestamp: number;
       value: number;
     }[]
   >;
@@ -28,7 +28,7 @@ const transformDataForSeries = (
   data: Record<
     string,
     {
-      epoch: number;
+      timestamp: number;
       value: number;
     }[]
   >,
@@ -60,7 +60,10 @@ const transformDataForSeries = (
 
 const StackedAreaChart: FC<Props> = ({ data, categories }) => {
   const seriesData = transformDataForSeries(data, categories);
-  const xAxisData = data[categories[0]].map((item) => `Epoch ${item.epoch}`);
+  const xAxisData = data[categories[0]].map((item) => {
+    const date = new Date(item.timestamp * 1000);
+    return date.toISOString().slice(0, 19);
+  });
 
   const option = {
     color: ["#80FFA5", "#00DDFF", "#37A2FF", "#FF0087", "#FFBF00"],

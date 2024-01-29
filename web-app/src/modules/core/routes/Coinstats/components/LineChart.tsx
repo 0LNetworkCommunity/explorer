@@ -3,7 +3,7 @@ import ReactECharts from "echarts-for-react";
 
 interface Props {
   title: string;
-  data: { value: number; epoch: number }[];
+  data: { value: number; timestamp: number }[];
 }
 
 const LineChart: FC<Props> = ({ data, title }) => {
@@ -26,9 +26,9 @@ const LineChart: FC<Props> = ({ data, title }) => {
         },
       },
       formatter: (params: { axisValueLabel: string; data: number }[]) => {
-        const epoch = params[0].axisValueLabel;
+        const timestamp = params[0].axisValueLabel;
         const value = params[0].data;
-        return `${epoch}<br/>${value}`;
+        return `${timestamp}<br/>${value}`;
       },
     },
     grid: {
@@ -40,7 +40,11 @@ const LineChart: FC<Props> = ({ data, title }) => {
     xAxis: {
       type: "category",
       boundaryGap: true,
-      data: data.map((item) => `Epoch ${item.epoch}`),
+      data: data.map((item: { timestamp: number }) => {
+        const date = new Date(item.timestamp * 1000);
+        const isoString = date.toISOString();
+        return isoString.slice(0, 19);
+      }),
       axisTick: {
         alignWithLabel: true,
       },

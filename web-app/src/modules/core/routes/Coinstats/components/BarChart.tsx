@@ -3,7 +3,7 @@ import ReactECharts from "echarts-for-react";
 
 interface Props {
   data: {
-    epoch: number;
+    timestamp: number;
     value: number;
   }[];
   title: string;
@@ -34,7 +34,11 @@ const BarChart: FC<Props> = ({ data, title }) => {
     },
     xAxis: {
       type: "category",
-      data: data.map((item) => `Epoch ${item.epoch}`),
+      data: data.map((item: { timestamp: number }) => {
+        const date = new Date(item.timestamp * 1000);
+        const isoString = date.toISOString();
+        return isoString.slice(0, 19);
+      }),
       axisTick: {
         alignWithLabel: true,
       },

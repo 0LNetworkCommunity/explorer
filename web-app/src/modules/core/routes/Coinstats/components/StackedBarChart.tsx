@@ -67,7 +67,11 @@ const StackedBarChart: FC<Props> = ({ data, title }) => {
     },
     xAxis: {
       type: "category",
-      data: data.map((item: { epoch: number }) => `Epoch ${item.epoch}`),
+      data: data.map((item: { timestamp: number }) => {
+        const date = new Date(item.timestamp * 1000); // Convert from Unix timestamp (seconds) to JavaScript Date (milliseconds)
+        const isoString = date.toISOString();
+        return isoString.slice(0, 19);
+      }),
     },
     yAxis: {
       type: "value",

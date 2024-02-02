@@ -11,9 +11,18 @@ export class StatsService {
   @Inject()
   private readonly olService: OlService;
 
-  public async getStats() {
-    const communityWallets = await this.olService.getCommunityWallets();
-    console.log(communityWallets);
+  public async getStats() /* : Promise<Stats> */ {
+    // const communityWallets = await this.olService.getCommunityWallets();
+    // console.log(communityWallets);
+
+    // const totalSupply = await this.getTotalSupply();
+    const slowWalletsOverTime = await this.getSlowWalletsOverTime();
+
+    console.log(slowWalletsOverTime);
+
+    // const burnsOverTime = await this.getBurnsOverTime();
+    const totalSlowWalletLocked = 0;
+    // return { totalSupply, totalSlowWalletLocked };
 
     // const totalSupply = await this.getTotalSupply();
     // const slowWallets = await this.getSlowWallets();
@@ -28,7 +37,7 @@ export class StatsService {
     // const slowWalletBalancesMap = new Map(
     //   slowWalletBalances.map((it) => [it.address, it.balance]),
     // );
-    
+
     // const totalSlowWalletLocked = Array.from(slowWalletBalancesMap.keys()).map(
     //   (address) => {
     //     return (
@@ -144,26 +153,107 @@ export class StatsService {
   }
 
   private async getTotalSupply(): Promise<number> {
-    const resultSet = await this.clickhouseService.client.query({
-      query: `
-        SELECT
-          "amount" / 1e6 AS "totalSupply"
-        FROM "total_supply"
-        ORDER BY
-          "version" DESC,
-          "change_index"
-        DESC limit 1
-      `,
-      format: "JSONEachRow",
-    });
-    const rows = await resultSet.json<
-      {
-        totalSupply: number;
-      }[]
-    >();
-    if (!rows.length) {
-      return 0;
+    try {
+      const resultSet = await this.clickhouseService.client.query({
+        query: `
+          SELECT
+            "amount" / 1e6 AS "totalSupply"
+          FROM "total_supply"
+          ORDER BY
+            "version" DESC,
+            "change_index"
+          DESC limit 1
+        `,
+        format: "JSONEachRow",
+      });
+      const rows = await resultSet.json<
+        {
+          totalSupply: number;
+        }[]
+      >();
+      if (!rows.length) {
+        return 0;
+      }
+      return rows[0].totalSupply;
+    } catch (error) {
+      console.error('Error in getTotalSupply:', error);
+      throw error; // Rethrow the error after logging
     }
-    return rows[0].totalSupply;
   }
+
+  private async getBurnsOverTime(): Promise<{ timestamp: number; value: number }[]> {
+    throw "Not implemented. Empty table?";
+    try {
+      const query = `
+        SELECT
+          "timestamp",
+          "cumu_burn" AS "value"
+        FROM "burn_tracker"
+        ORDER BY "timestamp" ASC
+      `;
+      const resultSet = await this.clickhouseService.client.query({
+        query: query,
+        format: "JSONEachRow",
+      });
+      const rows = await resultSet.json<
+        {
+          timestamp: number;
+          value: number;
+        }[]
+      >();
+      if (!rows.length) {
+        return [];
+      }
+      return rows.map(row => ({
+        timestamp: row.timestamp,
+        value: row.value,
+      }));
+    } catch (error) {
+      console.error('Error in getBurnsOverTime:', error);
+      throw error;
+    }
+  }
+
+  private async getSlowWalletsOverTime(): Promise<{ timestamp: number; value: number; }[]> {
+    try {
+      const resultSet = await this.clickhouseService.client.query({
+        query: `
+              SELECT
+                "timestamp",
+                "list_count" AS "value"
+              FROM "slow_wallet_list"
+              ORDER BY "timestamp" ASC
+            `,
+        format: "JSONEachRow",
+      });
+      const rows = await resultSet.json<{
+        timestamp: string;
+        value: string;
+      }[]>();
+
+      if (!rows.length) {
+        console.warn('No data found for slow wallets over time.');
+        return [];
+      }
+
+      // Convert to desired structure with number conversion
+      const slowWalletsOverTime = rows.map(row => ({
+        timestamp: parseInt(row.timestamp, 10) / 1_000_000,
+        value: parseInt(row.value, 10),
+      }));
+
+      const result = slowWalletsOverTime.map(item => ({
+        timestamp: Math.round(item.timestamp),
+        value: item.value,
+      }));
+
+      return result;
+
+    } catch (error) {
+      console.error('Error in getSlowWalletsOverTime:', error);
+      throw error;
+    }
+  }
+
+
 }

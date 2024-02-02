@@ -9,8 +9,11 @@ export class StatsController {
 
   @Get()
   public async getStats() {
-    // const stats = await this.statsService.getStats();
+    const stats = await this.statsService.getStats();
 
+    return 'ok';
+
+    // return stats;
     return {
       burnOverTime: [
         { timestamp: 1704842008, value: 418674 },

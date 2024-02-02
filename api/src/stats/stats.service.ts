@@ -15,12 +15,16 @@ export class StatsService {
     // const communityWallets = await this.olService.getCommunityWallets();
     // console.log(communityWallets);
 
-    // const totalSupply = await this.getTotalSupply();
-    const slowWalletsOverTime = await this.getSlowWalletsOverTime();
+    // const totalSupply = await this.getTotalSupply(); // DONE
+    // const slowWalletsOverTime = await this.getSlowWalletsOverTime(); // DONE
+    // const burnsOverTime = await this.getBurnsOverTime(); // DONE
 
-    console.log(slowWalletsOverTime);
+    const accountsOnChainOverTime = await this.getAccountsOnChainOverTime(); // WIP
+    console.log(accountsOnChainOverTime);
 
-    // const burnsOverTime = await this.getBurnsOverTime();
+
+
+
     const totalSlowWalletLocked = 0;
     // return { totalSupply, totalSlowWalletLocked };
 
@@ -181,29 +185,33 @@ export class StatsService {
     }
   }
 
+
   private async getBurnsOverTime(): Promise<{ timestamp: number; value: number }[]> {
-    throw "Not implemented. Empty table?";
     try {
       const query = `
         SELECT
-          "timestamp",
-          "cumu_burn" AS "value"
-        FROM "burn_tracker"
-        ORDER BY "timestamp" ASC
+          toInt32(divide("timestamp", 1000000)) AS "timestamp", // Convert to Unix timestamp
+          divide("lifetime_burned", 1000000) AS "value" // Divide by 1e6
+        FROM "burn_counter"
+        ORDER BY "timestamp"
       `;
+
       const resultSet = await this.clickhouseService.client.query({
         query: query,
         format: "JSONEachRow",
       });
+
       const rows = await resultSet.json<
         {
           timestamp: number;
           value: number;
         }[]
       >();
+
       if (!rows.length) {
         return [];
       }
+
       return rows.map(row => ({
         timestamp: row.timestamp,
         value: row.value,
@@ -255,5 +263,40 @@ export class StatsService {
     }
   }
 
+  private async getAccountsOnChainOverTime(): Promise<{ timestamp: number; value: number; }[]> {
+    try {
+      const resultSet = await this.clickhouseService.client.query({
+        query: `
+          SELECT
+            toStartOfDay(toDateTime("timestamp" / 1000000)) AS "day", // Convert timestamp to seconds and group by day
+            countDistinct("address") AS "value"
+          FROM "coin_balance"
+          GROUP BY "day"
+          ORDER BY "day" ASC
+        `,
+        format: "JSONEachRow",
+      });
+      const rows = await resultSet.json<{
+        day: string; // Assuming toStartOfDay returns a string representation of the date
+        value: number;
+      }[]>();
+
+      if (!rows.length) {
+        console.warn('No data found for accounts on chain over time.');
+        return [];
+      }
+
+      // Convert to desired structure with timestamp conversion
+      const accountsOnChainOverTime = rows.map(row => ({
+        timestamp: Math.floor(new Date(row.day).getTime() / 1000), // Convert day to Unix timestamp in seconds
+        value: row.value,
+      }));
+
+      return accountsOnChainOverTime;
+    } catch (error) {
+      console.error('Error in getAccountsOnChainOverTime:', error);
+      throw error; // Rethrow the error after logging
+    }
+  }
 
 }

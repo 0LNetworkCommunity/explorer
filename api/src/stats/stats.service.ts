@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { Stats } from "./types.js";
+import { Stats, TimestampValue } from "./types.js";
 import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
 import { OlService } from "../ol/ol.service.js";
 
@@ -18,8 +18,8 @@ export class StatsService {
     // const totalSupply = await this.getTotalSupply(); // DONE
     // const slowWalletsOverTime = await this.getSlowWalletsOverTime(); // DONE
     // const burnsOverTime = await this.getBurnsOverTime(); // DONE
+    const accountsOnChainOverTime = await this.getAccountsOnChainOverTime(); // DONE
 
-    const accountsOnChainOverTime = await this.getAccountsOnChainOverTime(); // WIP
     console.log(accountsOnChainOverTime);
 
 
@@ -263,40 +263,54 @@ export class StatsService {
     }
   }
 
-  private async getAccountsOnChainOverTime(): Promise<{ timestamp: number; value: number; }[]> {
+  private async getAccountsOnChainOverTime(): Promise<TimestampValue[]> {
     try {
+      const query = `
+        SELECT 
+          toInt32(divide(min(timestamp), 1000000)) AS timestamp,
+          address
+        FROM coin_balance
+        WHERE coin_module = 'libra_coin'
+        GROUP BY address
+        ORDER BY timestamp ASC
+      `;
+  
       const resultSet = await this.clickhouseService.client.query({
-        query: `
-          SELECT
-            toStartOfDay(toDateTime("timestamp" / 1000000)) AS "day", // Convert timestamp to seconds and group by day
-            countDistinct("address") AS "value"
-          FROM "coin_balance"
-          GROUP BY "day"
-          ORDER BY "day" ASC
-        `,
+        query: query,
         format: "JSONEachRow",
       });
+  
       const rows = await resultSet.json<{
-        day: string; // Assuming toStartOfDay returns a string representation of the date
-        value: number;
+        timestamp: number;
+        address: string;
       }[]>();
-
-      if (!rows.length) {
-        console.warn('No data found for accounts on chain over time.');
-        return [];
-      }
-
-      // Convert to desired structure with timestamp conversion
-      const accountsOnChainOverTime = rows.map(row => ({
-        timestamp: Math.floor(new Date(row.day).getTime() / 1000), // Convert day to Unix timestamp in seconds
-        value: row.value,
-      }));
-
-      return accountsOnChainOverTime;
+  
+      // Initialize the result array and a count for accounts with timestamp > 0 (6.9 genesis timestamp is 0)
+      const accountsOverTime: TimestampValue[] = [];
+      let countOfZeroTimestamps = 0;
+      let cumulativeCount = 0;
+  
+      rows.forEach(row => {
+        if (row.timestamp == 0) {
+          countOfZeroTimestamps++;
+        } else {
+          // This is the first record after all the 0 timestamps have been counted
+          if (accountsOverTime.length === 0 && countOfZeroTimestamps > 0) {
+            accountsOverTime.push({ timestamp: 0, value: countOfZeroTimestamps });
+            cumulativeCount = countOfZeroTimestamps;
+          }
+          cumulativeCount++; // Increment for each unique address with timestamp > 0
+          accountsOverTime.push({ timestamp: row.timestamp, value: cumulativeCount });
+        }
+      });
+  
+      return accountsOverTime;
     } catch (error) {
       console.error('Error in getAccountsOnChainOverTime:', error);
-      throw error; // Rethrow the error after logging
+      throw error;
     }
   }
+  
+  
 
 }

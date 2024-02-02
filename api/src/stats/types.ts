@@ -1,10 +1,10 @@
-export interface SlowWalletOverTime {
+export interface TimestampValue {
   timestamp: number;
   value: number;
 }
 
 export interface Stats {
-  slowWalletsOverTime: SlowWalletOverTime[];
+  slowWalletsOverTime: TimestampValue[];
   totalSupply: number;
   totalSlowWalletLocked: number;
 }

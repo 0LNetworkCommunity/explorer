@@ -3,6 +3,11 @@ export interface TimestampValue {
   value: number;
 }
 
+export interface NameValue {
+  name: string;
+  value: number;
+}
+
 export interface Stats {
   slowWalletsOverTime: TimestampValue[];
   totalSupply: number;

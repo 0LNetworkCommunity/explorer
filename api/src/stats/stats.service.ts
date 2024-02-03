@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { Stats, TimestampValue } from "./types.js";
+import { Stats, TimestampValue, NameValue } from "./types.js";
 import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
 import { OlService } from "../ol/ol.service.js";
 
@@ -20,8 +20,10 @@ export class StatsService {
     // const slowWalletsCountOverTime = await this.getSlowWalletsCountOverTime(); // DONE
     // const burnsOverTime = await this.getBurnsOverTime(); // DONE
     // const accountsOnChainOverTime = await this.getAccountsOnChainOverTime(); // DONE
-    const supplyAndCapital = await this.getSupplyAndCapital(); // DONE
-    console.log('supplyAndCapital:', supplyAndCapital);
+    // const supplyAndCapital = await this.getSupplyAndCapital(); // DONE
+
+    // const liquidityConcentrationLiquid = await this.getLiquidityConcentrationLiquid()
+    // console.log('liquidityConcentrationLiquid:', liquidityConcentrationLiquid);
 
 
     // return { totalSupply, totalSlowWalletLocked };
@@ -147,6 +149,7 @@ export class StatsService {
 
   private async getCommunityWalletsBalance(): Promise<number> {
     const communityWallets = await this.olService.getCommunityWallets();
+    console.log('communityWallets size:', communityWallets.length)
     const communityWalletsRecords = await this.getWalletsBalances(communityWallets);
     const communityWalletsBalances = communityWalletsRecords.reduce((acc, row) => acc + row.balance, 0);
     return communityWalletsBalances;
@@ -350,6 +353,68 @@ export class StatsService {
       };
     } catch (error) {
       console.error('Error in getSupplyAndCapital:', error);
+      throw error;
+    }
+  }
+
+  private async getLiquidityConcentrationLiquid(): Promise<NameValue[]> {
+    try {
+      // Fetch community wallet addresses
+      const communityWallets = await this.olService.getCommunityWallets();
+      const formattedCommunityWallets = communityWallets
+        .map(address => `reinterpretAsUInt256('${address}')`)
+        .join(', ');
+
+      // Dynamically build the part of the query that excludes community wallets
+      const exclusionPart = communityWallets.length > 0 ? `AND address NOT IN (${formattedCommunityWallets})` : '';
+
+        
+      const queryForRanges = `
+        SELECT 
+          CASE
+            WHEN balance <= 250 THEN '0 - 250'
+            WHEN balance <= 500 THEN '251 - 500'
+            WHEN balance <= 2500 THEN '501 - 2,500'
+            WHEN balance <= 5000 THEN '2,501 - 5,000'
+            WHEN balance <= 25000 THEN '5,001 - 25,000'
+            WHEN balance <= 50000 THEN '25,001 - 50,000'
+            WHEN balance <= 250000 THEN '50,001 - 250,000'
+            WHEN balance <= 500000 THEN '250,001 - 500,000'
+            WHEN balance <= 2500000 THEN '500,001 - 2,500,000'
+            WHEN balance <= 5000000 THEN '2,500,001 - 5,000,000'
+            WHEN balance <= 25000000 THEN '5,000,001 - 25,000,000'
+            ELSE '25,000,001 and above'
+            END as range,
+          count(*) as count
+          FROM (
+            SELECT 
+              address, 
+              (balance - IF(sw.unlocked IS NOT NULL, sw.unlocked, 0)) / 1e6 as balance
+            FROM coin_balance cb
+            LEFT JOIN (
+              SELECT 
+                address, 
+                SUM(unlocked) as unlocked
+              FROM slow_wallet
+              GROUP BY address
+            ) sw ON cb.address = sw.address
+            WHERE 1 = 1 
+            ${exclusionPart}
+          ) AS balance_adjusted
+          GROUP BY range`;
+
+      // Execute the query
+      const resultSet = await this.clickhouseService.client.query({
+        query: queryForRanges,
+        format: "JSONEachRow",
+      });
+
+      // Parse the results
+      const results = await resultSet.json() as NameValue[];
+
+      return results;
+    } catch (error) {
+      console.error('Error in getLiquidityConcentrationLiquid:', error);
       throw error;
     }
   }

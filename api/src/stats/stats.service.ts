@@ -3,27 +3,28 @@ import { Stats, TimestampValue } from "./types.js";
 import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
 import { OlService } from "../ol/ol.service.js";
 
+
+
 @Injectable()
 export class StatsService {
   @Inject()
   private readonly clickhouseService: ClickhouseService;
-
+  
   @Inject()
   private readonly olService: OlService;
-
+  
   public async getStats() /* : Promise<Stats> */ {
     // const communityWallets = await this.olService.getCommunityWallets();
     // console.log(communityWallets);
-
+    
     // const totalSupply = await this.getTotalSupply(); // DONE
     // const slowWalletsCountOverTime = await this.getSlowWalletsCountOverTime(); // DONE
     // const burnsOverTime = await this.getBurnsOverTime(); // DONE
     // const accountsOnChainOverTime = await this.getAccountsOnChainOverTime(); // DONE
     // const totalSlowWalletLocked = await this.getSlowWalletsLockedAmount(); // DONE
+    // const communityWalletsBalances = await this.getCommunityWalletsBalance(); // DONE
 
-    // console.log(totalSlowWalletLocked);
-    // console.log(accountsOnChainOverTime);
-
+    // console.log(communityWalletsBalances);
 
 
     // return { totalSupply, totalSlowWalletLocked };
@@ -83,54 +84,6 @@ export class StatsService {
     return rows;
   }
 
-  private async getSlowWallets(): Promise<
-    {
-      address: string;
-      unlocked: number;
-      transferred: number;
-    }[]
-  > {
-    const query = `
-      SELECT
-        hex(tupleElement("entry", 2)) AS "address",
-        tupleElement("entry", 3) / 1e6 AS "unlocked",
-        tupleElement("entry", 4) / 1e6 AS "transferred"
-      FROM (
-        SELECT
-          arrayElement(
-            arraySort(
-              (x) -> tupleElement(x, 1) ,
-              groupArray(
-                tuple(
-                  "version",
-                  "address",
-                  "unlocked",
-                  "transferred"
-                )
-              )
-            ),
-            -1
-          ) AS "entry"
-        FROM "slow_wallet"
-        GROUP BY "address"
-      )
-    `;
-
-    const resultSet = await this.clickhouseService.client.query({
-      query,
-      format: "JSONEachRow",
-    });
-    const rows = await resultSet.json<
-      {
-        address: string;
-        unlocked: number;
-        transferred: number;
-      }[]
-    >();
-
-    return rows;
-  }
-
   private async getTotalSupply(): Promise<number> {
     try {
       const resultSet = await this.clickhouseService.client.query({
@@ -160,6 +113,12 @@ export class StatsService {
     }
   }
 
+  private async getCommunityWalletsBalance(): Promise<number> {
+    const communityWallets = await this.olService.getCommunityWallets();
+    const communityWalletsRecords = await this.getWalletsBalances(communityWallets);
+    const communityWalletsBalances = communityWalletsRecords.reduce((acc, row) => acc + row.balance, 0);
+    return communityWalletsBalances;
+  }
 
   private async getBurnsOverTime(): Promise<{ timestamp: number; value: number }[]> {
     try {
@@ -233,7 +192,7 @@ export class StatsService {
     }
   }
 
-  private async getSlowWalletsCountOverTime(): Promise<{ timestamp: number; value: number; }[]> {
+  private async getSlowWalletsCountOverTime(): Promise<TimestampValue[]> {
     try {
       const resultSet = await this.clickhouseService.client.query({
         query: `

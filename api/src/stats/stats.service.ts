@@ -17,14 +17,11 @@ export class StatsService {
     // const communityWallets = await this.olService.getCommunityWallets();
     // console.log(communityWallets);
     
-    // const totalSupply = await this.getTotalSupply(); // DONE
     // const slowWalletsCountOverTime = await this.getSlowWalletsCountOverTime(); // DONE
     // const burnsOverTime = await this.getBurnsOverTime(); // DONE
     // const accountsOnChainOverTime = await this.getAccountsOnChainOverTime(); // DONE
-    // const totalSlowWalletLocked = await this.getSlowWalletsLockedAmount(); // DONE
-    // const communityWalletsBalances = await this.getCommunityWalletsBalance(); // DONE
-
-    // console.log(communityWalletsBalances);
+    const supplyAndCapital = await this.getSupplyAndCapital(); // DONE
+    console.log('supplyAndCapital:', supplyAndCapital);
 
 
     // return { totalSupply, totalSlowWalletLocked };
@@ -63,6 +60,8 @@ export class StatsService {
               ),
               "address" 
             )
+          AND
+            "coin_module" = 'libra_coin'
           GROUP BY "address"
         )
     `;
@@ -110,6 +109,39 @@ export class StatsService {
     } catch (error) {
       console.error('Error in getTotalSupply:', error);
       throw error; // Rethrow the error after logging
+    }
+  }
+
+  // Calculates the libra balances of all accounts
+  private async getTotalLibraBalances(): Promise<number> {
+    try {
+      const query = `
+        SELECT
+            SUM(latest_balance) / 1e6 AS total_balance
+        FROM (
+            SELECT 
+                argMax(balance, version) AS latest_balance
+            FROM coin_balance
+            WHERE coin_module = 'libra_coin'
+            GROUP BY address
+        )
+      `;
+  
+      const resultSet = await this.clickhouseService.client.query({
+        query: query,
+        format: "JSONEachRow",
+      });
+  
+      const result = await resultSet.json<{ total_balance: number }[]>();
+  
+      // Assuming there's only one row returned
+      if (result.length > 0) {
+        return result[0].total_balance;
+      }
+      return 0;
+    } catch (error) {
+      console.error('Error in getTotalBalances:', error);
+      throw error;
     }
   }
 
@@ -281,6 +313,45 @@ export class StatsService {
     }
   }
   
+  private async getSupplyAndCapital(): Promise<{ supplyAllocation: any[], individualsCapital: any[], communityCapital: any[] }> {
+    try {
+      // Call the provided helper methods
+      const totalSupply = await this.getTotalSupply();
+      const totalSlowWalletLocked = await this.getSlowWalletsLockedAmount();
+      const communityWalletsBalances = await this.getCommunityWalletsBalance();
+      const totalLibraBalances = await this.getTotalLibraBalances();
   
+      // Calculate additional values
+      const infraEscrowBalance = totalSupply - totalLibraBalances;
+      const circulating = totalLibraBalances - (totalSlowWalletLocked + communityWalletsBalances);
+  
+      // Organize the results into the specified structure
+      const supplyAllocation = [
+        { name: "Community Wallets", value: communityWalletsBalances },
+        { name: "Locked", value: totalSlowWalletLocked },
+        { name: "Infrastructure escrow", value: infraEscrowBalance },
+        { name: "Circulating", value: circulating },
+      ];
+  
+      const individualsCapital = [
+        { name: "Locked", value: totalSlowWalletLocked },
+        { name: "Circulating", value: circulating },
+      ];
+  
+      const communityCapital = [
+        { name: "Community Wallets", value: communityWalletsBalances },
+        { name: "Infrastructure escrow", value: infraEscrowBalance },
+      ];
+  
+      return {
+        supplyAllocation,
+        individualsCapital,
+        communityCapital,
+      };
+    } catch (error) {
+      console.error('Error in getSupplyAndCapital:', error);
+      throw error;
+    }
+  }
 
 }

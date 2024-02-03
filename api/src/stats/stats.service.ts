@@ -16,40 +16,15 @@ export class StatsService {
     // console.log(communityWallets);
 
     // const totalSupply = await this.getTotalSupply(); // DONE
-    // const slowWalletsOverTime = await this.getSlowWalletsOverTime(); // DONE
+    // const slowWalletsCountOverTime = await this.getSlowWalletsCountOverTime(); // DONE
     // const burnsOverTime = await this.getBurnsOverTime(); // DONE
-    const accountsOnChainOverTime = await this.getAccountsOnChainOverTime(); // DONE
+    // const accountsOnChainOverTime = await this.getAccountsOnChainOverTime(); // DONE
+    // const totalSlowWalletLocked = await this.getSlowWalletsLockedAmount(); // DONE
 
-    console.log(accountsOnChainOverTime);
+    // console.log(totalSlowWalletLocked);
+    // console.log(accountsOnChainOverTime);
 
 
-
-
-    const totalSlowWalletLocked = 0;
-    // return { totalSupply, totalSlowWalletLocked };
-
-    // const totalSupply = await this.getTotalSupply();
-    // const slowWallets = await this.getSlowWallets();
-
-    // const slowWalletAddresses = slowWallets.map((it) => it.address);
-
-    // const slowWalletBalances = await this.getWalletsBalances(slowWalletAddresses);
-
-    // const slowWalletsMap = new Map(
-    //   slowWallets.map((it) => [it.address, it])
-    // );
-    // const slowWalletBalancesMap = new Map(
-    //   slowWalletBalances.map((it) => [it.address, it.balance]),
-    // );
-
-    // const totalSlowWalletLocked = Array.from(slowWalletBalancesMap.keys()).map(
-    //   (address) => {
-    //     return (
-    //       slowWalletBalancesMap.get(address)! -
-    //       slowWalletsMap.get(address)!.unlocked
-    //     );
-    //   },
-    // ).reduce((prev, curr) => prev + curr, 0);
 
     // return { totalSupply, totalSlowWalletLocked };
   }
@@ -222,7 +197,43 @@ export class StatsService {
     }
   }
 
-  private async getSlowWalletsOverTime(): Promise<{ timestamp: number; value: number; }[]> {
+  private async getSlowWalletsLockedAmount(): Promise<number> {
+    try {
+      const query = `
+      SELECT
+        hex(SW.address) AS address,
+       (latest_balance - max(SW.unlocked)) / 1e6 AS locked_balance
+      FROM
+        slow_wallet SW
+      JOIN
+        (SELECT 
+          address, 
+          argMax(balance, timestamp) as latest_balance
+        FROM coin_balance
+        WHERE coin_module = 'libra_coin'
+        GROUP BY address) AS CB
+      ON SW.address = CB.address
+      GROUP BY SW.address, latest_balance
+      `;
+  
+      const resultSet = await this.clickhouseService.client.query({
+        query: query,
+        format: "JSONEachRow",
+      });
+  
+      const rows = await resultSet.json<{ locked_balance: number }[]>();
+  
+      // Sum the locked balances
+      const totalLockedAmount = rows.reduce((acc, row) => acc + row.locked_balance, 0);
+  
+      return totalLockedAmount;
+    } catch (error) {
+      console.error('Error in getSlowWalletsLockedAmount:', error);
+      throw error;
+    }
+  }
+
+  private async getSlowWalletsCountOverTime(): Promise<{ timestamp: number; value: number; }[]> {
     try {
       const resultSet = await this.clickhouseService.client.query({
         query: `

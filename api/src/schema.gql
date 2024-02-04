@@ -69,11 +69,17 @@ type Account {
   balance: Float!
   creationDate: String!
   slowWallet: SlowWallet
+  movements: [Movement!]!
 }
 
 type SlowWallet {
   transferred: Float!
   unlocked: Float!
+}
+
+type Movement {
+  balance: Float!
+  version: Float!
 }
 
 type Query {

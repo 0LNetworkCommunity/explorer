@@ -22,8 +22,6 @@ export class LoggingPlugin {
 
     const { req } = context.contextValue;
 
-    console.log(req.headers);
-
     req._startAt = process.hrtime()
 
     return {

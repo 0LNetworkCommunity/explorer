@@ -46,7 +46,7 @@ const PieChart: FC<Props> = ({ data, title }) => {
     },
     tooltip: {
       trigger: "item",
-      formatter: "{a} <br/>{b}: Ƚ{c}B ({d}%)",
+      formatter: "{b}: Ƚ{c}B ({d}%)",
     },
     color: colorPalette,
     series: [

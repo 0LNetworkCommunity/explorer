@@ -52,19 +52,19 @@ const getData = async () => {
             title: "Individuals capital concentration",
           },
         ],
+        // [
+        //   {
+        //     type: "StackedBarChart",
+        //     data: data.totalSupplyAllocationOverTime,
+        //     title: "Total Supply Allocation Over Time",
+        //   },
+        // ],
         [
-          {
-            type: "StackedBarChart",
-            data: data.totalSupplyAllocationOverTime,
-            title: "Total Supply Allocation Over Time",
-          },
-        ],
-        [
-          {
-            type: "StackedAreaChart",
-            data: data.dailyTransactedVolume,
-            title: "Daily transfer volume by account category",
-          },
+          // {
+          //   type: "StackedAreaChart",
+          //   data: data.dailyTransactedVolume,
+          //   title: "Daily transfer volume by account category",
+          // },
           {
             type: "BarChart",
             data: data.accountsOnChainOverTime,
@@ -75,33 +75,38 @@ const getData = async () => {
           {
             type: "LineAndAreaChart",
             data: data.burnOverTime,
-            title: "Burn Over Time",
+            title: "Total Burned Over Time",
           },
-          {
-            type: "LineAndAreaChart",
-            data: data.circulatingSupplyOverTime,
-            title: "Circulating Supply Over Time",
-          },
+          // {
+          //   type: "LineAndAreaChart",
+          //   data: data.circulatingSupplyOverTime,
+          //   title: "Circulating Supply Over Time",
+          // },
         ],
       ],
     },
     validators: {
       kpis: [
-        { value: data.lastEpochRewards, title: "Epoch reward", unit: "Ƚ" },
-        { value: data.currentWinningBid, title: "Winning Bid", unit: "Ƚ" },
-        { value: data.currentSeatCount, title: "Seat Count" },
+        { value: data.lastEpochReward, title: "Epoch reward", unit: "Ƚ" },
+        { value: data.currentClearingBid, title: "Clearing Bid (%)" },
+        // { value: data.currentSeatCount, title: "Seat Count" },
       ],
       chartRows: [
         [
-          {
-            type: "BarChart",
-            data: data.seatsOverTime,
-            title: "Seats Over Time",
-          },
+          // {
+          //   type: "BarChart",
+          //   data: data.seatsOverTime,
+          //   title: "Seats Over Time",
+          // },
           {
             type: "LineChart",
             data: data.rewardsOverTime,
             title: "Rewards Over Time",
+          },
+          {
+            type: "LineChart",
+            data: data.clearingBidoverTime,
+            title: "Clearing bid Over Time",
           },
         ],
       ],
@@ -113,22 +118,22 @@ const getData = async () => {
           title: "Community Wallets Balance",
           unit: "Ƚ",
         },
-        {
-          value: data.communityWalletsChange,
-          title: "Community Wallets change from previous epoch",
-          unit: "Ƚ",
-        },
+        // {
+        //   value: data.communityWalletsChange,
+        //   title: "Community Wallets change from previous epoch",
+        //   unit: "Ƚ",
+        // },
       ],
       chartRows: [
         [
-          {
-            type: "LineChart",
-            data: data.communityWalletsBalanceOverTime,
-            title: "Community wallets balance Over Time",
-          },
+          // {
+          //   type: "LineChart",
+          //   data: data.communityWalletsBalanceOverTime,
+          //   title: "Community wallets balance Over Time",
+          // },
           {
             type: "PieChart",
-            data: data.communityWalletsSupply,
+            data: data.communityWalletsBalanceBreakdown,
             title: "Community wallets breakdown",
           },
         ],
@@ -143,21 +148,21 @@ const getData = async () => {
           unit: "Ƚ",
         },
         {
-          value: data.lastEpochUnlocked,
+          value: data.lastEpochTotalUnlockedAmount,
           title: "Last Epoch Unlocked",
           unit: "Ƚ",
         },
       ],
       chartRows: [
         [
-          {
-            type: "LineChart",
-            data: data.unlockedOverTime,
-            title: "Unlock Over Time",
-          },
+          // {
+          //   type: "LineChart",
+          //   data: data.unlockedOverTime,
+          //   title: "Unlock Over Time",
+          // },
           {
             type: "LineAndBarChart",
-            data: data.slowWalletsOverTime,
+            data: data.slowWalletsCountOverTime,
             title: "Slow wallets count Over Time",
           },
         ],

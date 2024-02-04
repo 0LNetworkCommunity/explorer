@@ -9,32 +9,90 @@ export class StatsController {
 
   @Get()
   public async getStats() {
-    const stats = await this.statsService.getStats();
+    const stats: Stats = await this.statsService.getStats();
 
-    return 'ok';
+    // calculate KPIS
+    const totalSupply = stats.supplyAndCapital.supplyAllocation.reduce((acc, {value}) => acc + value, 0);
+    // circulating
+    const circulatingEntry = stats.supplyAndCapital.supplyAllocation.find(entry => entry.name === "Circulating");
+    const circulatingValue = circulatingEntry ? circulatingEntry.value : 0;
+    const circulatingPercentage = (circulatingValue / totalSupply) * 100;
+    const circulatingSupply = {
+      nominal: circulatingValue,
+      percentage: parseFloat(circulatingPercentage.toFixed(4))
+    };
 
+    // CW
+    const communityWalletsEntry = stats.supplyAndCapital.supplyAllocation.find(entry => entry.name === "Community Wallets");
+    const communityWalletsValue = communityWalletsEntry ? communityWalletsEntry.value : 0;
+    const communityWalletsPercentage = (communityWalletsValue / totalSupply) * 100;
+    const communityWalletsBalance = {
+      nominal: communityWalletsValue,
+      percentage: parseFloat(communityWalletsPercentage.toFixed(4))
+    };
+
+    // Locked
+    const lockedEntry = stats.supplyAndCapital.supplyAllocation.find(entry => entry.name === "Locked");
+    const lockedValue = lockedEntry ? lockedEntry.value : 0;
+    const lockedPercentage = (lockedValue / totalSupply) * 100;
+    const currentLockedOnSlowWallets = {
+      nominal: lockedValue,
+      percentage: parseFloat(lockedPercentage.toFixed(4))
+    };
+
+    const totalBurned = {
+      nominal: 100_000_000_000 - totalSupply,
+      percentage: (100_000_000_000 - totalSupply) / 100_000_000_000
+    }
+
+    const lastEpochTotalUnlockedAmount = {
+      nominal: stats.lastEpochTotalUnlockedAmount,
+      percentage: (stats.lastEpochTotalUnlockedAmount / totalSupply) * 100
+    }
+
+    const lastEpochReward = {
+      nominal: stats.pofValues.nominalRewardOverTime[stats.pofValues.nominalRewardOverTime.length - 1].value,
+      percentage: (stats.pofValues.nominalRewardOverTime[stats.pofValues.nominalRewardOverTime.length - 1].value / totalSupply) * 100
+    }
+
+
+    // return 'ok';
+    
     // return stats;
     return {
-      burnOverTime: [
-        { timestamp: 1704842008, value: 418674 },
-        { timestamp: 1704928408, value: 431909 },
-        { timestamp: 1705014808, value: 483166 },
-        { timestamp: 1705101208, value: 503020 },
-        { timestamp: 1705187608, value: 471029 },
-        { timestamp: 1705274008, value: 520192 },
-        { timestamp: 1705360408, value: 580000 },
-        { timestamp: 1705446808, value: 620000 },
-      ],
-      unlockedOverTime: [
-        { timestamp: 1704842008, value: 550000 },
-        { timestamp: 1704928408, value: 580000 },
-        { timestamp: 1705014808, value: 600000 },
-        { timestamp: 1705101208, value: 620000 },
-        { timestamp: 1705187608, value: 640000 },
-        { timestamp: 1705274008, value: 650000 },
-        { timestamp: 1705360408, value: 630000 },
-        { timestamp: 1705446808, value: 660000 },
-      ],
+      // charts
+      slowWalletsCountOverTime: stats.slowWalletsCountOverTime,
+      burnOverTime: stats.burnOverTime,
+      accountsOnChainOverTime: stats.accountsOnChainOverTime,
+      supplyAllocation: stats.supplyAndCapital.supplyAllocation,
+      individualsCapital: stats.supplyAndCapital.individualsCapital,
+      communityCapital: stats.supplyAndCapital.communityCapital,
+      communityWalletsBalanceBreakdown: stats.communityWalletsBalanceBreakdown,
+      rewardsOverTime: stats.pofValues.nominalRewardOverTime, // net rewards? also available on the pofValues object
+      clearingBidoverTime: stats.pofValues.clearingBidOverTime, // net rewards? also available on the pofValues object
+      
+      // kpis
+      circulatingSupply,
+      totalBurned,
+      communityWalletsBalance,
+      currentSlowWalletsCount: stats.slowWalletsCountOverTime[stats.slowWalletsCountOverTime.length - 1].value,
+      currentLockedOnSlowWallets,
+      lastEpochTotalUnlockedAmount,
+      lastEpochReward,
+      currentClearingBid: (stats.pofValues.clearingBidOverTime[stats.pofValues.clearingBidOverTime.length - 1].value) / 10,
+
+      
+
+      // unlockedOverTime: [
+      //   { timestamp: 1704842008, value: 550000 },
+      //   { timestamp: 1704928408, value: 580000 },
+      //   { timestamp: 1705014808, value: 600000 },
+      //   { timestamp: 1705101208, value: 620000 },
+      //   { timestamp: 1705187608, value: 640000 },
+      //   { timestamp: 1705274008, value: 650000 },
+      //   { timestamp: 1705360408, value: 630000 },
+      //   { timestamp: 1705446808, value: 660000 },
+      // ],
       circulatingSupplyOverTime: [
         { timestamp: 1705446808, value: 1000000 },
         { timestamp: 1705360408, value: 1050000 },
@@ -96,23 +154,13 @@ export class StatsController {
           Circulating: 5.208753199480319,
         },
       ],
-      communityWalletsBalanceOverTime: [
-        { timestamp: 1704842008, value: 1000000 },
-        { timestamp: 1704928408, value: 1050000 },
-        { timestamp: 1705014808, value: 1100000 },
-        { timestamp: 1705101208, value: 1150000 },
-        { timestamp: 1705187608, value: 1200000 },
-      ],
-      rewardsOverTime: [
-        { timestamp: 1704842008, value: 900 },
-        { timestamp: 1704928408, value: 950 },
-        { timestamp: 1705014808, value: 1000 },
-        { timestamp: 1705101208, value: 1050 },
-        { timestamp: 1705187608, value: 1100 },
-        { timestamp: 1705274008, value: 1000 },
-        { timestamp: 1705360408, value: 1200 },
-        { timestamp: 1705446808, value: 1150 },
-      ],
+      // communityWalletsBalanceOverTime: [
+      //   { timestamp: 1704842008, value: 1000000 },
+      //   { timestamp: 1704928408, value: 1050000 },
+      //   { timestamp: 1705014808, value: 1100000 },
+      //   { timestamp: 1705101208, value: 1150000 },
+      //   { timestamp: 1705187608, value: 1200000 },
+      // ],
       seatsOverTime: [
         { timestamp: 1704842008, value: 9 },
         { timestamp: 1704928408, value: 9 },
@@ -122,55 +170,7 @@ export class StatsController {
         { timestamp: 1705274008, value: 10 },
         { timestamp: 1705360408, value: 11 },
         { timestamp: 1705446808, value: 12 },
-      ],
-      supplyAllocation: [
-        { name: "Community Wallets", value: 44776366902.9375 },
-        { name: "Locked", value: 7500584480.351093 },
-        { name: "Infrastructure escrow", value: 38573288582.73144 },
-        { name: "Circulating", value: 9002769502.90007 },
-      ],
-      individualsCapital: [
-        { name: "Locked", value: 7500584480.351093 },
-        { name: "Circulating", value: 9002769502.90007 },
-      ],
-      communityCapital: [
-        { name: "Community Wallets", value: 44776366902.9375 },
-        { name: "Infrastructure escrow", value: 38573288582.73144 },
-      ],
-      communityWalletsSupply: [
-        {
-          name: "Engineering Fund, tool-scrubbers-guild",
-          value: 2225922774.69,
-        },
-        { name: "The Iqlusion Engineering Program", value: 1591295804.26 },
-        {
-          name: "FTW: Ongoing Full-Time Workers Program",
-          value: 5789640475.77,
-        },
-        { name: "A Good List", value: 4067688590.11 },
-        { name: "Social Infrastructure Program", value: 1553552643.67 },
-        { name: "Danish Red Cross Humanitarian Fund", value: 3870872750.48 },
-        { name: "Application Studio", value: 3804152053.36 },
-        { name: "Moonshot Program", value: 1784214134.79 },
-        { name: "Human Rewards Program", value: 4412617579.07 },
-        {
-          name: "RxC Research and Experimentation (0L Fund)",
-          value: 53107904.41,
-        },
-        { name: "University of Toronto MSRG", value: 1304606575.65 },
-        { name: "Deep Technology Innovation Program", value: 2782442175.47 },
-        { name: "Working Group Key Roles", value: 4759886538.29 },
-      ],
-      slowWalletsOverTime: [
-        { timestamp: 1704842008, value: 1117 },
-        { timestamp: 1704928408, value: 1125 },
-        { timestamp: 1705014808, value: 1125 },
-        { timestamp: 1705101208, value: 1128 },
-        { timestamp: 1705187608, value: 1162 },
-        { timestamp: 1705274008, value: 1163 },
-        { timestamp: 1705360408, value: 1163 },
-        { timestamp: 1705446808, value: 1190 },
-      ],
+      ],      
       dailyTransactedVolume: {
         "Slow Wallets": [
           { timestamp: 1704842008, value: 1117 },
@@ -215,28 +215,6 @@ export class StatsController {
           "System Operations",
         ],
       },
-      accountsOnChainOverTime: [
-        { timestamp: 1704842008, value: 500 },
-        { timestamp: 1704928408, value: 520 },
-        { timestamp: 1705014808, value: 560 },
-        { timestamp: 1705101208, value: 580 },
-        { timestamp: 1705187608, value: 610 },
-        { timestamp: 1705274008, value: 630 },
-        { timestamp: 1705360408, value: 660 },
-        { timestamp: 1705446808, value: 680 },
-        { timestamp: 1705533208, value: 710 },        
-        { timestamp: 1705619608, value: 730 },
-        { timestamp: 1705706008, value: 750 },
-        { timestamp: 1705792408, value: 780 },
-        { timestamp: 1705878808, value: 800 },
-        { timestamp: 1705965208, value: 830 },
-        { timestamp: 1706051608, value: 860 },
-        { timestamp: 1706138008, value: 890 },
-        { timestamp: 1706224408, value: 920 },
-        { timestamp: 1706310808, value: 950 },
-        { timestamp: 1706397208, value: 980 },
-        { timestamp: 1706483608, value: 1000 },
-      ],
       liquidityConcentrationLiquid: [
         { name: "0 - 250", value: 8491 },
         { name: "251 - 500", value: 393 },
@@ -282,25 +260,12 @@ export class StatsController {
         ],
       },
 
-      circulatingSupply: { nominal: 9002769502.90007, percentage: 9.0027 },
-      totalBurned: { nominal: 186072011.027, percentage: 0.0018 },
       changeInCirculatingSupply: { nominal: -25029, percentage: -0.0025 },
       lastEpochBurn: { nominal: 500000, percentage: 0.00005 },
-      currentLockedOnSlowWallets: {
-        nominal: 7500584480.351093,
-        percentage: 7.5,
-      },
-      lastEpochUnlocked: { nominal: 600000, percentage: 0.0006 },
-      communityWalletsBalance: {
-        nominal: 44776366902.9375,
-        percentage: 44.7763,
-      },
-      communityWalletsChange: { nominal: 600000, percentage: 0.0006 },
+      // communityWalletsChange: { nominal: 600000, percentage: 0.0006 },
       lastEpochRewards: { nominal: 3117, percentage: 0.00003 },
-      currentWinningBid: 2703,
       currentSeatCount: 15,
-      currenttimestamp: 17050148086,
-      currentSlowWalletsCount: 1190,
+      currenttimestamp: 17050148086,      
     };
   }
 }

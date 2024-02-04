@@ -9,7 +9,11 @@ export interface NameValue {
 }
 
 export interface Stats {
-  slowWalletsOverTime: TimestampValue[];
-  totalSupply: number;
-  totalSlowWalletLocked: number;
+  slowWalletsCountOverTime: TimestampValue[];
+  burnOverTime: TimestampValue[];
+  accountsOnChainOverTime: TimestampValue[];
+  supplyAndCapital: any;
+  communityWalletsBalanceBreakdown: NameValue[];
+  lastEpochTotalUnlockedAmount: number;
+  pofValues: any;
 }

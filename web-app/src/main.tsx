@@ -15,9 +15,9 @@ posthog.init(
 );
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <PostHogProvider client={posthog}>
       <App />
     </PostHogProvider>
-  </React.StrictMode>
+  // </React.StrictMode>
 );

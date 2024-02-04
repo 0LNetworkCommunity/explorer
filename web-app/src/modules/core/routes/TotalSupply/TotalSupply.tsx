@@ -1,36 +1,72 @@
 import { FC, useEffect, useState } from "react";
 import axios from "axios";
-
-import Chart from "../../../ui/Chart";
-import { Time } from "lightweight-charts";
+import ReactECharts from "echarts-for-react";
 import clsx from "clsx";
 
 const TotalSupply: FC = () => {
-  const [data, setData] = useState<{
-    time: Time;
-    value: number;
-  }[]>();
+  const [options, setOptions] = useState<any>();
 
   useEffect(() => {
     const load = async () => {
-      const res = await axios({
-        url: `${import.meta.env.VITE_API_HOST}/total-supply`,
+      const res = await axios<[number, number][]>({
+        url: `${import.meta.env.VITE_DATA_API_HOST}/total-supply`,
       });
-      setData(res.data);
+
+      const data = res.data.map((it) => [it[0] * 1e3, it[1]]);
+
+      setOptions({
+        animation: false,
+        grid: { top: 28, right: 30, bottom: 80, left: 120 },
+        xAxis: {
+          type: "time",
+        },
+        yAxis: {
+          type: "value",
+          scale: true,
+        },
+        series: [
+          {
+            data,
+            type: "line",
+          },
+        ],
+        tooltip: {
+          trigger: "axis",
+        },
+        dataZoom: [
+          {
+            type: "inside",
+            start: 0,
+            end: 10,
+          },
+          {
+            start: 0,
+            end: 10,
+          },
+        ],
+      });
     };
     load();
   }, []);
 
   return (
-    <div className="p-4">
-      <Chart
-        className={clsx(
-          "w-full rounded-md shadow overflow-hidden h-[800px]",
-          "bg-white"
-        )}
-        data={data}
-      />
-    </div>
+    <>
+      {options && (
+        <div className="p-4">
+          <div
+            className={clsx(
+              "h-[800px] w-full overflow-hidden rounded-md shadow",
+              "bg-white",
+            )}
+          >
+            <ReactECharts
+              option={options}
+              style={{ height: "100%", width: "100%" }}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

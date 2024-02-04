@@ -1,7 +1,16 @@
-import ReactECharts from 'echarts-for-react'
-import { FC } from 'react';
+import ReactECharts from "echarts-for-react";
+import { FC } from "react";
 
-const colorPalette = ['#E8595C', '#188BE9', '#002FA7', '#80DED9', '#F0F7FE', '#FC8452', '#9A60B4', '#EA7CCC'];
+const colorPalette = [
+  "#E8595C",
+  "#188BE9",
+  "#002FA7",
+  "#80DED9",
+  "#F0F7FE",
+  "#FC8452",
+  "#9A60B4",
+  "#EA7CCC",
+];
 
 interface Props {
   title: string;

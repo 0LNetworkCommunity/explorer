@@ -1,25 +1,17 @@
 import { FC } from "react";
-import ReactECharts from 'echarts-for-react'
+import ReactECharts from "echarts-for-react";
+import ChartContainer from "./ChartContainer";
 
 interface Props {
   title: string;
   data: {
-    timestamp: number
+    timestamp: number;
     value: number;
   }[];
 }
 
 const LineAndBarChart: FC<Props> = ({ data, title }) => {
   const option = {
-    title: {
-      text: title,
-      left: "center",
-      textStyle: {
-        color: "#333",
-        fontWeight: "bold",
-        fontSize: 16,
-      },
-    },
     tooltip: {
       trigger: "axis",
       axisPointer: {
@@ -97,7 +89,11 @@ const LineAndBarChart: FC<Props> = ({ data, title }) => {
     ],
   };
 
-  return <ReactECharts option={option} style={{ height: 400 }} />;
+  return (
+    <ChartContainer title={title}>
+      <ReactECharts option={option} style={{ height: 400 }} />
+    </ChartContainer>
+  );
 };
 
 export default LineAndBarChart;

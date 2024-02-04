@@ -1,5 +1,6 @@
 import { FC } from "react";
-import ReactECharts from 'echarts-for-react'
+import ReactECharts from "echarts-for-react";
+import ChartContainer from "./ChartContainer";
 
 interface Props {
   title: string;
@@ -8,15 +9,7 @@ interface Props {
 
 const LineAndAreaChart: FC<Props> = ({ data, title }) => {
   const option = {
-    title: {
-      text: title,
-      left: "center",
-      textStyle: {
-        color: "#333",
-        fontWeight: "bold",
-        fontSize: 16,
-      },
-    },
+    animation: false,
     tooltip: {
       trigger: "axis",
       axisPointer: {
@@ -91,7 +84,11 @@ const LineAndAreaChart: FC<Props> = ({ data, title }) => {
     ],
   };
 
-  return <ReactECharts option={option} style={{ height: 400 }} />;
+  return (
+    <ChartContainer title={title}>
+      <ReactECharts option={option} style={{ height: 400 }} />
+    </ChartContainer>
+  );
 };
 
 export default LineAndAreaChart;

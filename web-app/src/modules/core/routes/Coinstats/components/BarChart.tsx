@@ -11,15 +11,7 @@ interface Props {
 
 const BarChart: FC<Props> = ({ data, title }) => {
   const option = {
-    title: {
-      text: title,
-      left: "center",
-      textStyle: {
-        color: "#333",
-        fontWeight: "bold",
-        fontSize: 16,
-      },
-    },
+    animation: false,
     tooltip: {
       trigger: "axis",
       axisPointer: {
@@ -58,7 +50,14 @@ const BarChart: FC<Props> = ({ data, title }) => {
     ],
   };
 
-  return <ReactECharts option={option} style={{ height: 400 }} />;
+  return (
+    <div className="relative overflow-hidden rounded-lg bg-white px-4 pb-12 pt-5 shadow sm:px-6 sm:pt-6">
+      <dt className="text-sm font-medium leading-6 text-gray-500">{title}</dt>
+      <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
+        <ReactECharts option={option} style={{ height: 400 }} />
+      </dd>
+    </div>
+  );
 };
 
 export default BarChart;

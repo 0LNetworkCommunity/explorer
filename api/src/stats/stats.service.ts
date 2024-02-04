@@ -205,7 +205,6 @@ export class StatsService {
     return balanceBreakdown;
   }
 
-
   private async getPOFValues(): Promise<{
     clearingBidOverTime: Array<TimestampValue>;
     nominalRewardOverTime: Array<TimestampValue>;
@@ -263,9 +262,6 @@ export class StatsService {
       throw error;
     }
   }
-
-
-
 
   private async getBurnsOverTime(): Promise<TimestampValue[]> {
     try {

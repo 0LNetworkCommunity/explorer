@@ -1,5 +1,7 @@
 import { FC } from "react";
 import ReactECharts from "echarts-for-react";
+import Money from "../../../../ui/Money";
+import ChartContainer from "./ChartContainer";
 
 const colorPalette = [
   "#E8595C",
@@ -21,29 +23,14 @@ const colorMapping = {
 
 interface Props {
   data: { name: keyof typeof colorMapping; value: number }[];
-  title: string;
+  title?: string;
 }
 
 const PieChart: FC<Props> = ({ data, title }) => {
   const total = data.reduce((sum, item) => sum + item.value, 0);
-  const formattedTotal = total.toLocaleString();
 
   const option = {
-    title: {
-      text: title,
-      subtext: `Total: Ƚ${formattedTotal}`,
-      left: "center",
-      textStyle: {
-        color: "#333",
-        fontWeight: "bold",
-        fontSize: 16,
-      },
-      subtextStyle: {
-        color: "#666",
-        fontSize: 12,
-        fontWeight: "bold",
-      },
-    },
+    animation: false,
     tooltip: {
       trigger: "item",
       formatter: "{b}: Ƚ{c}B ({d}%)",
@@ -84,7 +71,14 @@ const PieChart: FC<Props> = ({ data, title }) => {
     ],
   };
 
-  return <ReactECharts option={option} style={{ height: 400 }} />;
+  return (
+    <ChartContainer title={title} subtitle={<Money>{total}</Money>}>
+      <ReactECharts
+        option={option}
+        style={{ height: 300 }}
+      />
+    </ChartContainer>
+  );
 };
 
 export default PieChart;

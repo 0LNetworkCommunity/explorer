@@ -1,4 +1,4 @@
-import { FC, useEffect, useState, useRef } from 'react';
+import { FC } from 'react';
 
 import BarChart from './components/BarChart';
 import BarChartLockedConcentration from './components/BarChartLockedConcentration';
@@ -17,16 +17,7 @@ interface Props {
 }
 
 const ChartComponent: FC<Props> = ({ type, data, title }) => {
-  const [chartReady, setChartReady] = useState(false);
-  const chartRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (chartRef.current && chartRef.current.clientHeight && chartRef.current.clientWidth) {
-      setChartReady(true);
-    }
-  }, []);
-
-  const renderChart = () => {
+  const chart = (() => {
     switch (type) {
       case 'BarChart':
         return <BarChart data={data} title={title} />;
@@ -49,11 +40,11 @@ const ChartComponent: FC<Props> = ({ type, data, title }) => {
       default:
         return null;
     }
-  };
+  })();
 
   return (
-    <div ref={chartRef} className="chart-item">
-      {chartReady && renderChart()}
+    <div className="chart-item">
+      {chart}
     </div>
   );
 };

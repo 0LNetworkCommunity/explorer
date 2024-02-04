@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 npm run build
 
 CI_COMMIT_SHA="$(git rev-parse --short HEAD)"

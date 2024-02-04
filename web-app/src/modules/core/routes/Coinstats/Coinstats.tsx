@@ -28,10 +28,6 @@ const Coinstats = () => {
     load();
   }, []);
 
-  if (!data) {
-    return null;
-  }
-
   return (
     <div className="p-4">
       {(!data && loading) && <div>loading...</div>}

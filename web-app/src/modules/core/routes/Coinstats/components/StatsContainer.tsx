@@ -11,8 +11,9 @@ const StatsContainer: FC<Props> = ({ columns, children }) => {
       className={clsx(
         "mt-2",
         "rounded-lg bg-white shadow overflow-hidden",
-        "mx-auto grid grid-cols-1 gap-px bg-gray-900/5",
-        `lg:grid-cols-${columns}`
+        "mx-auto grid bg-gray-900/5",
+        `lg:grid-cols-${columns} lg:divide-x`,
+        `sm:grid-cols-1 sm:divide-y`
       )}
     >
       {children}

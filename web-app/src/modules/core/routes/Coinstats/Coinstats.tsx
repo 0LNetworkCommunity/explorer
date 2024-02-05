@@ -75,6 +75,19 @@ const Coinstats = () => {
 
             <dl className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
               <ChartComponent
+                type="BarChartSupplyConcentration"
+                title="Indidividuals Liquid Capital Concentration"
+                data={data.liquidSupplyConcentration}
+              />
+              <ChartComponent
+                type="BarChartLockedConcentration"
+                title="Slow Wallets Locked Capital Concentration"
+                data={data.lockedSupplyConcentration}
+              />
+            </dl>
+
+            <dl className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+              <ChartComponent
                 type="BarChart"
                 title="Accounts on chain over time"
                 data={data.accountsOnChainOverTime}

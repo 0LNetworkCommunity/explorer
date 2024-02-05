@@ -59,7 +59,7 @@ const BarChartSupplyConcentration: FC<Props> = ({ data, title }) => {
         {title}
       </dt>
       <dd className={clsx("text-gray-700", "text-xs font-medium")}>
-        Unique accounts on chain in each size category
+        Unique accounts on chain in each balance size category
       </dd>
       <dd className="w-full flex-none text-3xl font-medium leading-10 tracking-tight text-gray-900">
         <ReactECharts option={option} style={{ height: 400 }} />

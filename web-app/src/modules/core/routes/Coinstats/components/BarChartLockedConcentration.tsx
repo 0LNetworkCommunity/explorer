@@ -1,35 +1,25 @@
-import { FC } from "react";
-import ReactECharts from "echarts-for-react";
+import React from 'react';
+import ReactECharts from 'echarts-for-react';
+import clsx from 'clsx';
 
-interface Props {
-  data: {
-    accountsLocked: {
-      name: string;
-      value: number;
-    }[];
-    avgTotalVestingTime: {
-      value: number;
-    }[];
-  };
+interface LockedConcentrationData {
+  accountsLocked: {
+    name: string;
+    value: number;
+  }[];
+  avgTotalVestingTime: {
+    value: number;
+  }[];
+}
+
+interface BarChartLockedConcentrationProps {
+  data: LockedConcentrationData;
   title: string;
 }
 
-const BarChartLockedConcentration: FC<Props> = ({ data, title }) => {
+const BarChartLockedConcentration: React.FC<BarChartLockedConcentrationProps> = ({ data, title }) => {
+  // Placeholder for chart option setup, as you've already implemented this.
   const option = {
-    title: {
-      text: title,
-      subtext: "Unique slow wallets on chain in each size category",
-      left: "center",
-      textStyle: {
-        color: "#333",
-        fontWeight: "bold",
-        fontSize: 16,
-      },
-      subtextStyle: {
-        color: "#555",
-        fontSize: 12,
-      },
-    },
     tooltip: {
       trigger: "axis",
       axisPointer: {
@@ -94,7 +84,19 @@ const BarChartLockedConcentration: FC<Props> = ({ data, title }) => {
     ],
   };
 
-  return <ReactECharts option={option} style={{ height: 400 }} />;
+  return (
+    <div className="relative overflow-hidden rounded-lg bg-white px-4 pb-12 pt-5 shadow sm:px-6 sm:pt-6">
+      <dt className="text-sm font-medium leading-6 text-gray-500">
+        {title}
+      </dt>
+      <dd className={clsx("text-gray-700", "text-xs font-medium")}>
+        Slow wallets on chain in each balance size category
+      </dd>
+      <dd className="mt-2">
+        <ReactECharts option={option} style={{ height: 400 }} />
+      </dd>
+    </div>
+  );
 };
 
 export default BarChartLockedConcentration;

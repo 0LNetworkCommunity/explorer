@@ -8,6 +8,14 @@ export interface NameValue {
   value: number;
 }
 
+export type BinRange = { name: string; value: number };
+
+export type WalletBalance = { address: string; balance: number };
+export type LockedBalance = { address: string; lockedBalance: number };
+export type BalanceItem = { balance: number };
+
+
+
 export interface Stats {
   slowWalletsCountOverTime: TimestampValue[];
   burnOverTime: TimestampValue[];
@@ -16,4 +24,9 @@ export interface Stats {
   communityWalletsBalanceBreakdown: NameValue[];
   lastEpochTotalUnlockedAmount: number;
   pofValues: any;
+  liquidSupplyConcentration: BinRange[];
+  lockedSupplyConcentration: {
+    accountsLocked: BinRange[];
+    avgTotalVestingTime: BinRange[];
+  };
 }

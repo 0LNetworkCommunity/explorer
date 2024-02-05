@@ -66,6 +66,8 @@ export class StatsController {
       communityWalletsBalanceBreakdown: stats.communityWalletsBalanceBreakdown,
       rewardsOverTime: stats.pofValues.nominalRewardOverTime, // net rewards? also available on the pofValues object
       clearingBidoverTime: stats.pofValues.clearingBidOverTime, // net rewards? also available on the pofValues object
+      liquidSupplyConcentration: stats.liquidSupplyConcentration,
+      lockedSupplyConcentration: stats.lockedSupplyConcentration,
       
       // kpis
       circulatingSupply,

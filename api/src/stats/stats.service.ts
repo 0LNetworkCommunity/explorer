@@ -1,7 +1,8 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { Stats, TimestampValue, NameValue } from "./types.js";
+import { Stats, TimestampValue, NameValue, WalletBalance, LockedBalance, BinRange, BalanceItem } from "./types.js";
 import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
 import { OlService } from "../ol/ol.service.js";
+import { CompressionType } from "@aws-sdk/client-s3";
 
 
 
@@ -13,17 +14,16 @@ export class StatsService {
   @Inject()
   private readonly olService: OlService;
 
-  public async getStats() /* : Promise<Stats> */ {
-    // const communityWallets = await this.olService.getCommunityWallets();
-    // console.log(communityWallets);
-
-    const slowWalletsCountOverTime = await this.getSlowWalletsCountOverTime(); // DONE
-    const burnOverTime = await this.getBurnsOverTime(); // DONE
-    const accountsOnChainOverTime = await this.getAccountsOnChainOverTime(); // DONE
-    const supplyAndCapital = await this.getSupplyAndCapital(); // DONE
-    const communityWalletsBalanceBreakdown = await this.getCommunityWalletsBalanceBreakdown(); // DONE
-    const lastEpochTotalUnlockedAmount = await this.getLastEpochTotalUnlockedAmount(); // DONE
+  public async getStats(): Promise<Stats> {
+    const slowWalletsCountOverTime = await this.getSlowWalletsCountOverTime();
+    const burnOverTime = await this.getBurnsOverTime();
+    const accountsOnChainOverTime = await this.getAccountsOnChainOverTime();
+    const supplyAndCapital = await this.getSupplyAndCapital();
+    const communityWalletsBalanceBreakdown = await this.getCommunityWalletsBalanceBreakdown();
+    const lastEpochTotalUnlockedAmount = await this.getLastEpochTotalUnlockedAmount();
     const pofValues = await this.getPOFValues(); // Empty table?
+    const liquidSupplyConcentration = await this.getLiquidSupplyConcentration()
+    const lockedSupplyConcentration = await this.calculateLiquidityConcentrationLocked()
 
     return {
       slowWalletsCountOverTime,
@@ -33,13 +33,9 @@ export class StatsService {
       communityWalletsBalanceBreakdown,
       lastEpochTotalUnlockedAmount,
       pofValues,
+      liquidSupplyConcentration,
+      lockedSupplyConcentration
     }
-
-    // const liquidityConcentrationLiquid = await this.getLiquidityConcentrationLiquid()
-    // console.log('liquidityConcentrationLiquid:', liquidityConcentrationLiquid);
-
-
-    // return { totalSupply, totalSlowWalletLocked };
   }
 
   private async getWalletsBalances(addresses: string[]) {
@@ -508,66 +504,244 @@ export class StatsService {
     }
   }
 
-  private async getLiquidityConcentrationLiquid(): Promise<NameValue[]> {
+  // Liquidity concentration
+
+  private async getLiquidSupplyConcentration() {
+    // Fetch community wallets to exclude
+    const communityWallets = await this.olService.getCommunityWallets();
+    
+    // Fetch slow wallets' unlocked balances
+    const slowWalletsUnlockedBalances = await this.getSlowWalletsUnlockedBalances();
+    
+    // Fetch all other wallets' balances, excluding community wallets and including adjustments for slow wallets
+    const allWalletsBalances = await this.getAllWalletsBalances(communityWallets, slowWalletsUnlockedBalances);
+    
+    // Bin the balances into the specified ranges
+    const bins = this.binBalances(allWalletsBalances);
+    
+    return bins;
+  }
+
+  private async getSlowWalletsUnlockedBalances(): Promise<{ address: string; unlockedBalance: number }[]> {
     try {
-      // Fetch community wallet addresses
-      const communityWallets = await this.olService.getCommunityWallets();
-      const formattedCommunityWallets = communityWallets
-        .map(address => `reinterpretAsUInt256('${address}')`)
-        .join(', ');
-
-      // Dynamically build the part of the query that excludes community wallets
-      const exclusionPart = communityWallets.length > 0 ? `AND address NOT IN (${formattedCommunityWallets})` : '';
-
-
-      const queryForRanges = `
-        SELECT 
-          CASE
-            WHEN balance <= 250 THEN '0 - 250'
-            WHEN balance <= 500 THEN '251 - 500'
-            WHEN balance <= 2500 THEN '501 - 2,500'
-            WHEN balance <= 5000 THEN '2,501 - 5,000'
-            WHEN balance <= 25000 THEN '5,001 - 25,000'
-            WHEN balance <= 50000 THEN '25,001 - 50,000'
-            WHEN balance <= 250000 THEN '50,001 - 250,000'
-            WHEN balance <= 500000 THEN '250,001 - 500,000'
-            WHEN balance <= 2500000 THEN '500,001 - 2,500,000'
-            WHEN balance <= 5000000 THEN '2,500,001 - 5,000,000'
-            WHEN balance <= 25000000 THEN '5,000,001 - 25,000,000'
-            ELSE '25,000,001 and above'
-            END as range,
-          count(*) as count
-          FROM (
-            SELECT 
-              address, 
-              (balance - IF(sw.unlocked IS NOT NULL, sw.unlocked, 0)) / 1e6 as balance
-            FROM coin_balance cb
-            LEFT JOIN (
-              SELECT 
-                address, 
-                SUM(unlocked) as unlocked
-              FROM slow_wallet
-              GROUP BY address
-            ) sw ON cb.address = sw.address
-            WHERE 1 = 1 
-            ${exclusionPart}
-          ) AS balance_adjusted
-          GROUP BY range`;
-
-      // Execute the query
+      const query = `
+        SELECT
+          hex(SW.address) AS address,
+          IF(latest_balance > max(SW.unlocked), max(SW.unlocked) / 1e6, latest_balance / 1e6) AS unlocked_balance
+        FROM
+          slow_wallet SW
+        JOIN
+          (SELECT 
+            address, 
+            argMax(balance, timestamp) as latest_balance
+          FROM coin_balance
+          WHERE coin_module = 'libra_coin'
+          GROUP BY address) AS CB
+        ON SW.address = CB.address
+        GROUP BY SW.address, latest_balance
+      `;
+  
       const resultSet = await this.clickhouseService.client.query({
-        query: queryForRanges,
+        query: query,
         format: "JSONEachRow",
       });
-
-      // Parse the results
-      const results = await resultSet.json() as NameValue[];
-
-      return results;
+  
+      const rows = await resultSet.json<{ address: string; unlocked_balance: number }[]>();
+      
+      // Adjust the balance based on the unlocked amount
+      return rows.map(row => ({
+        address: row.address,
+        unlockedBalance: Math.max(0, row.unlocked_balance), // Corrected field name to match the query result
+      }));
     } catch (error) {
-      console.error('Error in getLiquidityConcentrationLiquid:', error);
+      console.error('Error in getSlowWalletsUnlockedBalances:', error);
+      throw error;
+    }
+  }
+  
+  private async getAllWalletsBalances(
+    communityWallets: string[],
+    slowWalletsUnlockedBalances: { address: string; unlockedBalance: number }[]
+  ): Promise<{ address: string; balance: number }[]> {
+    try {
+      // Convert community wallets to a format suitable for the SQL query
+      const communityWalletsFormatted = communityWallets.map(wallet => `'${wallet}'`).join(',');
+  
+      // Convert slow wallets to a map for easy access
+      const slowWalletsMap = new Map(slowWalletsUnlockedBalances.map(wallet => [wallet.address, wallet.unlockedBalance]));
+  
+      // Query to fetch balances for all wallets, excluding community wallets
+      const query = `
+        SELECT
+          hex(address) AS address,
+          argMax(balance, timestamp) / 1e6 AS balance
+          FROM coin_balance
+          WHERE coin_module = 'libra_coin'
+          AND NOT has([${communityWalletsFormatted}], hex(address))
+        GROUP BY address
+      `;
+  
+      const resultSet = await this.clickhouseService.client.query({
+        query: query,
+        format: "JSONEachRow",
+      });
+  
+      let rows = await resultSet.json<{ address: string; balance: number }[]>();
+  
+      // Adjust balances for slow wallets
+      rows = rows.map(row => {
+        const unlockedBalance = slowWalletsMap.get(row.address);
+        // Check if there's an unlocked balance, if not, use the original balance
+        if (unlockedBalance !== undefined) {
+          return { address: row.address, balance: unlockedBalance };
+        }
+        return row;
+      });
+  
+      return rows;
+    } catch (error) {
+      console.error('Error in getAllWalletsBalances:', error);
       throw error;
     }
   }
 
+  private binGenericBalances(balances: BalanceItem[], ranges: { min: number, max: number }[]): BinRange[] {
+    const bins: BinRange[] = ranges.map((range, index) => {
+      let name = `${range.min} - ${range.max}`;
+      if (index === ranges.length - 1) { // Handle the "and above" case for the last bin
+        name = `${range.min} and above`;
+      }
+      return { name, value: 0 };
+    });
+  
+    balances.forEach(item => {
+      const binIndex = ranges.findIndex(range => item.balance >= range.min && (item.balance <= range.max || range.max === Infinity));
+      if (binIndex !== -1) {
+        bins[binIndex].value += 1;
+      }
+    });
+  
+    return bins;
+  }
+  
+  private binBalances(allWalletsBalances: WalletBalance[]): BinRange[] {
+    const balanceItems: BalanceItem[] = allWalletsBalances.map(wallet => ({ balance: wallet.balance }));
+    return this.binGenericBalances(balanceItems, [
+      { min: 0, max: 250 },
+      { min: 251, max: 500 },
+      { min: 501, max: 2500 },
+      { min: 2501, max: 5000 },
+      { min: 5001, max: 25000 },
+      { min: 25001, max: 50000 },
+      { min: 50001, max: 250000 },
+      { min: 250001, max: 500000 },
+      { min: 500001, max: 2500000 },
+      { min: 2500001, max: 5000000 },
+      { min: 5000001, max: 25000000 },
+      { min: 25000001, max: 50000000 },
+      { min: 50000001, max: 100000000 },
+      { min: 100000001, max: Infinity },
+    ]);
+  }
+
+  // Locked concentration
+  // Main method to calculate liquidity concentration for locked balances
+  private async calculateLiquidityConcentrationLocked(): Promise<any> {
+    const lockedBalances = await this.getLockedBalancesForSlowWallets();
+    const accountsLocked = this.calculateLockedBalancesConcentration(lockedBalances);
+    const avgTotalVestingTime = this.calculateAvgTotalVestingTime(accountsLocked);
+    return {
+      accountsLocked,
+      avgTotalVestingTime,
+    };
+  }
+  
+  private async getLockedBalancesForSlowWallets(): Promise<LockedBalance[]> {
+    try {
+      const slowWalletAddresses = await this.getSlowWalletAddresses();
+      
+      const walletsBalances = await this.getWalletsBalances(slowWalletAddresses);
+      
+      const unlockedBalances = await this.getSlowWalletsUnlockedBalances();
+      
+      const lockedBalances = walletsBalances.map(wallet => {
+        const unlockedAmount = unlockedBalances.find(u => u.address === wallet.address)?.unlockedBalance || 0;
+        const lockedBalanceCalculation = wallet.balance - unlockedAmount;
+        
+        return {
+          address: wallet.address,
+          lockedBalance: Math.max(0, lockedBalanceCalculation), // Ensure locked balance is not negative
+        };
+      })
+      .filter(wallet => wallet.lockedBalance > 0); // Ensure wallets with zero locked balance are filtered out
+      
+  
+      return lockedBalances;
+    } catch (error) {
+      console.error('Error in getLockedBalancesForSlowWallets:', error);
+      throw error;
+    }
+  }  
+  
+  private async getSlowWalletAddresses(): Promise<string[]> {
+    try {
+      const query = `
+        SELECT DISTINCT hex(address) AS address
+        FROM slow_wallet
+      `;
+  
+      const resultSet = await this.clickhouseService.client.query({
+        query: query,
+        format: "JSONEachRow",
+      });
+  
+      const rows = await resultSet.json<{ address: string }[]>();
+  
+      const addresses = rows.map(row => row.address);
+  
+      return addresses;
+    } catch (error) {
+      console.error('Error in getSlowWalletAddresses:', error);
+      throw error;
+    }
+  }
+  
+  private calculateLockedBalancesConcentration(lockedBalances: LockedBalance[]): BinRange[] {
+    const balanceItems: BalanceItem[] = lockedBalances.map(wallet => ({ balance: wallet.lockedBalance }));
+    return this.binGenericBalances(balanceItems, [
+      { min: 50001, max: 250000 },
+      { min: 250001, max: 500000 },
+      { min: 500001, max: 2500000 },
+      { min: 2500001, max: 5000000 },
+      { min: 5000001, max: 15000000 },
+      { min: 1500001, max: 25000000 },
+      { min: 25000001, max: 40000000 },
+      { min: 40000001, max: 50000000 },
+      { min: 50000001, max: 100000000 },
+      { min: 100000001, max: Infinity },
+    ]);
+  }
+  
+  private calculateAvgTotalVestingTime(bins: BinRange[]): BinRange[] {
+    return bins.map(bin => {
+      // Extract the lower and upper bounds from the bin name
+      let lower, upper;
+      if (bin.name.includes("and above")) {
+        // For "and above" case, extract the lower bound and use it as both lower and upper for simplicity
+        lower = Number(bin.name.split(' ')[0]);
+        upper = lower; // This simplification might need adjustment based on actual data distribution
+      } else {
+        [lower, upper] = bin.name.split(' - ').map(Number);
+      }
+  
+      const middleValue = (lower + (upper || lower)) / 2;
+      // Calculate vesting time in days
+      const vestingDays = middleValue / 35000;
+      const vestingMonths = vestingDays / 30;
+      return {
+        name: bin.name,
+        value: Math.round(vestingMonths * 100) / 100 // Round to two decimal places for readability
+      };
+    });
+  }
 }

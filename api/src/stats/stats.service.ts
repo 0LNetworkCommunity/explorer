@@ -301,7 +301,7 @@ export class StatsService {
       }
 
       const baseTimestamp = new Date('2023-11-28T00:00:00Z').getTime() / 1000;
-      if (rows[0].timestamp === 0) {
+      if (rows[0].timestamp == 0) {
         rows[0].timestamp = baseTimestamp;
       }
 
@@ -418,6 +418,11 @@ export class StatsService {
         timestamp: parseInt(row.timestamp, 10) / 1_000_000,
         value: parseInt(row.value, 10),
       }));
+
+      const baseTimestamp = new Date('2023-11-28T00:00:00Z').getTime() / 1000;
+      if (slowWalletsOverTime[0].timestamp == 0) {
+        slowWalletsOverTime[0].timestamp = baseTimestamp;
+      }
 
       const result = slowWalletsOverTime.map(item => ({
         timestamp: Math.round(item.timestamp),

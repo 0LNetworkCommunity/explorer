@@ -285,6 +285,11 @@ export class StatsService {
         return [];
       }
 
+      const baseTimestamp = new Date('2023-11-28T00:00:00Z').getTime() / 1000;
+      if (rows[0].timestamp === 0) {
+        rows[0].timestamp = baseTimestamp;
+      }
+
       return rows.map(row => ({
         timestamp: row.timestamp,
         value: row.value,

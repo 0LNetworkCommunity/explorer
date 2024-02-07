@@ -35,7 +35,7 @@ const PieChart: FC<Props> = ({ data, title }) => {
       trigger: "item",
       formatter: (params) => {
         const value = params.value.toLocaleString('en-US');
-        return `${params.name}: $${value} (${params.percent}%)`;
+        return `${params.name}: Ƚ${value} (${params.percent}%)`;
       },
     },
     color: colorPalette,

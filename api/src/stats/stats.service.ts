@@ -1,3 +1,5 @@
+import NodeCache from 'node-cache';
+
 import { Inject, Injectable } from "@nestjs/common";
 import { Stats, TimestampValue, NameValue, WalletBalance, LockedBalance, BinRange, BalanceItem } from "./types.js";
 import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
@@ -14,7 +16,16 @@ export class StatsService {
   @Inject()
   private readonly olService: OlService;
 
+  private cache = new NodeCache({ stdTTL: 7200 }); // 2 hours (2 x 3600 seconds)
+
   public async getStats(): Promise<Stats> {
+
+    const cachedStats = this.cache.get('cachedStats');
+
+    if (cachedStats) {
+      return cachedStats as Stats;
+    }
+
     const slowWalletsCountOverTime = await this.getSlowWalletsCountOverTime();
     const burnOverTime = await this.getBurnsOverTime();
     const accountsOnChainOverTime = await this.getAccountsOnChainOverTime();
@@ -25,7 +36,7 @@ export class StatsService {
     const liquidSupplyConcentration = await this.getLiquidSupplyConcentration()
     const lockedSupplyConcentration = await this.calculateLiquidityConcentrationLocked()
 
-    return {
+    const packedStats = {
       slowWalletsCountOverTime,
       burnOverTime,
       accountsOnChainOverTime,
@@ -36,6 +47,10 @@ export class StatsService {
       liquidSupplyConcentration,
       lockedSupplyConcentration
     }
+
+    this.cache.set('cachedStats', packedStats);
+
+    return packedStats;
   }
 
   private async getWalletsBalances(addresses: string[]) {

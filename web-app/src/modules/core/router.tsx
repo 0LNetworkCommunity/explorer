@@ -14,6 +14,7 @@ import Test from "./routes/Test";
 import Module from "./routes/Account/Modules/Module";
 import Coinstats from "./routes/Coinstats";
 import TotalSupply from "./routes/TotalSupply";
+import CirculatingSupply from "./routes/CirculatingSupply";
 
 const router = createBrowserRouter([
   {
@@ -75,6 +76,10 @@ const router = createBrowserRouter([
       {
         path: "/total-supply",
         element: <TotalSupply />,
+      },
+      {
+        path: "/circulating-supply",
+        element: <CirculatingSupply />,
       },
       {
         path: "/test",

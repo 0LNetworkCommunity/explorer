@@ -20,6 +20,7 @@ interface BarChartLockedConcentrationProps {
 const BarChartLockedConcentration: React.FC<BarChartLockedConcentrationProps> = ({ data, title }) => {
   // Placeholder for chart option setup, as you've already implemented this.
   const option = {
+    animation: false,
     tooltip: {
       trigger: "axis",
       axisPointer: {

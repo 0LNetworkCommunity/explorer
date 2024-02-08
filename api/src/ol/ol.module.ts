@@ -33,27 +33,27 @@ const roles = process.env.ROLES!.split(",");
 
     BullModule.registerQueue({
       name: "ol-clickhouse-ingestor",
-      connection: redisClient(),
+      connection: redisClient,
     }),
 
     BullModule.registerQueue({
       name: "transformer",
-      connection: redisClient(),
+      connection: redisClient,
     }),
 
     BullModule.registerQueue({
       name: "ol-parquet-producer",
-      connection: redisClient(),
+      connection: redisClient,
     }),
 
     BullModule.registerQueue({
       name: "ol-version-batch",
-      connection: redisClient(),
+      connection: redisClient,
     }),
 
     BullModule.registerQueue({
       name: "ol-version",
-      connection: redisClient(),
+      connection: redisClient,
     }),
   ],
   providers: [

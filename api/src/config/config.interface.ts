@@ -1,4 +1,7 @@
 export interface Config {
+  cacheEnabled: boolean;
+  dataApiHost: string;
+
   info: InfoConfig;
   ol: OlConfig;
   s3: S3Config;

@@ -42,11 +42,7 @@ const ChartComponent: FC<Props> = ({ type, data, title }) => {
     }
   })();
 
-  return (
-    <div className="chart-item">
-      {chart}
-    </div>
-  );
+  return chart;
 };
 
 export default ChartComponent;

@@ -15,6 +15,7 @@ import { OlDbService } from '../ol-db/ol-db.service.js';
 import { ClickhouseService } from '../clickhouse/clickhouse.service.js';
 import { TransformerService } from "./transformer.service.js";
 import { NotPendingTransaction } from "./types.js";
+import Bluebird from "bluebird";
 
 const ZERO = new BN(0);
 const ONE = new BN(1);
@@ -79,7 +80,15 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   public async process(job: Job<VersionJobData, any, string>) {
     switch (job.name) {
       case "getMissingVersions":
-        await this.getMissingVersions();
+        try {
+          await Promise.race([
+            this.getMissingVersions(),
+            // 1m timeout to avoid blocking the queue
+            Bluebird.delay(1 * 60 * 1_000),
+          ]);
+        } catch (error) {
+          // fail silently to avoid accumulating failed repeating jobs
+        }
         break;
 
       case "version":
@@ -87,7 +96,15 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
         break;
 
       case "fetchLatestVersion":
-        await this.fetchLatestVersion();
+        try {
+          await Promise.race([
+            this.fetchLatestVersion(),
+            // 1m timeout to avoid blocking the queue
+            Bluebird.delay(1 * 60 * 1_000),
+          ]);
+        } catch (error) {
+          // fail silently to avoid accumulating failed repeating jobs
+        }
         break;
 
       default:

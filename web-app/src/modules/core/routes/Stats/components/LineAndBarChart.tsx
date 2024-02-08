@@ -12,6 +12,7 @@ interface Props {
 
 const LineAndBarChart: FC<Props> = ({ data, title }) => {
   const option = {
+    animation: false,
     tooltip: {
       trigger: "axis",
       axisPointer: {

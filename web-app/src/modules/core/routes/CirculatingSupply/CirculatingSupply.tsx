@@ -8,13 +8,13 @@ const CirculatingSupply: FC = () => {
 
   useEffect(() => {
     const load = async () => {
-      const res = await axios<{ timestamps: number[]; locked: number[] }>({
-        url: `${import.meta.env.VITE_DATA_API_HOST}/circulating-supply`,
+      const res = await axios<[number, number][]>({
+        url: `${import.meta.env.VITE_DATA_API_HOST}/locked-coins`,
       });
 
-      const data = res.data.timestamps.map((it, index) => [
-        it * 1e3,
-        res.data.locked[index] / 1e6,
+      const data = res.data.map((it ) => [
+        it[0] * 1e3,
+        it[1],
       ]);
 
       console.log(data);

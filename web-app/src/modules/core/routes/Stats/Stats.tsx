@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import ReactECharts from "echarts-for-react";
+
 import Money from "../../../ui/Money";
 import ChartComponent from "./ChartComponent";
 import StatItem from "./components/StatItem";
@@ -18,7 +20,14 @@ const Coinstats = () => {
     const load = async () => {
       try {
         setLoading(true);
-        setData(await getData());
+
+        const data = await getData();
+
+        const lockedCoins = data.lockedCoins.map((it: [number, number]) => [
+          it[0] * 1e3,
+          it[1],
+        ]);
+        setData({ ...data, lockedCoins});
       } catch (error) {
         console.error(error);
       } finally {
@@ -30,7 +39,7 @@ const Coinstats = () => {
 
   return (
     <div className="p-4">
-      {(!data && loading) && <div>loading...</div>}
+      {!data && loading && <div>loading...</div>}
 
       {data && (
         <>
@@ -185,12 +194,54 @@ const Coinstats = () => {
               </StatItem>
             </StatsContainer>
 
-            <dl className="mt-5 grid grid-cols-1 gap-5">
+            <dl className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
               <ChartComponent
                 type="LineAndBarChart"
                 title="Slow wallets count Over Time"
                 data={data.slowWalletsCountOverTime}
               />
+
+              <div className="relative overflow-hidden rounded-lg bg-white px-4 pb-12 pt-5 shadow sm:px-6 sm:pt-6">
+                <dt className="text-sm font-medium leading-6 text-gray-500">
+                  Supply locked in slow wallets
+                </dt>
+                <dd className="mt-2">
+                  <ReactECharts
+                    option={{
+                      animation: false,
+                      grid: { top: 28, right: 30, bottom: 80, left: 120 },
+                      xAxis: {
+                        type: "time",
+                      },
+                      yAxis: {
+                        type: "value",
+                        scale: true,
+                      },
+                      series: [
+                        {
+                          data: data.lockedCoins,
+                          type: "line",
+                        },
+                      ],
+                      tooltip: {
+                        trigger: "axis",
+                      },
+                      dataZoom: [
+                        {
+                          type: "inside",
+                          start: 0,
+                          end: 10,
+                        },
+                        {
+                          start: 0,
+                          end: 10,
+                        },
+                      ],
+                    }}
+                    style={{ height: 400 }}
+                  />
+                </dd>
+              </div>
             </dl>
           </div>
         </>

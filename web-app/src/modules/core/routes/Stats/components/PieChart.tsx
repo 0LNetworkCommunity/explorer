@@ -33,8 +33,8 @@ const PieChart: FC<Props> = ({ data, title }) => {
     animation: false,
     tooltip: {
       trigger: "item",
-      formatter: (params) => {
-        const value = params.value.toLocaleString('en-US');
+      formatter: (params: { name: string; percent: number; value: number }) => {
+        const value = params.value.toLocaleString();
         return `${params.name}: Ƚ${value} (${params.percent}%)`;
       },
     },

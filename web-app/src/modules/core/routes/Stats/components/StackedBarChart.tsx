@@ -19,6 +19,7 @@ interface Props {
 
 const StackedBarChart: FC<Props> = ({ data, title }) => {
   const option = {
+    animation: false,
     title: {
       text: title,
       left: "center",

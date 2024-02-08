@@ -12,7 +12,7 @@ import Root from "./Root";
 import Validators from "./routes/Validators";
 import Test from "./routes/Test";
 import Module from "./routes/Account/Modules/Module";
-import Coinstats from "./routes/Coinstats";
+import Stats from "./routes/Stats";
 import TotalSupply from "./routes/TotalSupply";
 import CirculatingSupply from "./routes/CirculatingSupply";
 
@@ -70,8 +70,8 @@ const router = createBrowserRouter([
         element: <Validators />,
       },
       {
-        path: "/coinstats",
-        element: <Coinstats />,
+        path: "/stats",
+        element: <Stats />,
       },
       {
         path: "/total-supply",

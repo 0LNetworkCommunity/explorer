@@ -5,13 +5,15 @@ export default (): Config => {
   const ENV = process.env;
 
   const config: Config = {
+    cacheEnabled: ENV.CACHE_ENABLED === "true",
+    dataApiHost: ENV.DATA_API_HOST!,
+
     info: {
       build: ENV.CI_COMMIT_SHA,
     },
 
     ol: {
-      // provider: "https://rpc.0l.fyi",
-      provider: "https://rpc.openlibra.space:8080/",
+      provider: "https://rpc.0l.fyi",
     },
 
     s3: {

@@ -15,6 +15,7 @@ import Module from "./routes/Account/Modules/Module";
 import Stats from "./routes/Stats";
 import TotalSupply from "./routes/TotalSupply";
 import CirculatingSupply from "./routes/CirculatingSupply";
+import Postero from "./routes/Postero";
 
 const router = createBrowserRouter([
   {
@@ -80,6 +81,10 @@ const router = createBrowserRouter([
       {
         path: "/circulating-supply",
         element: <CirculatingSupply />,
+      },
+      {
+        path: "/postero",
+        element: <Postero />,
       },
       {
         path: "/test",

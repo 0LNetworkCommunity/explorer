@@ -72,7 +72,7 @@ const AppFrame: FC<PropsWithChildren> = ({ children }) => {
               </div>
 
               <div className="flex items-center">
-                {import.meta.env.VITE_FEATURE_WALLET === "true" && (
+                {localStorage.getItem("postero_enabled") === "true" && (
                   <div className="flex items-baseline space-x-4">
                     {aptosWallet.account ? (
                       <>

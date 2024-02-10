@@ -58,7 +58,7 @@ const Module: FC = () => {
                 </div>
                 <ViewFunction module={module} func={func} />
               </li>
-            ) : import.meta.env.VITE_FEATURE_WALLET === "true" ? (
+            ) : localStorage.getItem("postero_enabled") === "true" ? (
               <li
                 key={func.name}
                 className="overflow-hidden bg-white px-3 py-2 shadow sm:rounded-md"

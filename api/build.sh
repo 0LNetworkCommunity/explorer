@@ -1,7 +1,7 @@
 
 #!/bin/bash
 
-npm run build
+set -ex
 
 CI_COMMIT_SHA="$(git rev-parse --short HEAD)"
 

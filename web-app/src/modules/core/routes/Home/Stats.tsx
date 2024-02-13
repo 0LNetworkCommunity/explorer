@@ -66,13 +66,13 @@ const Stats: FC = () => {
     <dl className="grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl text-center grid-cols-5">
       <div className="flex flex-col bg-gray-400/5 p-4">
         <Link to={`/total-supply`} className="hover:underline">
+          <dd className="order-first text-3xl tracking-tight text-gray-900 font-mono">
+            {totalSupply &&
+              `${d3Format(".3f")(Math.floor(totalSupply.amount / 1e6) / 1e3)}B`}
+          </dd>
           <dt className="text-sm font-semibold leading-6 text-gray-600">
             Total Supply
           </dt>
-          <dd className="order-first text-3xl tracking-tight text-gray-900 font-mono">
-            {totalSupply &&
-              `${d3Format(".2")(Math.floor(totalSupply.amount / 1e9))}B`}
-          </dd>
         </Link>
       </div>
       <div className="flex flex-col bg-gray-400/5 p-4">

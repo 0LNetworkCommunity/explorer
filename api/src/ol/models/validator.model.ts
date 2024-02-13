@@ -1,6 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
-interface GqlValidatorGradeInpt {
+interface GqlValidatorGradeInput {
   compliant: boolean;
   proposedBlocks: number;
   failedBlocks: number;
@@ -9,7 +9,7 @@ interface GqlValidatorGradeInpt {
 
 @ObjectType('ValidatorGrade')
 export class GqlValidatorGrade {
-  public constructor(input: GqlValidatorGradeInpt) {
+  public constructor(input: GqlValidatorGradeInput) {
     this.compliant = input.compliant;
     this.proposedBlocks = input.proposedBlocks;
     this.failedBlocks = input.failedBlocks;

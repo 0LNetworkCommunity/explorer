@@ -26,13 +26,39 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Prerequisites
+
+Before you begin, ensure you have met the following requirements:
+
+- Node.js
+- npm or yarn
+- Redis
+
+
 ## Installation
+
+First, install the project dependencies:
 
 ```bash
 $ npm install
 ```
+Then, install [Redis](https://redis.io/docs/install/install-redis/) on your machine. 
+
+After installing Redis, start the Redis server:
+
+```bash 
+$ brew services start redis
+```
+
+Don't forget to configure the `.env` on your machine
+
+```bash
+$ cp .env.example .env
+```
 
 ## Running the app
+
+To run your Nest application, use the following commands:
 
 ```bash
 # development
@@ -46,6 +72,8 @@ $ npm run start:prod
 ```
 
 ## Test
+
+Execute the unit and e2e tests to ensure your application is running correctly:
 
 ```bash
 # unit tests

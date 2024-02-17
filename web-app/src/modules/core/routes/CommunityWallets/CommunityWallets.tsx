@@ -1,6 +1,8 @@
-import { FC } from "react";
-import { Link } from "react-router-dom";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useQuery } from '@apollo/client';
+import { FC } from 'react';
+import { ICommunityWalletInfo } from '../../../interface/CommunityWallets.interface';
+import CommunityWalletRow from '../../../ui/CommunityWalletsTable';
+import Page from '../../../ui/Page';
 
 const GET_COMMUNITY_WALLETS = gql`
   query CommunityWallets {
@@ -13,15 +15,9 @@ const GET_COMMUNITY_WALLETS = gql`
   }
 `;
 
-
 const CommunityWallets: FC = () => {
-  const { loading, error, data } = useQuery<{
-    communityWallets: {
-      program: string;
-      purpose: string;
-      manager: string;
-      walletAddress: string;
-    }[];
+  const { data } = useQuery<{
+    communityWallets: ICommunityWalletInfo[];
   }>(GET_COMMUNITY_WALLETS);
 
   if (!data) {
@@ -29,67 +25,44 @@ const CommunityWallets: FC = () => {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 bg-white">
-      <div className="mt-8 flow-root">
-        <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+    <Page>
+      <div className="mt-2 flow-root">
+        <div className="inline-block min-w-full py-1 align-middle px-1">
+          <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
             <table className="min-w-full divide-y divide-gray-300">
               <thead>
                 <tr>
-                  <th
-                    scope="col"
-                    className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
-                  >
+                  <th scope="col" className="px-3 py-2 font-normal">
                     Program
                   </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
+                  <th scope="col" className="px-3 py-2 font-normal">
                     Purpose
                   </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
+                  <th scope="col" className="px-3 py-2 font-normal">
                     Wallet
                   </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
+                  <th scope="col" className="px-3 py-2 font-normal">
                     Manager
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
-                {data.communityWallets.map((communityWallet) => (
-                  <tr key={communityWallet.walletAddress}>
-                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
-                      {communityWallet.program}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {communityWallet.purpose}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      <Link
-                        to={`/accounts/${communityWallet.walletAddress}`}
-                        className="text-blue-600 hover:text-blue-900 hover:underline"
-                      >
-                        {communityWallet.walletAddress}
-                      </Link>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {communityWallet.manager}
-                    </td>
-                  </tr>
-                ))}
+              <tbody className="divide-y divide-gray-200 bg-white">
+                {data.communityWallets.map((communityWalletInfo: ICommunityWalletInfo) => {
+                  return (
+                    <CommunityWalletRow
+                      key={communityWalletInfo.walletAddress}
+                      communityWalletInfo={communityWalletInfo}
+                    />
+                  );
+                })}
               </tbody>
             </table>
+
+            {/* @TODO: PAGINATION */}
           </div>
         </div>
       </div>
-    </div>
+    </Page>
   );
 };
 

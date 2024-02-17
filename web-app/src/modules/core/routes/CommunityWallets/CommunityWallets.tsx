@@ -30,7 +30,7 @@ const CommunityWallets: FC = () => {
         <div className="inline-block min-w-full py-1 align-middle px-1">
           <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
             <table className="min-w-full divide-y divide-gray-300">
-              <thead>
+              <thead className="bg-gray-50 text-left text-sm text-gray-900">
                 <tr>
                   <th scope="col" className="px-3 py-2 font-normal">
                     Program

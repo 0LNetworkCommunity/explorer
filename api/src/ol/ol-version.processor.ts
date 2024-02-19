@@ -64,11 +64,11 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   public async onModuleInit() {
-    await this.olVersionQueue.add('getMissingVersions', undefined, {
-      repeat: {
-        every: 30 * 1_000, // 30 seconds
-      },
-    });
+    // await this.olVersionQueue.add('getMissingVersions', undefined, {
+    //   repeat: {
+    //     every: 30 * 1_000, // 30 seconds
+    //   },
+    // });
 
     await this.olVersionQueue.add('fetchLatestVersion', undefined, {
       repeat: {
@@ -114,7 +114,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
 
   private async processVersion(version: string) {
     const transactions = await this.olService.aptosClient.getTransactions({
-      start: parseInt(version, 10),
+      start: BigInt(version),
       limit: 1,
     });
 
@@ -127,11 +127,18 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   private async fetchLatestVersion() {
     const ledgerInfo = await this.olService.aptosClient.getLedgerInfo();
 
-    const version = ledgerInfo.ledger_version;
+    const ledgerVersion = BigInt(ledgerInfo.ledger_version);
 
-    await this.olVersionQueue.add("version", { version } as VersionJobData, {
-      jobId: `__version__${version}`,
-    });
+    for (let i = 0; i < 1_000; ++i) {
+      const version = ledgerVersion - BigInt(i);
+      await this.olVersionQueue.add(
+        "version",
+        { version: version.toString(10) } as VersionJobData,
+        {
+          jobId: `__version__${version}`,
+        },
+      );
+    }
   }
 
   private async ingestTransactions(transactions: Types.Transaction[]) {
@@ -167,39 +174,38 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   private async getMissingVersions() {
     // const lastBatchIngestedVersion =
     //   await this.olDbService.getLastBatchIngestedVersion();
-    const lastBatchIngestedVersion = new BN(21_036_027);
 
-    const ingestedVersions = await this.olDbService.getIngestedVersions(
-      lastBatchIngestedVersion ?? undefined,
-    );
-    const ledgerInfo = await this.olService.aptosClient.getLedgerInfo();
-    const latestVersion = new BN(ledgerInfo.ledger_version);
+    // const ingestedVersions = await this.olDbService.getIngestedVersions(
+    //   lastBatchIngestedVersion ?? undefined,
+    // );
+    // const ledgerInfo = await this.olService.aptosClient.getLedgerInfo();
+    // const latestVersion = new BN(ledgerInfo.ledger_version);
 
-    const missingVersions: BN[] = [];
-    for (
-      let i = lastBatchIngestedVersion
-        ? lastBatchIngestedVersion.add(ONE)
-        : ZERO;
-      i.lt(latestVersion);
-      i = i.add(new BN(ONE))
-    ) {
-      const version = i;
-      if (bnFindIndex(ingestedVersions, version) !== -1) {
-        continue;
-      }
-      missingVersions.push(version);
-    }
+    // const missingVersions: BN[] = [];
+    // for (
+    //   let i = lastBatchIngestedVersion
+    //     ? lastBatchIngestedVersion.add(ONE)
+    //     : ZERO;
+    //   i.lt(latestVersion);
+    //   i = i.add(new BN(ONE))
+    // ) {
+    //   const version = i;
+    //   if (bnFindIndex(ingestedVersions, version) !== -1) {
+    //     continue;
+    //   }
+    //   missingVersions.push(version);
+    // }
 
-    await this.olVersionQueue.addBulk(
-      missingVersions.map((version) => ({
-        name: "version",
-        data: {
-          version: version.toString(),
-        },
-        opts: {
-          jobId: `__version__${version}`,
-        },
-      })),
-    );
+    // await this.olVersionQueue.addBulk(
+    //   missingVersions.map((version) => ({
+    //     name: "version",
+    //     data: {
+    //       version: version.toString(),
+    //     },
+    //     opts: {
+    //       jobId: `__version__${version}`,
+    //     },
+    //   })),
+    // );
   }
 }

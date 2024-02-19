@@ -1,18 +1,18 @@
 import os from "node:os";
-import pathUtil from 'node:path';
-import fs from 'node:fs';
+import pathUtil from "node:path";
+import fs from "node:fs";
 
 import _ from "lodash";
-import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
-import { OnModuleInit } from '@nestjs/common';
-import { Job, Queue } from 'bullmq';
-import BN from 'bn.js';
-import * as d3 from 'd3-array';
+import { InjectQueue, Processor, WorkerHost } from "@nestjs/bullmq";
+import { OnModuleInit } from "@nestjs/common";
+import { Job, Queue } from "bullmq";
+import BN from "bn.js";
+import * as d3 from "d3-array";
 import { Types } from "aptos";
 
-import { OlService } from './ol.service.js';
-import { OlDbService } from '../ol-db/ol-db.service.js';
-import { ClickhouseService } from '../clickhouse/clickhouse.service.js';
+import { OlService } from "./ol.service.js";
+import { OlDbService } from "../ol-db/ol-db.service.js";
+import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
 import { TransformerService } from "./transformer.service.js";
 import { NotPendingTransaction } from "./types.js";
 import Bluebird from "bluebird";
@@ -64,13 +64,21 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   public async onModuleInit() {
-    // await this.olVersionQueue.add('getMissingVersions', undefined, {
-    //   repeat: {
-    //     every: 30 * 1_000, // 30 seconds
-    //   },
-    // });
+    try {
+      await this.olVersionQueue.removeRepeatable("getMissingVersions", {
+        every: 30 * 1_000, // 30 seconds
+      });
+    } catch (error) {
+      console.error(error);
+    }
 
-    await this.olVersionQueue.add('fetchLatestVersion', undefined, {
+    await this.olVersionQueue.add("getMissingVersions", undefined, {
+      repeat: {
+        every: 8 * 60 * 60 * 1_000, // 8 hours
+      },
+    });
+
+    await this.olVersionQueue.add("fetchLatestVersion", undefined, {
       repeat: {
         every: 30 * 1_000, // 30 seconds
       },
@@ -84,7 +92,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
           await Promise.race([
             this.getMissingVersions(),
             // 1m timeout to avoid blocking the queue
-            Bluebird.delay(1 * 60 * 1_000),
+            Bluebird.delay(60 * 60 * 1_000),
           ]);
         } catch (error) {
           // fail silently to avoid accumulating failed repeating jobs
@@ -142,27 +150,40 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   private async ingestTransactions(transactions: Types.Transaction[]) {
-    const notPendingTransactions = transactions.filter((transactions) => transactions.type !== "pending_transaction") as NotPendingTransaction[];
+    const notPendingTransactions = transactions.filter(
+      (transactions) => transactions.type !== "pending_transaction",
+    ) as NotPendingTransaction[];
     if (!notPendingTransactions.length) {
       return;
     }
 
-    const dest = await fs.promises.mkdtemp(pathUtil.join(os.tmpdir(), 'ol-version-'));
+    const dest = await fs.promises.mkdtemp(
+      pathUtil.join(os.tmpdir(), "ol-version-"),
+    );
     await fs.promises.mkdir(dest, { recursive: true });
 
     const transactionsFile = `${dest}/transactions.json`;
-    await fs.promises.writeFile(`${dest}/transactions.json`, JSON.stringify(notPendingTransactions));
+    await fs.promises.writeFile(
+      `${dest}/transactions.json`,
+      JSON.stringify(notPendingTransactions),
+    );
 
-    const parquetDest = await this.transformerService.transform([transactionsFile]);
+    const parquetDest = await this.transformerService.transform([
+      transactionsFile,
+    ]);
     const files = await fs.promises.readdir(parquetDest);
     for (const file of files) {
-      await this.clichouseService.insertParquetFile(pathUtil.join(parquetDest, file));
+      await this.clichouseService.insertParquetFile(
+        pathUtil.join(parquetDest, file),
+      );
     }
 
     await fs.promises.rm(parquetDest, { recursive: true, force: true });
     await fs.promises.rm(dest, { recursive: true, force: true });
 
-    const versions = notPendingTransactions.map((transaction) => `(${transaction.version})`);
+    const versions = notPendingTransactions.map(
+      (transaction) => `(${transaction.version})`,
+    );
 
     await this.clichouseService.client.exec({
       query: `
@@ -172,40 +193,33 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   private async getMissingVersions() {
-    // const lastBatchIngestedVersion =
-    //   await this.olDbService.getLastBatchIngestedVersion();
+    const lastBatchIngestedVersion =
+      await this.olDbService.getLastBatchIngestedVersion();
 
-    // const ingestedVersions = await this.olDbService.getIngestedVersions(
-    //   lastBatchIngestedVersion ?? undefined,
-    // );
-    // const ledgerInfo = await this.olService.aptosClient.getLedgerInfo();
-    // const latestVersion = new BN(ledgerInfo.ledger_version);
+    const ingestedVersions = await this.olDbService.getIngestedVersions(
+      lastBatchIngestedVersion ?? undefined,
+    );
+    const ledgerInfo = await this.olService.aptosClient.getLedgerInfo();
+    const latestVersion = new BN(ledgerInfo.ledger_version);
 
-    // const missingVersions: BN[] = [];
-    // for (
-    //   let i = lastBatchIngestedVersion
-    //     ? lastBatchIngestedVersion.add(ONE)
-    //     : ZERO;
-    //   i.lt(latestVersion);
-    //   i = i.add(new BN(ONE))
-    // ) {
-    //   const version = i;
-    //   if (bnFindIndex(ingestedVersions, version) !== -1) {
-    //     continue;
-    //   }
-    //   missingVersions.push(version);
-    // }
-
-    // await this.olVersionQueue.addBulk(
-    //   missingVersions.map((version) => ({
-    //     name: "version",
-    //     data: {
-    //       version: version.toString(),
-    //     },
-    //     opts: {
-    //       jobId: `__version__${version}`,
-    //     },
-    //   })),
-    // );
+    for (
+      let i = lastBatchIngestedVersion
+        ? lastBatchIngestedVersion.add(ONE)
+        : ZERO;
+      i.lt(latestVersion);
+      i = i.add(new BN(ONE))
+    ) {
+      const version = i;
+      if (bnFindIndex(ingestedVersions, version) !== -1) {
+        continue;
+      }
+      await this.olVersionQueue.add(
+        "version",
+        { version: version.toString(10) } as VersionJobData,
+        {
+          jobId: `__version__${version}`,
+        },
+      );
+    }
   }
 }

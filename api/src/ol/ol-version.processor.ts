@@ -165,8 +165,10 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   private async getMissingVersions() {
-    const lastBatchIngestedVersion =
-      await this.olDbService.getLastBatchIngestedVersion();
+    // const lastBatchIngestedVersion =
+    //   await this.olDbService.getLastBatchIngestedVersion();
+    const lastBatchIngestedVersion = new BN(21_036_027);
+
     const ingestedVersions = await this.olDbService.getIngestedVersions(
       lastBatchIngestedVersion ?? undefined,
     );

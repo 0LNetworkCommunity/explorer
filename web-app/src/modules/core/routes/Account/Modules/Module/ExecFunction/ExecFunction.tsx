@@ -14,6 +14,8 @@ const ExecFunction: FC<Props> = ({ module: mod, func }) => {
   const [args, setArgs] = useState<string[]>([]);
   const [genericParams, setGenericParams] = useState<string[]>([]);
 
+  const params = func.params.filter((param) => !["signer", "&signer"].includes(param));
+
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -24,12 +26,16 @@ const ExecFunction: FC<Props> = ({ module: mod, func }) => {
       data: {
         function: `${mod.abi!.address}::${mod.abi!.name}::${func.name}`,
         typeArguments: [],
-        functionArguments: args.map((arg) => BCS.bcsSerializeStr(arg)),
+        functionArguments: args.map((arg, index) => {
+          if (params[index] === '0x1::string::String') {
+            return BCS.bcsSerializeStr(arg);
+          }
+          return arg;
+        }),
       },
     });
   };
 
-  const params = func.params.filter((param) => !["signer"].includes(param));
 
   return (
     <form onSubmit={onSubmit}>

@@ -16,6 +16,7 @@ import Stats from "./routes/Stats";
 import TotalSupply from "./routes/TotalSupply";
 import CirculatingSupply from "./routes/CirculatingSupply";
 import Postero from "./routes/Postero";
+import CommunityWallets from "./routes/CommunityWallets";
 
 const router = createBrowserRouter([
   {
@@ -81,6 +82,10 @@ const router = createBrowserRouter([
       {
         path: "/circulating-supply",
         element: <CirculatingSupply />,
+      },
+      {
+        path: "/community-wallets",
+        element: <CommunityWallets />,
       },
       {
         path: "/postero",

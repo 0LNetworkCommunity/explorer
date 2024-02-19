@@ -22,6 +22,7 @@ import { TransformerService } from "./transformer.service.js";
 import { OlParquetProducerProcessor } from "./ol-parquet-producer.processor.js";
 // import { OlClickhouseIngestorProcessor } from "./ol-clickhouse-ingestor.processor.js";
 import { OlController } from './ol.controller.js';
+import { CommunityWalletsResolver } from "./community-wallets.resolver.js";
 
 const roles = process.env.ROLES!.split(",");
 
@@ -66,6 +67,7 @@ const roles = process.env.ROLES!.split(",");
     ValidatorResolver,
     ValidatorsResolver,
     VouchResolver,
+    CommunityWalletsResolver,
 
     OlService,
     TransformerService,

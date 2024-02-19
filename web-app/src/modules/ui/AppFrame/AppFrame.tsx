@@ -1,22 +1,22 @@
-import { FC, PropsWithChildren, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import clsx from "clsx";
-import { Link, NavLink } from "react-router-dom";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import Logo from "../Logo/Logo";
-import { PosteroWalletName } from "../../postero-wallet";
-import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
+import { useWallet } from '@aptos-labs/wallet-adapter-react';
+import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
+import clsx from 'clsx';
+import { FC, PropsWithChildren, useRef, useState } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { PosteroWalletName } from '../../postero-wallet';
+import Logo from '../Logo/Logo';
 
 const navigation = [
-  { name: "Transactions", to: "/transactions" },
-  { name: "Validators", to: "/validators" },
-  { name: "Stats", to: "/stats" },
+  { name: 'Transactions', to: '/transactions' },
+  { name: 'Validators', to: '/validators' },
+  { name: 'Stats', to: '/stats' },
+  { name: 'Community Wallets', to: '/community-wallets' },
 ];
 
 const AppFrame: FC<PropsWithChildren> = ({ children }) => {
   const aptosWallet = useWallet();
   const navigate = useNavigate();
-  const [searchAddress, setSearchAddress] = useState("");
+  const [searchAddress, setSearchAddress] = useState('');
   const searchInput = useRef<HTMLInputElement>(null);
 
   const connectWallet = () => {
@@ -58,10 +58,8 @@ const AppFrame: FC<PropsWithChildren> = ({ children }) => {
                       to={item.to}
                       className={({ isActive }) =>
                         clsx(
-                          isActive
-                            ? "bg-primary-700 text-white"
-                            : "text-white hover:underline",
-                          "rounded-md px-3 py-1 text-sm"
+                          isActive ? 'bg-primary-700 text-white' : 'text-white hover:underline',
+                          'rounded-md px-3 py-1 text-sm',
                         )
                       }
                     >
@@ -72,18 +70,16 @@ const AppFrame: FC<PropsWithChildren> = ({ children }) => {
               </div>
 
               <div className="flex items-center">
-                {localStorage.getItem("postero_enabled") === "true" && (
+                {localStorage.getItem('postero_enabled') === 'true' && (
                   <div className="flex items-baseline space-x-4">
                     {aptosWallet.account ? (
                       <>
-                        <div className="text-sm">
-                          {aptosWallet.account.address}
-                        </div>
+                        <div className="text-sm">{aptosWallet.account.address}</div>
                         <button
                           type="button"
                           className={clsx(
-                            "text-white hover:underline",
-                            "rounded-md text-sm px-3 py-1"
+                            'text-white hover:underline',
+                            'rounded-md text-sm px-3 py-1',
                           )}
                           onClick={() => {
                             aptosWallet.disconnect();
@@ -96,8 +92,8 @@ const AppFrame: FC<PropsWithChildren> = ({ children }) => {
                       <button
                         type="button"
                         className={clsx(
-                          "text-white hover:underline",
-                          "rounded-md px-3 py-1 text-sm"
+                          'text-white hover:underline',
+                          'rounded-md px-3 py-1 text-sm',
                         )}
                         onClick={connectWallet}
                       >
@@ -108,32 +104,24 @@ const AppFrame: FC<PropsWithChildren> = ({ children }) => {
                 )}
 
                 <div className="flex flex-1 justify-center px-2 ml-6">
-                  <form
-                    className="w-full max-w-lg lg:max-w-xs"
-                    onSubmit={onSearch}
-                  >
+                  <form className="w-full max-w-lg lg:max-w-xs" onSubmit={onSearch}>
                     <div className="relative text-gray-400 focus-within:text-gray-600">
                       <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <MagnifyingGlassIcon
-                          className="h-5 w-5"
-                          aria-hidden="true"
-                        />
+                        <MagnifyingGlassIcon className="h-5 w-5" aria-hidden="true" />
                       </div>
                       <input
                         id="search"
                         className={clsx(
-                          "block w-full rounded-md border-0 bg-white py-1 pl-10 pr-3",
-                          "text-gray-900 text-sm",
-                          "focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-600"
+                          'block w-full rounded-md border-0 bg-white py-1 pl-10 pr-3',
+                          'text-gray-900 text-sm',
+                          'focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-600',
                         )}
                         placeholder="Search Address"
                         type="search"
                         name="search"
                         ref={searchInput}
                         value={searchAddress}
-                        onChange={(event) =>
-                          setSearchAddress(event.target.value)
-                        }
+                        onChange={(event) => setSearchAddress(event.target.value)}
                       />
                     </div>
                   </form>

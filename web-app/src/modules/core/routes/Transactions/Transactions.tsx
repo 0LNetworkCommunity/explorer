@@ -1,10 +1,10 @@
-import { FC } from "react";
-import { gql, useQuery } from "@apollo/client";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
-import { NavLink, useSearchParams } from "react-router-dom";
-import clsx from "clsx";
-import UserTransactionRow from "../../../ui/UserTransactionsTable/UserTransactionRow";
-import Page from "../../../ui/Page/Page";
+import { gql, useQuery } from '@apollo/client';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid';
+import clsx from 'clsx';
+import { FC } from 'react';
+import { NavLink, useSearchParams } from 'react-router-dom';
+import Page from '../../../ui/Page/Page';
+import UserTransactionRow from '../../../ui/UserTransactionsTable/UserTransactionRow';
 
 const ITEM_PER_PAGE = 20;
 
@@ -27,7 +27,7 @@ const GET_USER_TRANSACTIONS = gql`
 
 const TransactionsPage: FC = () => {
   const [searchParams] = useSearchParams();
-  const page = parseInt(searchParams.get("page") ?? "1", 10);
+  const page = parseInt(searchParams.get('page') ?? '1', 10);
 
   const { data } = useQuery<{
     userTransactions: {
@@ -53,11 +53,9 @@ const TransactionsPage: FC = () => {
     return <Page />;
   }
 
-  let pageCount = Math.ceil(data.userTransactions.size / ITEM_PER_PAGE);
-  let pages: (null | number)[] = new Array(pageCount)
-    .fill(0)
-    .map((_, index) => index + 1);
-  
+  const pageCount = Math.ceil(data.userTransactions.size / ITEM_PER_PAGE);
+  let pages: (null | number)[] = new Array(pageCount).fill(0).map((_, index) => index + 1);
+
   pages = pages.slice(Math.max(page - 3, 0), page + 2);
 
   if (pages[0] !== 1) {
@@ -93,10 +91,7 @@ const TransactionsPage: FC = () => {
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
                 {data.userTransactions.items.map((transaction) => (
-                  <UserTransactionRow
-                    key={transaction.version}
-                    transaction={transaction}
-                  />
+                  <UserTransactionRow key={transaction.version} transaction={transaction} />
                 ))}
               </tbody>
             </table>
@@ -119,21 +114,18 @@ const TransactionsPage: FC = () => {
               <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm text-gray-700">
-                    Showing{" "}
+                    Showing{' '}
                     <span className="font-medium">
                       {((page - 1) * ITEM_PER_PAGE + 1).toLocaleString()}
-                    </span>{" "}
-                    to{" "}
+                    </span>{' '}
+                    to{' '}
                     <span className="font-medium">
-                      {(
-                        (page - 1) * ITEM_PER_PAGE +
-                        ITEM_PER_PAGE
-                      ).toLocaleString()}
-                    </span>{" "}
-                    of{" "}
+                      {((page - 1) * ITEM_PER_PAGE + ITEM_PER_PAGE).toLocaleString()}
+                    </span>{' '}
+                    of{' '}
                     <span className="font-medium">
                       {data.userTransactions.size.toLocaleString()}
-                    </span>{" "}
+                    </span>{' '}
                     results
                   </p>
                 </div>
@@ -156,10 +148,10 @@ const TransactionsPage: FC = () => {
                           <span
                             key={`void-${index}`}
                             className={clsx(
-                              "relative inline-flex items-center",
-                              "px-4 py-2",
-                              "text-sm font-semibold text-gray-700",
-                              "ring-1 ring-inset ring-gray-300 focus:outline-offset-0"
+                              'relative inline-flex items-center',
+                              'px-4 py-2',
+                              'text-sm font-semibold text-gray-700',
+                              'ring-1 ring-inset ring-gray-300 focus:outline-offset-0',
                             )}
                           >
                             ...
@@ -172,15 +164,15 @@ const TransactionsPage: FC = () => {
                           key={it}
                           to={`/transactions?page=${it}`}
                           className={clsx(
-                            "relative inline-flex items-center",
-                            "px-4 py-2",
-                            "text-sm font-semibold text-gray-900",
-                            "ring-1 ring-inset ring-gray-300",
-                            "focus:z-20 focus:outline-offset-0",
+                            'relative inline-flex items-center',
+                            'px-4 py-2',
+                            'text-sm font-semibold text-gray-900',
+                            'ring-1 ring-inset ring-gray-300',
+                            'focus:z-20 focus:outline-offset-0',
 
                             page === it
-                              ? "z-10 bg-primary-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
-                              : "hover:bg-gray-50"
+                              ? 'z-10 bg-primary-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600'
+                              : 'hover:bg-gray-50',
                           )}
                         >
                           {it.toLocaleString()}
@@ -193,10 +185,7 @@ const TransactionsPage: FC = () => {
                       className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
                     >
                       <span className="sr-only">Next</span>
-                      <ChevronRightIcon
-                        className="h-5 w-5"
-                        aria-hidden="true"
-                      />
+                      <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
                     </NavLink>
                   </nav>
                 </div>

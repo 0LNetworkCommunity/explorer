@@ -82,9 +82,17 @@ type Movement {
   version: Float!
 }
 
+type CommunityWallet {
+  program: String!
+  purpose: String!
+  manager: String!
+  walletAddress: String!
+}
+
 type Query {
   userTransactions(limit: Int!, offset: Int!, order: String!): UserTransactionCollection!
   modules: [Module!]!
   account(address: String!): Account
   validators: [Validator!]!
+  communityWallets: [CommunityWallet!]!
 }

@@ -8,14 +8,17 @@ import { OnModuleInit } from "@nestjs/common";
 import { Job, Queue } from "bullmq";
 import BN from "bn.js";
 import * as d3 from "d3-array";
+import axios from "axios";
+import Bluebird from "bluebird";
 import { Types } from "aptos";
+import { ConfigService } from "@nestjs/config";
+import qs from "qs";
 
-import { OlService } from "./ol.service.js";
 import { OlDbService } from "../ol-db/ol-db.service.js";
 import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
 import { TransformerService } from "./transformer.service.js";
 import { NotPendingTransaction } from "./types.js";
-import Bluebird from "bluebird";
+import { OlConfig } from "../config/config.interface.js";
 
 const ZERO = new BN(0);
 const ONE = new BN(1);
@@ -48,19 +51,24 @@ export interface VersionJobData {
 
 @Processor("ol-version")
 export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
+  private readonly providerHost: string;
+
   public constructor(
     @InjectQueue("ol-version")
     private readonly olVersionQueue: Queue,
 
-    private readonly transformerService: TransformerService,
+    configService: ConfigService,
 
-    private readonly olService: OlService,
+    private readonly transformerService: TransformerService,
 
     private readonly olDbService: OlDbService,
 
     private readonly clichouseService: ClickhouseService,
   ) {
     super();
+
+    const config = configService.get<OlConfig>("ol")!;
+    this.providerHost = config.provider;
   }
 
   public async onModuleInit() {
@@ -121,10 +129,15 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   private async processVersion(version: string) {
-    const transactions = await this.olService.aptosClient.getTransactions({
-      start: BigInt(version),
-      limit: 1,
+    const res = await axios({
+      method: "GET",
+      url: `${this.providerHost}/v1/transactions?${qs.stringify({
+        start: version,
+        limit: 1,
+      })}`,
+      signal: AbortSignal.timeout(5 * 60 * 1_000), // 5 minutes
     });
+    const transactions: Types.Transaction[] = res.data;
 
     if (!transactions.length) {
       throw new Error(`transaction not found ${version}`);
@@ -133,9 +146,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   private async fetchLatestVersion() {
-    const ledgerInfo = await this.olService.aptosClient.getLedgerInfo();
-
-    const ledgerVersion = BigInt(ledgerInfo.ledger_version);
+    const ledgerVersion = BigInt(await this.getLedgerVersion());
 
     for (let i = 0; i < 1_000; ++i) {
       const version = ledgerVersion - BigInt(i);
@@ -192,6 +203,16 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     });
   }
 
+  private async getLedgerVersion(): Promise<string> {
+    const res = await axios({
+      method: "GET",
+      url: `${this.providerHost}/v1`,
+      signal: AbortSignal.timeout(5 * 60 * 1_000), // 5 minutes
+    });
+
+    return res.data.ledger_version;
+  }
+
   private async getMissingVersions() {
     const lastBatchIngestedVersion =
       await this.olDbService.getLastBatchIngestedVersion();
@@ -199,8 +220,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     const ingestedVersions = await this.olDbService.getIngestedVersions(
       lastBatchIngestedVersion ?? undefined,
     );
-    const ledgerInfo = await this.olService.aptosClient.getLedgerInfo();
-    const latestVersion = new BN(ledgerInfo.ledger_version);
+    const latestVersion = new BN(await this.getLedgerVersion());
 
     for (
       let i = lastBatchIngestedVersion

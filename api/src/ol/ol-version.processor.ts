@@ -197,8 +197,8 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       `,
     });
 
-    for (const version of versions) {
-      await this.walletSubscriptionService.releaseVersion(version);
+    for (const transaction of notPendingTransactions) {
+      await this.walletSubscriptionService.releaseVersion(transaction.version);
     }
   }
 

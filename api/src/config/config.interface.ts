@@ -6,6 +6,7 @@ export interface Config {
   ol: OlConfig;
   s3: S3Config;
   clickhouse: ClickhouseConfig;
+  apn?: ApnConfig;
 }
 
 export interface InfoConfig {
@@ -34,4 +35,10 @@ export interface ClickhouseConfig {
   host: string;
   port: number;
   database: string;
+}
+
+export interface ApnConfig {
+  privateKey: Buffer;
+  keyId: string;
+  teamId: string;
 }

@@ -89,10 +89,22 @@ type CommunityWallet {
   walletAddress: String!
 }
 
+"""Buffer"""
+scalar Bytes
+
 type Query {
   userTransactions(limit: Int!, offset: Int!, order: String!): UserTransactionCollection!
   modules: [Module!]!
   account(address: String!): Account
   validators: [Validator!]!
   communityWallets: [CommunityWallet!]!
+}
+
+type Mutation {
+  walletSubscribe(walletAddress: Bytes!, deviceToken: String!, deviceType: DeviceType!): Boolean!
+}
+
+enum DeviceType {
+  IOS
+  ANDROID
 }

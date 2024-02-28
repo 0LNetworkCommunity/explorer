@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DeviceType {
+  IOS
+  ANDROID
+}
+
+model Device {
+  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  token              String
+  type               DeviceType
+
+  walletSubscriptions WalletSubscription[]
+
+  @@unique([token, type])
+}
+
+model WalletSubscription {
+  walletAddress Bytes
+  deviceId      String @db.Uuid
+
+  device Device @relation(fields: [deviceId], references: [id])
+
+  @@id([walletAddress, deviceId])
+}

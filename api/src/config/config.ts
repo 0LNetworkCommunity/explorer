@@ -22,7 +22,7 @@ export default (): Config => {
       accessKey: ENV.S3_ACCESS_KEY_ID!,
       secretKey: ENV.S3_SECRET_ACCESS_KEY!,
       port: ENV.S3_PORT ? parseInt(ENV.S3_PORT, 10) : 443,
-      useSSL: ENV.S3_USE_SSL ? ENV.S3_USE_SSL === 'true' : true,
+      useSSL: ENV.S3_USE_SSL ? ENV.S3_USE_SSL === "true" : true,
       bucket: ENV.S3_BUCKET!,
       storageClass: ENV.S3_STORAGE_CLASS!,
     },
@@ -35,6 +35,14 @@ export default (): Config => {
       port: parseInt(ENV.CLICKHOUSE_PORT!, 10),
       database: ENV.CLICKHOUSE_DATABASE!,
     },
+
+    apn: ENV.APN_PRIVATE_KEY
+      ? {
+          privateKey: Buffer.from(ENV.APN_PRIVATE_KEY, "base64"),
+          keyId: ENV.APN_KEY_ID!,
+          teamId: ENV.APN_TEAM_ID!,
+        }
+      : undefined,
   };
 
   return config;

@@ -12,6 +12,7 @@ import { S3Module } from "../s3/s3.module.js";
 import { NodeWatcherModule } from "../node-watcher/node-watcher.module.js";
 import { GraphQLModule } from "../graphql/graphql.module.js";
 import { StatsModule } from "../stats/stats.module.js";
+import { WalletSubscriptionModule } from "../wallet-subscription/wallet-subscription.module.js";
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { StatsModule } from "../stats/stats.module.js";
     OlModule,
     NodeWatcherModule,
     StatsModule,
+    WalletSubscriptionModule,
   ],
   controllers: [],
   providers: [AppService],

@@ -20,6 +20,10 @@ export class LoggingPlugin {
     const ctx = context as unknown as GraphQLRequestContext<Context>;
     const { operationName } = ctx.request;
 
+    if (operationName === "IntrospectionQuery") {
+      return;
+    }
+
     const { req } = context.contextValue;
 
     req._startAt = process.hrtime()

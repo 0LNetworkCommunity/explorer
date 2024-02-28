@@ -22,7 +22,7 @@ export class TransformerService {
       });
 
       // proc.stderr.pipe(process.stderr, { end: false });
-      // proc.stderr.pipe(process.stdout, { end: false });
+      // proc.stdout.pipe(process.stdout, { end: false });
 
       proc.on("close", (code) => {
         if (code === 0) {

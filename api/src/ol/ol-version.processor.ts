@@ -19,6 +19,7 @@ import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
 import { TransformerService } from "./transformer.service.js";
 import { NotPendingTransaction } from "./types.js";
 import { OlConfig } from "../config/config.interface.js";
+import { WalletSubscriptionService } from "../wallet-subscription/wallet-subscription.service.js";
 
 const ZERO = new BN(0);
 const ONE = new BN(1);
@@ -64,6 +65,8 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     private readonly olDbService: OlDbService,
 
     private readonly clichouseService: ClickhouseService,
+
+    private readonly walletSubscriptionService: WalletSubscriptionService,
   ) {
     super();
 
@@ -72,14 +75,6 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   public async onModuleInit() {
-    try {
-      await this.olVersionQueue.removeRepeatable("getMissingVersions", {
-        every: 30 * 1_000, // 30 seconds
-      });
-    } catch (error) {
-      console.error(error);
-    }
-
     await this.olVersionQueue.add("getMissingVersions", undefined, {
       repeat: {
         every: 8 * 60 * 60 * 1_000, // 8 hours
@@ -201,6 +196,10 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
         INSERT INTO "ingested_versions" ("version") VALUES ${versions.join()} 
       `,
     });
+
+    for (const version of versions) {
+      await this.walletSubscriptionService.releaseVersion(version);
+    }
   }
 
   private async getLedgerVersion(): Promise<string> {

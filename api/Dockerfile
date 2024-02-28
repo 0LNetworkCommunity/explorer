@@ -1,15 +1,15 @@
-FROM clickhouse/clickhouse-server:23.8.4.69 as clickhouse
+FROM clickhouse/clickhouse-server:24.1.5.6 as clickhouse
 
 ###############################################
 
-FROM rust:1.75.0 as transformerBuilder
+FROM rust:1.76.0 as transformerBuilder
 WORKDIR /usr/src/myapp
 COPY ./transformer .
 RUN cargo install --path .
 
 ###############################################
 
-FROM node:20.11.0
+FROM node:20.11.1
 
 COPY --from=clickhouse /usr/bin/clickhouse-client /usr/bin/clickhouse-client
 COPY --from=transformerBuilder /usr/local/cargo/bin/transformer /usr/local/bin/transformer

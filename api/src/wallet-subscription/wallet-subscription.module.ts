@@ -7,6 +7,7 @@ import { WalletSubscriptionResolver } from "./wallet-subscription.resolver.js";
 import { PrismaModule } from "../prisma/prisma.module.js";
 import { ClickhouseModule } from "../clickhouse/clickhouse.module.js";
 import { WalletSubscriptionProcessor } from "./wallet-subscription.processor.js";
+import { FirebaseModule } from "../firebase/firebase.module.js";
 
 const roles = process.env.ROLES!.split(",");
 
@@ -14,6 +15,7 @@ const roles = process.env.ROLES!.split(",");
   imports: [
     ClickhouseModule,
     PrismaModule,
+    FirebaseModule,
 
     BullModule.registerQueue({
       name: "wallet-subscription",

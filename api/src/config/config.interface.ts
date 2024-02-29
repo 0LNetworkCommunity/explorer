@@ -7,6 +7,7 @@ export interface Config {
   s3: S3Config;
   clickhouse: ClickhouseConfig;
   apn?: ApnConfig;
+  firebase?: FirebaseConfig;
 }
 
 export interface InfoConfig {
@@ -41,4 +42,8 @@ export interface ApnConfig {
   privateKey: Buffer;
   keyId: string;
   teamId: string;
+}
+
+export interface FirebaseConfig {
+  serviceAccount: string;
 }

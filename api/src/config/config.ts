@@ -43,6 +43,11 @@ export default (): Config => {
           teamId: ENV.APN_TEAM_ID!,
         }
       : undefined,
+
+    firebase: ENV.FIREBASE_SERVICE_ACCOUNT
+      ? {
+        serviceAccount: ENV.FIREBASE_SERVICE_ACCOUNT,
+      } : undefined
   };
 
   return config;

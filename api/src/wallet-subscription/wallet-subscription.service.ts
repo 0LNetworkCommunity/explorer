@@ -9,6 +9,7 @@ import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
 import { PrismaService } from "../prisma/prisma.service.js";
 import { ApnConfig } from "../config/config.interface.js";
 import { ReleaseVersionJobData } from "./wallet-subscription.processor.js";
+import { FirebaseService } from "../firebase/firebase.service.js";
 
 @Injectable()
 export class WalletSubscriptionService implements OnModuleInit {
@@ -18,6 +19,7 @@ export class WalletSubscriptionService implements OnModuleInit {
     config: ConfigService,
     private readonly clickhouseService: ClickhouseService,
     private readonly prisma: PrismaService,
+    private readonly firebaseService: FirebaseService,
 
     @InjectQueue("wallet-subscription")
     private readonly walletSubscriptionQueue: Queue,
@@ -115,23 +117,41 @@ export class WalletSubscriptionService implements OnModuleInit {
           .toUpperCase();
         const slowWallet = balances.find((it) => it[1] === walletAddress)!;
 
-        if (subscription.device.type !== DeviceType.IOS) {
-          continue;
+        switch (subscription.device.type) {
+          case DeviceType.IOS: {
+            const note = new apn.Notification();
+            note.expiry = Math.floor(Date.now() / 1e3) + 3_600; // Expires 1 hour from now.
+            note.alert = `New balance Ƚ ${slowWallet[0].toLocaleString("en-US")} on version ${BigInt(version).toLocaleString("en-US")}`;
+            note.payload = {
+              messageFrom: "John Appleseed",
+            };
+            note.topic = "app.postero.postero";
+
+            const res = await this.apnProvider.send(
+              note,
+              subscription.device.token,
+            );
+            console.log("res", res);
+          } break;
+
+          case DeviceType.ANDROID: {
+            const { app } = this.firebaseService;
+
+            if (app) {
+              const res = await app.messaging().send({
+                token: subscription.device.token,
+                notification: {
+                  title: `New balance Ƚ ${slowWallet[0].toLocaleString("en-US")}`,
+                  body: `Version ${BigInt(version).toLocaleString("en-US")}`,
+                },
+                data: {
+                  story_id: "story_12345",
+                },
+              });
+              console.log("res", res);
+            }
+          } break;
         }
-
-        const note = new apn.Notification();
-        note.expiry = Math.floor(Date.now() / 1e3) + 3_600; // Expires 1 hour from now.
-        note.alert = `New balance Ƚ ${slowWallet[0].toLocaleString("en-US")} on version ${BigInt(version).toLocaleString("en-US")}`;
-        note.payload = {
-          messageFrom: "John Appleseed",
-        };
-        note.topic = "app.postero.postero";
-
-        const res = await this.apnProvider.send(
-          note,
-          subscription.device.token,
-        );
-        console.log("res", res);
       }
     }
 
@@ -192,23 +212,41 @@ export class WalletSubscriptionService implements OnModuleInit {
           .toUpperCase();
         const slowWallet = slowWallets.find((it) => it[1] === walletAddress)!;
 
-        if (subscription.device.type !== DeviceType.IOS) {
-          continue;
+        switch (subscription.device.type) {
+          case DeviceType.IOS: {
+            const note = new apn.Notification();
+            note.expiry = Math.floor(Date.now() / 1e3) + 3_600; // Expires 1 hour from now.
+            note.alert = `New unlocked amount Ƚ ${slowWallet[0].toLocaleString("en-US")} on version ${BigInt(version).toLocaleString("en-US")}`;
+            note.payload = {
+              messageFrom: "John Appleseed",
+            };
+            note.topic = "app.postero.postero";
+
+            const res = await this.apnProvider.send(
+              note,
+              subscription.device.token,
+            );
+            console.log("res", res);
+          } break;
+
+          case DeviceType.ANDROID: {
+            const { app } = this.firebaseService;
+
+            if (app) {
+              const res = await app.messaging().send({
+                token: subscription.device.token,
+                notification: {
+                  title: `New unlocked amount Ƚ ${slowWallet[0].toLocaleString("en-US")}`,
+                  body: `Version ${BigInt(version).toLocaleString("en-US")}`,
+                },
+                data: {
+                  story_id: "story_12345",
+                },
+              });
+              console.log("res", res);
+            }
+          } break;
         }
-
-        const note = new apn.Notification();
-        note.expiry = Math.floor(Date.now() / 1e3) + 3_600; // Expires 1 hour from now.
-        note.alert = `New unlocked amount Ƚ ${slowWallet[0].toLocaleString("en-US")} on version ${BigInt(version).toLocaleString("en-US")}`;
-        note.payload = {
-          messageFrom: "John Appleseed",
-        };
-        note.topic = "app.postero.postero";
-
-        const res = await this.apnProvider.send(
-          note,
-          subscription.device.token,
-        );
-        console.log("res", res);
       }
     }
   }

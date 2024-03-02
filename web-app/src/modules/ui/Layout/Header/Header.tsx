@@ -10,6 +10,7 @@ const navigation = [
   { name: 'Transactions', to: '/transactions' },
   { name: 'Validators', to: '/validators' },
   { name: 'Stats', to: '/stats' },
+  { name: 'Community Wallets', to: '/community-wallets' },
 ];
 
 const Header: React.FC = () => {
@@ -57,10 +58,8 @@ const Header: React.FC = () => {
                 to={item.to}
                 className={({ isActive }) =>
                   clsx(
-                    isActive
-                      ? 'bg-primary-700 text-white'
-                      : 'text-white hover:underline',
-                    'rounded-md p-3 text-sm',
+                    isActive ? 'bg-primary-700 text-white' : 'text-white hover:underline',
+                    'rounded-md p-3 text-sm text-nowrap',
                   )
                 }
               >
@@ -94,10 +93,7 @@ const Header: React.FC = () => {
                   ) : (
                     <button
                       type="button"
-                      className={clsx(
-                        'text-white hover:underline',
-                        'rounded-md px-3 py-1 text-sm',
-                      )}
+                      className={clsx('text-white hover:underline', 'rounded-md px-3 py-1 text-sm')}
                       onClick={connectWallet}
                     >
                       Connect
@@ -139,19 +135,18 @@ const Header: React.FC = () => {
           </button>
         </div>
         {menuIsOpen && (
-          <div>
+          <div className="block md:hidden">
             <ul className="w-full py-3">
               {navigation.map((item, index) => (
                 <li key={index} className="p-1">
                   <NavLink
                     end
                     to={item.to}
+                    onClick={() => setMenuIsOpen(false)}
                     className={({ isActive }) =>
                       clsx(
-                        isActive
-                          ? 'bg-primary-700 text-white'
-                          : 'text-white hover:underline',
-                        'rounded-md text-sm w-full block p-2',
+                        isActive ? 'bg-primary-700 text-white' : 'text-white hover:underline',
+                        'rounded-md text-sm w-full block p-2 text-nowrap',
                       )
                     }
                   >

@@ -29,7 +29,6 @@ const Header: React.FC = () => {
     event.preventDefault();
 
     const input = searchAddress.trim();
-    // Check if the length is 32, 34, 62, or 64 characters
 
     try {
       const addr = normalizeAddress(input);
@@ -140,7 +139,7 @@ const Header: React.FC = () => {
           </div>
         </div>
         {menuIsOpen && (
-          <div className="block md:hidden">
+          <div className="block lg:hidden">
             <ul className="w-full py-3">
               {navigation.map((item, index) => (
                 <li key={index} className="p-1">

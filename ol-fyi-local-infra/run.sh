@@ -6,6 +6,8 @@ mkdir -p \
   ./volumes/clickhouse/var/lib/clickhouse \
   ./volumes/postgres/var/lib/postgresql/data
 
+docker compose up -d
+
 docker compose exec -T clickhouse \
   clickhouse-client \
     --host "127.0.0.1" \

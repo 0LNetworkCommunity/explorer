@@ -8,6 +8,7 @@ export interface Config {
   clickhouse: ClickhouseConfig;
   apn?: ApnConfig;
   firebase?: FirebaseConfig;
+  nats: NatsConfig;
 }
 
 export interface InfoConfig {
@@ -46,4 +47,8 @@ export interface ApnConfig {
 
 export interface FirebaseConfig {
   serviceAccount: string;
+}
+
+export interface NatsConfig {
+  servers: string;
 }

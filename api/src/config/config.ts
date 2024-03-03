@@ -47,7 +47,11 @@ export default (): Config => {
     firebase: ENV.FIREBASE_SERVICE_ACCOUNT
       ? {
         serviceAccount: ENV.FIREBASE_SERVICE_ACCOUNT,
-      } : undefined
+      } : undefined,
+
+    nats: {
+      servers: ENV.NATS_SERVERS!,
+    }
   };
 
   return config;

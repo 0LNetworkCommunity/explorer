@@ -1,4 +1,5 @@
 import { Types } from "aptos";
+import BN from "bn.js";
 
 export type NotPendingTransaction =
   | Types.UserTransaction
@@ -29,14 +30,14 @@ export interface ConsensusReward {
 
 export interface ValidatorSet {
   activeValidators:  {
-    addr: string;
+    addr: Buffer;
     config: {
       consensusPubkey: string;
-      validatorIndex: number;
+      validatorIndex: BN;
       fullnodeAddresses?: string;
       networkAddresses?: string;
     };
-    votingPower: number;
+    votingPower: BN;
   }[];
 }
 

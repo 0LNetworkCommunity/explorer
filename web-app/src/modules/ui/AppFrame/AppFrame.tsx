@@ -4,12 +4,10 @@ import Header from '../Layout/Header';
 
 const AppFrame: FC<PropsWithChildren> = ({ children }) => {
   return (
-    <>
-      <div className="min-h-full">
-        <Header />
-        {children}
-      </div>
-    </>
+    <div className='min-h-full flex flex-col'>
+      <Header />
+      {children}
+    </div>
   );
 };
 

@@ -1,7 +1,7 @@
 import { Args, Int, Query, Resolver } from "@nestjs/graphql";
 
 import {
-  GqlUserTransaction,
+  GqlUserTransactionDeprecated,
   GqlUserTransactionCollection,
 } from "./models/transaction.model.js";
 import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
@@ -85,7 +85,7 @@ export class UserTransactionsResolver {
         .then((rows) =>
           rows.map(
             (row) =>
-              new GqlUserTransaction({
+              new GqlUserTransactionDeprecated({
                 hash: row.hash,
                 version: parseInt(row.version, 10),
                 gasUsed: parseInt(row.gas_used, 10),

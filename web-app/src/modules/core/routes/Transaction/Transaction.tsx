@@ -24,7 +24,7 @@ const Transaction: FC = () => {
   }, [version]);
 
   return (
-    <Page title={`Transaction: ${version}`}>
+    <Page title={`Transaction: ${version}`} __deprecated_grayBg>
       {transaction && (
         <div>
           {transaction.type === "block_metadata_transaction" && (

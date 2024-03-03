@@ -1,4 +1,10 @@
 services:
+  nats:
+    image: nats:2.10.11-alpine3.19
+    ports:
+      - 4222:4222
+      - 8222:8222
+
   clickhouse:
     image: clickhouse/clickhouse-server:24.1.5.6-alpine
     environment:

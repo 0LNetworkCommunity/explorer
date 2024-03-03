@@ -24,7 +24,7 @@ const Block: FC = () => {
   }, []);
 
   return (
-    <Page title={`Block: ${blockHeight}`}>
+    <Page title={`Block: ${blockHeight}`} __deprecated_grayBg>
       {block && (
         <>
           <DetailsTable>

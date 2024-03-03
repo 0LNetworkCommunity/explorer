@@ -13,9 +13,11 @@ import { NodeWatcherModule } from "../node-watcher/node-watcher.module.js";
 import { GraphQLModule } from "../graphql/graphql.module.js";
 import { StatsModule } from "../stats/stats.module.js";
 import { WalletSubscriptionModule } from "../wallet-subscription/wallet-subscription.module.js";
+import { NatsModule } from "../nats/nats.module.js";
 
 @Module({
   imports: [
+    NatsModule,
     GraphQLModule,
 
     ConfigModule.forRoot({
@@ -27,6 +29,11 @@ import { WalletSubscriptionModule } from "../wallet-subscription/wallet-subscrip
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), "src/schema.gql"),
       playground: true,
+      subscriptions: {
+        'graphql-ws': {
+          path: '/graphql',
+        },
+      },
     }),
 
     S3Module,

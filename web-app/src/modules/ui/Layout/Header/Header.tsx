@@ -5,6 +5,7 @@ import React, { useRef, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { PosteroWalletName } from '../../../postero-wallet';
 import Logo from '../../Logo/Logo';
+import { normalizeAddress } from '../../../../utils';
 
 const navigation = [
   { name: 'Transactions', to: '/transactions' },
@@ -29,14 +30,15 @@ const Header: React.FC = () => {
 
     const input = searchAddress.trim();
     // Check if the length is 32, 34, 62, or 64 characters
-    const validLengths = [32, 34, 62, 64];
-    if (validLengths.includes(input.length)) {
-      navigate(`/accounts/${encodeURIComponent(input)}/resources`);
+
+    try {
+      const addr = normalizeAddress(input);
+      navigate(`/accounts/${encodeURIComponent(addr)}/resources`);
       setSearchAddress('');
       if (searchInput.current) {
         searchInput.current.blur();
       }
-    }
+    } catch (error) {}
   };
 
   const sliceHexAddress = (address: string | null) =>
@@ -50,7 +52,7 @@ const Header: React.FC = () => {
             <Logo className="h-7 w-7" />
           </Link>
 
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden lg:inline gap-1 flex-grow">
             {navigation.map((item, index) => (
               <NavLink
                 key={index}
@@ -68,7 +70,7 @@ const Header: React.FC = () => {
             ))}
           </div>
 
-          <div className="w-full ml-auto justify-end items-center gap-2 hidden md:flex">
+          <div className="justify-end items-center gap-2 hidden justify-self-end lg:flex">
             {localStorage.getItem('postero_enabled') === 'true' && (
               <div className="flex items-baseline gap-2">
                 <div className="flex items-baseline space-x-4">
@@ -126,13 +128,16 @@ const Header: React.FC = () => {
             </form>
           </div>
 
-          <button
-            className="h-6 w-6 text-white ml-auto flex md:hidden"
-            aria-label="Open Burger Menu"
-            onClick={() => setMenuIsOpen(!menuIsOpen)}
-          >
-            <Bars3Icon />
-          </button>
+          <div className="flex flex-grow justify-end lg:hidden">
+            <button
+              className="text-white"
+              aria-label="Open Burger Menu"
+              type="button"
+              onClick={() => setMenuIsOpen(!menuIsOpen)}
+            >
+              <Bars3Icon className="h-6 w-6" />
+            </button>
+          </div>
         </div>
         {menuIsOpen && (
           <div className="block md:hidden">

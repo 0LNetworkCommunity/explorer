@@ -1,8 +1,9 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import { Decimal } from 'decimal.js';
 
 interface GqlSlowWalletInput {
-  transferred: number;
-  unlocked: number;
+  transferred: Decimal;
+  unlocked: Decimal;
 }
 
 @ObjectType('SlowWallet')
@@ -12,9 +13,9 @@ export class GqlSlowWallet {
     this.unlocked = input.unlocked;
   }
 
-  @Field(() => Number)
-  public transferred: number;
+  @Field(() => Decimal)
+  public transferred: Decimal;
 
-  @Field(() => Number)
-  public unlocked: number;
+  @Field(() => Decimal)
+  public unlocked: Decimal;
 }

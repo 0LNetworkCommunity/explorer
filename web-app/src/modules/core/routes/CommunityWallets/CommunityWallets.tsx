@@ -25,7 +25,7 @@ const CommunityWallets: FC = () => {
   }
 
   return (
-    <Page>
+    <Page __deprecated_grayBg>
       <div className="mt-2 flow-root overflow-x-auto">
         <div className="inline-block min-w-full py-1 align-middle px-1">
           <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">

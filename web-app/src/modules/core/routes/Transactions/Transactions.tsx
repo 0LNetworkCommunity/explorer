@@ -50,7 +50,7 @@ const TransactionsPage: FC = () => {
   });
 
   if (!data) {
-    return <Page />;
+    return <Page __deprecated_grayBg />;
   }
 
   const pageCount = Math.ceil(data.userTransactions.size / ITEM_PER_PAGE);

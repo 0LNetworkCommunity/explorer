@@ -1,7 +1,10 @@
-import { Float, Parent, ResolveField, Resolver } from "@nestjs/graphql";
+import { Parent, ResolveField, Resolver } from "@nestjs/graphql";
+import BN from "bn.js";
+
 import { OlService } from "./ol.service.js";
 import { GqlValidator, GqlValidatorCurrentBid, GqlValidatorGrade, GqlVouch } from "./models/validator.model.js";
 import { GqlAccount } from "./models/account.model.js";
+import { parseAddress } from "../utils.js";
 
 @Resolver(GqlValidator)
 export class ValidatorResolver {
@@ -15,7 +18,7 @@ export class ValidatorResolver {
   @ResolveField(() => [GqlVouch])
   public async vouches(@Parent() validator: GqlValidator): Promise<GqlVouch[]> {
     const vouchesRes = await this.olService.aptosClient.getAccountResource(
-      `0x${validator.address}`,
+      `0x${validator.address.toString("hex")}`,
       "0x1::vouch::MyVouches",
     );
     const vouches = vouchesRes.data as {
@@ -24,8 +27,8 @@ export class ValidatorResolver {
     };
     return vouches.my_buddies.map((address, index) => {
       return new GqlVouch({
-        address: address.substring(2).toUpperCase(),
-        epoch: parseInt(vouches.epoch_vouched[index], 10),
+        address: parseAddress(address),
+        epoch: new BN(vouches.epoch_vouched[index]),
         inSet: true,
       });
     });
@@ -35,9 +38,7 @@ export class ValidatorResolver {
   public async grade(
     @Parent() validator: GqlValidator,
   ): Promise<GqlValidatorGrade> {
-    const grade = await this.olService.getValidatorGrade(
-      `0x${validator.address}`,
-    );
+    const grade = await this.olService.getValidatorGrade(validator.address);
     return new GqlValidatorGrade({
       compliant: grade.compliant,
       proposedBlocks: grade.proposedBlocks,
@@ -50,9 +51,7 @@ export class ValidatorResolver {
   public async currentBid(
     @Parent() validator: GqlValidator,
   ): Promise<GqlValidatorCurrentBid> {
-    const currentBid = await this.olService.getCurrentBid(
-      `0x${validator.address}`,
-    );
+    const currentBid = await this.olService.getCurrentBid(validator.address);
     return new GqlValidatorCurrentBid({
       currentBid: currentBid.currentBid,
       expirationEpoch: currentBid.expirationEpoch,

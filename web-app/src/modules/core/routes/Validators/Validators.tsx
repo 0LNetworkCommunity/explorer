@@ -64,7 +64,7 @@ const Validators: FC = () => {
 
   if (!data && loading) {
     return (
-      <Page>
+      <Page __deprecated_grayBg>
         <div>Loading...</div>
       </Page>
     );
@@ -75,7 +75,7 @@ const Validators: FC = () => {
     const eligible = data.validators.length - validatorSet.length;
 
     return (
-      <Page>
+      <Page __deprecated_grayBg>
         <section className="mt-2 flow-root">
           <div>
             <dl className="grid gap-0.5 overflow-hidden rounded-2xl text-center grid-cols-3">
@@ -194,7 +194,7 @@ const Validators: FC = () => {
 
   if (error) {
     return (
-      <Page>
+      <Page __deprecated_grayBg>
         <p>{`Error: ${error.message}`}</p>
       </Page>
     );

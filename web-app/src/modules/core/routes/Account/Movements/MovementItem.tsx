@@ -1,15 +1,21 @@
 import { FC } from 'react';
 import { format } from 'date-fns';
-import { Movement, TransactionType } from '../../../../movements';
+import { Movement, TransactionType, UserTransaction } from '../../../../movements';
 
 import GenesisMovement from './GenesisMovement';
 import BlockMetadataMovement from './BlockMetadataMovement';
 import UserMovement from './UserMovement';
 import LibraAmount from '../../../../ui/LibraAmount';
+import clsx from 'clsx';
 
 const MovementItem: FC<{ movement: Movement }> = ({ movement }) => {
+  const success =
+    movement.transaction.type === TransactionType.User
+      ? (movement.transaction as UserTransaction).success
+      : true;
+
   return (
-    <div className="text-slate-500 px-4 py-3 sm:px-4">
+    <div className={clsx('text-slate-500 px-4 py-3 sm:px-4', !success && 'bg-red-100')}>
       <div className="flex flex-row justify-between mb-2">
         <div>
           <LibraAmount className="font-mono text-slate-800">{movement.balance}</LibraAmount>

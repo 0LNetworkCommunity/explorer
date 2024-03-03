@@ -1,8 +1,8 @@
-import { FC } from "react";
-import { formatDistanceToNow } from "date-fns";
-import { Link } from "react-router-dom";
-import clsx from "clsx";
-import AccountAddress from "../AccountAddress";
+import { FC } from 'react';
+import { formatDistanceToNow } from 'date-fns';
+import { Link } from 'react-router-dom';
+import clsx from 'clsx';
+import AccountAddress from '../AccountAddress';
 
 interface Props {
   transaction: {
@@ -19,10 +19,12 @@ interface Props {
 const UserTransactionRow: FC<Props> = ({ transaction }) => {
   const age = new Date(transaction.timestamp / 1_000);
   return (
-    <tr className={clsx(
-      "whitespace-nowrap text-sm font-medium text-gray-900",
-      !transaction.success && "bg-red-100"
-      )}>
+    <tr
+      className={clsx(
+        'whitespace-nowrap text-sm font-medium text-gray-900',
+        !transaction.success && 'bg-red-100',
+      )}
+    >
       <td className="py-2 px-3">
         <Link
           to={`/transactions/${transaction.version}`}
@@ -32,7 +34,7 @@ const UserTransactionRow: FC<Props> = ({ transaction }) => {
         </Link>
       </td>
       <td className="px-3 py-2">
-        <AccountAddress  address={transaction.sender} />
+        <AccountAddress address={transaction.sender} />
       </td>
       <td className="px-3 py-2">
         <span className="font-mono">
@@ -41,9 +43,7 @@ const UserTransactionRow: FC<Props> = ({ transaction }) => {
           <span className="text-blue-500">{transaction.functionName}</span>
         </span>
       </td>
-      <td className="px-3 py-2 text-right">
-        {formatDistanceToNow(age)}
-      </td>
+      <td className="px-3 py-2 text-right">{formatDistanceToNow(age)}</td>
     </tr>
   );
 };

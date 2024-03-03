@@ -30,9 +30,6 @@ const UserMovement: FC<Props> = ({ movement }) => {
       <div>
         <AccountAddress address={`${transaction.sender.toString('hex').toUpperCase()}`} />
       </div>
-      <div>
-        <pre>{`${transaction.arguments}`}</pre>
-      </div>
     </div>
   );
 };

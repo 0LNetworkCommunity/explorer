@@ -107,6 +107,7 @@ export class AccountResolver {
           "address" = reinterpretAsUInt256(reverse(unhex({address:String})))
         ORDER BY
           "version" DESC, "change_index" DESC
+        LIMIT 30
       `,
       query_params: {
         address: account.address.toString('hex'),

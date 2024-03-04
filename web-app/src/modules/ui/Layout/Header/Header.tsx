@@ -11,7 +11,6 @@ const navigation = [
   { name: 'Transactions', to: '/transactions' },
   { name: 'Validators', to: '/validators' },
   { name: 'Stats', to: '/stats' },
-  { name: 'Community Wallets', to: '/community-wallets' },
 ];
 
 const Header: React.FC = () => {

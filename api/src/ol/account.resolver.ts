@@ -59,15 +59,25 @@ export class AccountResolver {
     return null;
   }
 
-  @ResolveField(() => Decimal)
-  public async balance(@Parent() account: GqlAccount): Promise<Decimal> {
-    const res = await this.olService.aptosClient.getAccountResource(
-      `0x${account.address.toString('hex')}`,
-      "0x1::coin::CoinStore<0x1::libra_coin::LibraCoin>",
-    );
-    const balance =
-      new Decimal((res.data as CoinStoreResource).coin.value).div(1e6);
-    return balance;
+  @ResolveField(() => Decimal, { nullable: true })
+  public async balance(@Parent() account: GqlAccount): Promise<Decimal | null> {
+    try {
+      const res = await this.olService.aptosClient.getAccountResource(
+        `0x${account.address.toString("hex")}`,
+        "0x1::coin::CoinStore<0x1::libra_coin::LibraCoin>",
+      );
+      const balance = new Decimal(
+        (res.data as CoinStoreResource).coin.value,
+      ).div(1e6);
+      return balance;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.errorCode === "resource_not_found") {
+          return null;
+        }
+      }
+      throw error;
+    }
   }
 
   @ResolveField(() => GqlSlowWallet, { nullable: true })
@@ -76,7 +86,7 @@ export class AccountResolver {
   ): Promise<GqlSlowWallet | null> {
     try {
       const res = await this.olService.aptosClient.getAccountResource(
-        `0x${account.address.toString('hex')}`,
+        `0x${account.address.toString("hex")}`,
         "0x1::slow_wallet::SlowWallet",
       );
       const slowWallet = res.data as SlowWalletResource;
@@ -110,7 +120,7 @@ export class AccountResolver {
         LIMIT 30
       `,
       query_params: {
-        address: account.address.toString('hex'),
+        address: account.address.toString("hex"),
       },
       format: "JSONEachRow",
     });

@@ -70,7 +70,7 @@ type ValidatorCurrentBid {
 
 type Account {
   address: Bytes!
-  balance: Decimal!
+  balance: Decimal
   slowWallet: SlowWallet
   movements: [Movement!]!
 }

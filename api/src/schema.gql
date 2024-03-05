@@ -72,7 +72,8 @@ type Account {
   address: Bytes!
   balance: Decimal
   slowWallet: SlowWallet
-  movements: [Movement!]!
+  movements(first: Float! = 10, after: String): PaginatedMovements!
+  allMovements: [Movement!]!
 }
 
 type SlowWallet {
@@ -106,6 +107,22 @@ type Movement {
   balance: Decimal!
   version: BigInt!
   transaction: AbstractTransaction!
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+}
+
+type GqlMovementEdge {
+  cursor: String!
+  node: Movement!
+}
+
+type PaginatedMovements {
+  edges: [GqlMovementEdge!]
+  totalCount: BigInt!
+  pageInfo: PageInfo!
 }
 
 type CommunityWallet {

@@ -21,7 +21,7 @@ const Logo: FC<Props> = ({ color = '#FFFFFF', className }) => {
           fill={color}
         />
       </svg>
-      <span className="text-white font-medium text-base whitespace-nowrap">OL Explorer</span>
+      <span className="text-white font-medium text-base whitespace-nowrap">0L Explorer</span>
     </div>
   );
 };

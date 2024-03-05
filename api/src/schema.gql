@@ -109,10 +109,9 @@ type Movement {
 }
 
 type CommunityWallet {
-  program: String!
-  purpose: String!
-  manager: String!
-  walletAddress: String!
+  name: String
+  description: String
+  address: Bytes!
 }
 
 """Buffer"""

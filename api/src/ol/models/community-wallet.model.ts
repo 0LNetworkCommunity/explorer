@@ -1,30 +1,25 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
 interface GqlCommunityWalletInput {
-  program: string;
-  purpose: string;
-  manager: string;
-  walletAddress: string;
+  name?: string;
+  description?: string;
+  address: Buffer;
 }
 
 @ObjectType('CommunityWallet')
 export class GqlCommunityWallet {
   public constructor(input: GqlCommunityWalletInput) {
-    this.program = input.program;
-    this.purpose = input.purpose;
-    this.manager = input.manager;
-    this.walletAddress = input.walletAddress;
+    this.name = input.name;
+    this.description = input.description;
+    this.address = input.address;
   }
 
-  @Field(() => String)
-  public program: string;
+  @Field(() => String, { nullable: true })
+  public name?: string;
 
-  @Field(() => String)
-  public purpose: string;
+  @Field(() => String, { nullable: true })
+  public description?: string;
 
-  @Field(() => String)
-  public manager: string;
-
-  @Field(() => String)
-  public walletAddress: string;
+  @Field(() => Buffer)
+  public address: Buffer;
 }

@@ -1,6 +1,5 @@
 export interface ICommunityWalletInfo {
-  program: string;
-  purpose: string;
-  manager: string;
-  walletAddress: string;
+  description: string | null;
+  name: string | null;
+  address: string;
 }

@@ -1,15 +1,95 @@
-import { Args, Parent, Query, ResolveField, Resolver } from "@nestjs/graphql";
+import {
+  Args,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+  ObjectType,
+  Field,
+} from "@nestjs/graphql";
+import { Type, Inject } from "@nestjs/common";
+import { ApiError } from "aptos";
+import BN from "bn.js";
+import { Decimal } from "decimal.js";
+
 import { OlService } from "./ol.service.js";
 import { GqlAccount } from "./models/account.model.js";
 import { GqlSlowWallet } from "./models/slow-wallet.model.js";
-import { ApiError } from "aptos";
 import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
-import { Inject } from "@nestjs/common";
-import { GqlBlockMetadataTransaction, GqlGenesisTransaction, GqlTransaction, GqlMovement, GqlUserTransaction } from "./models/movement.model.js";
-import BN from "bn.js";
-import { Decimal } from "decimal.js";
+import {
+  GqlBlockMetadataTransaction,
+  GqlGenesisTransaction,
+  GqlTransaction,
+  GqlMovement,
+  GqlUserTransaction,
+} from "./models/movement.model.js";
 import { BytesScalar } from "../graphql/bytes.scalar.js";
 
+interface IEdgeType<T> {
+  cursor: string;
+  node: T;
+}
+
+interface IPaginatedType<T> {
+  edges: IEdgeType<T>[];
+  // nodes: T[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+interface PaginatedTypeInput<T> {
+  nodes: T[];
+}
+
+@ObjectType("PageInfo")
+class PageInfo {
+  @Field((type) => String, { nullable: true })
+  public readonly endCursor?: string;
+
+  @Field((type) => Boolean)
+  public readonly hasNextPage: boolean;
+
+  public constructor(hasNextPage: boolean, endCursor?: string) {
+    this.endCursor = endCursor;
+    this.hasNextPage = hasNextPage;
+  }
+}
+
+function Paginated<T>(classRef: Type<T>): Type<IPaginatedType<T>> {
+  @ObjectType(`${classRef.name}Edge`)
+  abstract class EdgeType {
+    @Field((type) => String)
+    public readonly cursor: string;
+
+    @Field((type) => classRef)
+    public readonly node: T;
+  }
+
+  @ObjectType({ isAbstract: true })
+  abstract class PaginatedType implements IPaginatedType<T> {
+    @Field((type) => [EdgeType], { nullable: true })
+    public readonly edges: EdgeType[];
+
+    @Field((type) => BN)
+    public readonly totalCount: number;
+
+    @Field()
+    public readonly pageInfo: PageInfo;
+
+    public constructor(
+      totalCount: number,
+      pageInfo: PageInfo,
+      edges: EdgeType[],
+    ) {
+      this.totalCount = totalCount;
+      this.pageInfo = pageInfo;
+      this.edges = edges;
+    }
+  }
+  return PaginatedType as Type<IPaginatedType<T>>;
+}
 
 export interface CoinStoreResource {
   coin: {
@@ -33,6 +113,17 @@ export interface CoinStoreResource {
       };
     };
   };
+}
+
+@ObjectType()
+class PaginatedMovements extends Paginated(GqlMovement) {
+  public constructor(
+    totalCount: number,
+    pageInfo: PageInfo,
+    edges: GqlMovement[],
+  ) {
+    super(totalCount, pageInfo, edges);
+  }
 }
 
 export interface SlowWalletResource {
@@ -104,8 +195,30 @@ export class AccountResolver {
     }
   }
 
-  @ResolveField(() => [GqlMovement])
+  @ResolveField(() => PaginatedMovements)
   public async movements(
+    @Parent() account: GqlAccount,
+
+    @Args({
+      name: "first",
+      type: () => Number,
+      defaultValue: 10,
+    })
+    first: number,
+
+    @Args({
+      name: "after",
+      type: () => String,
+      nullable: true,
+    })
+    after: string | undefined,
+  ): Promise<PaginatedMovements> {
+    console.log("first", first, after);
+    return new PaginatedMovements(0, new PageInfo(false), []);
+  }
+
+  @ResolveField(() => [GqlMovement])
+  public async allMovements(
     @Parent() account: GqlAccount,
   ): Promise<GqlMovement[]> {
     const balancesRes = await this.clickhouseService.client.query({

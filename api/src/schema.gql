@@ -72,8 +72,12 @@ type Account {
   address: Bytes!
   balance: Decimal
   slowWallet: SlowWallet
-  movements(first: Float! = 10, after: String): PaginatedMovements!
-  allMovements: [Movement!]!
+  movements(first: Int! = 10, after: String, order: OrderDirection! = ASC): PaginatedMovements!
+}
+
+enum OrderDirection {
+  ASC
+  DESC
 }
 
 type SlowWallet {
@@ -105,12 +109,13 @@ type UserTransaction implements AbstractTransaction {
 
 type Movement {
   balance: Decimal!
+  lockedBalance: Decimal!
   version: BigInt!
   transaction: AbstractTransaction!
 }
 
 type PageInfo {
-  endCursor: String
+  prevCursor: String
   hasNextPage: Boolean!
 }
 
@@ -121,7 +126,7 @@ type GqlMovementEdge {
 
 type PaginatedMovements {
   edges: [GqlMovementEdge!]
-  totalCount: BigInt!
+  totalCount: Float!
   pageInfo: PageInfo!
 }
 

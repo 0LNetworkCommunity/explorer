@@ -1,26 +1,45 @@
 import { gql } from '@apollo/client';
 
 export const GET_MOVEMENTS = gql`
-  query GetAccountMovements($address: Bytes!) {
+  query GetAccountMovements(
+    $address: Bytes!,
+    $order: OrderDirection,
+    $first: Int,
+    $after: String,
+  ) {
     account(address: $address) {
       balance
-      movements {
-        balance
-        version
-        transaction {
-          __typename
-          version
-          timestamp
-          ... on BlockMetadataTransaction {
-            epoch
-          }
-          ... on UserTransaction {
-            success
-            moduleName
-            moduleAddress
-            functionName
-            sender
-            arguments
+      movements(
+        order: $order,
+        after: $after,
+        first: $first,
+      ) {
+        totalCount
+        pageInfo {
+          prevCursor
+          hasNextPage
+        }
+        edges {
+          cursor
+          node {
+            balance
+            version
+            transaction {
+              __typename
+              version
+              timestamp
+              ... on BlockMetadataTransaction {
+                epoch
+              }
+              ... on UserTransaction {
+                success
+                moduleName
+                moduleAddress
+                functionName
+                sender
+                arguments
+              }
+            }
           }
         }
       }
@@ -59,12 +78,30 @@ export type GqlTransaction =
 
 export interface GqlMovement {
   balance: string;
+  version: string;
+  changeIndex: string;
   transaction: GqlTransaction;
+}
+
+export interface Edge<T> {
+  cursor: string;
+  node: T;
+}
+
+export interface PageInfo {
+  prevCursor: string | null;
+  hasNextPage: boolean;
+}
+
+export interface Paginated<T> {
+  edges: Edge<T>[];
+  pageInfo: PageInfo;
+  totalCount: number;
 }
 
 export interface GetAccountMovementsRes {
   account: {
     balance: number;
-    movements: GqlMovement[];
+    movements: Paginated<GqlMovement>;
   };
 }

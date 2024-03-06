@@ -7,7 +7,6 @@ import { InjectQueue, Processor, WorkerHost } from "@nestjs/bullmq";
 import { OnModuleInit } from "@nestjs/common";
 import { Job, Queue } from "bullmq";
 import BN from "bn.js";
-import * as d3 from "d3-array";
 import axios from "axios";
 import Bluebird from "bluebird";
 import { Types } from "aptos";
@@ -22,19 +21,10 @@ import { NotPendingTransaction } from "./types.js";
 import { OlConfig } from "../config/config.interface.js";
 import { WalletSubscriptionService } from "../wallet-subscription/wallet-subscription.service.js";
 import { NatsService } from "../nats/nats.service.js";
+import { bnBisect } from "../utils.js";
 
 const ZERO = new BN(0);
 const ONE = new BN(1);
-
-const bnBisect = d3.bisector((a: BN, b: BN) => {
-  if (a.lt(b)) {
-    return -1;
-  }
-  if (a.gt(b)) {
-    return 1;
-  }
-  return 0;
-});
 
 // Find a BN number in a ascending sorted list
 const bnFindIndex = (list: BN[], element: BN): number => {
@@ -68,7 +58,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
 
     private readonly olDbService: OlDbService,
 
-    private readonly clichouseService: ClickhouseService,
+    private readonly clickhouseService: ClickhouseService,
 
     private readonly natsService: NatsService,
 
@@ -207,7 +197,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     ]);
     const files = await fs.promises.readdir(parquetDest);
     for (const file of files) {
-      await this.clichouseService.insertParquetFile(
+      await this.clickhouseService.insertParquetFile(
         pathUtil.join(parquetDest, file),
       );
     }
@@ -219,7 +209,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       (transaction) => `(${transaction.version})`,
     );
 
-    await this.clichouseService.client.exec({
+    await this.clickhouseService.client.exec({
       query: `
         INSERT INTO "ingested_versions" ("version")
         VALUES ${versions.join()}
@@ -233,7 +223,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   private async publishChanges(version: string) {
-    const result = await this.clichouseService.client.query({
+    const result = await this.clickhouseService.client.query({
       query: `
         SELECT DISTINCT hex("address") as "address"
         FROM (

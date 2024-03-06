@@ -39,60 +39,57 @@ const HistoricalBalance: FC<Props> = ({ address }) => {
         color: ['#DAE1FA', '#5A68FF', '#9BAEF1'],
         grid: { top: 28, right: 30, bottom: 80, left: 120 },
         xAxis: {
-          type: "time",
+          type: 'time',
         },
         yAxis: {
-          type: "value",
+          type: 'value',
+          min: 'dataMin',
         },
         series: [
           {
-            name: "Balance",
+            name: 'Balance',
             data: historicalBalance,
-            type: "line",
+            type: 'line',
             showSymbol: false,
             lineStyle: {
-              width: 0
+              width: 0,
             },
           },
           {
             stack: 'Total',
-            name: "Unlocked",
+            name: 'Unlocked',
             data: slowWalletUnlocked,
-            type: "line",
+            type: 'line',
             areaStyle: {
-              color: '#5A68FF'
+              color: '#5A68FF',
             },
             lineStyle: {
-              width: 0
+              width: 0,
             },
             showSymbol: false,
           },
           {
             stack: 'Total',
-            name: "Locked",
+            name: 'Locked',
             data: slowWalletLocked,
-            type: "line",
+            type: 'line',
             areaStyle: {
               color: '#9BAEF1',
             },
             lineStyle: {
-              width: 0
+              width: 0,
             },
             showSymbol: false,
           },
         ],
         tooltip: {
-          trigger: "axis",
+          trigger: 'axis',
         },
         dataZoom: [
           {
-            type: "inside",
-            start: 0,
-            end: 10,
-          },
-          {
-            start: 0,
-            end: 10,
+            type: 'inside',
+            start: 94,
+            end: 100,
           },
         ],
       });

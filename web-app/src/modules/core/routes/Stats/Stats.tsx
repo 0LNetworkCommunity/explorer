@@ -70,11 +70,7 @@ const Coinstats = () => {
                 data={data.individualsCapital}
               />
 
-              <ChartComponent
-                type="PieChart"
-                title="Total Supply"
-                data={data.supplyAllocation}
-              />
+              <ChartComponent type="PieChart" title="Total Supply" data={data.supplyAllocation} />
 
               <ChartComponent
                 type="PieChart"
@@ -111,9 +107,7 @@ const Coinstats = () => {
           </div>
 
           <div className="mt-10">
-            <h3 className="text-base font-semibold text-gray-900">
-              Validators
-            </h3>
+            <h3 className="text-base font-semibold text-gray-900">Validators</h3>
 
             <StatsContainer columns={2}>
               <StatItem
@@ -123,9 +117,7 @@ const Coinstats = () => {
                 <Money>{data.lastEpochReward.nominal}</Money>
               </StatItem>
 
-              <StatItem name="Clearing Bid">
-                {`${data.currentClearingBid}%`}
-              </StatItem>
+              <StatItem name="Clearing Bid">{`${data.currentClearingBid}%`}</StatItem>
             </StatsContainer>
 
             <dl className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
@@ -142,7 +134,7 @@ const Coinstats = () => {
             </dl>
           </div>
 
-          <div className="mt-10">
+          {/* <div className="mt-10">
             <h3 className="text-base font-semibold text-gray-900">
               Community Wallets
             </h3>
@@ -165,12 +157,10 @@ const Coinstats = () => {
                 data={data.communityWalletsBalanceBreakdown}
               />
             </dl>
-          </div>
+          </div> */}
 
           <div className="mt-5">
-            <h3 className="text-base font-semibold text-gray-900">
-              Slow Wallets
-            </h3>
+            <h3 className="text-base font-semibold text-gray-900">Slow Wallets</h3>
 
             <StatsContainer columns={3}>
               <StatItem name="Slow wallets count">
@@ -178,18 +168,14 @@ const Coinstats = () => {
               </StatItem>
               <StatItem
                 name="Locked on Slow wallets"
-                secondary={`${data.currentLockedOnSlowWallets.percentage.toFixed(
-                  4
-                )}%`}
+                secondary={`${data.currentLockedOnSlowWallets.percentage.toFixed(4)}%`}
               >
                 <Money>{data.currentLockedOnSlowWallets.nominal}</Money>
               </StatItem>
 
               <StatItem
                 name="Last Epoch Unlocked"
-                secondary={`${data.lastEpochTotalUnlockedAmount.percentage.toFixed(
-                  4
-                )}%`}
+                secondary={`${data.lastEpochTotalUnlockedAmount.percentage.toFixed(4)}%`}
               >
                 <Money>{data.lastEpochTotalUnlockedAmount.nominal}</Money>
               </StatItem>
@@ -212,31 +198,28 @@ const Coinstats = () => {
                       animation: false,
                       grid: { top: 28, right: 30, bottom: 80, left: 120 },
                       xAxis: {
-                        type: "time",
+                        type: 'time',
                       },
                       yAxis: {
-                        type: "value",
+                        type: 'value',
                         scale: true,
                       },
                       series: [
                         {
                           data: data.lockedCoins,
-                          type: "line",
+                          type: 'line',
                         },
                       ],
                       tooltip: {
-                        trigger: "axis",
+                        trigger: 'axis',
                       },
                       dataZoom: [
                         {
-                          type: "inside",
-                          start: 0,
-                          end: 10,
+                          type: 'inside',
+                          start: 90,
+                          end: 100,
                         },
-                        {
-                          start: 0,
-                          end: 10,
-                        },
+                        {},
                       ],
                     }}
                     style={{ height: 400 }}

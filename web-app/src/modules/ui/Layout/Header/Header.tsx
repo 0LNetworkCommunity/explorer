@@ -10,7 +10,7 @@ import { normalizeAddress } from '../../../../utils';
 const navigation = [
   { name: 'Transactions', to: '/transactions' },
   { name: 'Validators', to: '/validators' },
-  // { name: 'Stats', to: '/stats' },
+  { name: 'Stats', to: '/stats' },
   { name: 'Community Wallets', to: '/community-wallets' },
 ];
 

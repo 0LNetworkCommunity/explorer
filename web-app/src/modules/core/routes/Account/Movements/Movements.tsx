@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { OrderDirection, useMovements } from '../../../../movements';
 import MovementItem from './MovementItem';
 
+
 const ITEM_PER_PAGE = 10;
 
 interface Props {
@@ -21,10 +22,8 @@ const Movements: FC<Props> = ({ address }) => {
 
   return (
     <div>
-      {loading && <div>loading</div>}
-
       <div className="overflow-hidden bg-white shadow sm:rounded-md">
-        <ul role="list" className="divide-y divide-gray-200">
+        <ul role="list" className={clsx("divide-y divide-gray-200", loading && "opacity-0")}>
           {movements &&
             movements.map((movement) => (
               <li key={`${movement.version.toString()}-${movement.changeIndex.toString()}`}>
@@ -83,3 +82,7 @@ const Movements: FC<Props> = ({ address }) => {
 };
 
 export default Movements;
+
+
+
+

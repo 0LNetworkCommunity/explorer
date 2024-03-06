@@ -23,6 +23,7 @@ export const GET_MOVEMENTS = gql`
           cursor
           node {
             balance
+            lockedBalance
             version
             transaction {
               __typename
@@ -78,6 +79,7 @@ export type GqlTransaction =
 
 export interface GqlMovement {
   balance: string;
+  lockedBalance: string;
   version: string;
   changeIndex: string;
   transaction: GqlTransaction;

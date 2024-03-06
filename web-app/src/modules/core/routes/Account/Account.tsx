@@ -8,6 +8,7 @@ import { normalizeAddress } from "../../../../utils";
 import LibraAmount from "../../../ui/LibraAmount";
 import Decimal from "decimal.js";
 import AccountDoesntExist from "./AccountDoesntExist";
+import HistoricalBalance from "./HistoricalBalance";
 
 const GET_ACCOUNT = gql`
   query GetAccount($address: Bytes!) {
@@ -92,19 +93,45 @@ const Account: FC<Props> = ({ accountAddress }) => {
   const account = data.account;
 
   return (
-    <Page title={`Account: ${account.address}`} __deprecated_grayBg>
-      {data.account.balance !== null && (
-        <div>
-          {'Balance: '}
-          <LibraAmount>{new Decimal(data.account.balance)}</LibraAmount>
-          {account.slowWallet && (
+    <Page __deprecated_grayBg>
+      <div>
+        <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+            <dt className="truncate text-sm font-medium text-gray-500">Address</dt>
+            <dd className="mt-1 font-semibold tracking-tight text-gray-900">{account.address}</dd>
+          </div>
+
+          {data.account.balance !== null && (
             <>
-              {' | Unlocked: '}
-              <LibraAmount>{new Decimal(account.slowWallet.unlocked)}</LibraAmount>
+              <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+                <dt className="truncate text-sm font-medium text-gray-500">
+                  {account.slowWallet ? <>Unlocked Balance</> : <>Balance</>}
+                </dt>
+                <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
+                  {account.slowWallet ? (
+                    <LibraAmount>{new Decimal(account.slowWallet.unlocked)}</LibraAmount>
+                  ) : (
+                    <LibraAmount>{new Decimal(data.account.balance)}</LibraAmount>
+                  )}
+                </dd>
+              </div>
+
+              {account.slowWallet && (
+                <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+                  <dt className="truncate text-sm font-medium text-gray-500">Locked</dt>
+                  <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
+                    <LibraAmount>
+                      {new Decimal(data.account.balance).minus(
+                        new Decimal(account.slowWallet.unlocked),
+                      )}
+                    </LibraAmount>
+                  </dd>
+                </div>
+              )}
             </>
           )}
-        </div>
-      )}
+        </dl>
+      </div>
 
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8" aria-label="Tabs">

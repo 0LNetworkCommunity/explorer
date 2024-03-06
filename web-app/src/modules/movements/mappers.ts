@@ -39,5 +39,7 @@ export const gqlMovementMapper = (gqlMovement: GqlMovement): Movement => {
   return new Movement({
     balance: new Decimal(gqlMovement.balance),
     transaction: gqlTransactionMapper(gqlMovement.transaction),
+    version: new BN(gqlMovement.version),
+    changeIndex: new BN(gqlMovement.changeIndex),
   });
 }

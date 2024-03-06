@@ -6,11 +6,15 @@ import {
   Resolver,
   ObjectType,
   Field,
+  registerEnumType,
+  Int,
 } from "@nestjs/graphql";
-import { Type, Inject } from "@nestjs/common";
+import { Type } from "@nestjs/common";
 import { ApiError } from "aptos";
 import BN from "bn.js";
 import { Decimal } from "decimal.js";
+import * as d3 from "d3-array";
+import axios from "axios";
 
 import { OlService } from "./ol.service.js";
 import { GqlAccount } from "./models/account.model.js";
@@ -23,7 +27,15 @@ import {
   GqlMovement,
   GqlUserTransaction,
 } from "./models/movement.model.js";
-import { BytesScalar } from "../graphql/bytes.scalar.js";
+import { ConfigService } from "@nestjs/config";
+import { OlConfig } from "../config/config.interface.js";
+
+export enum OrderDirection {
+  ASC = "ASC",
+  DESC = "DESC",
+}
+
+registerEnumType(OrderDirection, { name: "OrderDirection" });
 
 interface IEdgeType<T> {
   cursor: string;
@@ -32,39 +44,37 @@ interface IEdgeType<T> {
 
 interface IPaginatedType<T> {
   edges: IEdgeType<T>[];
-  // nodes: T[];
-
   totalCount: number;
-
   pageInfo: PageInfo;
-}
-
-interface PaginatedTypeInput<T> {
-  nodes: T[];
 }
 
 @ObjectType("PageInfo")
 class PageInfo {
   @Field((type) => String, { nullable: true })
-  public readonly endCursor?: string;
+  public readonly prevCursor?: string;
 
   @Field((type) => Boolean)
   public readonly hasNextPage: boolean;
 
-  public constructor(hasNextPage: boolean, endCursor?: string) {
-    this.endCursor = endCursor;
+  public constructor(hasNextPage: boolean, prevCursor?: string) {
+    this.prevCursor = prevCursor;
     this.hasNextPage = hasNextPage;
   }
 }
 
 function Paginated<T>(classRef: Type<T>): Type<IPaginatedType<T>> {
   @ObjectType(`${classRef.name}Edge`)
-  abstract class EdgeType {
+  class EdgeType {
     @Field((type) => String)
     public readonly cursor: string;
 
     @Field((type) => classRef)
     public readonly node: T;
+
+    public constructor(cursor: string, node: T) {
+      this.cursor = cursor;
+      this.node = node;
+    }
   }
 
   @ObjectType({ isAbstract: true })
@@ -72,7 +82,7 @@ function Paginated<T>(classRef: Type<T>): Type<IPaginatedType<T>> {
     @Field((type) => [EdgeType], { nullable: true })
     public readonly edges: EdgeType[];
 
-    @Field((type) => BN)
+    @Field((type) => Number)
     public readonly totalCount: number;
 
     @Field()
@@ -81,11 +91,14 @@ function Paginated<T>(classRef: Type<T>): Type<IPaginatedType<T>> {
     public constructor(
       totalCount: number,
       pageInfo: PageInfo,
-      edges: EdgeType[],
+      nodes: T[],
+      cursorExtractor: (node: T) => string,
     ) {
       this.totalCount = totalCount;
       this.pageInfo = pageInfo;
-      this.edges = edges;
+      this.edges = nodes.map(
+        (node) => new EdgeType(cursorExtractor(node), node),
+      );
     }
   }
   return PaginatedType as Type<IPaginatedType<T>>;
@@ -120,9 +133,11 @@ class PaginatedMovements extends Paginated(GqlMovement) {
   public constructor(
     totalCount: number,
     pageInfo: PageInfo,
-    edges: GqlMovement[],
+    nodes: GqlMovement[],
   ) {
-    super(totalCount, pageInfo, edges);
+    super(totalCount, pageInfo, nodes, (movement: GqlMovement) =>
+      movement.version.toString(10),
+    );
   }
 }
 
@@ -133,11 +148,16 @@ export interface SlowWalletResource {
 
 @Resolver(GqlAccount)
 export class AccountResolver {
-  @Inject()
-  private readonly olService: OlService;
+  private dataApiHost: string;
 
-  @Inject()
-  private readonly clickhouseService: ClickhouseService;
+  public constructor(
+    private readonly olService: OlService,
+    private readonly clickhouseService: ClickhouseService,
+    configService: ConfigService,
+  ) {
+    const olConfig = configService.get<OlConfig>('ol')!;
+    this.dataApiHost = olConfig.dataApiHost;
+  }
 
   @Query(() => GqlAccount, { nullable: true })
   public async account(
@@ -201,7 +221,7 @@ export class AccountResolver {
 
     @Args({
       name: "first",
-      type: () => Number,
+      type: () => Int,
       defaultValue: 10,
     })
     first: number,
@@ -212,40 +232,73 @@ export class AccountResolver {
       nullable: true,
     })
     after: string | undefined,
-  ): Promise<PaginatedMovements> {
-    console.log("first", first, after);
-    return new PaginatedMovements(0, new PageInfo(false), []);
-  }
 
-  @ResolveField(() => [GqlMovement])
-  public async allMovements(
-    @Parent() account: GqlAccount,
-  ): Promise<GqlMovement[]> {
-    const balancesRes = await this.clickhouseService.client.query({
-      query: `
-        SELECT
-          "version", "balance"
-        FROM "coin_balance"
-        WHERE
-          "address" = reinterpretAsUInt256(reverse(unhex({address:String})))
-        ORDER BY
-          "version" DESC, "change_index" DESC
-        LIMIT 30
-      `,
-      query_params: {
-        address: account.address.toString("hex"),
-      },
-      format: "JSONEachRow",
+    @Args({
+      name: "order",
+      type: () => OrderDirection,
+      defaultValue: OrderDirection.ASC,
+    })
+    order: OrderDirection,
+  ): Promise<PaginatedMovements> {
+    const accountAddress = account.address.toString("hex").toUpperCase();
+
+    // Retrieve all the wallets movements from the data api
+    const historicalData = await axios<{
+      timestamp: number[];
+      version: number[];
+      balance: number[];
+      unlocked: number[];
+      locked: number[];
+    }>({
+      method: "GET",
+      url: `${this.dataApiHost}/historical-balance/${accountAddress}`,
     });
 
-    const balancesRows = await balancesRes.json<
-      {
-        version: string;
-        balance: string;
-      }[]
-    >();
+    const allVersions = historicalData.data.version;
+    const allVersionsLength = allVersions.length;
 
-    const versions = balancesRows.map((row) => row.version);
+    // Empty list
+    if (!allVersionsLength) {
+      return new PaginatedMovements(0, new PageInfo(false), []);
+    }
+
+    let startIndex: number;
+    let endIndex: number;
+    let prevIndex: number | undefined;
+
+    switch (order) {
+      case OrderDirection.ASC:
+        {
+          startIndex =
+            after === undefined
+              ? 0
+              : d3.bisectRight(allVersions, parseInt(after, 10));
+          endIndex = Math.min(allVersionsLength, startIndex + first);
+
+          prevIndex = startIndex - first - 1;
+          if (prevIndex < 0 || prevIndex === startIndex) {
+            prevIndex = undefined;
+          }
+        }
+        break;
+
+      case OrderDirection.DESC:
+        {
+          endIndex =
+            after === undefined
+              ? allVersionsLength
+              : d3.bisectLeft(allVersions, parseInt(after, 10));
+          startIndex = Math.max(0, endIndex - first);
+
+          prevIndex = endIndex + first;
+          if (prevIndex > allVersionsLength - 1 || prevIndex === startIndex) {
+            prevIndex = undefined;
+          }
+        }
+        break;
+    }
+
+    const versions = allVersions.slice(startIndex, endIndex);
 
     const resUserTransaction = await this.clickhouseService.client.query({
       query: `
@@ -260,7 +313,7 @@ export class AccountResolver {
           "arguments"
         FROM "user_transaction"
         WHERE
-          "version" IN {versions:Array(String)}
+          "version" IN {versions:Array(UInt64)}
       `,
       query_params: {
         versions,
@@ -298,11 +351,11 @@ export class AccountResolver {
     const blockMetadataTransactionRes =
       await this.clickhouseService.client.query({
         query: `
-        SELECT *
-        FROM "block_metadata_transaction"
-        WHERE
-          "version" IN {versions:Array(String)}
-      `,
+          SELECT *
+          FROM "block_metadata_transaction"
+          WHERE
+            "version" IN {versions:Array(UInt64)}
+        `,
         query_params: {
           versions,
         },
@@ -325,13 +378,13 @@ export class AccountResolver {
       }),
     );
 
-    const transactions = balancesRows.map((row) => {
+    const movements = versions.map((version, index) => {
       let transaction: typeof GqlTransaction | undefined;
-      if (row.version === "0") {
+      if (version === 0) {
         transaction = new GqlGenesisTransaction();
       } else {
         const blockMetadataTransaction = blockMetadataTransactions.get(
-          row.version,
+          `${version}`,
         );
         if (blockMetadataTransaction) {
           transaction = new GqlBlockMetadataTransaction({
@@ -340,7 +393,7 @@ export class AccountResolver {
             epoch: new BN(blockMetadataTransaction.epoch),
           });
         } else {
-          const userTransaction = userTransactions.get(row.version);
+          const userTransaction = userTransactions.get(`${version}`);
           if (userTransaction) {
             transaction = new GqlUserTransaction({
               sender: Buffer.from(userTransaction.sender, "hex"),
@@ -357,22 +410,38 @@ export class AccountResolver {
       }
 
       return new GqlMovement({
-        version: new BN(row.version),
-        balance: new Decimal(row.balance).div(1e6),
+        version: new BN(version),
+        balance: new Decimal(
+          historicalData.data.balance[index + startIndex],
+        ).div(1e6),
+        lockedBalance: new Decimal(
+          historicalData.data.locked[index + startIndex],
+        ).div(1e6),
         transaction: transaction!,
       });
     });
 
-    transactions.sort((a, b) => {
-      if (a.version.lt(b.version)) {
-        return 1;
-      }
-      if (a.version.gt(b.version)) {
-        return -1;
-      }
-      return 0;
-    });
+    switch (order) {
+      case OrderDirection.ASC:
+        return new PaginatedMovements(
+          historicalData.data.version.length,
+          new PageInfo(
+            endIndex !== allVersionsLength,
+            prevIndex !== undefined ? `${allVersions[prevIndex]}` : undefined,
+          ),
+          movements,
+        );
 
-    return transactions;
+      case OrderDirection.DESC:
+        movements.reverse();
+        return new PaginatedMovements(
+          historicalData.data.version.length,
+          new PageInfo(
+            startIndex !== 0,
+            prevIndex !== undefined ? `${allVersions[prevIndex]}` : undefined,
+          ),
+          movements,
+        );
+    }
   }
 }

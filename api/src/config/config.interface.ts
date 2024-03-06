@@ -17,6 +17,7 @@ export interface InfoConfig {
 
 export interface OlConfig {
   provider: string;
+  dataApiHost: string;
 }
 
 export interface S3Config {

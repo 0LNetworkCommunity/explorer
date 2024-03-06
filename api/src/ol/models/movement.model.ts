@@ -128,6 +128,7 @@ export const GqlTransaction = createUnionType({
 
 interface GqlMovementInput {
   balance: Decimal;
+  lockedBalance: Decimal;
   version: BN;
   transaction: AbstractTransaction;
 }
@@ -136,12 +137,16 @@ interface GqlMovementInput {
 export class GqlMovement {
   public constructor(input: GqlMovementInput) {
     this.balance = input.balance;
+    this.lockedBalance = input.lockedBalance;
     this.version = input.version;
     this.transaction = input.transaction;
   }
 
   @Field(() => Decimal)
   public balance: Decimal;
+
+  @Field(() => Decimal)
+  public lockedBalance: Decimal;
 
   @Field(() => BN)
   public version: BN;

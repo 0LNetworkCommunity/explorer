@@ -2,6 +2,8 @@ import { rm } from "node:fs/promises";
 import os from "node:os";
 import pathUtil from 'node:path';
 import fs from 'node:fs';
+import * as d3 from "d3-array";
+import BN from "bn.js";
 
 export const cleanUp = async (...files: string[]) => {
   for (const file of files) {
@@ -37,3 +39,13 @@ export const parseAddress = (address: string): Buffer => {
 
   return Buffer.from(addr, "hex");
 };
+
+export const bnBisect = d3.bisector((a: BN, b: BN) => {
+  if (a.lt(b)) {
+    return -1;
+  }
+  if (a.gt(b)) {
+    return 1;
+  }
+  return 0;
+});

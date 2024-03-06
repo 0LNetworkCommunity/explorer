@@ -14,6 +14,7 @@ export default (): Config => {
 
     ol: {
       provider: "https://rpc.0l.fyi",
+      dataApiHost: ENV.DATA_API_HOST!,
     },
 
     s3: {

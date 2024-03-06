@@ -18,7 +18,17 @@ const MovementItem: FC<{ movement: Movement }> = ({ movement }) => {
     <div className={clsx('text-slate-500 px-4 py-3 sm:px-4', !success && 'bg-red-100')}>
       <div className="flex flex-row justify-between mb-2">
         <div>
-          <LibraAmount className="font-mono text-slate-800">{movement.balance}</LibraAmount>
+          <LibraAmount className="font-mono text-slate-800">
+            {movement.balance.minus(movement.lockedBalance)}
+          </LibraAmount>
+          {!movement.lockedBalance.isZero() && (
+            <>
+              {' - '}
+              <LibraAmount className="font-mono text-slate-500">
+                {movement.lockedBalance}
+              </LibraAmount>
+            </>
+          )}
         </div>
 
         <div className="font-mono text-sm">

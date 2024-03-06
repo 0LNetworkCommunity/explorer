@@ -87,6 +87,7 @@ export type Transaction = GenesisTransaction | BlockMetadataTransaction | UserTr
 
 export interface MovementInput {
   balance: Decimal;
+  lockedBalance: Decimal;
   transaction: Transaction;
   version: BN;
   changeIndex: BN;
@@ -97,6 +98,8 @@ export class Movement {
 
   public readonly balance: Decimal;
 
+  public readonly lockedBalance: Decimal;
+
   public readonly version: BN;
 
   public readonly changeIndex: BN;
@@ -104,6 +107,7 @@ export class Movement {
   public constructor(input: MovementInput) {
     this.transaction = input.transaction;
     this.balance = input.balance;
+    this.lockedBalance = input.lockedBalance;
     this.version = input.version;
     this.changeIndex = input.changeIndex;
   }

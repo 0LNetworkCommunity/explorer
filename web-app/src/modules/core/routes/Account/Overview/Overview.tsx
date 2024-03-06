@@ -24,10 +24,10 @@ const Overview: FC = () => {
       {account && (
         <div>
           <div className="grid grid-cols-12 gap-4 py-4">
-            <div className="col-span-6 space-y-6">
+            <div className="col-span-8 space-y-6">
               <Movements address={accountAddress!} />
             </div>
-            <div className="col-span-6 space-y-6">
+            <div className="col-span-4 space-y-6">
               <HistoricalBalance address={accountAddress!} />
             </div>
           </div>

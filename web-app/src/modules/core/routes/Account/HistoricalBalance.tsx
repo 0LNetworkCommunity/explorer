@@ -91,6 +91,7 @@ const HistoricalBalance: FC<Props> = ({ address }) => {
             start: 94,
             end: 100,
           },
+          {},
         ],
       });
     };

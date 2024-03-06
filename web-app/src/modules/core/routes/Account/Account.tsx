@@ -8,7 +8,6 @@ import { normalizeAddress } from "../../../../utils";
 import LibraAmount from "../../../ui/LibraAmount";
 import Decimal from "decimal.js";
 import AccountDoesntExist from "./AccountDoesntExist";
-import HistoricalBalance from "./HistoricalBalance";
 
 const GET_ACCOUNT = gql`
   query GetAccount($address: Bytes!) {

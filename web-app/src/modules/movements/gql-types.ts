@@ -22,6 +22,9 @@ export const GET_MOVEMENTS = gql`
         edges {
           cursor
           node {
+            amount
+            unlockedAmount
+            lockedAmount
             balance
             lockedBalance
             version
@@ -78,6 +81,9 @@ export type GqlTransaction =
   | GqlBlockMetadataTransaction;
 
 export interface GqlMovement {
+  amount: string;
+  lockedAmount: string;
+  unlockedAmount: string;
   balance: string;
   lockedBalance: string;
   version: string;

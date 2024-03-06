@@ -10,7 +10,13 @@ const LibraAmount = forwardRef<HTMLSpanElement, Props>(function LibraAmount(
   ref,
 ) {
   return (
-    <span title={`${amount}`} {...props} ref={ref}>
+    <span
+      title={`${amount.toNumber().toLocaleString(undefined, {
+        minimumFractionDigits: 6,
+      })}`}
+      {...props}
+      ref={ref}
+    >
       {`Ƚ ${amount.toNumber().toLocaleString()}`}
     </span>
   );

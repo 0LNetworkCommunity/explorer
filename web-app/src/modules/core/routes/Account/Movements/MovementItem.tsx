@@ -17,18 +17,33 @@ const MovementItem: FC<{ movement: Movement }> = ({ movement }) => {
   return (
     <div className={clsx('text-slate-500 px-4 py-3 sm:px-4', !success && 'bg-red-100')}>
       <div className="flex flex-row justify-between mb-2">
-        <div>
-          <LibraAmount className="font-mono text-slate-800">
-            {movement.balance.minus(movement.lockedBalance)}
-          </LibraAmount>
-          {!movement.lockedBalance.isZero() && (
-            <>
-              {' - '}
-              <LibraAmount className="font-mono text-slate-500">
-                {movement.lockedBalance}
-              </LibraAmount>
-            </>
-          )}
+        <div className="flex flex-col">
+          <div>
+            <LibraAmount className="font-mono text-slate-800">
+              {movement.unlockedAmount}
+            </LibraAmount>
+            {!movement.lockedAmount.isZero() && (
+              <>
+                {' - '}
+                <LibraAmount className="font-mono text-slate-500">
+                  {movement.lockedAmount}
+                </LibraAmount>
+              </>
+            )}
+          </div>
+          {/* <div>
+            <LibraAmount className="font-mono text-slate-800">
+              {movement.balance.minus(movement.lockedBalance)}
+            </LibraAmount>
+            {!movement.lockedBalance.isZero() && (
+              <>
+                {' - '}
+                <LibraAmount className="font-mono text-slate-500">
+                  {movement.lockedBalance}
+                </LibraAmount>
+              </>
+            )}
+          </div> */}
         </div>
 
         <div className="font-mono text-sm">

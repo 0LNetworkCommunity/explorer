@@ -1,12 +1,12 @@
 import { FC } from "react";
 import { gql, useQuery, useSubscription } from "@apollo/client";
 import clsx from "clsx";
+import Decimal from "decimal.js";
+import { NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
 
 import Page from "../../../ui/Page/Page";
-import { NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
 import { normalizeAddress } from "../../../../utils";
 import LibraAmount from "../../../ui/LibraAmount";
-import Decimal from "decimal.js";
 import AccountDoesntExist from "./AccountDoesntExist";
 
 const GET_ACCOUNT = gql`
@@ -92,14 +92,9 @@ const Account: FC<Props> = ({ accountAddress }) => {
   const account = data.account;
 
   return (
-    <Page __deprecated_grayBg>
+    <Page __deprecated_grayBg title={account.address}>
       <div>
         <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
-          <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-            <dt className="truncate text-sm font-medium text-gray-500">Address</dt>
-            <dd className="mt-1 font-semibold tracking-tight text-gray-900">{account.address}</dd>
-          </div>
-
           {data.account.balance !== null && (
             <>
               <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">

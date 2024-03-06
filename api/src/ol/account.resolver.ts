@@ -254,10 +254,37 @@ export class AccountResolver {
       url: `${this.dataApiHost}/historical-balance/${accountAddress}`,
     });
 
+    {
+      /**
+       * @todo
+       * move this to the data api
+       */
+      const { timestamp, version, balance, unlocked, locked } = historicalData.data;
+      let len = timestamp.length;
+
+      if (len > 1) {
+        let i = 1;
+        while (i < len) {
+          if (
+            balance[i - 1] === balance[i] &&
+            unlocked[i - 1] === unlocked[i] &&
+            locked[i - 1] === locked[i]
+          ) {
+            timestamp.splice(i, 1);
+            version.splice(i, 1);
+            balance.splice(i, 1);
+            unlocked.splice(i, 1);
+            locked.splice(i, 1);
+            len -= 1;
+          } else {
+            i += 1;
+          }
+        }
+      }
+    }
     const allVersions = historicalData.data.version;
     const allVersionsLength = allVersions.length;
 
-    // Empty list
     if (!allVersionsLength) {
       return new PaginatedMovements(0, new PageInfo(false), []);
     }
@@ -409,15 +436,40 @@ export class AccountResolver {
         }
       }
 
+      const pos = startIndex + index;
+
+      const unlockedBalance = new Decimal(
+        historicalData.data.unlocked[index + startIndex],
+      );
+      const lockedBalance = new Decimal(
+        historicalData.data.locked[index + startIndex],
+      );
+      const balance = new Decimal(
+        historicalData.data.balance[index + startIndex],
+      );
+
+      let unlockedAmount = unlockedBalance;
+      let lockedAmount = lockedBalance;
+      let amount = balance;
+
+      if (pos > 0) {
+        const prevBalance = new Decimal(historicalData.data.balance[pos - 1]);
+        const prevLockedBalance = new Decimal(historicalData.data.locked[pos - 1]);
+        const prevUnlockedBalance = new Decimal(historicalData.data.unlocked[pos - 1]);
+
+        amount = amount.minus(prevBalance);
+        lockedAmount = lockedAmount.minus(prevLockedBalance);
+        unlockedAmount = unlockedAmount.minus(prevUnlockedBalance);
+      }
+
       return new GqlMovement({
         version: new BN(version),
-        balance: new Decimal(
-          historicalData.data.balance[index + startIndex],
-        ).div(1e6),
-        lockedBalance: new Decimal(
-          historicalData.data.locked[index + startIndex],
-        ).div(1e6),
         transaction: transaction!,
+        lockedBalance: lockedBalance.div(1e6),
+        balance: balance.div(1e6),
+        amount: amount.div(1e6),
+        lockedAmount: lockedAmount.div(1e6),
+        unlockedAmount: unlockedAmount.div(1e6),
       });
     });
 

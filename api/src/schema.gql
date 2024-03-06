@@ -108,6 +108,9 @@ type UserTransaction implements AbstractTransaction {
 }
 
 type Movement {
+  amount: Decimal!
+  unlockedAmount: Decimal!
+  lockedAmount: Decimal!
   balance: Decimal!
   lockedBalance: Decimal!
   version: BigInt!

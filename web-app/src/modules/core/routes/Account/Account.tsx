@@ -1,13 +1,13 @@
-import { FC } from "react";
-import { gql, useQuery, useSubscription } from "@apollo/client";
-import clsx from "clsx";
-import Decimal from "decimal.js";
-import { NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
+import { FC } from 'react';
+import { gql, useQuery, useSubscription } from '@apollo/client';
+import clsx from 'clsx';
+import Decimal from 'decimal.js';
+import { NavLink, Navigate, Outlet, useLocation } from 'react-router-dom';
 
-import Page from "../../../ui/Page/Page";
-import { normalizeAddress } from "../../../../utils";
-import LibraAmount from "../../../ui/LibraAmount";
-import AccountDoesntExist from "./AccountDoesntExist";
+import Page from '../../../ui/Page/Page';
+import { normalizeAddress } from '../../../../utils';
+import LibraAmount from '../../../ui/LibraAmount';
+import AccountDoesntExist from './AccountDoesntExist';
 
 const GET_ACCOUNT = gql`
   query GetAccount($address: Bytes!) {
@@ -27,8 +27,8 @@ interface GetAccountRes {
     balance: string | null;
     slowWallet: {
       unlocked: string;
-    } | null
-  }
+    } | null;
+  };
 }
 
 const WALLET_MOVEMENT_SUBSCRIPTION = gql`
@@ -44,11 +44,9 @@ const AccountWrapper: FC = () => {
   const cleanAccountAddress = normalizeAddress(accountAddress);
   if (accountAddress !== cleanAccountAddress) {
     pathnames[2] = cleanAccountAddress;
-    return <Navigate to={pathnames.join('/')} replace={true} />
+    return <Navigate to={pathnames.join('/')} replace={true} />;
   }
-  return (
-    <Account accountAddress={accountAddress} />
-  );
+  return <Account accountAddress={accountAddress} />;
 };
 
 interface Props {
@@ -77,10 +75,10 @@ const Account: FC<Props> = ({ accountAddress }) => {
   });
 
   if (loading) {
-    return (<div>Loading...</div>);
+    return <div>Loading...</div>;
   }
   if (error) {
-    return (<div>{error.message}</div>);
+    return <div>{error.message}</div>;
   }
   if (data && !data.account) {
     return <AccountDoesntExist address={accountAddress} />;
@@ -93,42 +91,41 @@ const Account: FC<Props> = ({ accountAddress }) => {
 
   return (
     <Page __deprecated_grayBg title={account.address}>
-      <div>
-        <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
-          {data.account.balance !== null && (
-            <>
-              <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-                <dt className="truncate text-sm font-medium text-gray-500">
-                  {account.slowWallet ? <>Unlocked Balance</> : <>Balance</>}
-                </dt>
-                <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
-                  {account.slowWallet ? (
-                    <LibraAmount>{new Decimal(account.slowWallet.unlocked)}</LibraAmount>
-                  ) : (
-                    <LibraAmount>{new Decimal(data.account.balance)}</LibraAmount>
+      <div className="grid grid-cols-12 gap-4 py-4">
+        {data.account.balance !== null && (
+          <div className="col-span-12 md:col-span-3 mt-5 gap-5">
+            <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+              <dt className="truncate text-sm font-medium text-gray-500">
+                {account.slowWallet ? <>Unlocked Balance</> : <>Balance</>}
+              </dt>
+              <dd className="mt-1 md:text-2xl font-semibold tracking-tight text-gray-900">
+                {account.slowWallet ? (
+                  <LibraAmount>{new Decimal(account.slowWallet.unlocked)}</LibraAmount>
+                ) : (
+                  <LibraAmount>{new Decimal(data.account.balance)}</LibraAmount>
+                )}
+              </dd>
+            </div>
+          </div>
+        )}
+        {data.account.balance && account.slowWallet && (
+          <div className="col-span-12 md:col-span-3 mt-5 gap-5">
+            <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+              <dt className="truncate text-sm font-medium text-gray-500">Locked</dt>
+              <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
+                <LibraAmount>
+                  {new Decimal(data.account.balance).minus(
+                    new Decimal(account.slowWallet.unlocked),
                   )}
-                </dd>
-              </div>
-
-              {account.slowWallet && (
-                <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-                  <dt className="truncate text-sm font-medium text-gray-500">Locked</dt>
-                  <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
-                    <LibraAmount>
-                      {new Decimal(data.account.balance).minus(
-                        new Decimal(account.slowWallet.unlocked),
-                      )}
-                    </LibraAmount>
-                  </dd>
-                </div>
-              )}
-            </>
-          )}
-        </dl>
+                </LibraAmount>
+              </dd>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+        <nav className="overflow-x-auto flex space-x-8" aria-label="Tabs">
           {tabs.map((tab) => (
             <NavLink
               key={tab.name}

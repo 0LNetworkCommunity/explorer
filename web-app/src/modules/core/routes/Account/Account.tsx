@@ -8,6 +8,7 @@ import Page from '../../../ui/Page/Page';
 import { normalizeAddress } from '../../../../utils';
 import LibraAmount from '../../../ui/LibraAmount';
 import AccountDoesntExist from './AccountDoesntExist';
+import { IAccountInfo } from '../../../interface/Account.interface';
 
 const GET_ACCOUNT = gql`
   query GetAccount($address: Bytes!) {
@@ -20,16 +21,6 @@ const GET_ACCOUNT = gql`
     }
   }
 `;
-
-interface GetAccountRes {
-  account: {
-    address: string;
-    balance: string | null;
-    slowWallet: {
-      unlocked: string;
-    } | null;
-  };
-}
 
 const WALLET_MOVEMENT_SUBSCRIPTION = gql`
   subscription OnWalletMovement($address: Bytes!) {
@@ -68,7 +59,7 @@ const Account: FC<Props> = ({ accountAddress }) => {
     { name: 'Modules', to: `/accounts/${accountAddress}/modules` },
   ];
 
-  const { data, error, loading } = useQuery<GetAccountRes>(GET_ACCOUNT, {
+  const { data, error, loading } = useQuery<IAccountInfo>(GET_ACCOUNT, {
     variables: {
       address: accountAddress,
     },

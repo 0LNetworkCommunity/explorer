@@ -1,4 +1,4 @@
-import { Query, Resolver } from "@nestjs/graphql";
+import { Args, Query, Resolver } from "@nestjs/graphql";
 import _ from "lodash";
 import { GqlCommunityWallet } from "./models/community-wallet.model.js";
 import { communityWallets } from "./community-wallets.js";
@@ -10,7 +10,9 @@ export class CommunityWalletsResolver {
   public constructor(private readonly olService: OlService) {}
 
   @Query(() => [GqlCommunityWallet])
-  async communityWallets(): Promise<GqlCommunityWallet[]> {
+  async communityWallets(
+    @Args("address", { type: () => String, nullable: true }) address?: string,
+  ): Promise<GqlCommunityWallet[]> {
     const donorVoiceRegistry =
       (await this.olService.aptosClient.getAccountResource(
         "0x1",
@@ -27,7 +29,7 @@ export class CommunityWalletsResolver {
       parseAddress(address).toString("hex").toUpperCase(),
     );
 
-    const res = addresses.map((address) => {
+    let res = addresses.map((address) => {
       const addrBuff = parseAddress(address);
       const addr = addrBuff.toString("hex").toUpperCase();
       const info = communityWallets.get(addr);
@@ -38,6 +40,13 @@ export class CommunityWalletsResolver {
         description: info?.description,
       });
     });
+
+    if (address) {
+      const upperAddress = address.toUpperCase();
+      res = res.filter(
+        (wallet) => `${wallet.address}`.toUpperCase() === upperAddress,
+      );
+    }
 
     const groups = _.groupBy(res, (wallet) => {
       if (wallet.name && wallet.description) {

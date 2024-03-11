@@ -9,6 +9,7 @@ import { normalizeAddress } from '../../../../utils';
 import LibraAmount from '../../../ui/LibraAmount';
 import AccountDoesntExist from './AccountDoesntExist';
 import { IAccountInfo } from '../../../interface/Account.interface';
+import { ICommunityWalletInfo } from '../../../interface/CommunityWallets.interface';
 
 const GET_ACCOUNT = gql`
   query GetAccount($address: Bytes!) {
@@ -18,6 +19,16 @@ const GET_ACCOUNT = gql`
       slowWallet {
         unlocked
       }
+    }
+  }
+`;
+
+const GET_COMMUNITY_WALLET = gql`
+  query CommunityWallets($address: Bytes!) {
+    communityWallets(address: $address) {
+      address
+      name
+      description
     }
   }
 `;
@@ -59,7 +70,17 @@ const Account: FC<Props> = ({ accountAddress }) => {
     { name: 'Modules', to: `/accounts/${accountAddress}/modules` },
   ];
 
-  const { data, error, loading } = useQuery<IAccountInfo>(GET_ACCOUNT, {
+  const {
+    data: accountData,
+    error,
+    loading,
+  } = useQuery<IAccountInfo>(GET_ACCOUNT, {
+    variables: {
+      address: accountAddress,
+    },
+  });
+
+  const { data: communityWalletData } = useQuery<ICommunityWalletInfo>(GET_COMMUNITY_WALLET, {
     variables: {
       address: accountAddress,
     },
@@ -71,19 +92,21 @@ const Account: FC<Props> = ({ accountAddress }) => {
   if (error) {
     return <div>{error.message}</div>;
   }
-  if (data && !data.account) {
+  if (accountData && !accountData.account) {
     return <AccountDoesntExist address={accountAddress} />;
   }
-  if (!data) {
+  if (!accountData) {
     return null;
   }
 
-  const account = data.account;
+  const account = accountData.account;
+  const communityWallet = communityWalletData;
+  console.log(communityWallet);
 
   return (
     <Page __deprecated_grayBg title={account.address}>
       <div className="grid grid-cols-12 gap-4 py-4">
-        {data.account.balance !== null && (
+        {accountData.account.balance !== null && (
           <div className="col-span-12 md:col-span-3 mt-5 gap-5">
             <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
               <dt className="truncate text-sm font-medium text-gray-500">
@@ -93,19 +116,19 @@ const Account: FC<Props> = ({ accountAddress }) => {
                 {account.slowWallet ? (
                   <LibraAmount>{new Decimal(account.slowWallet.unlocked)}</LibraAmount>
                 ) : (
-                  <LibraAmount>{new Decimal(data.account.balance)}</LibraAmount>
+                  <LibraAmount>{new Decimal(accountData.account.balance)}</LibraAmount>
                 )}
               </dd>
             </div>
           </div>
         )}
-        {data.account.balance && account.slowWallet && (
+        {accountData.account.balance && account.slowWallet && (
           <div className="col-span-12 md:col-span-3 mt-5 gap-5">
             <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
               <dt className="truncate text-sm font-medium text-gray-500">Locked</dt>
               <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
                 <LibraAmount>
-                  {new Decimal(data.account.balance).minus(
+                  {new Decimal(accountData.account.balance).minus(
                     new Decimal(account.slowWallet.unlocked),
                   )}
                 </LibraAmount>

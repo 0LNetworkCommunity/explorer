@@ -35,14 +35,21 @@ impl EventCollection {
             self.version.push(version);
             self.timestamp.push(timestamp);
             self.creation_number.push(event.guid.creation_number.into());
-            self.account_address
-                .push(event.guid.account_address.inner().to_vec());
+
+            let mut account_address = event.guid.account_address.inner().to_vec();
+            account_address.reverse();
+            self.account_address.push(account_address);
+
             self.sequence_number.push(event.sequence_number.into());
             self.data.push(serde_json::to_string(&event.data).unwrap());
 
             match &event.typ {
                 diem_api_types::MoveType::Struct(s) => {
-                    self.module_address.push(s.address.inner().to_vec());
+
+                    let mut module_address = s.address.inner().to_vec();
+                    module_address.reverse();
+                    self.module_address.push(module_address);
+
                     self.module_name.push(s.module.0.to_string());
                     self.struct_name.push(s.name.0.to_string());
                 }

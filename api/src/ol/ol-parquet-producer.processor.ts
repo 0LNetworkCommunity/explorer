@@ -15,7 +15,7 @@ import { TransformerService } from './transformer.service.js';
 
 const execFile = util.promisify(execFileNative);
 
-const PARQUETS_DIR = 'parquets';
+const PARQUETS_DIR = 'parquets-fixed';
 
 @Processor('ol-parquet-producer')
 export class OlParquetProducerProcessor
@@ -102,7 +102,6 @@ export class OlParquetProducerProcessor
     );
 
     const parquetDir = await this.transformerService.transform(transactionsFiles);
-    console.log("parquetDir", parquetDir);
 
     let files = await fs.promises.readdir(parquetDir);
     files = files.filter(
@@ -110,7 +109,6 @@ export class OlParquetProducerProcessor
     );
 
     for (const file of files) {
-      console.log(`compressing (${start}-${end}/${file}.tar.gz) ...`);
       job.log(`compressing (${start}-${end}/${file}.tar.gz) ...`);
       await execFile(
         `tar`,

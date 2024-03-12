@@ -1409,7 +1409,7 @@ checksum = "6a1abaf4d861455be59f64fd2b55606cb151fce304ede7165f410243ce96bde6"
 [[package]]
 name = "diem-aggregator"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "bcs 0.1.4",
@@ -1427,7 +1427,7 @@ dependencies = [
 [[package]]
 name = "diem-api-types"
 version = "0.0.1"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1454,7 +1454,7 @@ dependencies = [
 [[package]]
 name = "diem-bitvec"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "serde 1.0.190",
  "serde_bytes",
@@ -1463,7 +1463,7 @@ dependencies = [
 [[package]]
 name = "diem-block-executor"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "arc-swap",
@@ -1488,7 +1488,7 @@ dependencies = [
 [[package]]
 name = "diem-block-partitioner"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "bcs 0.1.4",
@@ -1508,7 +1508,7 @@ dependencies = [
 [[package]]
 name = "diem-config"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "bcs 0.1.4",
@@ -1538,7 +1538,7 @@ dependencies = [
 [[package]]
 name = "diem-crypto"
 version = "0.0.3"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "ark-ec",
@@ -1575,7 +1575,7 @@ dependencies = [
 [[package]]
 name = "diem-crypto-derive"
 version = "0.0.3"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "proc-macro2 1.0.69",
  "quote 1.0.33",
@@ -1585,7 +1585,7 @@ dependencies = [
 [[package]]
 name = "diem-enum-conversion-derive"
 version = "0.0.3"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "proc-macro2 1.0.69",
  "quote 1.0.33",
@@ -1595,7 +1595,7 @@ dependencies = [
 [[package]]
 name = "diem-framework"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "ark-bls12-381",
@@ -1661,7 +1661,7 @@ dependencies = [
 [[package]]
 name = "diem-gas"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "bcs 0.1.4",
@@ -1684,7 +1684,7 @@ dependencies = [
 [[package]]
 name = "diem-gas-algebra-ext"
 version = "0.0.1"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "move-core-types",
 ]
@@ -1692,17 +1692,17 @@ dependencies = [
 [[package]]
 name = "diem-global-constants"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 
 [[package]]
 name = "diem-infallible"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 
 [[package]]
 name = "diem-log-derive"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "proc-macro2 1.0.69",
  "quote 1.0.33",
@@ -1712,7 +1712,7 @@ dependencies = [
 [[package]]
 name = "diem-logger"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "backtrace",
  "chrono",
@@ -1736,7 +1736,7 @@ dependencies = [
 [[package]]
 name = "diem-metrics-core"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "prometheus",
@@ -1745,7 +1745,7 @@ dependencies = [
 [[package]]
 name = "diem-move-stdlib"
 version = "0.1.1"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "hex",
@@ -1768,7 +1768,7 @@ dependencies = [
 [[package]]
 name = "diem-mvhashmap"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "bcs 0.1.4",
@@ -1783,7 +1783,7 @@ dependencies = [
 [[package]]
 name = "diem-node-identity"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "claims",
@@ -1795,7 +1795,7 @@ dependencies = [
 [[package]]
 name = "diem-openapi"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "async-trait",
  "percent-encoding",
@@ -1808,7 +1808,7 @@ dependencies = [
 [[package]]
 name = "diem-package-builder"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "diem-framework",
@@ -1821,7 +1821,7 @@ dependencies = [
 [[package]]
 name = "diem-scratchpad"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "bitvec 0.19.6",
  "diem-crypto",
@@ -1837,7 +1837,7 @@ dependencies = [
 [[package]]
 name = "diem-sdk-builder"
 version = "0.2.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "bcs 0.1.4",
@@ -1856,7 +1856,7 @@ dependencies = [
 [[package]]
 name = "diem-secure-net"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "diem-logger",
  "diem-metrics-core",
@@ -1868,7 +1868,7 @@ dependencies = [
 [[package]]
 name = "diem-secure-storage"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "base64 0.13.1",
@@ -1890,7 +1890,7 @@ dependencies = [
 [[package]]
 name = "diem-short-hex-str"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "mirai-annotations",
  "serde 1.0.190",
@@ -1901,7 +1901,7 @@ dependencies = [
 [[package]]
 name = "diem-speculative-state-helper"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "crossbeam",
@@ -1913,7 +1913,7 @@ dependencies = [
 [[package]]
 name = "diem-state-view"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "bcs 0.1.4",
@@ -1927,7 +1927,7 @@ dependencies = [
 [[package]]
 name = "diem-storage-interface"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "arr_macro",
@@ -1954,7 +1954,7 @@ dependencies = [
 [[package]]
 name = "diem-temppath"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "hex",
  "rand 0.7.3",
@@ -1963,7 +1963,7 @@ dependencies = [
 [[package]]
 name = "diem-time-service"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "diem-infallible",
  "enum_dispatch",
@@ -1976,7 +1976,7 @@ dependencies = [
 [[package]]
 name = "diem-types"
 version = "0.0.3"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "arr_macro",
@@ -2007,12 +2007,12 @@ dependencies = [
 [[package]]
 name = "diem-utils"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 
 [[package]]
 name = "diem-vault-client"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "base64 0.13.1",
  "chrono",
@@ -2028,7 +2028,7 @@ dependencies = [
 [[package]]
 name = "diem-vm"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "bcs 0.1.4",
@@ -2074,7 +2074,7 @@ dependencies = [
 [[package]]
 name = "diem-vm-logging"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "arc-swap",
  "diem-crypto",
@@ -2090,7 +2090,7 @@ dependencies = [
 [[package]]
 name = "diem-vm-types"
 version = "0.0.1"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "diem-aggregator",
@@ -3383,7 +3383,7 @@ checksum = "1fafa6961cabd9c63bcd77a45d7e3b7f3b552b70417831fb0f56db717e72407e"
 [[package]]
 name = "move-abigen"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "bcs 0.1.4",
@@ -3400,7 +3400,7 @@ dependencies = [
 [[package]]
 name = "move-binary-format"
 version = "0.0.3"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "indexmap 1.9.3",
@@ -3414,12 +3414,12 @@ dependencies = [
 [[package]]
 name = "move-borrow-graph"
 version = "0.0.1"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 
 [[package]]
 name = "move-bytecode-source-map"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "bcs 0.1.4",
@@ -3434,7 +3434,7 @@ dependencies = [
 [[package]]
 name = "move-bytecode-utils"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "move-binary-format",
@@ -3446,7 +3446,7 @@ dependencies = [
 [[package]]
 name = "move-bytecode-verifier"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "fail 0.4.0",
@@ -3460,7 +3460,7 @@ dependencies = [
 [[package]]
 name = "move-command-line-common"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "difference",
@@ -3477,7 +3477,7 @@ dependencies = [
 [[package]]
 name = "move-compiler"
 version = "0.0.1"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "bcs 0.1.4",
@@ -3506,7 +3506,7 @@ dependencies = [
 [[package]]
 name = "move-core-types"
 version = "0.0.4"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "bcs 0.1.4",
@@ -3525,7 +3525,7 @@ dependencies = [
 [[package]]
 name = "move-coverage"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "bcs 0.1.4",
@@ -3545,7 +3545,7 @@ dependencies = [
 [[package]]
 name = "move-disassembler"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "clap 4.4.18",
@@ -3563,7 +3563,7 @@ dependencies = [
 [[package]]
 name = "move-docgen"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "codespan",
@@ -3582,7 +3582,7 @@ dependencies = [
 [[package]]
 name = "move-errmapgen"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "bcs 0.1.4",
@@ -3596,7 +3596,7 @@ dependencies = [
 [[package]]
 name = "move-ir-to-bytecode"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "codespan-reporting",
@@ -3615,7 +3615,7 @@ dependencies = [
 [[package]]
 name = "move-ir-to-bytecode-syntax"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "hex",
@@ -3628,7 +3628,7 @@ dependencies = [
 [[package]]
 name = "move-ir-types"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "hex",
@@ -3642,7 +3642,7 @@ dependencies = [
 [[package]]
 name = "move-model"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "codespan",
@@ -3669,7 +3669,7 @@ dependencies = [
 [[package]]
 name = "move-package"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "bcs 0.1.4",
@@ -3705,7 +3705,7 @@ dependencies = [
 [[package]]
 name = "move-prover"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3742,7 +3742,7 @@ dependencies = [
 [[package]]
 name = "move-prover-boogie-backend"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3771,7 +3771,7 @@ dependencies = [
 [[package]]
 name = "move-resource-viewer"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "bcs 0.1.4",
@@ -3786,7 +3786,7 @@ dependencies = [
 [[package]]
 name = "move-stackless-bytecode"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "codespan",
  "codespan-reporting",
@@ -3812,7 +3812,7 @@ dependencies = [
 [[package]]
 name = "move-symbol-pool"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "once_cell",
  "serde 1.0.190",
@@ -3821,7 +3821,7 @@ dependencies = [
 [[package]]
 name = "move-table-extension"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "bcs 0.1.4",
@@ -3838,7 +3838,7 @@ dependencies = [
 [[package]]
 name = "move-vm-runtime"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "better_any",
  "fail 0.4.0",
@@ -3855,7 +3855,7 @@ dependencies = [
 [[package]]
 name = "move-vm-test-utils"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "anyhow",
  "move-binary-format",
@@ -3869,7 +3869,7 @@ dependencies = [
 [[package]]
 name = "move-vm-types"
 version = "0.1.0"
-source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=db1137ba1#db1137ba1f8e7301e325021f71f740063daaf76e"
+source = "git+https://github.com/0LNetworkCommunity/diem.git?rev=7b843bc4d46f5f62dd906644d22df5338d3ddde1#7b843bc4d46f5f62dd906644d22df5338d3ddde1"
 dependencies = [
  "bcs 0.1.4",
  "move-binary-format",

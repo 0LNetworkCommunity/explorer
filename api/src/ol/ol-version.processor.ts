@@ -71,17 +71,66 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   public async onModuleInit() {
-    await this.olVersionQueue.add("getMissingVersions", undefined, {
-      repeat: {
-        every: 8 * 60 * 60 * 1_000, // 8 hours
-      },
-    });
 
-    await this.olVersionQueue.add("fetchLatestVersion", undefined, {
-      repeat: {
-        every: 30 * 1_000, // 30 seconds
+    console.log('INIT!!!!!!!');
+
+    const js = this.natsService.jetstream;
+
+
+    const kv = await js.views.kv("ol");
+    await kv.put("ledger.latestVersion", "0");
+
+    let entry = await kv.get("ledger.latestVersion");
+    console.log(`${entry?.key} @ ${entry?.revision} -> ${entry?.string()}`);
+
+    const ledgerLatestVersion = new BN(entry?.string() ?? "0");
+    console.log("ledgerLatestVersion", ledgerLatestVersion);
+
+    const start = ledgerLatestVersion;
+    const end = start.add(new BN(1_000));
+
+    const resultSet = await this.clickhouseService.client.query({
+      query: `
+        (
+          SELECT "version"
+          FROM
+            "user_transaction"
+          WHERE
+            "version" BETWEEN {start:String} AND {end:String}
+          ORDER BY "version" ASC
+        )
+
+        UNION ALL
+
+        (
+          SELECT "version"
+          FROM
+            "block_metadata_transaction"
+          WHERE
+            "version" BETWEEN {start:String} AND {end:String}
+          ORDER BY "version" ASC
+        )
+      `,
+      query_params: {
+        start: start.toString(10),
+        end: end.toString(10),
       },
+      format: "JSONEachRow"
     });
+    const rows = await resultSet.json();
+    console.log(rows);
+
+    // await this.olVersionQueue.add("getMissingVersions", undefined, {
+    //   repeat: {
+    //     every: 8 * 60 * 60 * 1_000, // 8 hours
+    //   },
+    // });
+
+    // await this.olVersionQueue.add("fetchLatestVersion", undefined, {
+    //   repeat: {
+    //     every: 30 * 1_000, // 30 seconds
+    //   },
+    // });
 
     // const versions = [
     //   0, 3, 357451, 383074, 750119, 1013884, 1381594, 1755416, 2129981, 2471148,
@@ -246,9 +295,12 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
 
     const rows = await result.json<{
       data: {
-        address: string[];
+        address?: string[];
       };
     }>();
+    if (!rows.data.address) {
+      return;
+    }
 
     for (const address of rows.data.address) {
       this.natsService.nc.publish(
@@ -271,32 +323,35 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   private async getMissingVersions() {
-    const lastBatchIngestedVersion =
-      await this.olDbService.getLastBatchIngestedVersion();
 
-    const ingestedVersions = await this.olDbService.getIngestedVersions(
-      lastBatchIngestedVersion ?? undefined,
-    );
-    const latestVersion = new BN(await this.getLedgerVersion());
+    this.natsService.nc.jetstream()
 
-    for (
-      let i = lastBatchIngestedVersion
-        ? lastBatchIngestedVersion.add(ONE)
-        : ZERO;
-      i.lt(latestVersion);
-      i = i.add(new BN(ONE))
-    ) {
-      const version = i;
-      if (bnFindIndex(ingestedVersions, version) !== -1) {
-        continue;
-      }
-      await this.olVersionQueue.add(
-        "version",
-        { version: version.toString(10) } as VersionJobData,
-        {
-          jobId: `__version__${version}`,
-        },
-      );
-    }
+    // const lastBatchIngestedVersion =
+    //   await this.olDbService.getLastBatchIngestedVersion();
+
+    // const ingestedVersions = await this.olDbService.getIngestedVersions(
+    //   lastBatchIngestedVersion ?? undefined,
+    // );
+    // const latestVersion = new BN(await this.getLedgerVersion());
+
+    // for (
+    //   let i = lastBatchIngestedVersion
+    //     ? lastBatchIngestedVersion.add(ONE)
+    //     : ZERO;
+    //   i.lt(latestVersion);
+    //   i = i.add(new BN(ONE))
+    // ) {
+    //   const version = i;
+    //   if (bnFindIndex(ingestedVersions, version) !== -1) {
+    //     continue;
+    //   }
+    //   await this.olVersionQueue.add(
+    //     "version",
+    //     { version: version.toString(10) } as VersionJobData,
+    //     {
+    //       jobId: `__version__${version}`,
+    //     },
+    //   );
+    // }
   }
 }

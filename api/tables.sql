@@ -66,8 +66,8 @@ CREATE TABLE "block_metadata_transaction" (
 ENGINE = MergeTree
 ORDER BY version;
 
--- CREATE TABLE "state_checkpoint_transaction" (
---   `version` UInt64,
+CREATE TABLE "state_checkpoint_transaction" (
+  `version` UInt64,
 --   `hash` UInt256,
 --   `state_change_hash` UInt256,
 --   `event_root_hash` UInt256,
@@ -76,10 +76,10 @@ ORDER BY version;
 --   `success` Boolean,
 --   `vm_status` String,
 --   `accumulator_root_hash` UInt256,
---   `timestamp` UInt64
--- )
--- ENGINE = MergeTree
--- ORDER BY version;
+  `timestamp` UInt64
+)
+ENGINE = MergeTree
+ORDER BY version;
 
 CREATE TABLE "ingested_files"
 (

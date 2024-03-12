@@ -13,9 +13,9 @@ SELECT
   "version",
   "timestamp",
   "creation_number",
-  reinterpretAsUInt256(reverse(unhex("account_address"))),
+  "account_address",
   "sequence_number",
-  reinterpretAsUInt256(reverse(unhex("module_address"))),
+  "module_address",
   "module_name",
   "struct_name",
   "data"
@@ -25,9 +25,9 @@ FROM
       version UInt64,
       timestamp UInt64,
       creation_number UInt64,
-      account_address String,
+      account_address UInt256,
       sequence_number UInt64,
-      module_address String,
+      module_address UInt256,
       module_name String,
       struct_name String,
       data String

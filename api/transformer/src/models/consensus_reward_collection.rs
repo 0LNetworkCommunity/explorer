@@ -1,8 +1,6 @@
-use arrow_array::{ArrayRef, RecordBatch, BinaryArray};
+use arrow_array::{ArrayRef, RecordBatch};
 use parquet::{arrow::arrow_writer::ArrowWriter, file::properties::WriterProperties};
 use std::{fs::File, sync::Arc};
-
-use crate::to_array_data::ToArrayData;
 
 pub struct ConsensusRewardCollection {
     version: Vec<u64>,

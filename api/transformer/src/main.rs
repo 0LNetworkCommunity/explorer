@@ -12,7 +12,7 @@ use models::{
     BurnCounterCollection, BurnTrackerCollection, CoinBalanceCollection, ConsensusRewardCollection,
     EpochFeeMakerRegistryCollection, EventCollection, ScriptCollection, SlowWalletCollection,
     SlowWalletListCollection, TotalSupplyCollection, TowerListCollection,
-    UserTransactionCollection, VdfDifficultyCollection,
+    UserTransactionCollection, VdfDifficultyCollection, StateCheckpointTransactionCollection,
 };
 use serde_json::Value;
 
@@ -405,7 +405,6 @@ fn process_changes(
                     && type_generic_type_params_len == 0
                 {
                     let data = &change.data.data.0;
-                    println!("data = {:?}", data);
 
                     let clearing_bid: String = serde_json::from_value(
                         data.get(&IdentifierWrapper::from_str("clearing_bid").unwrap())
@@ -550,6 +549,7 @@ async fn main() {
     let args = Args::parse();
 
     let mut block_metadata_transaction_collection = BlockMetadataTransactionCollection::new();
+    let mut state_checkpoint_transaction_collection = StateCheckpointTransactionCollection::new();
     let mut user_transaction_collection = UserTransactionCollection::new();
     let mut script_collection = ScriptCollection::new();
     let mut total_supply_collection = TotalSupplyCollection::new();
@@ -585,8 +585,6 @@ async fn main() {
                 panic!("invalid transaction json file");
             }
         };
-
-        println!("tx = {}", transactions.len());
 
         let it = transactions.iter();
         for transaction in it {
@@ -695,7 +693,16 @@ async fn main() {
                         &info.changes,
                     );
                 }
-                Transaction::StateCheckpointTransaction(_) => {}
+                Transaction::StateCheckpointTransaction(state_checkpoint_transaction) => {
+                    let info = &state_checkpoint_transaction.info;
+
+                    assert_eq!(info.vm_status, "Executed successfully");
+                    assert_eq!(info.gas_used, diem_api_types::U64(0));
+                    assert_eq!(info.success, true);
+                    assert_eq!(info.changes.len(), 0);
+
+                    state_checkpoint_transaction_collection.push(state_checkpoint_transaction);
+                }
             }
         }
     }
@@ -704,6 +711,8 @@ async fn main() {
     user_transaction_collection.to_parquet(format!("{}/user_transaction.parquet", &args.dest));
     block_metadata_transaction_collection
         .to_parquet(format!("{}/block_metadata_transaction.parquet", &args.dest));
+    state_checkpoint_transaction_collection
+        .to_parquet(format!("{}/state_checkpoint_transaction.parquet", &args.dest));
     total_supply_collection.to_parquet(format!("{}/total_supply.parquet", &args.dest));
     coin_balance_collection.to_parquet(format!("{}/coin_balance.parquet", &args.dest));
     script_collection.to_parquet(format!("{}/script.parquet", &args.dest));

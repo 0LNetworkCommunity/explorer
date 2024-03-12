@@ -43,7 +43,7 @@ export interface VersionJobData {
 }
 
 @Processor("ol-version")
-export class OlVersionProcessor extends WorkerHost /* implements OnModuleInit */ {
+export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   private static jsonCodec = JSONCodec();
 
   private readonly providerHost: string;
@@ -70,90 +70,86 @@ export class OlVersionProcessor extends WorkerHost /* implements OnModuleInit */
     this.providerHost = config.provider;
   }
 
-  // public async onModuleInit() {
+  public async onModuleInit() {
+    // const js = this.natsService.jetstream;
 
-  //   console.log('INIT!!!!!!!');
+    // const kv = await js.views.kv("ol");
+    // await kv.put("ledger.latestVersion", "0");
 
-  //   const js = this.natsService.jetstream;
+    // let entry = await kv.get("ledger.latestVersion");
+    // console.log(`${entry?.key} @ ${entry?.revision} -> ${entry?.string()}`);
 
+    // const ledgerLatestVersion = new BN(entry?.string() ?? "0");
+    // console.log("ledgerLatestVersion", ledgerLatestVersion);
 
-  //   const kv = await js.views.kv("ol");
-  //   await kv.put("ledger.latestVersion", "0");
+    // const start = ledgerLatestVersion;
+    // const end = start.add(new BN(1_000));
 
-  //   let entry = await kv.get("ledger.latestVersion");
-  //   console.log(`${entry?.key} @ ${entry?.revision} -> ${entry?.string()}`);
+    // const resultSet = await this.clickhouseService.client.query({
+    //   query: `
+    //     (
+    //       SELECT "version"
+    //       FROM
+    //         "user_transaction"
+    //       WHERE
+    //         "version" BETWEEN {start:String} AND {end:String}
+    //       ORDER BY "version" ASC
+    //     )
 
-  //   const ledgerLatestVersion = new BN(entry?.string() ?? "0");
-  //   console.log("ledgerLatestVersion", ledgerLatestVersion);
+    //     UNION ALL
 
-  //   const start = ledgerLatestVersion;
-  //   const end = start.add(new BN(1_000));
+    //     (
+    //       SELECT "version"
+    //       FROM
+    //         "block_metadata_transaction"
+    //       WHERE
+    //         "version" BETWEEN {start:String} AND {end:String}
+    //       ORDER BY "version" ASC
+    //     )
+    //   `,
+    //   query_params: {
+    //     start: start.toString(10),
+    //     end: end.toString(10),
+    //   },
+    //   format: "JSONEachRow"
+    // });
+    // const rows = await resultSet.json();
+    // console.log(rows);
 
-  //   const resultSet = await this.clickhouseService.client.query({
-  //     query: `
-  //       (
-  //         SELECT "version"
-  //         FROM
-  //           "user_transaction"
-  //         WHERE
-  //           "version" BETWEEN {start:String} AND {end:String}
-  //         ORDER BY "version" ASC
-  //       )
+    await this.olVersionQueue.add("getMissingVersions", undefined, {
+      repeat: {
+        every: 8 * 60 * 60 * 1_000, // 8 hours
+      },
+    });
 
-  //       UNION ALL
+    await this.olVersionQueue.add("fetchLatestVersion", undefined, {
+      repeat: {
+        every: 30 * 1_000, // 30 seconds
+      },
+    });
 
-  //       (
-  //         SELECT "version"
-  //         FROM
-  //           "block_metadata_transaction"
-  //         WHERE
-  //           "version" BETWEEN {start:String} AND {end:String}
-  //         ORDER BY "version" ASC
-  //       )
-  //     `,
-  //     query_params: {
-  //       start: start.toString(10),
-  //       end: end.toString(10),
-  //     },
-  //     format: "JSONEachRow"
-  //   });
-  //   const rows = await resultSet.json();
-  //   console.log(rows);
+    // const versions = [
+    //   0, 3, 357451, 383074, 750119, 1013884, 1381594, 1755416, 2129981, 2471148,
+    //   2881024, 3230553, 3544066, 3904673, 4276587, 4547740, 4910530, 5266217,
+    //   5601203, 5861979, 6192113, 6476658, 6791428, 7103475, 7451257, 7801233,
+    //   8111591, 8450577, 8771238, 9077846, 9427323, 9828418, 10177281, 10531814,
+    //   10914227, 11316377, 11710656, 12090849, 12495421, 12898524, 13251727,
+    //   13620738, 14004276, 14387731, 14789599, 15174340, 15572039, 15941510,
+    //   16336657, 16696634, 17063354, 17463463, 23992709, 24370482, 24778357,
+    //   25173909, 25533427, 25913345, 26315881, 26694115, 27066756, 27443464,
+    //   27805311, 28188869, 28573730,
+    // ];
 
-  //   // await this.olVersionQueue.add("getMissingVersions", undefined, {
-  //   //   repeat: {
-  //   //     every: 8 * 60 * 60 * 1_000, // 8 hours
-  //   //   },
-  //   // });
-
-  //   // await this.olVersionQueue.add("fetchLatestVersion", undefined, {
-  //   //   repeat: {
-  //   //     every: 30 * 1_000, // 30 seconds
-  //   //   },
-  //   // });
-
-  //   // const versions = [
-  //   //   0, 3, 357451, 383074, 750119, 1013884, 1381594, 1755416, 2129981, 2471148,
-  //   //   2881024, 3230553, 3544066, 3904673, 4276587, 4547740, 4910530, 5266217,
-  //   //   5601203, 5861979, 6192113, 6476658, 6791428, 7103475, 7451257, 7801233,
-  //   //   8111591, 8450577, 8771238, 9077846, 9427323, 9828418, 10177281, 10531814,
-  //   //   10914227, 11316377, 11710656, 12090849, 12495421, 12898524, 13251727,
-  //   //   13620738, 14004276, 14387731, 14789599, 15174340, 15572039, 15941510,
-  //   //   16336657, 16696634, 17063354, 17463463, 23992709, 24370482, 24778357,
-  //   //   25173909, 25533427, 25913345, 26315881, 26694115, 27066756, 27443464,
-  //   //   27805311, 28188869, 28573730,
-  //   // ];
-
-  //   // for (const version of versions) {
-  //   //   await this.olVersionQueue.add(
-  //   //     "version",
-  //   //     { version: `${version}` } as VersionJobData,
-  //   //     {
-  //   //       jobId: `__version__${version}`,
-  //   //     },
-  //   //   );
-  //   // }
-  // }
+    // for (const version of versions) {
+    //   await this.olVersionQueue.add(
+    //     "version",
+    //     { version: `${version}` } as VersionJobData,
+    //     {
+    //       jobId: `__version__${version}`,
+    //     },
+    //   );
+    // }
+  }
 
   public async process(job: Job<VersionJobData, any, string>) {
     switch (job.name) {
@@ -323,35 +319,34 @@ export class OlVersionProcessor extends WorkerHost /* implements OnModuleInit */
   }
 
   private async getMissingVersions() {
+    // this.natsService.nc.jetstream()
 
-    this.natsService.nc.jetstream()
+    const lastBatchIngestedVersion =
+      await this.olDbService.getLastBatchIngestedVersion();
 
-    // const lastBatchIngestedVersion =
-    //   await this.olDbService.getLastBatchIngestedVersion();
+    const ingestedVersions = await this.olDbService.getIngestedVersions(
+      lastBatchIngestedVersion ?? undefined,
+    );
+    const latestVersion = new BN(await this.getLedgerVersion());
 
-    // const ingestedVersions = await this.olDbService.getIngestedVersions(
-    //   lastBatchIngestedVersion ?? undefined,
-    // );
-    // const latestVersion = new BN(await this.getLedgerVersion());
-
-    // for (
-    //   let i = lastBatchIngestedVersion
-    //     ? lastBatchIngestedVersion.add(ONE)
-    //     : ZERO;
-    //   i.lt(latestVersion);
-    //   i = i.add(new BN(ONE))
-    // ) {
-    //   const version = i;
-    //   if (bnFindIndex(ingestedVersions, version) !== -1) {
-    //     continue;
-    //   }
-    //   await this.olVersionQueue.add(
-    //     "version",
-    //     { version: version.toString(10) } as VersionJobData,
-    //     {
-    //       jobId: `__version__${version}`,
-    //     },
-    //   );
-    // }
+    for (
+      let i = lastBatchIngestedVersion
+        ? lastBatchIngestedVersion.add(ONE)
+        : ZERO;
+      i.lt(latestVersion);
+      i = i.add(new BN(ONE))
+    ) {
+      const version = i;
+      if (bnFindIndex(ingestedVersions, version) !== -1) {
+        continue;
+      }
+      await this.olVersionQueue.add(
+        "version",
+        { version: version.toString(10) } as VersionJobData,
+        {
+          jobId: `__version__${version}`,
+        },
+      );
+    }
   }
 }

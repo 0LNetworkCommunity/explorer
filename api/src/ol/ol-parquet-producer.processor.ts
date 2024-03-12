@@ -5,6 +5,7 @@ import { execFile as execFileNative } from 'node:child_process';
 import util from 'node:util';
 import { Readable } from 'node:stream';
 
+import Bluebird from "bluebird";
 import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
 import _ from 'lodash';
 import { OnModuleInit } from '@nestjs/common';
@@ -15,7 +16,7 @@ import { TransformerService } from './transformer.service.js';
 
 const execFile = util.promisify(execFileNative);
 
-const PARQUETS_DIR = 'parquets-fixed';
+const PARQUETS_DIR = 'parquets';
 
 @Processor('ol-parquet-producer')
 export class OlParquetProducerProcessor
@@ -48,7 +49,14 @@ export class OlParquetProducerProcessor
         break;
 
       case 'transform':
-        await this.processArchive(job);
+        await Promise.race([
+          this.processArchive(job),
+
+          // 20m timeout to avoid blocking the queue
+          Bluebird.delay(20 * 60 * 1_000).then(() => {
+            throw new Error("timeout");
+          }),
+        ]);
         break;
 
       default:

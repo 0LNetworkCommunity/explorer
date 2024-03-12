@@ -11,7 +11,7 @@ import { NatsConfig } from "../config/config.interface.js";
 export class NatsService implements OnModuleInit, OnApplicationShutdown {
   public nc: NatsConnection;
 
-  public jetstream: JetStreamClient;
+  // public jetstream: JetStreamClient;
 
   private servers: string;
 
@@ -25,7 +25,7 @@ export class NatsService implements OnModuleInit, OnApplicationShutdown {
       servers: this.servers,
     });
     this.nc = conn;
-    this.jetstream = conn.jetstream();
+    // this.jetstream = conn.jetstream();
   }
 
   public async onApplicationShutdown(signal?: string | undefined) {

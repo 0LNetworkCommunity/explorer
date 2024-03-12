@@ -73,7 +73,6 @@ const roles = process.env.ROLES!.split(",");
 
     OlService,
     TransformerService,
-    OlVersionProcessor,
 
     ...(roles.includes("worker")
       ? [

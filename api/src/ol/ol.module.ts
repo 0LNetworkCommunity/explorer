@@ -18,7 +18,7 @@ import { ValidatorResolver } from "./validator.resvoler.js";
 import { AccountResolver } from "./account.resolver.js";
 import { TransformerService } from "./transformer.service.js";
 import { OlParquetProducerProcessor } from "./ol-parquet-producer.processor.js";
-import { OlClickhouseIngestorProcessor } from "./ol-clickhouse-ingestor.processor.js";
+// import { OlClickhouseIngestorProcessor } from "./ol-clickhouse-ingestor.processor.js";
 import { OlController } from './ol.controller.js';
 import { CommunityWalletsResolver } from "./community-wallets.resolver.js";
 import { WalletSubscriptionModule } from "../wallet-subscription/wallet-subscription.module.js";
@@ -76,11 +76,11 @@ const roles = process.env.ROLES!.split(",");
 
     ...(roles.includes("worker")
       ? [
-        // OlVersionProcessor,
-        // OlVersionBatchProcessor,
+        OlVersionProcessor,
+        OlVersionBatchProcessor,
         OlParquetProducerProcessor,
 
-        OlClickhouseIngestorProcessor,
+        // OlClickhouseIngestorProcessor,
       ]
       : []),
   ],

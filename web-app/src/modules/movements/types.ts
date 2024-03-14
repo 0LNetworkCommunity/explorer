@@ -93,7 +93,6 @@ export interface MovementInput {
   unlockedAmount: Decimal;
   transaction: Transaction;
   version: BN;
-  changeIndex: BN;
 }
 
 export class Movement {
@@ -111,8 +110,6 @@ export class Movement {
 
   public readonly version: BN;
 
-  public readonly changeIndex: BN;
-
   public constructor(input: MovementInput) {
     this.transaction = input.transaction;
     this.balance = input.balance;
@@ -121,7 +118,6 @@ export class Movement {
     this.lockedAmount = input.lockedAmount;
     this.unlockedAmount = input.unlockedAmount;
     this.version = input.version;
-    this.changeIndex = input.changeIndex;
   }
 }
 

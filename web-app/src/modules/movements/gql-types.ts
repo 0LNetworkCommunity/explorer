@@ -87,7 +87,6 @@ export interface GqlMovement {
   balance: string;
   lockedBalance: string;
   version: string;
-  changeIndex: string;
   transaction: GqlTransaction;
 }
 

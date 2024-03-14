@@ -290,3 +290,21 @@ PRIMARY KEY (
 ORDER BY (
     "version", "change_index"
 );
+
+CREATE TABLE "beneficiary_policy"
+(
+    "version" UInt64,
+    "timestamp" UInt64,
+    "change_index" UInt64,
+    "lifetime_pledged" UInt64,
+    "lifetime_withdrawn" UInt64,
+    "amount_available" UInt64,
+    "pledgers_count" UInt64
+)
+ENGINE = MergeTree
+PRIMARY KEY (
+    "version", "change_index"
+)
+ORDER BY (
+    "version", "change_index"
+);

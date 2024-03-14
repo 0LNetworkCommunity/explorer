@@ -26,7 +26,7 @@ const Movements: FC<Props> = ({ address }) => {
         <ul role="list" className={clsx("divide-y divide-gray-200", loading && "opacity-0")}>
           {movements &&
             movements.map((movement) => (
-              <li key={`${movement.version.toString()}-${movement.changeIndex.toString()}`}>
+              <li key={movement.version.toString()}>
                 <Link to={`/transactions/${movement.transaction.version}`}>
                   <MovementItem movement={movement} />
                 </Link>

@@ -109,7 +109,6 @@ export class OlClickhouseIngestorProcessor
 
   private async ingest(file: string) {
     const fileComponents = file.split("/");
-    const range = fileComponents[0];
     let parquetFileName = fileComponents[fileComponents.length - 1];
     parquetFileName = parquetFileName.substring(
       0,
@@ -125,19 +124,17 @@ export class OlClickhouseIngestorProcessor
 
     for (const file of files) {
       if (file.endsWith(".parquet")) {
-        if (
-          await this.clickhouseService.insertParquetFile(
-            pathUtil.join(archiveDir, file),
-          )
-        ) {
-          await this.clickhouseService.client.insert({
-            table: "ingested_files",
-            values: [{ name: `${range}/${file}` }],
-            format: "JSONEachRow",
-          });
-        }
+        await this.clickhouseService.insertParquetFile(
+          pathUtil.join(archiveDir, file),
+        )
       }
     }
+
+    await this.clickhouseService.client.insert({
+      table: "ingested_files",
+      values: [{ name: file }],
+      format: "JSONEachRow",
+    });
 
     await cleanUp(archiveDir);
   }

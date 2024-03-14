@@ -65,12 +65,12 @@ export class ClickhouseService implements OnModuleInit, OnApplicationShutdown {
     this.client.close();
   }
 
-  public async insertParquetFile(path: string): Promise<boolean> {
+  public async insertParquetFile(path: string): Promise<void> {
     const queryName = pathUtil.basename(path).split(".")[0];
 
     const queryPath = this.insertQueriesFiles.get(queryName);
     if (!queryPath) {
-      return false;
+      throw new Error(`insert query missing for ${queryName}`);
     }
 
     const clickhouseConfig = this.config;
@@ -90,6 +90,5 @@ export class ClickhouseService implements OnModuleInit, OnApplicationShutdown {
          --query="$(cat ${queryPath})"
       `,
     ]);
-    return true;
   }
 }

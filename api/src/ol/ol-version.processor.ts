@@ -71,51 +71,6 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   public async onModuleInit() {
-    // const js = this.natsService.jetstream;
-
-    // const kv = await js.views.kv("ol");
-    // await kv.put("ledger.latestVersion", "0");
-
-    // let entry = await kv.get("ledger.latestVersion");
-    // console.log(`${entry?.key} @ ${entry?.revision} -> ${entry?.string()}`);
-
-    // const ledgerLatestVersion = new BN(entry?.string() ?? "0");
-    // console.log("ledgerLatestVersion", ledgerLatestVersion);
-
-    // const start = ledgerLatestVersion;
-    // const end = start.add(new BN(1_000));
-
-    // const resultSet = await this.clickhouseService.client.query({
-    //   query: `
-    //     (
-    //       SELECT "version"
-    //       FROM
-    //         "user_transaction"
-    //       WHERE
-    //         "version" BETWEEN {start:String} AND {end:String}
-    //       ORDER BY "version" ASC
-    //     )
-
-    //     UNION ALL
-
-    //     (
-    //       SELECT "version"
-    //       FROM
-    //         "block_metadata_transaction"
-    //       WHERE
-    //         "version" BETWEEN {start:String} AND {end:String}
-    //       ORDER BY "version" ASC
-    //     )
-    //   `,
-    //   query_params: {
-    //     start: start.toString(10),
-    //     end: end.toString(10),
-    //   },
-    //   format: "JSONEachRow"
-    // });
-    // const rows = await resultSet.json();
-    // console.log(rows);
-
     await this.olVersionQueue.add("getMissingVersions", undefined, {
       repeat: {
         every: 8 * 60 * 60 * 1_000, // 8 hours
@@ -127,28 +82,6 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
         every: 30 * 1_000, // 30 seconds
       },
     });
-
-    // const versions = [
-    //   0, 3, 357451, 383074, 750119, 1013884, 1381594, 1755416, 2129981, 2471148,
-    //   2881024, 3230553, 3544066, 3904673, 4276587, 4547740, 4910530, 5266217,
-    //   5601203, 5861979, 6192113, 6476658, 6791428, 7103475, 7451257, 7801233,
-    //   8111591, 8450577, 8771238, 9077846, 9427323, 9828418, 10177281, 10531814,
-    //   10914227, 11316377, 11710656, 12090849, 12495421, 12898524, 13251727,
-    //   13620738, 14004276, 14387731, 14789599, 15174340, 15572039, 15941510,
-    //   16336657, 16696634, 17063354, 17463463, 23992709, 24370482, 24778357,
-    //   25173909, 25533427, 25913345, 26315881, 26694115, 27066756, 27443464,
-    //   27805311, 28188869, 28573730,
-    // ];
-
-    // for (const version of versions) {
-    //   await this.olVersionQueue.add(
-    //     "version",
-    //     { version: `${version}` } as VersionJobData,
-    //     {
-    //       jobId: `__version__${version}`,
-    //     },
-    //   );
-    // }
   }
 
   public async process(job: Job<VersionJobData, any, string>) {
@@ -319,8 +252,6 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   private async getMissingVersions() {
-    // this.natsService.nc.jetstream()
-
     const lastBatchIngestedVersion =
       await this.olDbService.getLastBatchIngestedVersion();
 

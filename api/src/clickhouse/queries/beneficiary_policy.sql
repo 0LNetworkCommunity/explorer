@@ -23,6 +23,6 @@ FROM
     lifetime_pledged UInt64,
     lifetime_withdrawn UInt64,
     amount_available UInt64,
-    pledgers_count UInt64,
+    pledgers_count UInt64
   ')
   FORMAT Parquet

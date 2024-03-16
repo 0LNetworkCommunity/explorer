@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   GetObjectCommand,
   GetObjectCommandOutput,
-  ListObjectsCommand,
+  ListObjectsV2Command,
   PutObjectCommand,
   PutObjectCommandOutput,
   S3Client,
@@ -70,14 +70,14 @@ export class S3Service {
   public async listFiles(prefix: string): Promise<string[]> {
     const files: string[] = [];
 
-    let marker: string | undefined;
+    let continuationToken: string | undefined;
 
     while (true) {
       const res = await this.client.send(
-        new ListObjectsCommand({
+        new ListObjectsV2Command({
           Bucket: this.bucket,
           Prefix: prefix,
-          Marker: marker,
+          ContinuationToken: continuationToken,
         }),
       );
 
@@ -88,10 +88,10 @@ export class S3Service {
       const prefixLength = prefix.length;
       files.push(...res.Contents.map((it) => it.Key!.substring(prefixLength)));
 
-      if (!res.NextMarker) {
+      if (!res.NextContinuationToken) {
         break;
       }
-      marker = res.NextMarker;
+      continuationToken = res.NextContinuationToken;
     }
     return files;
   }

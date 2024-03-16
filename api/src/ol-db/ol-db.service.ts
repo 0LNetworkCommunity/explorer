@@ -34,7 +34,7 @@ export class OlDbService {
       return null;
     }
 
-    return new BN(res.data[0].last_batch_ingested_version);
+    return new BN(res.data[0].last_batch_ingested_version).add(new BN(99));
   }
 
   public async getIngestedVersions(after?: BN): Promise<BN[]> {

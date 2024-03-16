@@ -212,6 +212,27 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       JSON.stringify([transaction]),
     );
 
+    const notPendingTransaction = transaction as NotPendingTransaction;
+
+    const ingestedVersions = await this.clickhouseService.client
+      .query({
+        query: `
+        SELECT "version"
+        FROM "ingested_versions"
+        WHERE "version" = {version:String}
+      `,
+        query_params: {
+          version: notPendingTransaction.version,
+        },
+      })
+      .then((resultSet) => resultSet.json<{ rows: number }>());
+
+    if (ingestedVersions.rows > 0) {
+      throw new Error(
+        `version ${notPendingTransaction.version} was already processed. ${ingestedVersions.rows} instances found.`,
+      );
+    }
+
     const parquetDest = await this.transformerService.transform([
       transactionsFile,
     ]);
@@ -225,7 +246,6 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     await fs.promises.rm(parquetDest, { recursive: true, force: true });
     await fs.promises.rm(dest, { recursive: true, force: true });
 
-    const notPendingTransaction = transaction as NotPendingTransaction;
     await this.clickhouseService.client.exec({
       query: `
         INSERT INTO "ingested_versions" ("version")
@@ -233,10 +253,12 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       `,
       query_params: {
         version: notPendingTransaction.version,
-      }
+      },
     });
 
-    await this.walletSubscriptionService.releaseVersion(notPendingTransaction.version);
+    await this.walletSubscriptionService.releaseVersion(
+      notPendingTransaction.version,
+    );
     await this.publishChanges(notPendingTransaction.version);
   }
 

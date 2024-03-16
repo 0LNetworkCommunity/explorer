@@ -217,10 +217,10 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     const ingestedVersions = await this.clickhouseService.client
       .query({
         query: `
-        SELECT "version"
-        FROM "ingested_versions"
-        WHERE "version" = {version:String}
-      `,
+          SELECT "version"
+          FROM "ingested_versions"
+          WHERE "version" = {version:String}
+        `,
         query_params: {
           version: notPendingTransaction.version,
         },
@@ -321,7 +321,6 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       lastBatchIngestedVersion ?? undefined,
     );
     const latestVersion = new BN(await this.getLedgerVersion());
-
     for (
       let i = lastBatchIngestedVersion
         ? lastBatchIngestedVersion.add(ONE)

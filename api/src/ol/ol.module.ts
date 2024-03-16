@@ -78,9 +78,9 @@ const roles = process.env.ROLES!.split(",");
       ? [
         OlVersionBatchProcessor,
         OlParquetProducerProcessor,
-        OlVersionProcessor,
 
-        // OlClickhouseIngestorProcessor,
+        // OlVersionProcessor,
+        OlClickhouseIngestorProcessor,
       ]
       : []),
   ],

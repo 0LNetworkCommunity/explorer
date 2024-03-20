@@ -24,6 +24,7 @@ import { CommunityWalletsResolver } from "./community-wallets.resolver.js";
 import { WalletSubscriptionModule } from "../wallet-subscription/wallet-subscription.module.js";
 import { NatsModule } from "../nats/nats.module.js";
 import { MovementsResolver } from "./movements.resolver.js";
+import { MovementsService } from "./movements.service.js";
 
 const roles = process.env.ROLES!.split(",");
 
@@ -72,6 +73,7 @@ const roles = process.env.ROLES!.split(",");
     CommunityWalletsResolver,
 
     OlService,
+    MovementsService,
     TransformerService,
 
     ...(roles.includes("worker")

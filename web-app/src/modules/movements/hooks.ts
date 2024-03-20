@@ -1,4 +1,4 @@
-import { useApolloClient } from '@apollo/client';
+import { ApolloError, useApolloClient } from '@apollo/client';
 import { useEffect, useState } from 'react';
 import { GET_MOVEMENTS, GetAccountMovementsRes } from './gql-types';
 import { gqlMovementMapper } from './mappers';
@@ -46,6 +46,8 @@ export const useMovements = (
             ? movements.edges[movements.edges.length - 1].cursor
             : undefined,
         );
+      } catch (error) {
+        console.error(error);
       } finally {
         setLoading(false);
       }

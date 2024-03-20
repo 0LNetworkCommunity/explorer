@@ -31,9 +31,9 @@ export const GET_MOVEMENTS = gql`
             transaction {
               __typename
               version
-              timestamp
               ... on BlockMetadataTransaction {
                 epoch
+                timestamp
               }
               ... on UserTransaction {
                 success
@@ -42,6 +42,10 @@ export const GET_MOVEMENTS = gql`
                 functionName
                 sender
                 arguments
+                timestamp
+              }
+              ... on ScriptUserTransaction {
+                timestamp
               }
             }
           }
@@ -53,12 +57,12 @@ export const GET_MOVEMENTS = gql`
 
 export interface GqlAbstractTransaction {
   version: string;
-  timestamp: string;
 }
 
 export interface GqlBlockMetadataTransaction extends GqlAbstractTransaction {
   __typename: 'BlockMetadataTransaction';
   epoch: string;
+  timestamp: string;
 }
 
 export interface GqlUserTransaction extends GqlAbstractTransaction {
@@ -69,16 +73,25 @@ export interface GqlUserTransaction extends GqlAbstractTransaction {
   success: boolean;
   sender: string;
   arguments: string;
+  timestamp: string;
 }
 
 export interface GqlGenesisTransaction extends GqlAbstractTransaction {
   __typename: 'GenesisTransaction';
 }
 
+export interface GqlScriptUserTransaction extends GqlAbstractTransaction {
+  __typename: 'ScriptUserTransaction';
+  success: boolean;
+  sender: string;
+  timestamp: string;
+}
+
 export type GqlTransaction =
   | GqlGenesisTransaction
   | GqlUserTransaction
-  | GqlBlockMetadataTransaction;
+  | GqlBlockMetadataTransaction
+  | GqlScriptUserTransaction;
 
 export interface GqlMovement {
   amount: string;

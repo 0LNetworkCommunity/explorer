@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { format } from 'date-fns';
-import { Movement, TransactionType, UserTransaction } from '../../../../movements';
+import { BlockMetadataTransaction, Movement, ScriptUserTransaction, TransactionType, UserTransaction } from '../../../../movements';
 
 import GenesisMovement from './GenesisMovement';
 import BlockMetadataMovement from './BlockMetadataMovement';
@@ -19,13 +19,25 @@ const MovementItem: FC<{ movement: Movement }> = ({ movement }) => {
       <div className="flex flex-row justify-between mb-2">
         <div className="flex flex-col">
           <div>
-            <LibraAmount className="font-mono text-slate-800">
+            <LibraAmount
+              className={clsx('font-mono', [
+                movement.unlockedAmount.isPos() && 'text-green-600',
+                movement.unlockedAmount.isNeg() && 'text-red-600',
+                movement.unlockedAmount.isZero() && 'text-slate-800',
+              ])}
+            >
               {movement.unlockedAmount}
             </LibraAmount>
             {!movement.lockedAmount.isZero() && (
               <>
                 {' - '}
-                <LibraAmount className="font-mono text-slate-500">
+                <LibraAmount
+                  className={clsx('font-mono', [
+                    movement.lockedAmount.isPos() && 'text-green-600',
+                    movement.lockedAmount.isNeg() && 'text-red-600',
+                    movement.lockedAmount.isZero() && 'text-slate-800',
+                  ])}
+                >
                   {movement.lockedAmount}
                 </LibraAmount>
               </>
@@ -46,9 +58,21 @@ const MovementItem: FC<{ movement: Movement }> = ({ movement }) => {
           </div> */}
         </div>
 
-        <div className="font-mono text-sm">
-          {`${format(movement.transaction.date, 'dd/MM/yyyy HH:mm')}`}
-        </div>
+        {[TransactionType.BlockMetadata, TransactionType.User, TransactionType.ScriptUser].includes(
+          movement.transaction.type,
+        ) && (
+          <div className="font-mono text-sm">
+            {`${format(
+              (
+                movement.transaction as
+                  | BlockMetadataTransaction
+                  | UserTransaction
+                  | ScriptUserTransaction
+              ).date,
+              'dd/MM/yyyy HH:mm',
+            )}`}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-row">
@@ -61,6 +85,8 @@ const MovementItem: FC<{ movement: Movement }> = ({ movement }) => {
                 return <BlockMetadataMovement movement={movement} />;
               case TransactionType.User:
                 return <UserMovement movement={movement} />;
+              case TransactionType.ScriptUser:
+                return <div>ScriptUser</div>;
             }
             return null;
           })()}

@@ -4,7 +4,6 @@ import clsx from 'clsx';
 import { OrderDirection, useMovements } from '../../../../movements';
 import MovementItem from './MovementItem';
 
-
 const ITEM_PER_PAGE = 10;
 
 interface Props {

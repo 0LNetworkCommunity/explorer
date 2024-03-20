@@ -1,5 +1,4 @@
 import { Args, Mutation, Resolver, registerEnumType } from "@nestjs/graphql";
-import { WalletSubscriptionService } from "./wallet-subscription.service.js";
 import { PrismaService } from "../prisma/prisma.service.js";
 import { GraphQLError } from "graphql";
 
@@ -12,10 +11,7 @@ registerEnumType(DeviceType, { name: "DeviceType" });
 
 @Resolver()
 export class WalletSubscriptionResolver {
-  public constructor(
-    private readonly walletSubscriptionService: WalletSubscriptionService,
-    private readonly prisma: PrismaService,
-  ) {}
+  public constructor(private readonly prisma: PrismaService) {}
 
   @Mutation(() => Boolean)
   async walletSubscribe(
@@ -45,13 +41,16 @@ export class WalletSubscriptionResolver {
         ON CONFLICT ("type", "token") DO NOTHING
         RETURNING id
       )
+
       SELECT * FROM e
+
       UNION
-        SELECT "id"
-        FROM "Device"
-        WHERE
-          "type" = CAST(${deviceType} as "DeviceType")
-          AND "token" = ${deviceToken}
+
+      SELECT "id"
+      FROM "Device"
+      WHERE
+        "type" = CAST(${deviceType} as "DeviceType")
+        AND "token" = ${deviceToken}
     `;
 
     const deviceId = res[0].id;

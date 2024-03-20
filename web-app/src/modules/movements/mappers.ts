@@ -1,7 +1,14 @@
 import { Buffer } from "buffer";
 import { Decimal } from "decimal.js";
 import { GqlMovement, GqlTransaction } from "./gql-types";
-import { Transaction, Movement, GenesisTransaction, UserTransaction, BlockMetadataTransaction } from "./types";
+import {
+  Transaction,
+  Movement,
+  GenesisTransaction,
+  UserTransaction,
+  BlockMetadataTransaction,
+  ScriptUserTransaction,
+} from './types';
 import { BN } from "bn.js";
 
 export const gqlTransactionMapper = (gqlTransaction: GqlTransaction): Transaction => {
@@ -9,7 +16,6 @@ export const gqlTransactionMapper = (gqlTransaction: GqlTransaction): Transactio
     case "GenesisTransaction":
       return new GenesisTransaction({
         version: new BN(gqlTransaction.version),
-        timestamp: new BN(gqlTransaction.timestamp),
       });
 
     case "UserTransaction":
@@ -22,6 +28,14 @@ export const gqlTransactionMapper = (gqlTransaction: GqlTransaction): Transactio
         functionName: gqlTransaction.functionName,
         sender: Buffer.from(gqlTransaction.sender, "hex"),
         arguments: gqlTransaction.arguments,
+      });
+
+    case "ScriptUserTransaction":
+      return new ScriptUserTransaction({
+        version: new BN(gqlTransaction.version),
+        timestamp: new BN(gqlTransaction.timestamp),
+        success: gqlTransaction.success,
+        sender: Buffer.from(gqlTransaction.sender, "hex"),
       });
 
     case "BlockMetadataTransaction":

@@ -71,51 +71,6 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   public async onModuleInit() {
-    // const js = this.natsService.jetstream;
-
-    // const kv = await js.views.kv("ol");
-    // await kv.put("ledger.latestVersion", "0");
-
-    // let entry = await kv.get("ledger.latestVersion");
-    // console.log(`${entry?.key} @ ${entry?.revision} -> ${entry?.string()}`);
-
-    // const ledgerLatestVersion = new BN(entry?.string() ?? "0");
-    // console.log("ledgerLatestVersion", ledgerLatestVersion);
-
-    // const start = ledgerLatestVersion;
-    // const end = start.add(new BN(1_000));
-
-    // const resultSet = await this.clickhouseService.client.query({
-    //   query: `
-    //     (
-    //       SELECT "version"
-    //       FROM
-    //         "user_transaction"
-    //       WHERE
-    //         "version" BETWEEN {start:String} AND {end:String}
-    //       ORDER BY "version" ASC
-    //     )
-
-    //     UNION ALL
-
-    //     (
-    //       SELECT "version"
-    //       FROM
-    //         "block_metadata_transaction"
-    //       WHERE
-    //         "version" BETWEEN {start:String} AND {end:String}
-    //       ORDER BY "version" ASC
-    //     )
-    //   `,
-    //   query_params: {
-    //     start: start.toString(10),
-    //     end: end.toString(10),
-    //   },
-    //   format: "JSONEachRow"
-    // });
-    // const rows = await resultSet.json();
-    // console.log(rows);
-
     await this.olVersionQueue.add("getMissingVersions", undefined, {
       repeat: {
         every: 8 * 60 * 60 * 1_000, // 8 hours
@@ -123,6 +78,12 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     });
 
     await this.olVersionQueue.add("fetchLatestVersion", undefined, {
+      repeat: {
+        every: 30 * 1_000, // 30 seconds
+      },
+    });
+
+    await this.olVersionQueue.add("updateLastestStableVersion", undefined, {
       repeat: {
         every: 30 * 1_000, // 30 seconds
       },
@@ -159,8 +120,111 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
         }
         break;
 
+      case "updateLastestStableVersion":
+        try {
+          await Promise.race([
+            this.updateLastestStableVersion(),
+            // 1m timeout to avoid blocking the queue
+            Bluebird.delay(1 * 60 * 1_000),
+          ]);
+        } catch (error) {
+          // fail silently to avoid accumulating failed repeating jobs
+        }
+        break;
+
       default:
         throw new Error(`invalid job name ${job.name}`);
+    }
+  }
+
+  private async updateLastestStableVersion(): Promise<void> {
+    const js = this.natsService.jetstream;
+    const kv = await js.views.kv("ol");
+    const entry = await kv.get("ledger.latestVersion");
+    let ledgerLatestVersion = new BN(entry?.string() ?? "0");
+
+    while (true) {
+      const start = ledgerLatestVersion;
+      const end = start.add(new BN(1e4));
+
+      const resultSet = await this.clickhouseService.client.query({
+        query: `
+          SELECT "version"
+          FROM (
+              SELECT "version"
+              FROM
+                "user_transaction"
+              WHERE
+                "version" BETWEEN {start:String} AND {end:String}
+              ORDER BY "version" DESC
+
+            UNION ALL
+
+              SELECT "version"
+              FROM
+                "block_metadata_transaction"
+              WHERE
+                "version" BETWEEN {start:String} AND {end:String}
+              ORDER BY "version" DESC
+
+            UNION ALL
+
+              SELECT "version"
+              FROM
+                "state_checkpoint_transaction"
+              WHERE
+                "version" BETWEEN {start:String} AND {end:String}
+              ORDER BY "version" DESC
+
+            UNION ALL
+
+              SELECT "version"
+              FROM
+                "genesis_transaction"
+              WHERE
+                "version" BETWEEN {start:String} AND {end:String}
+              ORDER BY "version" DESC
+
+            UNION ALL
+
+              SELECT "version"
+              FROM
+                "script"
+              WHERE
+                "version" BETWEEN {start:String} AND {end:String}
+              ORDER BY "version" DESC
+          ) as "list"
+          ORDER BY "version" DESC
+        `,
+        query_params: {
+          start: start.toString(10),
+          end: end.toString(10),
+        },
+        format: "JSONColumnsWithMetadata",
+      });
+      const rows = await resultSet.json<{
+        meta: [{ name: "version"; type: "UInt64" }];
+        data: {
+          version: string[];
+        };
+        rows: number;
+      }>();
+
+      const versions = rows.data.version;
+
+      for (const i = start.clone(); i.lte(end); i.iadd(ONE)) {
+        const index = versions.lastIndexOf(i.toString());
+        if (index === -1) {
+          if (!i.isZero()) {
+            const last = i.sub(ONE);
+            await kv.put("ledger.latestVersion", last.toString());
+          }
+          return;
+        }
+      }
+
+      await kv.put("ledger.latestVersion", end.toString());
+      ledgerLatestVersion = end.clone();
     }
   }
 

@@ -4,7 +4,6 @@
 
 interface AbstractTransaction {
   version: BigInt!
-  timestamp: BigInt!
 }
 
 type GqlUserTransactionDeprecated {
@@ -85,15 +84,40 @@ type SlowWallet {
   unlocked: Decimal!
 }
 
-type GenesisTransaction implements AbstractTransaction {
+type PageInfo {
+  prevCursor: String
+  hasNextPage: Boolean!
+}
+
+type Movement {
+  amount: Decimal!
+  unlockedAmount: Decimal!
+  lockedAmount: Decimal!
+  balance: Decimal!
+  lockedBalance: Decimal!
   version: BigInt!
-  timestamp: BigInt!
+  transaction: AbstractTransaction!
+}
+
+type GqlMovementEdge {
+  cursor: String!
+  node: Movement!
+}
+
+type PaginatedMovements {
+  edges: [GqlMovementEdge!]
+  totalCount: Float!
+  pageInfo: PageInfo!
 }
 
 type BlockMetadataTransaction implements AbstractTransaction {
   version: BigInt!
-  timestamp: BigInt!
   epoch: BigInt!
+  timestamp: BigInt!
+}
+
+type GenesisTransaction implements AbstractTransaction {
+  version: BigInt!
 }
 
 type UserTransaction implements AbstractTransaction {
@@ -107,30 +131,11 @@ type UserTransaction implements AbstractTransaction {
   arguments: String!
 }
 
-type Movement {
-  amount: Decimal!
-  unlockedAmount: Decimal!
-  lockedAmount: Decimal!
-  balance: Decimal!
-  lockedBalance: Decimal!
+type ScriptUserTransaction implements AbstractTransaction {
   version: BigInt!
-  transaction: AbstractTransaction!
-}
-
-type PageInfo {
-  prevCursor: String
-  hasNextPage: Boolean!
-}
-
-type GqlMovementEdge {
-  cursor: String!
-  node: Movement!
-}
-
-type PaginatedMovements {
-  edges: [GqlMovementEdge!]
-  totalCount: Float!
-  pageInfo: PageInfo!
+  timestamp: BigInt!
+  success: Boolean!
+  sender: Bytes!
 }
 
 type CommunityWallet {

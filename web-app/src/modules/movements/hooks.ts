@@ -1,4 +1,4 @@
-import { ApolloError, useApolloClient } from '@apollo/client';
+import { useApolloClient } from '@apollo/client';
 import { useEffect, useState } from 'react';
 import { GET_MOVEMENTS, GetAccountMovementsRes } from './gql-types';
 import { gqlMovementMapper } from './mappers';

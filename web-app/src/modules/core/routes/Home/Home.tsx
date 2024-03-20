@@ -34,7 +34,7 @@ const Transactions: FC = () => {
 
 const Home: FC = () => {
   return (
-    <Page>
+    <Page __deprecated_grayBg>
       <Stats />
       <section className="mt-2 overflow-x-auto">
         <Transactions />

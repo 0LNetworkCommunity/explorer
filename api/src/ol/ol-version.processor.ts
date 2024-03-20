@@ -11,6 +11,7 @@ import * as d3 from "d3-array";
 import axios from "axios";
 import Bluebird from "bluebird";
 import { Types } from "aptos";
+import { JSONCodec } from "nats";
 import { ConfigService } from "@nestjs/config";
 import qs from "qs";
 
@@ -20,6 +21,7 @@ import { TransformerService } from "./transformer.service.js";
 import { NotPendingTransaction } from "./types.js";
 import { OlConfig } from "../config/config.interface.js";
 import { WalletSubscriptionService } from "../wallet-subscription/wallet-subscription.service.js";
+import { NatsService } from "../nats/nats.service.js";
 
 const ZERO = new BN(0);
 const ONE = new BN(1);
@@ -52,6 +54,8 @@ export interface VersionJobData {
 
 @Processor("ol-version")
 export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
+  private static jsonCodec = JSONCodec();
+
   private readonly providerHost: string;
 
   public constructor(
@@ -65,6 +69,8 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     private readonly olDbService: OlDbService,
 
     private readonly clichouseService: ClickhouseService,
+
+    private readonly natsService: NatsService,
 
     private readonly walletSubscriptionService: WalletSubscriptionService,
   ) {
@@ -86,6 +92,28 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
         every: 30 * 1_000, // 30 seconds
       },
     });
+
+    // const versions = [
+    //   0, 3, 357451, 383074, 750119, 1013884, 1381594, 1755416, 2129981, 2471148,
+    //   2881024, 3230553, 3544066, 3904673, 4276587, 4547740, 4910530, 5266217,
+    //   5601203, 5861979, 6192113, 6476658, 6791428, 7103475, 7451257, 7801233,
+    //   8111591, 8450577, 8771238, 9077846, 9427323, 9828418, 10177281, 10531814,
+    //   10914227, 11316377, 11710656, 12090849, 12495421, 12898524, 13251727,
+    //   13620738, 14004276, 14387731, 14789599, 15174340, 15572039, 15941510,
+    //   16336657, 16696634, 17063354, 17463463, 23992709, 24370482, 24778357,
+    //   25173909, 25533427, 25913345, 26315881, 26694115, 27066756, 27443464,
+    //   27805311, 28188869, 28573730,
+    // ];
+
+    // for (const version of versions) {
+    //   await this.olVersionQueue.add(
+    //     "version",
+    //     { version: `${version}` } as VersionJobData,
+    //     {
+    //       jobId: `__version__${version}`,
+    //     },
+    //   );
+    // }
   }
 
   public async process(job: Job<VersionJobData, any, string>) {
@@ -193,12 +221,52 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
 
     await this.clichouseService.client.exec({
       query: `
-        INSERT INTO "ingested_versions" ("version") VALUES ${versions.join()} 
+        INSERT INTO "ingested_versions" ("version")
+        VALUES ${versions.join()}
       `,
     });
 
     for (const transaction of notPendingTransactions) {
       await this.walletSubscriptionService.releaseVersion(transaction.version);
+      await this.publishChanges(transaction.version);
+    }
+  }
+
+  private async publishChanges(version: string) {
+    const result = await this.clichouseService.client.query({
+      query: `
+        SELECT DISTINCT hex("address") as "address"
+        FROM (
+          SELECT "address"
+            FROM "coin_balance"
+            WHERE "version" = {version:UInt64}
+
+          UNION ALL
+
+          SELECT "address"
+            FROM "slow_wallet"
+            WHERE "version" = {version:UInt64}
+        )
+      `,
+      query_params: {
+        version,
+      },
+      format: "JSONColumnsWithMetadata",
+    });
+
+    const rows = await result.json<{
+      data: {
+        address: string[];
+      };
+    }>();
+
+    for (const address of rows.data.address) {
+      this.natsService.nc.publish(
+        `wallet.${address}`,
+        OlVersionProcessor.jsonCodec.encode({
+          version,
+        }),
+      );
     }
   }
 

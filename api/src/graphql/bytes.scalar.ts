@@ -24,7 +24,7 @@ export class BytesScalar implements CustomScalar<string, Buffer> {
   }
 
   public serialize(value: Buffer): string {
-    return value.toString("hex");
+    return value.toString("hex").toUpperCase();
   }
 
   public parseLiteral(ast: ValueNode): Buffer {

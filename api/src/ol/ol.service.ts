@@ -5,6 +5,8 @@ import { ConfigService } from "@nestjs/config";
 import { OlConfig } from "../config/config.interface.js";
 import { ConsensusReward, RawDonorVoiceRegistry, RawValidatorSet, ValidatorGrade, ValidatorSet } from "./types.js";
 import { NetworkAddresses } from "./network-addresses.js";
+import BN from "bn.js";
+import { parseAddress } from "../utils.js";
 
 @Injectable()
 export class OlService {
@@ -24,29 +26,30 @@ export class OlService {
     return addresses[0] as string[];
   }
 
-  public async accountExists(address: string): Promise<boolean> {
+  public async accountExists(address: Buffer): Promise<boolean> {
     const res = await this.aptosClient.view({
       function: "0x1::account::exists_at",
       type_arguments: [],
-      arguments: [address],
+      arguments: [`0x${address.toString('hex')}`],
     });
     return res[0] as boolean;
   }
 
-  public async getEligibleValidators(): Promise<string[]> {
-    const addresses = await this.aptosClient.view({
+  public async getEligibleValidators(): Promise<Buffer[]> {
+    const res = await this.aptosClient.view({
       function: "0x1::validator_universe::get_eligible_validators",
       type_arguments: [],
       arguments: [],
     });
-    return addresses[0] as string[];
+    const addresses = res[0] as string[];
+    return addresses.map((address) => parseAddress(address));
   }
 
-  public async getCurrentBid(address: string) {
+  public async getCurrentBid(address: Buffer) {
     const res = await this.aptosClient.view({
       function: "0x1::proof_of_fee::current_bid",
       type_arguments: [],
-      arguments: [address],
+      arguments: [`0x${address.toString('hex')}`],
     });
     const currentBid = res as [string, string];
     return {
@@ -55,12 +58,12 @@ export class OlService {
     };
   }
 
-  public async getValidatorGrade(address: string): Promise<ValidatorGrade> {
+  public async getValidatorGrade(address: Buffer): Promise<ValidatorGrade> {
     try {
       const res = await this.aptosClient.view({
         function: "0x1::grade::get_validator_grade",
         type_arguments: [],
-        arguments: [address, "0"],
+        arguments: [`0x${address.toString("hex")}`, "0"],
       });
       const payload = res as [boolean, string, string, { value: string }];
       return {
@@ -70,7 +73,6 @@ export class OlService {
         ratio: parseInt(payload[3].value, 10),
       };
     } catch (error) {
-      console.log(error);
       return {
         compliant: false,
         proposedBlocks: -1,
@@ -80,20 +82,20 @@ export class OlService {
     }
   }
 
-  public async getAllVouchers(address: string) {
+  public async getAllVouchers(address: Buffer) {
     const res = await this.aptosClient.view({
       function: "0x1::vouch::all_vouchers",
       type_arguments: [],
-      arguments: [address],
+      arguments: [`0x${address.toString('hex')}`],
     });
     return res;
   }
 
-  public async getVouchersInValSet(address: string) {
+  public async getVouchersInValSet(address: Buffer) {
     const res = await this.aptosClient.view({
       function: "0x1::vouch::true_friends",
       type_arguments: [],
-      arguments: [address],
+      arguments: [`0x${address.toString("hex")}`],
     });
     return res;
   }
@@ -144,15 +146,15 @@ export class OlService {
         );
 
         return {
-          addr: validator.addr,
-          votingPower: parseInt(validator.voting_power, 10),
+          addr: parseAddress(validator.addr),
+          votingPower: new BN(validator.voting_power),
           config: {
             consensusPubkey: validator.config.consensus_pubkey,
             fullnodeAddresses:
               NetworkAddresses.fromBytes(fullnodeAddresses)?.toString(),
             networkAddresses:
               NetworkAddresses.fromBytes(networkAddresses)?.toString(),
-            validatorIndex: parseInt(validator.config.validator_index, 10),
+            validatorIndex: new BN(validator.config.validator_index),
           },
         };
       }),

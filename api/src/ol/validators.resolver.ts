@@ -1,6 +1,7 @@
 import { Query, Resolver } from "@nestjs/graphql";
 import _ from "lodash";
 import Bluebird from "bluebird";
+import BN from "bn.js";
 
 import { OlService } from "./ol.service.js";
 import { GqlValidator } from "./models/validator.model.js";
@@ -31,15 +32,16 @@ export class ValidatorsResolver {
     const currentValidators = validatorSet.activeValidators.map(
       (validator) => {
         const validatorPerformance =
-          validatorPerformances.validators[validator.config.validatorIndex];
+          validatorPerformances.validators[
+            validator.config.validatorIndex.toNumber()
+          ];
 
         return new GqlValidator({
-          address: validator.addr.substring(2).toUpperCase(),
+          address: validator.addr,
           votingPower: validator.votingPower,
-          failedProposals: parseInt(validatorPerformance.failed_proposals, 10),
-          successfulProposals: parseInt(
+          failedProposals: new BN(validatorPerformance.failed_proposals),
+          successfulProposals: new BN(
             validatorPerformance.successful_proposals,
-            10,
           ),
           inSet: true,
           networkAddresses: validator.config.networkAddresses,
@@ -50,16 +52,16 @@ export class ValidatorsResolver {
 
     let eligible = await this.olService.getEligibleValidators();
     eligible = eligible.filter((address) =>
-      !currentValidators.find((it) => it.address === address),
+      !currentValidators.find((it) => it.address.equals(address)),
     );
 
     const eligibleValidators = await Bluebird.map(eligible, async (address) => {
       const grade = await this.olService.getValidatorGrade(address);
       return new GqlValidator({
-        address: address.substring(2).toUpperCase(),
-        votingPower: 0,
-        failedProposals: grade.failedBlocks,
-        successfulProposals: grade.proposedBlocks,
+        address,
+        votingPower: new BN(0),
+        failedProposals: new BN(grade.failedBlocks),
+        successfulProposals: new BN(grade.proposedBlocks),
         inSet: false,
       });
     });

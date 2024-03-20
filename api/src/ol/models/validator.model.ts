@@ -1,4 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import BN from 'bn.js';
 
 interface GqlValidatorGradeInput {
   compliant: boolean;
@@ -30,10 +31,10 @@ export class GqlValidatorGrade {
 }
 
 interface GqlValidatorInput {
-  address: string;
-  votingPower: number;
-  failedProposals: number;
-  successfulProposals: number;
+  address: Buffer;
+  votingPower: BN;
+  failedProposals: BN;
+  successfulProposals: BN;
   inSet: boolean;
   networkAddresses?: string;
   fullnodeAddresses?: string;
@@ -54,8 +55,8 @@ export class GqlValidator {
   @Field(() => Boolean)
   public inSet: boolean;
 
-  @Field(() => String)
-  public address: string;
+  @Field(() => Buffer)
+  public address: Buffer;
 
   @Field(() => String, { nullable: true })
   public networkAddresses?: string;
@@ -63,19 +64,19 @@ export class GqlValidator {
   @Field(() => String, { nullable: true })
   public fullnodeAddresses?: string;
 
-  @Field(() => Number)
-  public votingPower: number;
+  @Field(() => BN)
+  public votingPower: BN;
 
-  @Field(() => Number)
-  public failedProposals: number;
+  @Field(() => BN)
+  public failedProposals: BN;
 
-  @Field(() => Number)
-  public successfulProposals: number;
+  @Field(() => BN)
+  public successfulProposals: BN;
 }
 
 interface GqlVouchInput {
-  epoch: number;
-  address: string;
+  epoch: BN;
+  address: Buffer;
   inSet: boolean;
 }
 
@@ -87,11 +88,11 @@ export class GqlVouch {
     this.inSet = input.inSet;
   }
 
-  @Field(() => Number)
-  public epoch: number;
+  @Field(() => BN)
+  public epoch: BN;
 
-  @Field(() => String)
-  public address: string;
+  @Field(() => Buffer)
+  public address: Buffer;
 
   @Field(() => Boolean)
   public inSet: boolean;

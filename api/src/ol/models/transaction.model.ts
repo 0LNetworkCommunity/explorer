@@ -18,8 +18,8 @@ interface GqlUserTransactionInput {
   timestamp: number;
 }
 
-@ObjectType('UserTransaction')
-export class GqlUserTransaction {
+@ObjectType('GqlUserTransactionDeprecated')
+export class GqlUserTransactionDeprecated {
   public constructor(input: GqlUserTransactionInput) {
     this.hash = input.hash;
     this.version = input.version;
@@ -86,7 +86,7 @@ export class GqlUserTransaction {
 
 @ObjectType('UserTransactionCollection')
 export class GqlUserTransactionCollection {
-  public constructor(size: number, items: GqlUserTransaction[]) {
+  public constructor(size: number, items: GqlUserTransactionDeprecated[]) {
     this.size = size;
     this.items = items;
   }
@@ -94,6 +94,6 @@ export class GqlUserTransactionCollection {
   @Field(() => Number)
   public size: number;
 
-  @Field(() => [GqlUserTransaction])
-  public items: GqlUserTransaction[];
+  @Field(() => [GqlUserTransactionDeprecated])
+  public items: GqlUserTransactionDeprecated[];
 }

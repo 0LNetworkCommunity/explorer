@@ -16,20 +16,21 @@ import { OlDbModule } from "../ol-db/ol-db.module.js";
 import { ValidatorsResolver } from "./validators.resolver.js";
 import { ValidatorResolver } from "./validator.resvoler.js";
 import { AccountResolver } from "./account.resolver.js";
-import { VouchResolver } from "./vouch.resolver.js";
-import { AccountsResolver } from "./accounts.resolver.js";
 import { TransformerService } from "./transformer.service.js";
 import { OlParquetProducerProcessor } from "./ol-parquet-producer.processor.js";
 // import { OlClickhouseIngestorProcessor } from "./ol-clickhouse-ingestor.processor.js";
 import { OlController } from './ol.controller.js';
 import { CommunityWalletsResolver } from "./community-wallets.resolver.js";
 import { WalletSubscriptionModule } from "../wallet-subscription/wallet-subscription.module.js";
+import { NatsModule } from "../nats/nats.module.js";
+import { MovementsResolver } from "./movements.resolver.js";
 
 const roles = process.env.ROLES!.split(",");
 
 @Module({
   imports: [
     S3Module,
+    NatsModule,
     ClickhouseModule,
     OlDbModule,
     WalletSubscriptionModule,
@@ -62,13 +63,12 @@ const roles = process.env.ROLES!.split(",");
   providers: [
     UserTransactionsResolver,
     ModulesResolver,
+    MovementsResolver,
 
     AccountResolver,
-    AccountsResolver,
 
     ValidatorResolver,
     ValidatorsResolver,
-    VouchResolver,
     CommunityWalletsResolver,
 
     OlService,

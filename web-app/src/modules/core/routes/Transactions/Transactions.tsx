@@ -50,7 +50,7 @@ const TransactionsPage: FC = () => {
   });
 
   if (!data) {
-    return <Page />;
+    return <Page __deprecated_grayBg />;
   }
 
   const pageCount = Math.ceil(data.userTransactions.size / ITEM_PER_PAGE);
@@ -69,7 +69,7 @@ const TransactionsPage: FC = () => {
 
   return (
     <Page>
-      <div className="mt-2 flow-root">
+      <div className="mt-2 flow-root overflow-x-auto">
         <div className="inline-block min-w-full py-1 align-middle px-1">
           <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
             <table className="min-w-full divide-y divide-gray-300">

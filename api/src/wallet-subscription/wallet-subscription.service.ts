@@ -12,7 +12,7 @@ import { ReleaseVersionJobData } from "./wallet-subscription.processor.js";
 import { FirebaseService } from "../firebase/firebase.service.js";
 
 @Injectable()
-export class WalletSubscriptionService implements OnModuleInit {
+export class WalletSubscriptionService {
   private readonly apnProvider?: apn.Provider;
 
   public constructor(
@@ -35,12 +35,6 @@ export class WalletSubscriptionService implements OnModuleInit {
         },
       });
     }
-  }
-
-  public async onModuleInit() {
-    setTimeout(async () => {
-      await this.releaseVersion("27443464");
-    }, 5_000);
   }
 
   public async releaseVersion(version: string) {

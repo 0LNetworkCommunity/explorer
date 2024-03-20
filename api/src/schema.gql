@@ -2,7 +2,12 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type UserTransaction {
+interface AbstractTransaction {
+  version: BigInt!
+  timestamp: BigInt!
+}
+
+type GqlUserTransactionDeprecated {
   hash: String!
   version: Float!
   gasUsed: Float!
@@ -22,7 +27,7 @@ type UserTransaction {
 
 type UserTransactionCollection {
   size: Float!
-  items: [UserTransaction!]!
+  items: [GqlUserTransactionDeprecated!]!
 }
 
 type Module {
@@ -40,12 +45,12 @@ type ValidatorGrade {
 
 type Validator {
   inSet: Boolean!
-  address: String!
+  address: Bytes!
   networkAddresses: String
   fullnodeAddresses: String
-  votingPower: Float!
-  failedProposals: Float!
-  successfulProposals: Float!
+  votingPower: BigInt!
+  failedProposals: BigInt!
+  successfulProposals: BigInt!
   account: Account!
   vouches: [Vouch!]!
   grade: ValidatorGrade!
@@ -53,10 +58,9 @@ type Validator {
 }
 
 type Vouch {
-  epoch: Float!
-  address: String!
+  epoch: BigInt!
+  address: Bytes!
   inSet: Boolean!
-  account: Account!
 }
 
 type ValidatorCurrentBid {
@@ -65,21 +69,43 @@ type ValidatorCurrentBid {
 }
 
 type Account {
-  address: String!
-  balance: Float!
-  creationDate: String!
+  address: Bytes!
+  balance: Decimal!
   slowWallet: SlowWallet
   movements: [Movement!]!
 }
 
 type SlowWallet {
-  transferred: Float!
-  unlocked: Float!
+  transferred: Decimal!
+  unlocked: Decimal!
+}
+
+type GenesisTransaction implements AbstractTransaction {
+  version: BigInt!
+  timestamp: BigInt!
+}
+
+type BlockMetadataTransaction implements AbstractTransaction {
+  version: BigInt!
+  timestamp: BigInt!
+  epoch: BigInt!
+}
+
+type UserTransaction implements AbstractTransaction {
+  version: BigInt!
+  timestamp: BigInt!
+  success: Boolean!
+  sender: Bytes!
+  moduleAddress: Bytes!
+  moduleName: String!
+  functionName: String!
+  arguments: String!
 }
 
 type Movement {
-  balance: Float!
-  version: Float!
+  balance: Decimal!
+  version: BigInt!
+  transaction: AbstractTransaction!
 }
 
 type CommunityWallet {
@@ -92,10 +118,16 @@ type CommunityWallet {
 """Buffer"""
 scalar Bytes
 
+"""BigInt"""
+scalar BigInt
+
+"""Decimal"""
+scalar Decimal
+
 type Query {
   userTransactions(limit: Int!, offset: Int!, order: String!): UserTransactionCollection!
   modules: [Module!]!
-  account(address: String!): Account
+  account(address: Bytes!): Account
   validators: [Validator!]!
   communityWallets: [CommunityWallet!]!
 }
@@ -107,4 +139,8 @@ type Mutation {
 enum DeviceType {
   IOS
   ANDROID
+}
+
+type Subscription {
+  walletMovement(address: Bytes!): String!
 }

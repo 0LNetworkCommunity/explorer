@@ -15,13 +15,14 @@ SELECT
   "hash",
   "epoch",
   "round",
+  "previous_block_votes_bitvec",
   "proposer",
   -- "failed_proposer_indices",
   "timestamp"
 FROM
   input(
     '
-      id String,
+      id UInt256,
       version UInt64,
       hash UInt256,
       epoch UInt64,

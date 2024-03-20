@@ -71,86 +71,62 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   public async onModuleInit() {
-    console.log("onModuleInit");
+    // const js = this.natsService.jetstream;
 
-    const js = this.natsService.jetstream;
+    // const kv = await js.views.kv("ol");
+    // await kv.put("ledger.latestVersion", "0");
 
-    const kv = await js.views.kv("ol");
-    await kv.put("ledger.latestVersion", "0");
+    // let entry = await kv.get("ledger.latestVersion");
+    // console.log(`${entry?.key} @ ${entry?.revision} -> ${entry?.string()}`);
 
-    let entry = await kv.get("ledger.latestVersion");
-    console.log(`${entry?.key} @ ${entry?.revision} -> ${entry?.string()}`);
+    // const ledgerLatestVersion = new BN(entry?.string() ?? "0");
+    // console.log("ledgerLatestVersion", ledgerLatestVersion);
 
-    const ledgerLatestVersion = new BN(entry?.string() ?? "0");
-    console.log("ledgerLatestVersion", ledgerLatestVersion);
+    // const start = ledgerLatestVersion;
+    // const end = start.add(new BN(1_000));
 
-    const start = ledgerLatestVersion;
-    const end = start.add(new BN(1_000));
+    // const resultSet = await this.clickhouseService.client.query({
+    //   query: `
+    //     (
+    //       SELECT "version"
+    //       FROM
+    //         "user_transaction"
+    //       WHERE
+    //         "version" BETWEEN {start:String} AND {end:String}
+    //       ORDER BY "version" ASC
+    //     )
 
-    const resultSet = await this.clickhouseService.client.query({
-      query: `
-        (
-          SELECT "version"
-          FROM
-            "user_transaction"
-          WHERE
-            "version" BETWEEN {start:String} AND {end:String}
-          ORDER BY "version" ASC
-        )
+    //     UNION ALL
 
-        UNION ALL
+    //     (
+    //       SELECT "version"
+    //       FROM
+    //         "block_metadata_transaction"
+    //       WHERE
+    //         "version" BETWEEN {start:String} AND {end:String}
+    //       ORDER BY "version" ASC
+    //     )
+    //   `,
+    //   query_params: {
+    //     start: start.toString(10),
+    //     end: end.toString(10),
+    //   },
+    //   format: "JSONEachRow"
+    // });
+    // const rows = await resultSet.json();
+    // console.log(rows);
 
-        (
-          SELECT "version"
-          FROM
-            "block_metadata_transaction"
-          WHERE
-            "version" BETWEEN {start:String} AND {end:String}
-          ORDER BY "version" ASC
-        )
-      `,
-      query_params: {
-        start: start.toString(10),
-        end: end.toString(10),
+    await this.olVersionQueue.add("getMissingVersions", undefined, {
+      repeat: {
+        every: 8 * 60 * 60 * 1_000, // 8 hours
       },
-      format: "JSONEachRow"
     });
-    const rows = await resultSet.json();
-    console.log(rows);
 
-    // await this.olVersionQueue.add("getMissingVersions", undefined, {
-    //   repeat: {
-    //     every: 8 * 60 * 60 * 1_000, // 8 hours
-    //   },
-    // });
-
-    // await this.olVersionQueue.add("fetchLatestVersion", undefined, {
-    //   repeat: {
-    //     every: 30 * 1_000, // 30 seconds
-    //   },
-    // });
-
-    // const versions = [
-    //   0, 3, 357451, 383074, 750119, 1013884, 1381594, 1755416, 2129981, 2471148,
-    //   2881024, 3230553, 3544066, 3904673, 4276587, 4547740, 4910530, 5266217,
-    //   5601203, 5861979, 6192113, 6476658, 6791428, 7103475, 7451257, 7801233,
-    //   8111591, 8450577, 8771238, 9077846, 9427323, 9828418, 10177281, 10531814,
-    //   10914227, 11316377, 11710656, 12090849, 12495421, 12898524, 13251727,
-    //   13620738, 14004276, 14387731, 14789599, 15174340, 15572039, 15941510,
-    //   16336657, 16696634, 17063354, 17463463, 23992709, 24370482, 24778357,
-    //   25173909, 25533427, 25913345, 26315881, 26694115, 27066756, 27443464,
-    //   27805311, 28188869, 28573730,
-    // ];
-
-    // for (const version of versions) {
-    //   await this.olVersionQueue.add(
-    //     "version",
-    //     { version: `${version}` } as VersionJobData,
-    //     {
-    //       jobId: `__version__${version}`,
-    //     },
-    //   );
-    // }
+    await this.olVersionQueue.add("fetchLatestVersion", undefined, {
+      repeat: {
+        every: 30 * 1_000, // 30 seconds
+      },
+    });
   }
 
   public async process(job: Job<VersionJobData, any, string>) {
@@ -202,7 +178,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     if (!transactions.length) {
       throw new Error(`transaction not found ${version}`);
     }
-    await this.ingestTransactions(transactions);
+    await this.ingestTransaction(transactions[0]);
   }
 
   private async fetchLatestVersion() {
@@ -220,11 +196,8 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     }
   }
 
-  private async ingestTransactions(transactions: Types.Transaction[]) {
-    const notPendingTransactions = transactions.filter(
-      (transactions) => transactions.type !== "pending_transaction",
-    ) as NotPendingTransaction[];
-    if (!notPendingTransactions.length) {
+  private async ingestTransaction(transaction: Types.Transaction) {
+    if (transaction.type === "pending_transaction") {
       return;
     }
 
@@ -236,8 +209,29 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     const transactionsFile = `${dest}/transactions.json`;
     await fs.promises.writeFile(
       `${dest}/transactions.json`,
-      JSON.stringify(notPendingTransactions),
+      JSON.stringify([transaction]),
     );
+
+    const notPendingTransaction = transaction as NotPendingTransaction;
+
+    const ingestedVersions = await this.clickhouseService.client
+      .query({
+        query: `
+        SELECT "version"
+        FROM "ingested_versions"
+        WHERE "version" = {version:String}
+      `,
+        query_params: {
+          version: notPendingTransaction.version,
+        },
+      })
+      .then((resultSet) => resultSet.json<{ rows: number }>());
+
+    if (ingestedVersions.rows > 0) {
+      throw new Error(
+        `version ${notPendingTransaction.version} was already processed. ${ingestedVersions.rows} instances found.`,
+      );
+    }
 
     const parquetDest = await this.transformerService.transform([
       transactionsFile,
@@ -252,21 +246,20 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     await fs.promises.rm(parquetDest, { recursive: true, force: true });
     await fs.promises.rm(dest, { recursive: true, force: true });
 
-    const versions = notPendingTransactions.map(
-      (transaction) => `(${transaction.version})`,
-    );
-
     await this.clickhouseService.client.exec({
       query: `
         INSERT INTO "ingested_versions" ("version")
-        VALUES ${versions.join()}
+        VALUES ({version:String})
       `,
+      query_params: {
+        version: notPendingTransaction.version,
+      },
     });
 
-    for (const transaction of notPendingTransactions) {
-      await this.walletSubscriptionService.releaseVersion(transaction.version);
-      await this.publishChanges(transaction.version);
-    }
+    await this.walletSubscriptionService.releaseVersion(
+      notPendingTransaction.version,
+    );
+    await this.publishChanges(notPendingTransaction.version);
   }
 
   private async publishChanges(version: string) {

@@ -24,7 +24,7 @@ const GET_ACCOUNT = gql`
 interface GetAccountRes {
   account: {
     address: string;
-    balance: string;
+    balance: string | null;
     slowWallet: {
       unlocked: string;
     } | null
@@ -93,16 +93,18 @@ const Account: FC<Props> = ({ accountAddress }) => {
 
   return (
     <Page title={`Account: ${account.address}`} __deprecated_grayBg>
-      <div>
-        {'Balance: '}
-        <LibraAmount>{new Decimal(data.account.balance)}</LibraAmount>
-        {account.slowWallet && (
-          <>
-            {" | Unlocked: "}
-            <LibraAmount>{new Decimal(account.slowWallet.unlocked)}</LibraAmount>
-          </>
-        )}
-      </div>
+      {data.account.balance !== null && (
+        <div>
+          {'Balance: '}
+          <LibraAmount>{new Decimal(data.account.balance)}</LibraAmount>
+          {account.slowWallet && (
+            <>
+              {' | Unlocked: '}
+              <LibraAmount>{new Decimal(account.slowWallet.unlocked)}</LibraAmount>
+            </>
+          )}
+        </div>
+      )}
 
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8" aria-label="Tabs">

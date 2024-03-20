@@ -66,6 +66,20 @@ CREATE TABLE "block_metadata_transaction" (
 ENGINE = MergeTree
 ORDER BY version;
 
+CREATE TABLE "genesis_transaction" (
+  `version` UInt64,
+  `hash` UInt256,
+  `state_change_hash` UInt256,
+  `event_root_hash` UInt256,
+  `state_checkpoint_hash` Nullable(UInt256),
+  `gas_used` UInt64,
+  `success` Boolean,
+  `vm_status` String,
+  `accumulator_root_hash` UInt256
+)
+ENGINE = MergeTree
+ORDER BY version;
+
 CREATE TABLE "state_checkpoint_transaction" (
   `version` UInt64,
 --   `hash` UInt256,
@@ -308,3 +322,9 @@ PRIMARY KEY (
 ORDER BY (
     "version", "change_index"
 );
+
+CREATE TABLE "community_wallet" (
+	"address" UInt256
+)
+ENGINE = MergeTree
+ORDER BY "address";

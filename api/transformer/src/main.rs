@@ -13,6 +13,7 @@ use models::{
     EpochFeeMakerRegistryCollection, EventCollection, ScriptCollection, SlowWalletCollection,
     SlowWalletListCollection, TotalSupplyCollection, TowerListCollection,
     UserTransactionCollection, VdfDifficultyCollection, StateCheckpointTransactionCollection,
+    GenesisTransactionCollection,
 };
 use serde_json::Value;
 
@@ -551,6 +552,7 @@ async fn main() {
     let mut block_metadata_transaction_collection = BlockMetadataTransactionCollection::new();
     let mut state_checkpoint_transaction_collection = StateCheckpointTransactionCollection::new();
     let mut user_transaction_collection = UserTransactionCollection::new();
+    let mut genesis_transaction_collection = GenesisTransactionCollection::new();
     let mut script_collection = ScriptCollection::new();
     let mut total_supply_collection = TotalSupplyCollection::new();
     let mut coin_balance_collection = CoinBalanceCollection::new();
@@ -644,6 +646,7 @@ async fn main() {
                     let events = &genesis_transaction.events;
 
                     event_collection.push(info.version.into(), 0, events);
+                    genesis_transaction_collection.push(genesis_transaction);
 
                     process_changes(
                         &mut total_supply_collection,
@@ -709,6 +712,7 @@ async fn main() {
 
     event_collection.to_parquet(format!("{}/event.parquet", &args.dest));
     user_transaction_collection.to_parquet(format!("{}/user_transaction.parquet", &args.dest));
+    genesis_transaction_collection.to_parquet(format!("{}/genesis_transaction.parquet", &args.dest));
     block_metadata_transaction_collection
         .to_parquet(format!("{}/block_metadata_transaction.parquet", &args.dest));
     state_checkpoint_transaction_collection

@@ -15,6 +15,7 @@ mod tower_list_collection;
 mod user_transaction_collection;
 mod vdf_difficulty_collection;
 mod state_checkpoint_transaction_collection;
+mod genesis_transaction_collection;
 
 pub use beneficiary_policy_collection::BeneficiaryPolicyCollection;
 pub use block_metadata_transaction_collection::BlockMetadataTransactionCollection;
@@ -33,3 +34,4 @@ pub use tower_list_collection::TowerListCollection;
 pub use user_transaction_collection::UserTransactionCollection;
 pub use vdf_difficulty_collection::VdfDifficultyCollection;
 pub use state_checkpoint_transaction_collection::StateCheckpointTransactionCollection;
+pub use genesis_transaction_collection::GenesisTransactionCollection;

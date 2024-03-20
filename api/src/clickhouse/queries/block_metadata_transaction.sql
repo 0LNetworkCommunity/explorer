@@ -10,13 +10,12 @@ INSERT INTO "block_metadata_transaction" (
   "timestamp"
 )
 SELECT
-  reinterpretAsUInt256(reverse(unhex("id"))),
+  "id",
   "version",
-  reinterpretAsUInt256(reverse(unhex("hash"))),
+  "hash",
   "epoch",
   "round",
-  unhex("previous_block_votes_bitvec"),
-  reinterpretAsUInt256(reverse(unhex("proposer"))),
+  "proposer",
   -- "failed_proposer_indices",
   "timestamp"
 FROM
@@ -24,11 +23,11 @@ FROM
     '
       id String,
       version UInt64,
-      hash String,
+      hash UInt256,
       epoch UInt64,
       round UInt64,
       previous_block_votes_bitvec String,
-      proposer String,
+      proposer UInt256,
       -- failed_proposer_indices Array(UInt32),
       timestamp UInt64
     '

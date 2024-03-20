@@ -13,10 +13,10 @@ serde = { version = "1.0", features = ["derive"] }
 
 lazy_static = "1.4.0"
 
-arrow = { version = "50" }
-parquet = { version = "50" }
-arrow-array = { version = "50" }
-arrow-schema = { version = "50" }
+arrow = { version = "51" }
+parquet = { version = "51" }
+arrow-array = { version = "51" }
+arrow-schema = { version = "51" }
 regex = "^1.7.0"
 
 # v7

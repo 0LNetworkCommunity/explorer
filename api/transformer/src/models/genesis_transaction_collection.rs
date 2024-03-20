@@ -1,11 +1,10 @@
 use std::{fs::File, sync::Arc};
 
 use arrow_array::{ArrayRef, FixedSizeBinaryArray, RecordBatch};
+use diem_api_types::transaction::GenesisTransaction;
 use parquet::{arrow::arrow_writer::ArrowWriter, file::properties::WriterProperties};
 
-use diem_api_types::transaction::StateCheckpointTransaction;
-
-pub struct StateCheckpointTransactionCollection {
+pub struct GenesisTransactionCollection {
     version: Vec<u64>,
     hash: Vec<Vec<u8>>,
     state_change_hash: Vec<Vec<u8>>,
@@ -15,27 +14,25 @@ pub struct StateCheckpointTransactionCollection {
     success: Vec<bool>,
     vm_status: Vec<String>,
     accumulator_root_hash: Vec<Vec<u8>>,
-    timestamp: Vec<u64>,
 }
 
-impl StateCheckpointTransactionCollection {
-    pub fn new() -> StateCheckpointTransactionCollection {
-      StateCheckpointTransactionCollection {
-            version: Vec::new(),
-            hash: Vec::new(),
-            state_change_hash: Vec::new(),
-            event_root_hash: Vec::new(),
-            state_checkpoint_hash: Vec::new(),
-            gas_used: Vec::new(),
-            success: Vec::new(),
-            vm_status: Vec::new(),
-            accumulator_root_hash: Vec::new(),
-            timestamp: Vec::new(),
+impl GenesisTransactionCollection {
+    pub fn new() -> GenesisTransactionCollection {
+        GenesisTransactionCollection {
+          version: Vec::new(),
+          hash: Vec::new(),
+          state_change_hash: Vec::new(),
+          event_root_hash: Vec::new(),
+          state_checkpoint_hash: Vec::new(),
+          gas_used: Vec::new(),
+          success: Vec::new(),
+          vm_status: Vec::new(),
+          accumulator_root_hash: Vec::new(),
         }
     }
 
-    pub fn push(&mut self, state_checkpoint_transaction: &StateCheckpointTransaction) {
-        let info = &state_checkpoint_transaction.info;
+    pub fn push(&mut self, genesis_transaction: &GenesisTransaction) {
+        let info = &genesis_transaction.info;
 
         let mut hash = info.hash.0.to_vec();
         hash.reverse();
@@ -49,8 +46,6 @@ impl StateCheckpointTransactionCollection {
         self.success.push(info.success);
         self.vm_status.push(info.vm_status.clone());
         self.accumulator_root_hash.push(info.accumulator_root_hash.0.to_vec());
-        self.timestamp
-            .push(state_checkpoint_transaction.timestamp.into());
 
         match info.state_checkpoint_hash {
             Some(state_checkpoint_hash) => {
@@ -68,8 +63,6 @@ impl StateCheckpointTransactionCollection {
             return;
         }
 
-        let parquet_file = File::create(path).unwrap();
-
         let version = arrow_array::UInt64Array::from(self.version.clone());
         let hash = FixedSizeBinaryArray::try_from_iter(self.hash.iter()).unwrap();
         let state_change_hash =
@@ -85,7 +78,6 @@ impl StateCheckpointTransactionCollection {
         // let accumulator_root_hash = BinaryArray::from(self.accumulator_root_hash.to_array_data());
         let accumulator_root_hash =
             FixedSizeBinaryArray::try_from_iter(self.accumulator_root_hash.iter()).unwrap();
-        let timestamp = arrow_array::UInt64Array::from(self.timestamp.clone());
 
         let batch = RecordBatch::try_from_iter(vec![
             ("version", Arc::new(version) as ArrayRef),
@@ -100,13 +92,15 @@ impl StateCheckpointTransactionCollection {
                 "accumulator_root_hash",
                 Arc::new(accumulator_root_hash) as ArrayRef,
             ),
-            ("timestamp", Arc::new(timestamp) as ArrayRef),
         ])
         .unwrap();
 
+        let parquet_file = File::create(path).unwrap();
         let props = WriterProperties::builder().build();
         let mut writer = ArrowWriter::try_new(parquet_file, batch.schema(), Some(props)).unwrap();
         writer.write(&batch).expect("Writing batch");
         writer.close().unwrap();
+
     }
+
 }

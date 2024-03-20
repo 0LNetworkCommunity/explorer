@@ -1,1 +1,0 @@
-export const LIBRA_SIGN = "Ƚ"; // Ł 

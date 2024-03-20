@@ -3,9 +3,10 @@ import { FC } from 'react';
 interface Props {
   color?: string;
   className?: string;
+  withText?: boolean;
 }
 
-const Logo: FC<Props> = ({ color = '#FFFFFF', className }) => {
+const Logo: FC<Props> = ({ color = '#FFFFFF', className, withText = true }) => {
   return (
     <div className="flex gap-2 justify-center items-center">
       <svg
@@ -21,7 +22,9 @@ const Logo: FC<Props> = ({ color = '#FFFFFF', className }) => {
           fill={color}
         />
       </svg>
-      <span className="text-white font-medium text-base whitespace-nowrap">0L Explorer</span>
+      {withText && (
+        <span className="text-white font-medium text-base whitespace-nowrap">0L Explorer</span>
+      )}
     </div>
   );
 };

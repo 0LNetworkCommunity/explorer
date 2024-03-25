@@ -1,9 +1,9 @@
-import { FC, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Types } from "aptos";
+import { FC, useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { Types } from 'aptos';
 
-import useAptos from "../../../../aptos";
-import TransactionTable from "../../../../ui/TransactionsTable";
+import useAptos from '../../../../aptos';
+import TransactionTable from '../../../../ui/TransactionsTable';
 
 const Transactions: FC = () => {
   const { accountAddress } = useParams();
@@ -12,16 +12,12 @@ const Transactions: FC = () => {
 
   useEffect(() => {
     const load = async () => {
-      const transactions = await aptos.getAccountTransactions(
-        `0x${accountAddress!}`,
-        {
-          limit: 10,
-        }
-      );
-      setTransaction(transactions);
+      const transactions = await aptos.getAccountTransactions(`0x${accountAddress!}`);
+      const reversedTransactions = transactions.reverse();
+      setTransaction(reversedTransactions);
     };
     load();
-  }, []);
+  }, [accountAddress, aptos]);
 
   if (transactions) {
     return <TransactionTable transactions={transactions} />;

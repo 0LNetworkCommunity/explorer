@@ -116,11 +116,14 @@ const TransactionsPage: FC = () => {
                   <p className="text-sm text-gray-700">
                     Showing{' '}
                     <span className="font-medium">
-                      {((page - 1) * ITEM_PER_PAGE + 1).toLocaleString()}
+                      {Math.min(
+                        (page - 1) * ITEM_PER_PAGE + 1,
+                        data.userTransactions.size,
+                      ).toLocaleString()}
                     </span>{' '}
                     to{' '}
                     <span className="font-medium">
-                      {((page - 1) * ITEM_PER_PAGE + ITEM_PER_PAGE).toLocaleString()}
+                      {Math.min(page * ITEM_PER_PAGE, data.userTransactions.size).toLocaleString()}
                     </span>{' '}
                     of{' '}
                     <span className="font-medium">

@@ -9,6 +9,7 @@ import { normalizeAddress } from '../../../../utils';
 import LibraAmount from '../../../ui/LibraAmount';
 import AccountDoesntExist from './AccountDoesntExist';
 import { IAccountInfo } from '../../../interface/Account.interface';
+import AccountQRCode from '../../../ui/AccountQRCode';
 
 const GET_ACCOUNT = gql`
   query GetAccount($address: Bytes!) {
@@ -82,6 +83,9 @@ const Account: FC<Props> = ({ accountAddress }) => {
 
   return (
     <Page __deprecated_grayBg title={account.address}>
+      <div className="flex justify-end gap-2">
+        <AccountQRCode address={accountAddress} />
+      </div>
       <div className="grid grid-cols-12 gap-4 py-4">
         {data.account.balance !== null && (
           <div className="col-span-12 md:col-span-3 mt-5 gap-5">

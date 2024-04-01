@@ -328,3 +328,14 @@ CREATE TABLE "community_wallet" (
 )
 ENGINE = MergeTree
 ORDER BY "address";
+
+CREATE TABLE "ol_swap_1h" (
+    "timestamp" UInt64,
+    "volume" Decimal64(6),
+    "open" Decimal64(6),
+    "high" Decimal64(6),
+    "low" Decimal64(6),
+    "close" Decimal64(6)
+)
+ENGINE = ReplacingMergeTree
+ORDER BY "timestamp";

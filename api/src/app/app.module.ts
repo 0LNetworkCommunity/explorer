@@ -14,6 +14,7 @@ import { GraphQLModule } from "../graphql/graphql.module.js";
 import { StatsModule } from "../stats/stats.module.js";
 import { WalletSubscriptionModule } from "../wallet-subscription/wallet-subscription.module.js";
 import { NatsModule } from "../nats/nats.module.js";
+import { OlSwapModule } from "../ol-swap/OlSwapModule.js";
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { NatsModule } from "../nats/nats.module.js";
     NodeWatcherModule,
     StatsModule,
     WalletSubscriptionModule,
+    OlSwapModule,
   ],
   controllers: [],
   providers: [AppService],

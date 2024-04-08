@@ -1,11 +1,11 @@
-import { useWallet } from '@aptos-labs/wallet-adapter-react';
-import { Bars3Icon, MagnifyingGlassIcon } from '@heroicons/react/20/solid';
+import { Bars3Icon } from '@heroicons/react/20/solid';
 import clsx from 'clsx';
-import React, { useRef, useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, NavLink } from 'react-router-dom';
+/* import { useWallet } from '@aptos-labs/wallet-adapter-react';
 import { PosteroWalletName } from '../../../postero-wallet';
+import { normalizeAddress } from '../../../../utils'; */
 import Logo from '../../Logo/Logo';
-import { normalizeAddress } from '../../../../utils';
 
 const navigation = [
   { name: 'Transactions', to: '/transactions' },
@@ -15,13 +15,13 @@ const navigation = [
 ];
 
 const Header: React.FC = () => {
-  const aptosWallet = useWallet();
-  const navigate = useNavigate();
   const [menuIsOpen, setMenuIsOpen] = useState<boolean>(false);
+
+  /* const aptosWallet = useWallet();
+  const navigate = useNavigate();
   const [searchAddress, setSearchAddress] = useState<string>('');
   const searchInput = useRef<HTMLInputElement>(null);
-
-  const connectWallet = () => {
+   const connectWallet = () => {
     aptosWallet.connect(PosteroWalletName);
   };
 
@@ -37,21 +37,23 @@ const Header: React.FC = () => {
       if (searchInput.current) {
         searchInput.current.blur();
       }
-    } catch (error) {}
+    } catch (error) {
+      console.warn(error);
+    }
   };
 
   const sliceHexAddress = (address: string | null) =>
     address ? `${address.slice(0, 5)}...${address.slice(-3)}` : '';
-
+ */
   return (
-    <header className="bg-primary-500">
-      <nav className="flex px-5 py-3 flex-col">
-        <div className="flex items-center gap-3">
+    <header className="bg-white">
+      <nav className="flex px-8 py-5 flex-col">
+        <div className="flex items-center gap-20">
           <Link to="/">
-            <Logo className="h-7 w-7" />
+            <Logo className="h-10 w-10 p-2 rounded bg-[#CD3B42]" withText={false} />
           </Link>
 
-          <div className="hidden lg:inline gap-1 flex-grow">
+          <div className="hidden lg:flex gap-5 flex-grow">
             {navigation.map((item, index) => (
               <NavLink
                 key={index}
@@ -59,8 +61,8 @@ const Header: React.FC = () => {
                 to={item.to}
                 className={({ isActive }) =>
                   clsx(
-                    isActive ? 'bg-primary-700 text-white' : 'text-white hover:underline',
-                    'rounded-md p-3 text-sm text-nowrap',
+                    isActive ? 'border-b border-[#DE2F32] text-[#292929]' : 'text-[#424242]',
+                    'text-md font-medium px-2 py-3 text-nowrap',
                   )
                 }
               >
@@ -69,7 +71,7 @@ const Header: React.FC = () => {
             ))}
           </div>
 
-          <div className="justify-end items-center gap-2 hidden justify-self-end lg:flex">
+          {/*  <div className="justify-end items-center gap-2 hidden justify-self-end lg:flex">
             {localStorage.getItem('postero_enabled') === 'true' && (
               <div className="flex items-baseline gap-2">
                 <div className="flex items-baseline space-x-4">
@@ -126,10 +128,11 @@ const Header: React.FC = () => {
               </div>
             </form>
           </div>
+           */}
 
           <div className="flex flex-grow justify-end lg:hidden">
             <button
-              className="text-white"
+              className="text-[#080808]"
               aria-label="Open Burger Menu"
               type="button"
               onClick={() => setMenuIsOpen(!menuIsOpen)}
@@ -138,28 +141,32 @@ const Header: React.FC = () => {
             </button>
           </div>
         </div>
-        {menuIsOpen && (
-          <div className="block lg:hidden">
-            <ul className="w-full py-3">
-              {navigation.map((item, index) => (
-                <li key={index} className="p-1">
-                  <NavLink
-                    end
-                    to={item.to}
-                    onClick={() => setMenuIsOpen(false)}
-                    className={({ isActive }) =>
-                      clsx(
-                        isActive ? 'bg-primary-700 text-white' : 'text-white hover:underline',
-                        'rounded-md text-sm w-full block p-2 text-nowrap',
-                      )
-                    }
-                  >
-                    {item.name}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-            <form className="w-full px-1" onSubmit={onSearch}>
+        <div
+          className={clsx('block lg:hidden transition-all duration-300 overflow-hidden w-full', {
+            'max-h-screen': menuIsOpen,
+            'max-h-0': !menuIsOpen,
+          })}
+        >
+          <ul className="w-full pt-5 pb-3 flex flex-col gap-4">
+            {navigation.map((item, index) => (
+              <li key={index} className="p-1">
+                <NavLink
+                  end
+                  to={item.to}
+                  onClick={() => setMenuIsOpen(false)}
+                  className={({ isActive }) =>
+                    clsx(
+                      isActive ? 'border-b border-[#DE2F32] text-[#292929]' : 'text-[#424242]',
+                      'text-md font-medium py-3 text-nowrap',
+                    )
+                  }
+                >
+                  {item.name}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+          {/* <form className="w-full px-1" onSubmit={onSearch}>
               <div className="relative text-gray-400 focus-within:text-gray-600">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                   <MagnifyingGlassIcon className="h-5 w-5" aria-hidden="true" />
@@ -179,9 +186,8 @@ const Header: React.FC = () => {
                   onChange={(event) => setSearchAddress(event.target.value)}
                 />
               </div>
-            </form>
-          </div>
-        )}
+            </form> */}
+        </div>
       </nav>
     </header>
   );

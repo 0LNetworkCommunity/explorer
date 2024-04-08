@@ -1,5 +1,7 @@
 export const LIBRA_SIGN = 'Ƚ'; // Ł
 
+export const OL_LANDING_LINK = 'https://0l.network/';
+
 export const SOCIAL_LINKS: Record<
   string,
   {

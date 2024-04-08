@@ -8,6 +8,7 @@ import { normalizeAddress } from '../../../../utils'; */
 import Logo from '../../Logo/Logo';
 
 const navigation = [
+  { name: 'Home', to: '/' },
   { name: 'Transactions', to: '/transactions' },
   { name: 'Validators', to: '/validators' },
   { name: 'Stats', to: '/stats' },

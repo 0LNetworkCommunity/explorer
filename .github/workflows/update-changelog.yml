@@ -17,6 +17,9 @@ jobs:
       with:
         node-version: '16'
         
+    - name: Set Script Permissions
+      run: chmod +x ./web-app/scripts/generate_changelog.sh
+
     - name: Generate Custom Changelog
       run: ./web-app/scripts/generate_changelog.sh
 

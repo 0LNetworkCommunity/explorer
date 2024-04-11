@@ -51,3 +51,7 @@ fi
 
 git add CHANGELOG.md
 git commit -m "chore: update changelog"
+git push origin main
+
+git tag -a "$LATEST_VERSION" -m "Release $LATEST_VERSION"
+git push origin "$LATEST_VERSION"

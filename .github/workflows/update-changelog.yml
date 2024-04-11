@@ -18,7 +18,7 @@ jobs:
         node-version: '16'
         
     - name: Generate Custom Changelog
-      run: ./scripts/generate_changelog.sh
+      run: ./web-app/scripts/generate_changelog.sh
 
     - name: Commit and Push Changes
       run: |

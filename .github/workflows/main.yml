@@ -3,7 +3,7 @@ name: Update Changelog
 on:
   push:
     branches:
-      - master
+      - feat/lei_changelog_dev
 
 jobs:
   update-changelog:

@@ -1,0 +1,35 @@
+name: Update Changelog
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+    
+    - name: Install jq
+      run: sudo apt-get install jq
+
+    - name: Set Script Permissions
+      run: chmod +x ./web-app/scripts/generate_changelog.sh
+
+    - name: Generate Custom Changelog
+      run: ./web-app/scripts/generate_changelog.sh
+
+    - name: Commit and Push Changes
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git add web-app/CHANGELOG.md
+        git commit -m "Update CHANGELOG.md" || echo "No changes to commit"
+        git push

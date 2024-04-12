@@ -1,0 +1,18 @@
+{
+  "packageFiles": [
+    {
+      "filename": "web-app/package.json",
+      "type": "json"
+    }
+  ],
+  "bumpFiles": [
+    {
+      "filename": "web-app/package.json",
+      "type": "json"
+    },
+    {
+      "filename": "web-app/CHANGELOG.md",
+      "type": "markdown"
+    }
+  ]
+}

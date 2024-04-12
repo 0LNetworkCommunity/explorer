@@ -18,7 +18,7 @@ jobs:
         node-version: '16'
     
     - name: Install jq
-        run: sudo apt-get install jq
+      run: sudo apt-get install jq
 
     - name: Set Script Permissions
       run: chmod +x ./web-app/scripts/generate_changelog.sh

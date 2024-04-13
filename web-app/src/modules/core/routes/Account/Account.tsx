@@ -82,11 +82,18 @@ const Account: FC<Props> = ({ accountAddress }) => {
   const account = data.account;
 
   return (
-    <Page __deprecated_grayBg title={account.address}>
-      <div className="flex justify-end gap-2">
-        <AccountQRCode address={accountAddress} />
-      </div>
-      <div className="grid grid-cols-12 gap-4 py-4">
+    <Page
+      __deprecated_grayBg
+      title={
+        <div className="flex flex-row items-center">
+          <AccountQRCode address={accountAddress} />
+          <h1 className="ml-2 text-base font-semibold leading-6 text-gray-900 overflow-hidden text-ellipsis">
+            {account.address}
+          </h1>
+        </div>
+      }
+    >
+      <div className="grid grid-cols-12 gap-4">
         {data.account.balance !== null && (
           <div className="col-span-12 md:col-span-3 mt-5 gap-5">
             <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">

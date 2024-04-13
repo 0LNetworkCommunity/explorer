@@ -38,4 +38,15 @@ services:
     image: redis/redis-stack:7.2.0-v8
     ports:
       - 6379:6379
-      - 8001:8001
+      # - 8001:8001
+
+  # geoipupdate:
+  #   image: ghcr.io/maxmind/geoipupdate:v7.0.1
+  #   restart: unless-stopped
+  #   environment:
+  #     GEOIPUPDATE_ACCOUNT_ID: "${GEOIPUPDATE_ACCOUNT_ID}"
+  #     GEOIPUPDATE_LICENSE_KEY: "${GEOIPUPDATE_LICENSE_KEY}"
+  #     GEOIPUPDATE_EDITION_IDS: "GeoLite2-ASN GeoLite2-City GeoLite2-Country"
+  #     GEOIPUPDATE_FREQUENCY: "72"
+  #   volumes:
+  #     - ./volumes/geoipupdate/usr/share/GeoIP:/usr/share/GeoIP

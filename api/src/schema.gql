@@ -144,6 +144,11 @@ type CommunityWallet {
   address: Bytes!
 }
 
+type Node {
+  latitude: Float!
+  longitude: Float!
+}
+
 """Buffer"""
 scalar Bytes
 
@@ -159,6 +164,7 @@ type Query {
   account(address: Bytes!): Account
   validators: [Validator!]!
   communityWallets: [CommunityWallet!]!
+  nodes: [Node!]
 }
 
 type Mutation {

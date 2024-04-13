@@ -52,6 +52,7 @@
     "graphql": "^16.8.1",
     "graphql-ws": "^5.15.0",
     "lodash": "^4.17.21",
+    "maxmind": "^4.3.18",
     "nats": "^2.19.0",
     "qs": "^6.11.2",
     "reflect-metadata": "^0.2.1",

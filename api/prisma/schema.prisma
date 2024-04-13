@@ -13,9 +13,9 @@ enum DeviceType {
 }
 
 model Device {
-  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  token              String
-  type               DeviceType
+  id    String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  token String
+  type  DeviceType
 
   walletSubscriptions WalletSubscription[]
 
@@ -29,4 +29,19 @@ model WalletSubscription {
   device Device @relation(fields: [deviceId], references: [id])
 
   @@id([walletAddress, deviceId])
+}
+
+model Validator {
+  address     Bytes   @id
+  validatorIp String?
+  fullNodeIp  String?
+}
+
+model Node {
+  ip            String    @id
+  latitude      Float
+  longitude     Float
+  lastCheck     DateTime?
+  isUp          Boolean?
+  ledgerVersion BigInt?
 }

@@ -44,6 +44,7 @@ import { OlSwapModule } from "../ol-swap/OlSwapModule.js";
     StatsModule,
     WalletSubscriptionModule,
     OlSwapModule,
+    NodeWatcherModule,
   ],
   controllers: [],
   providers: [AppService],

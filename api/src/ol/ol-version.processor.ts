@@ -81,11 +81,19 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       repeat: {
         every: 30 * 1_000, // 30 seconds
       },
+      removeOnComplete: true,
+      removeOnFail: {
+        age: 24 * 60 * 60,
+      },
     });
 
     await this.olVersionQueue.add("updateLastestStableVersion", undefined, {
       repeat: {
         every: 30 * 1_000, // 30 seconds
+      },
+      removeOnComplete: true,
+      removeOnFail: {
+        age: 24 * 60 * 60,
       },
     });
   }
@@ -255,6 +263,11 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
         { version: version.toString(10) } as VersionJobData,
         {
           jobId: `__version__${version}`,
+          attempts: 10,
+          backoff: {
+            type: "fixed",
+          },
+          removeOnComplete: true,
         },
       );
     }
@@ -401,6 +414,11 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
         { version: version.toString(10) } as VersionJobData,
         {
           jobId: `__version__${version}`,
+          attempts: 10,
+          backoff: {
+            type: "fixed",
+          },
+          removeOnComplete: true,
         },
       );
     }

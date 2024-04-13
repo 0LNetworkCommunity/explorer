@@ -75,6 +75,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       repeat: {
         every: 8 * 60 * 60 * 1_000, // 8 hours
       },
+      removeOnComplete: true,
     });
 
     await this.olVersionQueue.add("fetchLatestVersion", undefined, {

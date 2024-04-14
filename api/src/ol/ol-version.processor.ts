@@ -306,9 +306,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       .then((resultSet) => resultSet.json<{ rows: number }>());
 
     if (ingestedVersions.rows > 0) {
-      throw new Error(
-        `version ${notPendingTransaction.version} was already processed. ${ingestedVersions.rows} instances found.`,
-      );
+      return;
     }
 
     const parquetDest = await this.transformerService.transform([

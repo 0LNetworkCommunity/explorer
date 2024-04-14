@@ -12,7 +12,7 @@ import Root from "./Root";
 import Validators from "./routes/Validators";
 import Test from "./routes/Test";
 import Module from "./routes/Account/Modules/Module";
-import Stats from "./routes/Stats";
+// import Stats from "./routes/Stats";
 import TotalSupply from "./routes/TotalSupply";
 import CirculatingSupply from "./routes/CirculatingSupply";
 import Postero from "./routes/Postero";
@@ -71,10 +71,10 @@ const router = createBrowserRouter([
         path: "/validators",
         element: <Validators />,
       },
-      {
-        path: "/stats",
-        element: <Stats />,
-      },
+      // {
+      //   path: "/stats",
+      //   element: <Stats />,
+      // },
       {
         path: "/total-supply",
         element: <TotalSupply />,

@@ -59,8 +59,6 @@ impl UserTransactionCollection {
         if let diem_api_types::TransactionPayload::EntryFunctionPayload(entry_function_payload) =
             payload
         {
-            assert_eq!(info.state_checkpoint_hash, None);
-
             let function = &entry_function_payload.function;
             let module = &function.module;
 

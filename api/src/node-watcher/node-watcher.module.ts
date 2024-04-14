@@ -25,7 +25,7 @@ const roles = process.env.ROLES!.split(",");
   providers: [
     NodeResolver,
     NodeWatcherService,
-    ...(roles.includes("worker") ? [NodeWatcherProcessor] : [NodeWatcherProcessor]),
+    ...(roles.includes("worker") ? [NodeWatcherProcessor] : []),
   ],
 
   controllers: [RelayController],

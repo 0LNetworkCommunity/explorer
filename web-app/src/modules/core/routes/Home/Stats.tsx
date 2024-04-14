@@ -64,9 +64,9 @@ const Stats: FC = () => {
 
   return (
     <dl className="grid grid-cols-2 gap-0.5 overflow-hidden rounded-2xl text-center md:grid-cols-5">
-      <div className="flex flex-col bg-gray-400/5 p-4">
+      <div className="flex flex-col bg-gray-400/5 p-4 h-18">
         <Link to={`/total-supply`} className="hover:underline">
-          <dd className="order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono">
+          <dd className="order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8">
             {totalSupply &&
               `${d3Format('.3f')(Math.floor(totalSupply.amount / 1e6) / 1e3)}B`}
           </dd>
@@ -75,13 +75,13 @@ const Stats: FC = () => {
           </dt>
         </Link>
       </div>
-      <div className="flex flex-col bg-gray-400/5 p-4">
+      <div className="flex flex-col bg-gray-400/5 p-4 h-18">
         {ledgerInfo && (
           <Link
             to={`/blocks/${ledgerInfo.block_height}`}
             className="hover:underline"
           >
-            <dd className="order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono">
+            <dd className="order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8">
               {parseInt(ledgerInfo.block_height, 10).toLocaleString()}
             </dd>
             <dt className="text-sm font-semibold leading-6 text-gray-600">
@@ -92,13 +92,13 @@ const Stats: FC = () => {
       </div>
       <div className="flex flex-col bg-gray-400/5 p-4">
         <dt className="text-sm font-semibold leading-6 text-gray-600">Epoch</dt>
-        <dd className="order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono">
+        <dd className="order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8">
           {ledgerInfo && parseInt(ledgerInfo.epoch, 10).toLocaleString()}
         </dd>
       </div>
       <div className="flex flex-col bg-gray-400/5 p-4">
         <NavLink to="/validators" className="hover:underline">
-          <dd className="order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono">
+          <dd className="order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8">
             {validatorSet && validatorSet.active_validators.length}
           </dd>
           <dt className="text-sm font-semibold leading-6 text-gray-600">
@@ -110,11 +110,11 @@ const Stats: FC = () => {
       <div className="flex flex-col bg-gray-400/5 p-4">
         <dt className="text-sm font-semibold leading-6 text-gray-600">
           Next Epoch
-          {nextEpoch && (
-            <div className="text-xs text-gray-400">{nextEpochDate}</div>
-          )}
+          <div className="text-xs text-gray-400 h-4">
+            {nextEpoch && nextEpochDate}
+          </div>
         </dt>
-        <dd className="order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono">
+        <dd className="order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8">
           {nextEpoch && <Countdown date={nextEpoch} />}
         </dd>
       </div>

@@ -7,6 +7,7 @@ import TransactionsTable from '../../../ui/UserTransactionsTable';
 import Stats from './Stats';
 import { ArrowUpRightIcon } from '@heroicons/react/20/solid';
 import { OL_LANDING_LINK } from '../../../../contants';
+import NodeMap from '../../../ui/NodeMap';
 
 const GET_USER_TRANSACTIONS = gql`
   query GetUserTransactions {
@@ -57,6 +58,9 @@ const Home: FC = () => {
             </a>
           </div>
         </div>
+      </section>
+      <section>
+        <NodeMap />
       </section>
       <Page __deprecated_grayBg>
         <Stats />

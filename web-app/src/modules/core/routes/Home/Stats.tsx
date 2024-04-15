@@ -66,9 +66,11 @@ const Stats: FC = () => {
     <dl className="grid grid-cols-2 gap-0.5 overflow-hidden rounded-2xl text-center md:grid-cols-5">
       <div className="flex flex-col bg-gray-400/5 p-4 h-18">
         <Link to={`/total-supply`} className="hover:underline">
-          <dd className="order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8">
-            {totalSupply &&
-              `${d3Format('.3f')(Math.floor(totalSupply.amount / 1e6) / 1e3)}B`}
+          <dd className={`order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8 rounded ${!totalSupply ? "animate-pulse bg-gray-300 space-y-4" : ""}`}>
+            {totalSupply ?
+              `${d3Format('.3f')(Math.floor(totalSupply.amount / 1e6) / 1e3)}B` :
+              null
+            }
           </dd>
           <dt className="text-sm font-semibold leading-6 text-gray-600">
             Total Supply
@@ -76,30 +78,28 @@ const Stats: FC = () => {
         </Link>
       </div>
       <div className="flex flex-col bg-gray-400/5 p-4 h-18">
-        {ledgerInfo && (
-          <Link
-            to={`/blocks/${ledgerInfo.block_height}`}
-            className="hover:underline"
-          >
-            <dd className="order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8">
-              {parseInt(ledgerInfo.block_height, 10).toLocaleString()}
-            </dd>
-            <dt className="text-sm font-semibold leading-6 text-gray-600">
-              Block Height
-            </dt>
-          </Link>
-        )}
+        <Link
+          to={ledgerInfo ? `/blocks/${ledgerInfo.block_height}` : '/'}
+          className="hover:underline"
+        >
+          <dd className={`order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8 rounded ${!ledgerInfo ? "animate-pulse bg-gray-300 space-y-4" : ""}`}>
+            {ledgerInfo ? parseInt(ledgerInfo.block_height, 10).toLocaleString() : null}
+          </dd>
+          <dt className="text-sm font-semibold leading-6 text-gray-600">
+            Block Height
+          </dt>
+        </Link>
       </div>
       <div className="flex flex-col bg-gray-400/5 p-4">
         <dt className="text-sm font-semibold leading-6 text-gray-600">Epoch</dt>
-        <dd className="order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8">
-          {ledgerInfo && parseInt(ledgerInfo.epoch, 10).toLocaleString()}
+        <dd className={`order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8 rounded ${!ledgerInfo ? "animate-pulse bg-gray-300 space-y-4" : ""}`}>
+          {ledgerInfo ? parseInt(ledgerInfo.epoch, 10).toLocaleString() : null}
         </dd>
       </div>
       <div className="flex flex-col bg-gray-400/5 p-4">
         <NavLink to="/validators" className="hover:underline">
-          <dd className="order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8">
-            {validatorSet && validatorSet.active_validators.length}
+          <dd className={`order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8 rounded ${!validatorSet ? "animate-pulse bg-gray-300 space-y-4" : ""}`}>
+            {validatorSet ? validatorSet.active_validators.length : null}
           </dd>
           <dt className="text-sm font-semibold leading-6 text-gray-600">
             Validators
@@ -110,12 +110,12 @@ const Stats: FC = () => {
       <div className="flex flex-col bg-gray-400/5 p-4">
         <dt className="text-sm font-semibold leading-6 text-gray-600">
           Next Epoch
-          <div className="text-xs text-gray-400 h-4">
-            {nextEpoch && nextEpochDate}
+          <div className={`text-xs text-gray-400 h-4 rounded ${!nextEpoch ? "animate-pulse bg-gray-300 space-y-4" : ""}`}>
+            {nextEpoch ? nextEpochDate : null}
           </div>
         </dt>
-        <dd className="order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8">
-          {nextEpoch && <Countdown date={nextEpoch} />}
+        <dd className={`order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8 rounded ${!nextEpoch ? "animate-pulse bg-gray-300 space-y-4" : ""}`}>
+          {nextEpoch ? <Countdown date={nextEpoch} /> : null}
         </dd>
       </div>
     </dl>

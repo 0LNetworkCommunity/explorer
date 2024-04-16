@@ -36,8 +36,6 @@ export class OlDbService {
         ClickhouseQueryResponse<{ version: string }>
       >();
 
-    console.log(res.rows);
-
     if (!res.rows) {
       return null;
     }

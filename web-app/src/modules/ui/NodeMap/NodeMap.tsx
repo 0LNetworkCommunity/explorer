@@ -1,7 +1,7 @@
-import { ReactNode, useEffect, useState } from "react";
-import { geoMercator } from "d3-geo";
-import worldImg from "./world.png";
-import { gql, useApolloClient } from "@apollo/client";
+import { ReactNode, useEffect, useState, useRef } from 'react';
+import { geoMercator } from 'd3-geo';
+import worldImg from './world.png';
+import { gql, useApolloClient } from '@apollo/client';
 
 const GET_NODES = gql`
   query Nodes {
@@ -15,15 +15,30 @@ const GET_NODES = gql`
 function NodeMap(): ReactNode {
   const apollo = useApolloClient();
   const [points, setPoints] = useState<[number, number][]>();
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 688, height: 488 });
+
+  useEffect(() => {
+    function handleResize() {
+      if (mapRef.current) {
+        setDimensions({
+          width: mapRef.current.offsetWidth,
+          height: mapRef.current.offsetWidth * 0.7,
+        });
+      }
+    }
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const load = async () => {
-      const width = 688;
-      const height = 688;
-
       const projection = geoMercator()
-        .scale(width / 2 / Math.PI)
-        .translate([width / 2, height / 2]);
+        .scale(dimensions.width / 2 / Math.PI)
+        .translate([dimensions.width / 2, dimensions.height / 2 + dimensions.height * 0.216]);
 
       const { data } = await apollo.query<{
         nodes: {
@@ -33,41 +48,37 @@ function NodeMap(): ReactNode {
       }>({ query: GET_NODES });
 
       const nodes = data.nodes;
-      const r = nodes.map((node) => {
-        return projection([node.longitude, node.latitude]);
-      }) as [number, number][];
+      const r = nodes.map((node) => projection([node.longitude, node.latitude])) as [
+        number,
+        number,
+      ][];
       setPoints(r);
     };
+
     load();
-  }, []);
+  }, [apollo, dimensions]);
 
   return (
-    <div>
+    <div ref={mapRef} className="lg:pb-6 w-full max-w-[700px] mx-auto">
       <div
+        className="relative w-full bg-[#F5F5F5] bg-cover bg-center"
         style={{
-          position: 'relative',
-          width: 688,
-          height: 488,
-          backgroundColor: '#F5F5F5',
+          height: dimensions.height,
           backgroundImage: `url(${worldImg})`,
-          backgroundSize: '100%',
         }}
       >
-        {points?.map((point) => {
-          return (
-            <div
-              style={{
-                position: 'absolute',
-                top: point[1] - 5,
-                left: point[0] - 5,
-                width: 10,
-                height: 10,
-                borderRadius: 1,
-                background: '#DE2F32',
-              }}
-            />
-          );
-        })}
+        {points?.map((point, index) => (
+          <div
+            key={index}
+            className="absolute bg-[#DE2F32]"
+            style={{
+              top: point[1] - 5,
+              left: point[0] - 5,
+              width: 6,
+              height: 6,
+            }}
+          />
+        ))}
       </div>
     </div>
   );

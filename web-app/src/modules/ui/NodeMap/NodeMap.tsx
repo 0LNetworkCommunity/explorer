@@ -23,7 +23,7 @@ function NodeMap(): ReactNode {
       if (mapRef.current) {
         setDimensions({
           width: mapRef.current.offsetWidth,
-          height: mapRef.current.offsetWidth * 0.708,
+          height: mapRef.current.offsetWidth * 0.7,
         });
       }
     }
@@ -38,7 +38,7 @@ function NodeMap(): ReactNode {
     const load = async () => {
       const projection = geoMercator()
         .scale(dimensions.width / 2 / Math.PI)
-        .translate([dimensions.width / 2, dimensions.height / 2]);
+        .translate([dimensions.width / 2, dimensions.height / 2 + dimensions.height * 0.216]);
 
       const { data } = await apollo.query<{
         nodes: {
@@ -59,29 +59,23 @@ function NodeMap(): ReactNode {
   }, [apollo, dimensions]);
 
   return (
-    <div ref={mapRef} style={{ width: '100%', maxWidth: '600px', margin: 'auto' }}>
+    <div ref={mapRef} className="lg:pb-6 w-full max-w-[700px] mx-auto">
       <div
+        className="relative w-full bg-[#F5F5F5] bg-cover bg-center"
         style={{
-          position: 'relative',
-          width: '100%',
           height: dimensions.height,
-          backgroundColor: '#F5F5F5',
           backgroundImage: `url(${worldImg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
         }}
       >
         {points?.map((point, index) => (
           <div
             key={index}
+            className="absolute bg-[#DE2F32]"
             style={{
-              position: 'absolute',
               top: point[1] - 5,
               left: point[0] - 5,
-              width: 10,
-              height: 10,
-              borderRadius: '50%',
-              background: '#DE2F32',
+              width: 6,
+              height: 6,
             }}
           />
         ))}

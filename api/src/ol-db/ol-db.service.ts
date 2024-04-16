@@ -12,29 +12,37 @@ export class OlDbService {
   public async getLastBatchIngestedVersion(): Promise<BN | null> {
     const resultSet = await this.clichouseService.client.query({
       query: `
-        SELECT
-          max(
+        WITH "batch_ingested_version" AS
+        (
+          SELECT
             toUInt64(
               splitByChar(
                 '-',
-                splitByChar('/', name)[1]
+                splitByChar('/', "name")[1]
               )[2]
-            )
-          ) AS "last_batch_ingested_version"
-        FROM "ingested_files"
+          ) AS "version"
+          FROM "ingested_files"
+        )
+        SELECT
+          "version"
+        FROM "batch_ingested_version"
+        ORDER BY "version" DESC
+        LIMIT 1
       `,
       format: "JSON",
     });
     const res =
       await resultSet.json<
-        ClickhouseQueryResponse<{ last_batch_ingested_version: string }>
+        ClickhouseQueryResponse<{ version: string }>
       >();
+
+    console.log(res.rows);
 
     if (!res.rows) {
       return null;
     }
 
-    return new BN(res.data[0].last_batch_ingested_version).add(new BN(99));
+    return new BN(res.data[0].version).add(new BN(99));
   }
 
   public async getIngestedVersions(after?: BN): Promise<BN[]> {

@@ -6,7 +6,7 @@ import Page from '../../../ui/Page/Page';
 import TransactionsTable from '../../../ui/UserTransactionsTable';
 import Stats from './Stats';
 import { ArrowUpRightIcon } from '@heroicons/react/20/solid';
-import { OL_LANDING_LINK } from '../../../../contants';
+import { OL_DISCORD_URL } from '../../../../contants';
 import NodeMap from '../../../ui/NodeMap';
 
 const GET_USER_TRANSACTIONS = gql`
@@ -49,12 +49,12 @@ const Home: FC = () => {
               </p>
             </div>
             <a
-              href={OL_LANDING_LINK}
+              href={OL_DISCORD_URL}
               target="_blank"
               className="h-fit px-3.5 py-4 lg-py-3 gap-1.5 text-white bg-[#CD3B42] flex justify-center items-center font-medium rounded-md shadow-sm cursor-pointer hover:bg-red-700 transition-colors duration-150"
             >
               <ArrowUpRightIcon className="h-5 w-5" />
-              View Website
+              Join Community
             </a>
           </div>
         </div>

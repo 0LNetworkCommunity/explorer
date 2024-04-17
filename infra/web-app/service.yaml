@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: explorer-web-app-dev
+  namespace: olfyi
+spec:
+  selector:
+    app: explorer-web-app-dev
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: http

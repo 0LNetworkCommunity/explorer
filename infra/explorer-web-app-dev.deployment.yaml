@@ -13,7 +13,7 @@ spec:
   template:
     spec:
       containers:
-        - name: explorer-web-app
+        - name: explorer-web-app-dev
           image: ghcr.io/0lnetworkcommunity/explorer/web-app:facd443
           ports:
             - name: http

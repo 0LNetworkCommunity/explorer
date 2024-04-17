@@ -11,6 +11,9 @@ spec:
     matchLabels:
       app: explorer-web-app-dev
   template:
+    metadata:
+      labels:
+        app: explorer-web-app-dev
     spec:
       containers:
         - name: explorer-web-app-dev

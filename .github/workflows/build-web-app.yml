@@ -1,0 +1,22 @@
+name: Build Web App
+
+on:
+  push:
+    paths:
+      - web-app/**
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build the Docker image
+        working-directory: ./web-app
+        run: >-
+          docker build
+            --build-arg CI_COMMIT_SHA="$GITHUB_SHA"
+            --file ./docker/Dockerfile
+            --tag "ghcr.io/0lnetworkcommunity/explorer/web-app:$GITHUB_SHA"
+            .

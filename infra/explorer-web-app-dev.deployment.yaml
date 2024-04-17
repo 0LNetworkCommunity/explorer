@@ -1,0 +1,30 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: explorer-web-app-dev
+  namespace: olfyi
+  labels:
+    app: explorer-web-app-dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: explorer-web-app-dev
+  template:
+    spec:
+      containers:
+        - name: explorer-web-app
+          image: ghcr.io/0lnetworkcommunity/explorer/web-app:facd443
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+      imagePullSecrets:
+        - name: docker-config
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 3

@@ -41,5 +41,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args:
-            CI_COMMIT_SHA: "$env:GITHUB_SHA"
+          build-args: |
+            CI_COMMIT_SHA="$env:GITHUB_SHA"

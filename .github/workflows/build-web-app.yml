@@ -43,3 +43,17 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             CI_COMMIT_SHA=${{ github.sha }}
+
+      - name: Render k8s manifests
+        run: |
+          export GITHUB_SHA="${{ github.sha }}"
+
+          envsubst < .templates/infra/web-app/deployment.yaml > infra/web-app/deployment.yaml
+
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+
+          git add infra/web-app/deployment.yaml
+
+          git commit -m "Update web-app deployment" || echo "No changes to commit"
+          git push

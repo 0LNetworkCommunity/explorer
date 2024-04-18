@@ -11,9 +11,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # permissions:
-    #   contents: write
-    #   packages: write
+    permissions:
+      contents: write
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,4 +57,4 @@ jobs:
           git add infra/web-app/deployment.yaml
 
           git commit -m "Update web-app deployment" || echo "No changes to commit"
-          git push
+          git push origin ci-deployment -f

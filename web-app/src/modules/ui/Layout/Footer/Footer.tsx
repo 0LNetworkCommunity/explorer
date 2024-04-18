@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import Logo from '../../Logo/Logo';
 import { SOCIAL_LINKS } from '../../../../contants';
 
+const CI_COMMIT_SHA: string = import.meta.env.VITE_CI_COMMIT_SHA;
+
 const Footer: React.FC = () => {
   return (
     <footer className="bg-[#0A0A0A] text-white ">
@@ -26,6 +28,7 @@ const Footer: React.FC = () => {
         <div className="justify-center md:justify-between border-t border-t-1 flex flex-row flex-wrap pt-8 gap-3">
           <span className="opacity-60 ">
             © {new Date().getFullYear()} 0L Network. All rights reserved.
+            <span className="opacity-50"> - {CI_COMMIT_SHA}</span>
           </span>
           <div className="flex gap-2">
             {Object.keys(SOCIAL_LINKS).map((socialKey) => {

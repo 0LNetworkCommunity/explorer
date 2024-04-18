@@ -14,6 +14,7 @@ jobs:
     permissions:
       contents: write
       packages: write
+      requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4

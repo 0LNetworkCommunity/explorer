@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: explorer-web-app-dev
-          image: ghcr.io/0lnetworkcommunity/explorer/web-app:da7542d91029d33e1e38f40e24009a2237422b7d
+          image: ghcr.io/0lnetworkcommunity/explorer/web-app:4d8fd6321bd3f953255c0eecfef5429abd078da0
           ports:
             - name: http
               containerPort: 80

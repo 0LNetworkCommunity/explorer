@@ -339,3 +339,10 @@ CREATE TABLE "ol_swap_1h" (
 )
 ENGINE = ReplacingMergeTree
 ORDER BY "timestamp";
+
+CREATE TABLE "ancestry" (
+	"address" UInt256,
+    "tree" Array(UInt256)
+)
+ENGINE = MergeTree
+ORDER BY "address";

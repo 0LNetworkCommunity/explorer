@@ -19,15 +19,15 @@ pub struct GenesisTransactionCollection {
 impl GenesisTransactionCollection {
     pub fn new() -> GenesisTransactionCollection {
         GenesisTransactionCollection {
-          version: Vec::new(),
-          hash: Vec::new(),
-          state_change_hash: Vec::new(),
-          event_root_hash: Vec::new(),
-          state_checkpoint_hash: Vec::new(),
-          gas_used: Vec::new(),
-          success: Vec::new(),
-          vm_status: Vec::new(),
-          accumulator_root_hash: Vec::new(),
+            version: Vec::new(),
+            hash: Vec::new(),
+            state_change_hash: Vec::new(),
+            event_root_hash: Vec::new(),
+            state_checkpoint_hash: Vec::new(),
+            gas_used: Vec::new(),
+            success: Vec::new(),
+            vm_status: Vec::new(),
+            accumulator_root_hash: Vec::new(),
         }
     }
 
@@ -45,7 +45,8 @@ impl GenesisTransactionCollection {
         self.gas_used.push(info.gas_used.into());
         self.success.push(info.success);
         self.vm_status.push(info.vm_status.clone());
-        self.accumulator_root_hash.push(info.accumulator_root_hash.0.to_vec());
+        self.accumulator_root_hash
+            .push(info.accumulator_root_hash.0.to_vec());
 
         match info.state_checkpoint_hash {
             Some(state_checkpoint_hash) => {
@@ -84,7 +85,10 @@ impl GenesisTransactionCollection {
             ("hash", Arc::new(hash) as ArrayRef),
             ("state_change_hash", Arc::new(state_change_hash) as ArrayRef),
             ("event_root_hash", Arc::new(event_root_hash) as ArrayRef),
-            ("state_checkpoint_hash", Arc::new(state_checkpoint_hash) as ArrayRef),
+            (
+                "state_checkpoint_hash",
+                Arc::new(state_checkpoint_hash) as ArrayRef,
+            ),
             ("gas_used", Arc::new(gas_used) as ArrayRef),
             ("success", Arc::new(success) as ArrayRef),
             ("vm_status", Arc::new(vm_status) as ArrayRef),
@@ -100,7 +104,5 @@ impl GenesisTransactionCollection {
         let mut writer = ArrowWriter::try_new(parquet_file, batch.schema(), Some(props)).unwrap();
         writer.write(&batch).expect("Writing batch");
         writer.close().unwrap();
-
     }
-
 }

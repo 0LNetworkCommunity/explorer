@@ -20,7 +20,7 @@ pub struct StateCheckpointTransactionCollection {
 
 impl StateCheckpointTransactionCollection {
     pub fn new() -> StateCheckpointTransactionCollection {
-      StateCheckpointTransactionCollection {
+        StateCheckpointTransactionCollection {
             version: Vec::new(),
             hash: Vec::new(),
             state_change_hash: Vec::new(),
@@ -48,7 +48,8 @@ impl StateCheckpointTransactionCollection {
         self.gas_used.push(info.gas_used.into());
         self.success.push(info.success);
         self.vm_status.push(info.vm_status.clone());
-        self.accumulator_root_hash.push(info.accumulator_root_hash.0.to_vec());
+        self.accumulator_root_hash
+            .push(info.accumulator_root_hash.0.to_vec());
         self.timestamp
             .push(state_checkpoint_transaction.timestamp.into());
 
@@ -92,7 +93,10 @@ impl StateCheckpointTransactionCollection {
             ("hash", Arc::new(hash) as ArrayRef),
             ("state_change_hash", Arc::new(state_change_hash) as ArrayRef),
             ("event_root_hash", Arc::new(event_root_hash) as ArrayRef),
-            ("state_checkpoint_hash", Arc::new(state_checkpoint_hash) as ArrayRef),
+            (
+                "state_checkpoint_hash",
+                Arc::new(state_checkpoint_hash) as ArrayRef,
+            ),
             ("gas_used", Arc::new(gas_used) as ArrayRef),
             ("success", Arc::new(success) as ArrayRef),
             ("vm_status", Arc::new(vm_status) as ArrayRef),

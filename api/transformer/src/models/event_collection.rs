@@ -45,7 +45,6 @@ impl EventCollection {
 
             match &event.typ {
                 diem_api_types::MoveType::Struct(s) => {
-
                     let mut module_address = s.address.inner().to_vec();
                     module_address.reverse();
                     self.module_address.push(module_address);

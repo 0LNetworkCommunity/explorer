@@ -1,4 +1,11 @@
-use arrow::{array::ArrayData, buffer::Buffer, datatypes::DataType};
+use arrow::{
+    array::{ArrayData, ArrayDataBuilder, LargeBinaryArray},
+    buffer::Buffer,
+    datatypes::{DataType, ToByteSlice},
+};
+use arrow_array::Array;
+use arrow_schema::Field;
+use std::{env, fs::File, sync::Arc};
 
 pub trait ToArrayData {
     fn to_array_data(&self) -> ArrayData;
@@ -107,4 +114,39 @@ impl ToArrayData for Vec<Vec<u64>> {
 
         return array_data;
     }
+}
+
+pub fn create_array_data_2d(list: &Vec<Vec<Vec<u8>>>, field_name: &str) -> ArrayData {
+    let mut values = Vec::<Vec<u8>>::from([]);
+    let mut offsets = Vec::from([0i32]);
+    let mut offset = 0i32;
+
+    let mut i = 0;
+    while i < list.len() {
+        let mut j = 0;
+        while j < list[i].len() {
+            values.push(list[i][j].clone());
+            j = j + 1;
+        }
+
+        offset += list[i].len() as i32;
+        offsets.push(offset);
+
+        i = i + 1;
+    }
+
+    let child = LargeBinaryArray::from_iter_values(values.iter());
+
+    let array_data = ArrayDataBuilder::new(DataType::List(Arc::new(Field::new(
+        field_name,
+        DataType::LargeBinary,
+        false,
+    ))))
+    .add_child_data(child.into_data())
+    .len(list.len())
+    .add_buffer(Buffer::from(offsets.to_byte_slice()))
+    .build()
+    .unwrap();
+
+    return array_data;
 }

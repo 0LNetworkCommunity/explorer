@@ -8,12 +8,12 @@ mod models;
 mod to_array_data;
 
 use models::{
-    BeneficiaryPolicyCollection, BlockMetadataTransactionCollection, BoundaryStatusCollection,
-    BurnCounterCollection, BurnTrackerCollection, CoinBalanceCollection, ConsensusRewardCollection,
-    EpochFeeMakerRegistryCollection, EventCollection, ScriptCollection, SlowWalletCollection,
-    SlowWalletListCollection, TotalSupplyCollection, TowerListCollection,
-    UserTransactionCollection, VdfDifficultyCollection, StateCheckpointTransactionCollection,
-    GenesisTransactionCollection,
+    AncestryCollection, BeneficiaryPolicyCollection, BlockMetadataTransactionCollection,
+    BoundaryStatusCollection, BurnCounterCollection, BurnTrackerCollection, CoinBalanceCollection,
+    ConsensusRewardCollection, EpochFeeMakerRegistryCollection, EventCollection,
+    GenesisTransactionCollection, ScriptCollection, SlowWalletCollection, SlowWalletListCollection,
+    StateCheckpointTransactionCollection, TotalSupplyCollection, TowerListCollection,
+    UserTransactionCollection, VdfDifficultyCollection,
 };
 use serde_json::Value;
 
@@ -75,6 +75,7 @@ fn process_changes(
     vdf_difficulty_collection: &mut VdfDifficultyCollection,
     consensus_reward_collection: &mut ConsensusRewardCollection,
     boundary_status_collection: &mut BoundaryStatusCollection,
+    ancestry_collection: &mut AncestryCollection,
 
     version: u64,
     timestamp: u64,
@@ -526,6 +527,27 @@ fn process_changes(
                         system_fees_collected,
                     );
                 }
+
+                if type_address == ROOT_ACCOUNT_ADDRESS.inner()
+                    && type_module == "ancestry"
+                    && type_name == "Ancestry"
+                    && type_generic_type_params_len == 0
+                {
+                    let data = &change.data.data.0;
+
+                    let tree: Vec<String> = serde_json::from_value(
+                        data.get(&IdentifierWrapper::from_str("tree").unwrap())
+                            .unwrap()
+                            .clone(),
+                    )
+                    .unwrap();
+
+                    let tree = tree
+                        .iter()
+                        .map(|addr| HexEncodedBytes::from_str(addr).unwrap().0)
+                        .collect::<Vec<_>>();
+                    ancestry_collection.push(address.clone(), tree);
+                }
             }
             diem_api_types::WriteSetChange::WriteTableItem(change) => {
                 if change.handle.eq(&LIBRA_COIN_HANDLE) && change.key.eq(&LIBRA_COIN_KEY) {
@@ -553,6 +575,7 @@ async fn main() {
     let mut state_checkpoint_transaction_collection = StateCheckpointTransactionCollection::new();
     let mut user_transaction_collection = UserTransactionCollection::new();
     let mut genesis_transaction_collection = GenesisTransactionCollection::new();
+    let mut ancestry_collection = AncestryCollection::new();
     let mut script_collection = ScriptCollection::new();
     let mut total_supply_collection = TotalSupplyCollection::new();
     let mut coin_balance_collection = CoinBalanceCollection::new();
@@ -615,6 +638,7 @@ async fn main() {
                         &mut vdf_difficulty_collection,
                         &mut consensus_reward_collection,
                         &mut boundary_status_collection,
+                        &mut ancestry_collection,
                         info.version.into(),
                         user_transaction.timestamp.into(),
                         &info.changes,
@@ -661,6 +685,7 @@ async fn main() {
                         &mut vdf_difficulty_collection,
                         &mut consensus_reward_collection,
                         &mut boundary_status_collection,
+                        &mut ancestry_collection,
                         info.version.into(),
                         0,
                         &info.changes,
@@ -691,6 +716,7 @@ async fn main() {
                         &mut vdf_difficulty_collection,
                         &mut consensus_reward_collection,
                         &mut boundary_status_collection,
+                        &mut ancestry_collection,
                         info.version.into(),
                         block_metadata_transaction.timestamp.into(),
                         &info.changes,
@@ -712,11 +738,15 @@ async fn main() {
 
     event_collection.to_parquet(format!("{}/event.parquet", &args.dest));
     user_transaction_collection.to_parquet(format!("{}/user_transaction.parquet", &args.dest));
-    genesis_transaction_collection.to_parquet(format!("{}/genesis_transaction.parquet", &args.dest));
+    genesis_transaction_collection
+        .to_parquet(format!("{}/genesis_transaction.parquet", &args.dest));
+    ancestry_collection.to_parquet(format!("{}/ancestry.parquet", &args.dest));
     block_metadata_transaction_collection
         .to_parquet(format!("{}/block_metadata_transaction.parquet", &args.dest));
-    state_checkpoint_transaction_collection
-        .to_parquet(format!("{}/state_checkpoint_transaction.parquet", &args.dest));
+    state_checkpoint_transaction_collection.to_parquet(format!(
+        "{}/state_checkpoint_transaction.parquet",
+        &args.dest
+    ));
     total_supply_collection.to_parquet(format!("{}/total_supply.parquet", &args.dest));
     coin_balance_collection.to_parquet(format!("{}/coin_balance.parquet", &args.dest));
     script_collection.to_parquet(format!("{}/script.parquet", &args.dest));

@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import fetch from 'node-fetch';
 
 import {
   Stats,
@@ -78,7 +79,7 @@ export class StatsService {
       percentage: (pofValues.nominalRewardOverTime[pofValues.nominalRewardOverTime.length - 1].value / totalSupply) * 100
     };
 
-    const lockedCoins = await (await fetch(`${this.dataApiHost}/locked-coins`)).json();
+    const lockedCoins:any = await (await fetch(`${this.dataApiHost}/locked-coins`)).json();
 
     return {
       // charts
@@ -93,7 +94,7 @@ export class StatsService {
       clearingBidoverTime: pofValues.clearingBidOverTime, // net rewards? also available on the pofValues object
       liquidSupplyConcentration: liquidSupplyConcentration,
       lockedSupplyConcentration: lockedSupplyConcentration,
-      
+
       // kpis
       circulatingSupply,
       totalBurned,
@@ -141,7 +142,7 @@ export class StatsService {
                 x -> reinterpretAsUInt256(reverse(unhex(x))),
                 {addresses: Array(String)}
               ),
-              "address" 
+              "address"
             )
           AND
             "coin_module" = 'libra_coin'
@@ -202,7 +203,7 @@ export class StatsService {
         SELECT
             SUM(latest_balance) / 1e6 AS total_balance
         FROM (
-            SELECT 
+            SELECT
                 argMax(balance, version) AS latest_balance
             FROM coin_balance
             WHERE coin_module = 'libra_coin'
@@ -439,8 +440,8 @@ export class StatsService {
       FROM
         slow_wallet SW
       JOIN
-        (SELECT 
-          address, 
+        (SELECT
+          address,
           argMax(balance, timestamp) as latest_balance
         FROM coin_balance
         WHERE coin_module = 'libra_coin'
@@ -478,8 +479,8 @@ export class StatsService {
       FROM
         slow_wallet SW
       JOIN
-        (SELECT 
-          address, 
+        (SELECT
+          address,
           argMax(balance, timestamp) as latest_balance
         FROM coin_balance
         WHERE coin_module = 'libra_coin'
@@ -561,7 +562,7 @@ export class StatsService {
   private async getAccountsOnChainOverTime(): Promise<TimestampValue[]> {
     try {
       const query = `
-        SELECT 
+        SELECT
           toInt32(divide(min(timestamp), 1000000)) AS timestamp,
           address
         FROM coin_balance
@@ -696,8 +697,8 @@ export class StatsService {
         FROM
           slow_wallet SW
         JOIN
-          (SELECT 
-            address, 
+          (SELECT
+            address,
             argMax(balance, timestamp) as latest_balance
           FROM coin_balance
           WHERE coin_module = 'libra_coin'

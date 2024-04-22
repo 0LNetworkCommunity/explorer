@@ -108,8 +108,13 @@ const Coinstats = () => {
 
           <div className="mt-10">
             <h3 className="text-base font-semibold text-gray-900">Validators</h3>
-
-            <StatsContainer columns={2}>
+            <StatsContainer columns={3}>
+              <StatItem
+                name="Infra escrow account balance"
+                secondary={`${data.infrastructureEscrow.percentage.toFixed(3)}%`}
+              >
+                <Money>{data.infrastructureEscrow.nominal}</Money>
+              </StatItem>
               <StatItem
                 name="Epoch reward"
                 secondary={`${data.lastEpochReward.percentage.toFixed(4)}%`}

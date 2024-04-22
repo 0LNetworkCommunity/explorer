@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import fetch from 'node-fetch';
+import axios from 'axios';
 
 import {
   Stats,
@@ -79,7 +79,8 @@ export class StatsService {
       percentage: (pofValues.nominalRewardOverTime[pofValues.nominalRewardOverTime.length - 1].value / totalSupply) * 100
     };
 
-    const lockedCoins:any = await (await fetch(`${this.dataApiHost}/locked-coins`)).json();
+    const response = await axios.get(`${this.dataApiHost}/locked-coins`);
+    const lockedCoins = response.data;
 
     const res: Stats = {
       // charts

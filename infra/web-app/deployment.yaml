@@ -1,3 +1,5 @@
+# Generated from .templates/infra/web-app/deployment.yaml
+
 kind: Deployment
 apiVersion: apps/v1
 metadata:
@@ -17,7 +19,7 @@ spec:
     spec:
       containers:
         - name: explorer-web-app-dev
-          image: ghcr.io/0lnetworkcommunity/explorer/web-app:e1133c6491415f38103cb5923d5d4600b3eb0823
+          image: ghcr.io/0lnetworkcommunity/explorer/web-app:f506560624db52cf9f1e299cff5bfd33759648b2
           ports:
             - name: http
               containerPort: 80

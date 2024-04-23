@@ -41,7 +41,7 @@
     "@types/d3-array": "^3.2.1",
     "@types/lodash": "^4.14.202",
     "aptos": "^1.21.0",
-    "axios": "^1.6.7",
+    "axios": "^1.6.8",
     "bluebird": "^3.7.2",
     "bn.js": "^5.2.1",
     "bullmq": "^5.4.0",

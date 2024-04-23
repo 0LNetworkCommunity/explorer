@@ -19,16 +19,18 @@ export class StatsController {
 
   @Get()
   public async getStats(@Res() res: Response) {
+    res.set('Content-Type', 'application/json');
+
     if (this.cacheEnabled) {
       const stats = await redisClient.get(STATS_CACHE_KEY);
       if (!stats) {
         throw new ServiceUnavailableException('Cache not ready');
       }
 
-      res.set('Content-Type', 'application/json');
       res.send(stats);
-      return;
+    } else {
+      const stats = await this.statsService.getStats();
+      res.send(stats);
     }
-    return this.statsService.getStats();
   }
 }

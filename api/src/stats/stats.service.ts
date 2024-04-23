@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import axios from 'axios';
 
 import {
   Stats,
@@ -9,9 +10,11 @@ import {
   LockedBalance,
   BinRange,
   BalanceItem,
+  SupplyStats,
 } from "./types.js";
 import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
 import { OlService } from "../ol/ol.service.js";
+import _ from "lodash";
 
 @Injectable()
 export class StatsService {
@@ -26,51 +29,49 @@ export class StatsService {
   }
 
   public async getStats(): Promise<Stats> {
+    const supplyStats = await this.olService.getSupplyStats();
+    const totalSupply: number = supplyStats.totalSupply;
     const slowWalletsCountOverTime = await this.getSlowWalletsCountOverTime();
     const burnOverTime = await this.getBurnsOverTime();
     const accountsOnChainOverTime = await this.getAccountsOnChainOverTime();
-    const supplyAndCapital = await this.getSupplyAndCapital();
+    const supplyAndCapital = await this.getSupplyAndCapital(supplyStats);
     const communityWalletsBalanceBreakdown =
-      await this.getCommunityWalletsBalanceBreakdown();
+    await this.getCommunityWalletsBalanceBreakdown();
     const lastEpochTotalUnlockedAmount =
-      await this.getLastEpochTotalUnlockedAmount();
+    await this.getLastEpochTotalUnlockedAmount();
     const pofValues = await this.getPOFValues(); // Empty table?
     const liquidSupplyConcentration = await this.getLiquidSupplyConcentration();
     const lockedSupplyConcentration =
-      await this.calculateLiquidityConcentrationLocked();
+    await this.calculateLiquidityConcentrationLocked();
 
     // calculate KPIS
-    const totalSupply = supplyAndCapital.supplyAllocation.reduce((acc, {value}) => acc + value, 0);
     // circulating
-    const circulatingEntry = supplyAndCapital.supplyAllocation.find(entry => entry.name === "Circulating");
-    const circulatingValue = circulatingEntry ? circulatingEntry.value : 0;
-    const circulatingPercentage = (circulatingValue / totalSupply) * 100;
     const circulatingSupply = {
-      nominal: circulatingValue,
-      percentage: parseFloat(circulatingPercentage.toFixed(4))
-    };
+      nominal: parseFloat(supplyStats.circulatingSupply.toFixed(3)),
+      percentage: parseFloat((supplyStats.circulatingSupply / totalSupply * 100).toFixed(3))
+    }
 
     // CW
-    const communityWalletsEntry = supplyAndCapital.supplyAllocation.find(entry => entry.name === "Community Wallets");
-    const communityWalletsValue = communityWalletsEntry ? communityWalletsEntry.value : 0;
-    const communityWalletsPercentage = (communityWalletsValue / totalSupply) * 100;
     const communityWalletsBalance = {
-      nominal: communityWalletsValue,
-      percentage: parseFloat(communityWalletsPercentage.toFixed(4))
+      nominal: parseFloat((supplyStats.cwSupply).toFixed(3)),
+      percentage: parseFloat((supplyStats.cwSupply / totalSupply * 100).toFixed(3))
     };
 
     // Locked
-    const lockedEntry = supplyAndCapital.supplyAllocation.find(entry => entry.name === "Locked");
-    const lockedValue = lockedEntry ? lockedEntry.value : 0;
-    const lockedPercentage = (lockedValue / totalSupply) * 100;
     const currentLockedOnSlowWallets = {
-      nominal: lockedValue,
-      percentage: parseFloat(lockedPercentage.toFixed(4))
-    };
+      nominal: parseFloat((supplyStats.slowLockedSupply).toFixed(3)),
+      percentage: parseFloat(((supplyStats.slowLockedSupply / totalSupply) * 100).toFixed(3))
+    }
+
+    // Validators escrow
+    const infrastructureEscrow = {
+      nominal: parseFloat((supplyStats.infraEscrowSupply).toFixed(3)),
+      percentage: parseFloat(((supplyStats.infraEscrowSupply / totalSupply) * 100).toFixed(3))
+    }
 
     const totalBurned = {
       nominal: 100_000_000_000 - totalSupply,
-      percentage: (100_000_000_000 - totalSupply) / 100_000_000_000
+      percentage: ((100_000_000_000 - totalSupply) / 100_000_000_000) * 100
     };
 
     const lastEpochReward = {
@@ -78,9 +79,10 @@ export class StatsService {
       percentage: (pofValues.nominalRewardOverTime[pofValues.nominalRewardOverTime.length - 1].value / totalSupply) * 100
     };
 
-    const lockedCoins = await (await fetch(`${this.dataApiHost}/locked-coins`)).json();
+    const response = await axios.get(`${this.dataApiHost}/locked-coins`);
+    const lockedCoins = response.data;
 
-    return {
+    const res: Stats = {
       // charts
       slowWalletsCountOverTime,
       burnOverTime,
@@ -93,7 +95,7 @@ export class StatsService {
       clearingBidoverTime: pofValues.clearingBidOverTime, // net rewards? also available on the pofValues object
       liquidSupplyConcentration: liquidSupplyConcentration,
       lockedSupplyConcentration: lockedSupplyConcentration,
-      
+
       // kpis
       circulatingSupply,
       totalBurned,
@@ -106,8 +108,10 @@ export class StatsService {
       },
       lastEpochReward,
       currentClearingBid: (pofValues.clearingBidOverTime[pofValues.clearingBidOverTime.length - 1].value) / 10,
+      infrastructureEscrow,
       lockedCoins,
     };
+    return res;
   }
 
   private async getWalletsBalances(addresses: string[]) {
@@ -141,7 +145,7 @@ export class StatsService {
                 x -> reinterpretAsUInt256(reverse(unhex(x))),
                 {addresses: Array(String)}
               ),
-              "address" 
+              "address"
             )
           AND
             "coin_module" = 'libra_coin'
@@ -202,7 +206,7 @@ export class StatsService {
         SELECT
             SUM(latest_balance) / 1e6 AS total_balance
         FROM (
-            SELECT 
+            SELECT
                 argMax(balance, version) AS latest_balance
             FROM coin_balance
             WHERE coin_module = 'libra_coin'
@@ -439,8 +443,8 @@ export class StatsService {
       FROM
         slow_wallet SW
       JOIN
-        (SELECT 
-          address, 
+        (SELECT
+          address,
           argMax(balance, timestamp) as latest_balance
         FROM coin_balance
         WHERE coin_module = 'libra_coin'
@@ -478,8 +482,8 @@ export class StatsService {
       FROM
         slow_wallet SW
       JOIN
-        (SELECT 
-          address, 
+        (SELECT
+          address,
           argMax(balance, timestamp) as latest_balance
         FROM coin_balance
         WHERE coin_module = 'libra_coin'
@@ -561,7 +565,7 @@ export class StatsService {
   private async getAccountsOnChainOverTime(): Promise<TimestampValue[]> {
     try {
       const query = `
-        SELECT 
+        SELECT
           toInt32(divide(min(timestamp), 1000000)) AS timestamp,
           address
         FROM coin_balance
@@ -617,33 +621,29 @@ export class StatsService {
     }
   }
 
-  private async getSupplyAndCapital(): Promise<{
+  private async getSupplyAndCapital(supplyStats: SupplyStats): Promise<{
     supplyAllocation: NameValue[];
     individualsCapital: NameValue[];
     communityCapital: NameValue[];
   }> {
+
+    const totalSupply = supplyStats.totalSupply;
+    const circulating = supplyStats.circulatingSupply;
+    const communityWalletsBalances = supplyStats.cwSupply;
+    const infraEscrowBalance = supplyStats.infraEscrowSupply;
+    const slowLocked = supplyStats.slowLockedSupply;
+
     try {
-      // Call the provided helper methods
-      const totalSupply = await this.getTotalSupply();
-      const totalSlowWalletLocked = await this.getSlowWalletsLockedAmount();
-      const communityWalletsBalances = await this.getCommunityWalletsBalance();
-      const totalLibraBalances = await this.getTotalLibraBalances();
-
-      // Calculate additional values
-      const infraEscrowBalance = totalSupply - totalLibraBalances;
-      const circulating =
-        totalLibraBalances - (totalSlowWalletLocked + communityWalletsBalances);
-
-      // Organize the results into the specified structure
+      // Organize the values into the specified structure
       const supplyAllocation = [
         { name: "Community Wallets", value: communityWalletsBalances },
-        { name: "Locked", value: totalSlowWalletLocked },
+        { name: "Locked", value: slowLocked },
         { name: "Infrastructure escrow", value: infraEscrowBalance },
         { name: "Circulating", value: circulating },
       ];
 
       const individualsCapital = [
-        { name: "Locked", value: totalSlowWalletLocked },
+        { name: "Locked", value: slowLocked },
         { name: "Circulating", value: circulating },
       ];
 
@@ -696,8 +696,8 @@ export class StatsService {
         FROM
           slow_wallet SW
         JOIN
-          (SELECT 
-            address, 
+          (SELECT
+            address,
             argMax(balance, timestamp) as latest_balance
           FROM coin_balance
           WHERE coin_module = 'libra_coin'

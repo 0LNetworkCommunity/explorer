@@ -7,6 +7,7 @@ import { ConsensusReward, RawDonorVoiceRegistry, RawValidatorSet, ValidatorGrade
 import { NetworkAddresses } from "./network-addresses.js";
 import BN from "bn.js";
 import { parseAddress } from "../utils.js";
+import { SupplyStats } from "./types.js";
 
 @Injectable()
 export class OlService {
@@ -15,6 +16,21 @@ export class OlService {
   public constructor(configService: ConfigService) {
     const config = configService.get<OlConfig>("ol")!;
     this.aptosClient = new AptosClient(config.provider);
+  }
+
+  public async getSupplyStats(): Promise<SupplyStats> {
+    const supplyStats = await this.aptosClient.view({
+      function: "0x1::supply::get_stats",
+      type_arguments: [],
+      arguments: [],
+    });
+    return {
+      totalSupply: parseFloat(supplyStats[0] as string) / 1e6,
+      slowLockedSupply: parseFloat(supplyStats[1] as string) / 1e6,
+      cwSupply: parseFloat(supplyStats[2] as string) / 1e6,
+      infraEscrowSupply: parseFloat(supplyStats[3] as string) / 1e6,
+      circulatingSupply: parseFloat(supplyStats[4] as string) / 1e6,
+    };
   }
 
   public async getCurrentValidators(): Promise<string[]> {

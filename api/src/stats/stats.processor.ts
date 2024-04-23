@@ -21,7 +21,7 @@ export class StatsProcessor extends WorkerHost implements OnModuleInit {
   public async onModuleInit() {
     await this.statsQueue.add("updateStats", undefined, {
       repeat: {
-        every: 3_600 * 2 * 1_000, // 2 hours
+        every: 60 * 60 * 2 * 1_000, // 2 hours
       },
     });
   }

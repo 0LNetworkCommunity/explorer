@@ -19,6 +19,14 @@ export interface CurrentBid {
   expirationEpoch: number;
 }
 
+export interface SupplyStats {
+  totalSupply: number;
+  slowLockedSupply: number;
+  cwSupply: number;
+  infraEscrowSupply: number;
+  circulatingSupply: number;
+}
+
 export interface ConsensusReward {
   clearingBid: number;
   entryFee: number;

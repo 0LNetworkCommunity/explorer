@@ -3,6 +3,8 @@ import clsx from "clsx";
 import axios from "axios";
 import ReactECharts from "echarts-for-react";
 
+import { config } from "../../../../config";
+
 interface Props {
   address: string;
 }
@@ -18,7 +20,7 @@ const HistoricalBalance: FC<Props> = ({ address }) => {
         unlocked: number[],
         locked: number[],
       }>({
-        url: `${import.meta.env.VITE_DATA_API_HOST}/historical-balance/${address}`,
+        url: `${config.dataApiHost}/historical-balance/${address}`,
       });
 
       const historicalBalance = res.data.balance.map((it, index) => [

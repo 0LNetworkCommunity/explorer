@@ -9,10 +9,11 @@ import App from './modules/core/App';
 
 import './index.css';
 
-const { VITE_POSTHOG_KEY, VITE_POSTHOG_HOST } = import.meta.env;
+const VITE_POSTHOG_KEY = "phc_hPZOabiIQet1rsxRGAELYmKy8eByxgklujcj3rTz4cd";
+const VITE_POSTHOG_HOST = "https://eu.posthog.com";
 
 const PostHogProviderWrapper = ({ children }: PropsWithChildren) => {
-  if (VITE_POSTHOG_KEY && VITE_POSTHOG_HOST) {
+  if (window.location.host === '0l.fyi') {
     posthog.init(VITE_POSTHOG_KEY, {
       api_host: VITE_POSTHOG_HOST,
     });

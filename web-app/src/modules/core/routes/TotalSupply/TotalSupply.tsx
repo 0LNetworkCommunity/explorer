@@ -2,6 +2,7 @@ import { FC, useEffect, useState } from "react";
 import axios from "axios";
 import ReactECharts from "echarts-for-react";
 import clsx from "clsx";
+import { config } from "../../../../config";
 
 const TotalSupply: FC = () => {
   const [options, setOptions] = useState<any>();
@@ -9,7 +10,7 @@ const TotalSupply: FC = () => {
   useEffect(() => {
     const load = async () => {
       const res = await axios<[number, number][]>({
-        url: `${import.meta.env.VITE_DATA_API_HOST}/total-supply`,
+        url: `${config.dataApiHost}/total-supply`,
       });
 
       const data = res.data.map((it) => [it[0] * 1e3, it[1]]);

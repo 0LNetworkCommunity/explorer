@@ -3,13 +3,15 @@ import axios from "axios";
 import ReactECharts from "echarts-for-react";
 import clsx from "clsx";
 
+import { config } from "../../../../config";
+
 const CirculatingSupply: FC = () => {
   const [options, setOptions] = useState<any>();
 
   useEffect(() => {
     const load = async () => {
       const res = await axios<[number, number][]>({
-        url: `${import.meta.env.VITE_DATA_API_HOST}/locked-coins`,
+        url: `${config.dataApiHost}/locked-coins`,
       });
 
       const data = res.data.map((it ) => [

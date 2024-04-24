@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ReactECharts from "echarts-for-react";
 
+import { config } from "../../../../config";
 import Money from "../../../ui/Money";
 import ChartComponent from "./ChartComponent";
 import StatItem from "./components/StatItem";
@@ -8,7 +9,7 @@ import StatsContainer from "./components/StatsContainer";
 import Page from "../../../ui/Page";
 
 const getData = async () => {
-  const res = await fetch(`${import.meta.env.VITE_API_HOST}/stats`);
+  const res = await fetch(`${config.apiHost}/stats`);
   const data = await res.json();
   return data;
 };

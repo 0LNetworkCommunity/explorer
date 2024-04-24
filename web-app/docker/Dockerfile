@@ -1,3 +1,4 @@
+:q
 #########################################
 #              FIRST STAGE              #
 #########################################
@@ -7,9 +8,6 @@ WORKDIR /app
 
 ARG CI_COMMIT_SHA=""
 ENV VITE_CI_COMMIT_SHA $CI_COMMIT_SHA
-
-ENV VITE_API_HOST "https://api.0l.fyi"
-ENV VITE_DATA_API_HOST="https://data.0l.fyi"
 
 COPY ./package.json ./package-lock.json ./
 RUN npm ci

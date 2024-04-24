@@ -5,6 +5,7 @@ export default (): Config => {
   const ENV = process.env;
 
   const config: Config = {
+    port: ENV.PORT !== undefined ? parseInt(ENV.PORT, 10) : 3000,
     cacheEnabled: ENV.CACHE_ENABLED === "true",
     dataApiHost: ENV.DATA_API_HOST!,
 
@@ -29,11 +30,11 @@ export default (): Config => {
     },
 
     clickhouse: {
-      httpHost: ENV.CLICKHOUSE_HTTP_HOST!,
-      httpUsername: ENV.CLICKHOUSE_HTTP_USERNAME,
-      httpPassword: ENV.CLICKHOUSE_HTTP_PASSWORD,
+      username: ENV.CLICKHOUSE_USERNAME!,
+      password: ENV.CLICKHOUSE_PASSWORD!,
       host: ENV.CLICKHOUSE_HOST!,
       port: parseInt(ENV.CLICKHOUSE_PORT!, 10),
+      httpPort: parseInt(ENV.CLICKHOUSE_HTTP_PORT!, 10),
       database: ENV.CLICKHOUSE_DATABASE!,
     },
 

@@ -1,4 +1,4 @@
-FROM clickhouse/clickhouse-server:24.1.5.6 as clickhouse
+FROM clickhouse/clickhouse-server:24.3.2.23 as clickhouse
 
 ###############################################
 
@@ -9,7 +9,7 @@ RUN cargo install --path .
 
 ###############################################
 
-FROM node:20.11.1
+FROM node:20.12.2
 
 COPY --from=clickhouse /usr/bin/clickhouse-client /usr/bin/clickhouse-client
 COPY --from=transformerBuilder /usr/local/cargo/bin/transformer /usr/local/bin/transformer
@@ -38,11 +38,14 @@ ENV S3_SECRET_ACCESS_KEY="************************************"
 ENV S3_BUCKET="0lfyi-v7"
 ENV S3_STORAGE_CLASS="ONEZONE_IA"
 
-ENV CLICKHOUSE_HTTP_HOST="127.0.0.1"
-ENV CLICKHOUSE_HTTP_USERNAME="ol_rw"
-ENV CLICKHOUSE_HTTP_PASSWORD="********************************"
-ENV CLICKHOUSE_PORT="8123"
+ENV CLICKHOUSE_HOST="127.0.0.1"
+ENV CLICKHOUSE_USERNAME="ol_rw"
+ENV CLICKHOUSE_PASSWORD="********************************"
+ENV CLICKHOUSE_HTTP_PORT="8123"
+ENV CLICKHOUSE_PORT="9000"
 ENV CLICKHOUSE_DATABASE="olfyi"
+
+ENV PORT="3000"
 
 EXPOSE 3000
 

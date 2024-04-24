@@ -1,4 +1,5 @@
 export interface Config {
+  port: number;
   cacheEnabled: boolean;
   dataApiHost: string;
 
@@ -32,11 +33,11 @@ export interface S3Config {
 }
 
 export interface ClickhouseConfig {
-  httpHost: string;
-  httpUsername?: string;
-  httpPassword?: string;
+  username: string;
+  password: string;
   host: string;
   port: number;
+  httpPort: number;
   database: string;
 }
 

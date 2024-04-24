@@ -41,12 +41,12 @@ export class ClickhouseService implements OnModuleInit, OnApplicationShutdown {
       protocol = "https";
     }
 
-    const host = `${protocol}://${clickhouseConfig.httpHost}:${clickhouseConfig.port}`;
+    const host = `${protocol}://${clickhouseConfig.host}:${clickhouseConfig.httpPort}`;
 
     this.client = createClient({
       host,
-      username: clickhouseConfig.httpUsername,
-      password: clickhouseConfig.httpPassword,
+      username: clickhouseConfig.username,
+      password: clickhouseConfig.password,
       database: clickhouseConfig.database,
     });
   }
@@ -82,11 +82,11 @@ export class ClickhouseService implements OnModuleInit, OnApplicationShutdown {
       "-c",
       `cat ${path} |
          ${clickhouseClient} \
-         -h "${clickhouseConfig.httpHost}" \
-         --port 9000 \
+         -h "${clickhouseConfig.host}" \
+         --port "${clickhouseConfig.port}" \
          -d "${clickhouseConfig.database}" \
-         -u "${clickhouseConfig.httpUsername}" \
-         --password "${clickhouseConfig.httpPassword}" \
+         -u "${clickhouseConfig.username}" \
+         --password "${clickhouseConfig.password}" \
          --query="$(cat ${queryPath})"
       `,
     ]);

@@ -254,23 +254,29 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     await this.ingestTransaction(transactions[0]);
   }
 
+  private async addVersionJob(version: bigint) {
+    await this.olVersionQueue.add(
+      "version",
+      { version: version.toString(10) },
+      {
+        jobId: `__version__${version}`,
+        attempts: 10,
+        backoff: {
+          type: "fixed",
+        },
+        removeOnComplete: {
+          age: 3600, // keep up to 1 hour
+        },
+      },
+    );
+  }
+
   private async fetchLatestVersion() {
     const ledgerVersion = BigInt(await this.getLedgerVersion());
 
     for (let i = 0; i < 1_000; ++i) {
       const version = ledgerVersion - BigInt(i);
-      await this.olVersionQueue.add(
-        "version",
-        { version: version.toString(10) } as VersionJobData,
-        {
-          jobId: `__version__${version}`,
-          attempts: 10,
-          backoff: {
-            type: "fixed",
-          },
-          removeOnComplete: true,
-        },
-      );
+      await this.addVersionJob(version);
     }
   }
 
@@ -408,18 +414,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       if (bnFindIndex(ingestedVersions, version) !== -1) {
         continue;
       }
-      await this.olVersionQueue.add(
-        "version",
-        { version: version.toString(10) } as VersionJobData,
-        {
-          jobId: `__version__${version}`,
-          attempts: 10,
-          backoff: {
-            type: "fixed",
-          },
-          removeOnComplete: true,
-        },
-      );
+      await this.addVersionJob(BigInt(version.toString(10)));
     }
   }
 }

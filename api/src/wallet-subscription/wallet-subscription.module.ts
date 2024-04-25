@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Module, Type } from "@nestjs/common";
 import { BullModule } from "@nestjs/bullmq";
 
 import { redisClient } from "../redis/redis.service.js";
@@ -10,6 +10,11 @@ import { WalletSubscriptionProcessor } from "./wallet-subscription.processor.js"
 import { FirebaseModule } from "../firebase/firebase.module.js";
 
 const roles = process.env.ROLES!.split(",");
+
+const workers: Type<any>[] = [];
+if (roles.includes("wallet-subscription-processor")) {
+  workers.push(WalletSubscriptionProcessor);
+}
 
 @Module({
   imports: [
@@ -25,8 +30,7 @@ const roles = process.env.ROLES!.split(",");
   providers: [
     WalletSubscriptionResolver,
     WalletSubscriptionService,
-
-    ...(roles.includes("worker") ? [WalletSubscriptionProcessor] : []),
+    ...workers,
   ],
   exports: [WalletSubscriptionService],
 })

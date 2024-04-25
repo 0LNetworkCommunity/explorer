@@ -1,13 +1,18 @@
 import process from "node:process";
 
 import { BullModule } from "@nestjs/bullmq";
-import { Module } from "@nestjs/common";
+import { Module, Type } from "@nestjs/common";
 
 import { redisClient } from "../redis/redis.service.js";
 import { ClickhouseModule } from "../clickhouse/clickhouse.module.js";
 import { OlSwapProcessor } from "./OlSwapProcessor.js";
 
 const roles = process.env.ROLES!.split(",");
+
+const workers: Type<any>[] = [];
+if (roles.includes("swap-processor")) {
+  workers.push(OlSwapProcessor);
+}
 
 @Module({
   imports: [
@@ -18,6 +23,6 @@ const roles = process.env.ROLES!.split(",");
       connection: redisClient,
     }),
   ],
-  providers: roles.includes("worker") ? [OlSwapProcessor] : [],
+  providers: workers,
 })
 export class OlSwapModule {}

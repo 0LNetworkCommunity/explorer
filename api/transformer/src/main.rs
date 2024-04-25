@@ -544,7 +544,16 @@ fn process_changes(
 
                     let tree = tree
                         .iter()
-                        .map(|addr| HexEncodedBytes::from_str(addr).unwrap().0)
+                        .map(|addr| {
+                            let mut addr = addr.clone();
+                            addr = addr.strip_prefix("0x").expect("invalid hex value").to_owned();
+                            if addr.len() < 32 {
+                                addr = format!("{:0>32}", addr);
+                            } else {
+                                addr = format!("{:0>64}", addr);
+                            }
+                            return HexEncodedBytes::from_str(&addr).unwrap().0;
+                        })
                         .collect::<Vec<_>>();
                     ancestry_collection.push(address.clone(), tree);
                 }

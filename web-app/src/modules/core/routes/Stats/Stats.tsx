@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
-import ReactECharts from "echarts-for-react";
+import { useEffect, useState } from 'react';
+import ReactECharts from 'echarts-for-react';
 
-import { config } from "../../../../config";
-import Money from "../../../ui/Money";
-import ChartComponent from "./ChartComponent";
-import StatItem from "./components/StatItem";
-import StatsContainer from "./components/StatsContainer";
-import Page from "../../../ui/Page";
+import { config } from '../../../../config';
+import Money from '../../../ui/Money';
+import ChartComponent from './ChartComponent';
+import StatItem from './components/StatItem';
+import StatsContainer from './components/StatsContainer';
+import Page from '../../../ui/Page';
 
 const getData = async () => {
   const res = await fetch(`${config.apiHost}/stats`);
@@ -25,11 +25,8 @@ const Coinstats = () => {
 
         const data = await getData();
 
-        const lockedCoins = data.lockedCoins.map((it: [number, number]) => [
-          it[0] * 1e3,
-          it[1],
-        ]);
-        setData({ ...data, lockedCoins});
+        const lockedCoins = data.lockedCoins.map((it: [number, number]) => [it[0] * 1e3, it[1]]);
+        setData({ ...data, lockedCoins });
       } catch (error) {
         console.error(error);
       } finally {
@@ -83,7 +80,7 @@ const Coinstats = () => {
             <dl className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
               <ChartComponent
                 type="BarChartSupplyConcentration"
-                title="Indidividuals Liquid Capital Concentration"
+                title="Individuals Liquid Capital Concentration"
                 data={data.liquidSupplyConcentration}
               />
               <ChartComponent

@@ -1,4 +1,4 @@
-CREATE TABLE "user_transaction" (
+CREATE TABLE "user_transaction" ON CLUSTER "olfyi" (
   "version" UInt64,
   "hash" UInt256,
   "gas_used" UInt64,
@@ -19,7 +19,7 @@ CREATE TABLE "user_transaction" (
 ENGINE = ReplicatedMergeTree
 ORDER BY "version";
 
-CREATE TABLE "script" (
+CREATE TABLE "script" ON CLUSTER "olfyi" (
   "version" UInt64,
   "hash" UInt256,
   "gas_used" UInt64,
@@ -38,7 +38,7 @@ CREATE TABLE "script" (
 ENGINE = ReplicatedMergeTree
 ORDER BY "version";
 
-CREATE TABLE "event" (
+CREATE TABLE "event" ON CLUSTER "olfyi" (
 	"version" UInt64,
 	"creation_number" UInt64,
 	"account_address" UInt256,
@@ -51,7 +51,7 @@ CREATE TABLE "event" (
 ENGINE = ReplicatedMergeTree
 ORDER BY "version";
 
-CREATE TABLE "block_metadata_transaction" (
+CREATE TABLE "block_metadata_transaction" ON CLUSTER "olfyi" (
   `id` UInt256,
   `version` UInt64,
   `hash` UInt256,
@@ -65,7 +65,7 @@ CREATE TABLE "block_metadata_transaction" (
 ENGINE = ReplicatedMergeTree
 ORDER BY version;
 
-CREATE TABLE "genesis_transaction" (
+CREATE TABLE "genesis_transaction" ON CLUSTER "olfyi" (
   `version` UInt64,
   `hash` UInt256,
   `state_change_hash` UInt256,
@@ -79,7 +79,7 @@ CREATE TABLE "genesis_transaction" (
 ENGINE = ReplicatedMergeTree
 ORDER BY version;
 
-CREATE TABLE "state_checkpoint_transaction" (
+CREATE TABLE "state_checkpoint_transaction" ON CLUSTER "olfyi" (
   `version` UInt64,
 --   `hash` UInt256,
 --   `state_change_hash` UInt256,
@@ -94,21 +94,19 @@ CREATE TABLE "state_checkpoint_transaction" (
 ENGINE = ReplicatedMergeTree
 ORDER BY version;
 
-CREATE TABLE "ingested_files"
-(
+CREATE TABLE "ingested_files" ON CLUSTER "olfyi" (
     `name` String
 )
 ENGINE = ReplicatedMergeTree
 PRIMARY KEY ("name");
 
-CREATE TABLE "ingested_versions" (
+CREATE TABLE "ingested_versions" ON CLUSTER "olfyi" (
 	`version` UInt64
 )
 ENGINE = ReplicatedMergeTree
 PRIMARY KEY ("version");
 
-CREATE TABLE "total_supply"
-(
+CREATE TABLE "total_supply" ON CLUSTER "olfyi" (
     "version" UInt64,
     "amount" UInt128,
     "change_index" UInt64
@@ -117,8 +115,7 @@ ENGINE = ReplicatedMergeTree
 PRIMARY KEY ("version", "change_index")
 ORDER BY ("version", "change_index");
 
-CREATE TABLE "coin_balance"
-(
+CREATE TABLE "coin_balance" ON CLUSTER "olfyi" (
     "version" UInt64,
     "address" UInt256,
     "balance" UInt128,
@@ -141,8 +138,7 @@ ORDER BY (
     "address"
 );
 
-CREATE TABLE "tower_list"
-(
+CREATE TABLE "tower_list" ON CLUSTER "olfyi" (
   "version" UInt64,
   "change_index" UInt64,
   "list_count" UInt64
@@ -155,8 +151,7 @@ ORDER BY (
   "version", "change_index"
 );
 
-CREATE TABLE "burn_tracker"
-(
+CREATE TABLE "burn_tracker" ON CLUSTER "olfyi" (
     "version" UInt64,
     "change_index" UInt64,
     "address" UInt256,
@@ -175,8 +170,7 @@ ORDER BY (
     "address"
 );
 
-CREATE TABLE "burn_counter"
-(
+CREATE TABLE "burn_counter" ON CLUSTER "olfyi" (
     "version" UInt64,
     "change_index" UInt64,
     "lifetime_burned" UInt64,
@@ -191,8 +185,7 @@ ORDER BY (
 );
 
 
-CREATE TABLE "slow_wallet"
-(
+CREATE TABLE "slow_wallet" ON CLUSTER "olfyi" (
     "version" UInt64,
     "change_index" UInt64,
     "address" UInt256,
@@ -210,8 +203,7 @@ ORDER BY (
     "address"
 );
 
-CREATE TABLE "epoch_fee_maker_registry"
-(
+CREATE TABLE "epoch_fee_maker_registry" ON CLUSTER "olfyi" (
     "version" UInt64,
     "change_index" UInt64,
 
@@ -225,8 +217,7 @@ ORDER BY (
     "version", "change_index"
 );
 
-CREATE TABLE "slow_wallet_list"
-(
+CREATE TABLE "slow_wallet_list" ON CLUSTER "olfyi" (
     "version" UInt64,
     "change_index" UInt64,
 
@@ -240,8 +231,7 @@ ORDER BY (
     "version", "change_index"
 );
 
-CREATE TABLE "vdf_difficulty"
-(
+CREATE TABLE "vdf_difficulty" ON CLUSTER "olfyi" (
     "version" UInt64,
     "change_index" UInt64,
 
@@ -255,8 +245,7 @@ ORDER BY (
     "version", "change_index"
 );
 
-CREATE TABLE "consensus_reward"
-(
+CREATE TABLE "consensus_reward" ON CLUSTER "olfyi" (
     "version" UInt64,
     "change_index" UInt64,
 
@@ -275,8 +264,7 @@ ORDER BY (
     "version", "change_index"
 );
 
-CREATE TABLE "boundary_status"
-(
+CREATE TABLE "boundary_status" ON CLUSTER "olfyi" (
     "version" UInt64,
     "change_index" UInt64,
 
@@ -293,8 +281,7 @@ ORDER BY (
     "version", "change_index"
 );
 
-CREATE TABLE "beneficiary_policy"
-(
+CREATE TABLE "beneficiary_policy" ON CLUSTER "olfyi" (
     "version" UInt64,
     "change_index" UInt64,
     "lifetime_pledged" UInt64,
@@ -310,13 +297,13 @@ ORDER BY (
     "version", "change_index"
 );
 
-CREATE TABLE "community_wallet" (
+CREATE TABLE "community_wallet" ON CLUSTER "olfyi" (
 	"address" UInt256
 )
 ENGINE = ReplicatedMergeTree
 ORDER BY "address";
 
-CREATE TABLE "ol_swap_1h" (
+CREATE TABLE "ol_swap_1h" ON CLUSTER "olfyi" (
     "timestamp" UInt64,
     "volume" Decimal64(6),
     "open" Decimal64(6),
@@ -327,14 +314,14 @@ CREATE TABLE "ol_swap_1h" (
 ENGINE = ReplicatedReplacingMergeTree
 ORDER BY "timestamp";
 
-CREATE TABLE "ancestry" (
+CREATE TABLE "ancestry" ON CLUSTER "olfyi" (
 	"address" UInt256,
     "tree" Array(UInt256)
 )
 ENGINE = ReplicatedMergeTree
 ORDER BY "address";
 
-CREATE TABLE "multi_action" (
+CREATE TABLE "multi_action" ON CLUSTER "olfyi" (
     "version" UInt64,
     "change_index" UInt64,
 	"address" UInt256,
@@ -348,5 +335,19 @@ PRIMARY KEY (
     "address"
 )
 ORDER BY (
-    "version", "change_index"
+    "address", "version", "change_index"
+);
+
+CREATE TABLE "multisig_account_owners" ON CLUSTER "olfyi" (
+    "version" UInt64,
+    "change_index" UInt64,
+	"address" UInt256,
+    "owners" Array(UInt256)
+)
+ENGINE = ReplicatedMergeTree
+PRIMARY KEY (
+    "address"
+)
+ORDER BY (
+    "address", "version", "change_index"
 );

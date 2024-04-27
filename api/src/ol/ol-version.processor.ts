@@ -15,7 +15,7 @@ import { ConfigService } from "@nestjs/config";
 import qs from "qs";
 
 import { OlDbService } from "../ol-db/ol-db.service.js";
-import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
+import { ClickhouseQueryResponse, ClickhouseService } from "../clickhouse/clickhouse.service.js";
 import { TransformerService } from "./transformer.service.js";
 import { NotPendingTransaction } from "./types.js";
 import { OlConfig } from "../config/config.interface.js";
@@ -211,15 +211,15 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
         },
         format: "JSONColumnsWithMetadata",
       });
-      const rows = await resultSet.json<{
-        meta: [{ name: "version"; type: "UInt64" }];
-        data: {
-          version: string[];
-        };
-        rows: number;
-      }>();
+      const rows =
+        (await resultSet.json()) as unknown as ClickhouseQueryResponse<{
+          version?: string[];
+        }>;
 
       const versions = rows.data.version;
+      if (!versions) {
+        return;
+      }
 
       for (const i = start.clone(); i.lte(end); i.iadd(ONE)) {
         const index = versions.lastIndexOf(i.toString());
@@ -311,7 +311,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       })
       .then((resultSet) => resultSet.json<{ rows: number }>());
 
-    if (ingestedVersions.rows > 0) {
+    if (ingestedVersions.rows && ingestedVersions.rows > 0) {
       return;
     }
 
@@ -366,11 +366,9 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       format: "JSONColumnsWithMetadata",
     });
 
-    const rows = await result.json<{
-      data: {
-        address?: string[];
-      };
-    }>();
+    const rows = (await result.json()) as unknown as ClickhouseQueryResponse<{
+      address?: string[];
+    }>;
     if (!rows.data.address) {
       return;
     }

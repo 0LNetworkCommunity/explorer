@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import apn from '@parse/node-apn';
 import { DeviceType } from "@prisma/client";
 import { ConfigService } from "@nestjs/config";
@@ -85,10 +85,7 @@ export class WalletSubscriptionService {
         format: "JSONCompact",
       });
 
-      const rows = await result.json<{
-        data: [number, string][];
-      }>();
-
+      const rows = await result.json<[number, string]>();
       const balances = rows.data;
       const addresses = balances.map(([_, address]) =>
         Buffer.from(address, "hex"),
@@ -180,9 +177,7 @@ export class WalletSubscriptionService {
         format: "JSONCompact",
       });
 
-      const rows = await result.json<{
-        data: [number, string][];
-      }>();
+      const rows = await result.json<[number, string]>();
 
       const slowWallets = rows.data;
       const addresses = slowWallets.map(([_, address]) =>
@@ -204,7 +199,7 @@ export class WalletSubscriptionService {
         const walletAddress = subscription.walletAddress
           .toString("hex")
           .toUpperCase();
-        const slowWallet = slowWallets.find((it) => it[1] === walletAddress)!;
+        const slowWallet = slowWallets.find((it: any) => it[1] === walletAddress)!;
 
         switch (subscription.device.type) {
           case DeviceType.IOS: {

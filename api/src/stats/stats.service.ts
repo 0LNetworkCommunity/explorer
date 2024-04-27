@@ -160,12 +160,10 @@ export class StatsService {
       },
       format: "JSONEachRow",
     });
-    const rows = await resultSet.json<
-      {
-        balance: number;
-        address: string;
-      }[]
-    >();
+    const rows = await resultSet.json<{
+      balance: number;
+      address: string;
+    }>();
 
     return rows;
   }
@@ -184,11 +182,9 @@ export class StatsService {
         `,
         format: "JSONEachRow",
       });
-      const rows = await resultSet.json<
-        {
-          totalSupply: number;
-        }[]
-      >();
+      const rows = await resultSet.json<{
+        totalSupply: number;
+      }>();
       if (!rows.length) {
         return 0;
       }
@@ -219,7 +215,7 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const result = await resultSet.json<{ total_balance: number }[]>();
+      const result = await resultSet.json<{ total_balance: number }>();
 
       // Assuming there's only one row returned
       if (result.length > 0) {
@@ -230,17 +226,6 @@ export class StatsService {
       console.error("Error in getTotalBalances:", error);
       throw error;
     }
-  }
-
-  private async getCommunityWalletsBalance(): Promise<number> {
-    const communityWallets = await this.olService.getCommunityWallets();
-    const communityWalletsRecords =
-      await this.getWalletsBalances(communityWallets);
-    const communityWalletsBalances = communityWalletsRecords.reduce(
-      (acc, row) => acc + row.balance,
-      0,
-    );
-    return communityWalletsBalances;
   }
 
   private async getCommunityWalletsBalanceBreakdown(): Promise<NameValue[]> {
@@ -338,14 +323,12 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<
-        {
-          timestamp: string; // Adjusted to string to match your input
-          nominalReward: number;
-          netReward: number;
-          clearingBid: number;
-        }[]
-      >();
+      const rows = await resultSet.json<{
+        timestamp: string; // Adjusted to string to match your input
+        nominalReward: number;
+        netReward: number;
+        clearingBid: number;
+      }>();
 
       // Convert timestamp from microseconds to seconds and ensure it's an integer
       const convertTimestamp = (timestamp: string) =>
@@ -408,12 +391,10 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<
-        {
-          timestamp: number;
-          value: number;
-        }[]
-      >();
+      const rows = await resultSet.json<{
+        timestamp: number;
+        value: number;
+      }>();
 
       if (!rows.length) {
         return [];
@@ -434,62 +415,23 @@ export class StatsService {
     }
   }
 
-  private async getSlowWalletsLockedAmount(): Promise<number> {
-    try {
-      const query = `
-      SELECT
-        hex(SW.address) AS address,
-       (latest_balance - max(SW.unlocked)) / 1e6 AS locked_balance
-      FROM
-        slow_wallet SW
-      JOIN
-        (SELECT
-          address,
-          argMax(balance, timestamp) as latest_balance
-        FROM coin_balance
-        WHERE coin_module = 'libra_coin'
-        GROUP BY address) AS CB
-      ON SW.address = CB.address
-      GROUP BY SW.address, latest_balance
-      `;
-
-      const resultSet = await this.clickhouseService.client.query({
-        query: query,
-        format: "JSONEachRow",
-      });
-
-      const rows = await resultSet.json<{ locked_balance: number }[]>();
-
-      // Sum the locked balances
-      const totalLockedAmount = rows.reduce(
-        (acc, row) => acc + row.locked_balance,
-        0,
-      );
-
-      return totalLockedAmount;
-    } catch (error) {
-      console.error("Error in getSlowWalletsLockedAmount:", error);
-      throw error;
-    }
-  }
-
   private async getLastEpochTotalUnlockedAmount(): Promise<number> {
     try {
       const query = `
-      SELECT
-        hex(SW.address) AS address,
-       (latest_balance - max(SW.unlocked)) / 1e6 AS locked_balance
-      FROM
-        slow_wallet SW
-      JOIN
-        (SELECT
-          address,
-          argMax(balance, timestamp) as latest_balance
-        FROM coin_balance
-        WHERE coin_module = 'libra_coin'
-        GROUP BY address) AS CB
-      ON SW.address = CB.address
-      GROUP BY SW.address, latest_balance
+        SELECT
+          hex(SW.address) AS address,
+        (latest_balance - max(SW.unlocked)) / 1e6 AS locked_balance
+        FROM
+          slow_wallet SW
+        JOIN
+          (SELECT
+            address,
+            argMax(balance, timestamp) as latest_balance
+          FROM coin_balance
+          WHERE coin_module = 'libra_coin'
+          GROUP BY address) AS CB
+        ON SW.address = CB.address
+        GROUP BY SW.address, latest_balance
       `;
 
       const resultSet = await this.clickhouseService.client.query({
@@ -497,7 +439,7 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<{ locked_balance: number }[]>();
+      const rows = await resultSet.json<{ locked_balance: number }>();
 
       // Count the wallets with locked balance greater than 35000
       const count = rows.reduce(
@@ -519,20 +461,18 @@ export class StatsService {
     try {
       const resultSet = await this.clickhouseService.client.query({
         query: `
-              SELECT
-                "timestamp",
-                "list_count" AS "value"
-              FROM "slow_wallet_list"
-              ORDER BY "timestamp" ASC
-            `,
+          SELECT
+            "timestamp",
+            "list_count" AS "value"
+          FROM "slow_wallet_list"
+          ORDER BY "timestamp" ASC
+        `,
         format: "JSONEachRow",
       });
-      const rows = await resultSet.json<
-        {
-          timestamp: string;
-          value: string;
-        }[]
-      >();
+      const rows = await resultSet.json<{
+        timestamp: string;
+        value: string;
+      }>();
 
       if (!rows.length) {
         console.warn("No data found for slow wallets over time.");
@@ -579,12 +519,10 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<
-        {
-          timestamp: number;
-          address: string;
-        }[]
-      >();
+      const rows = await resultSet.json<{
+        timestamp: number;
+        address: string;
+      }>();
 
       // Initialize the result array and a count for accounts with timestamp > 0
       const accountsOverTime: TimestampValue[] = [];
@@ -711,8 +649,10 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows =
-        await resultSet.json<{ address: string; unlocked_balance: number }[]>();
+      const rows = await resultSet.json<{
+        address: string;
+        unlocked_balance: number;
+      }>();
 
       // Adjust the balance based on the unlocked amount
       return rows.map((row) => ({
@@ -759,7 +699,7 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      let rows = await resultSet.json<{ address: string; balance: number }[]>();
+      let rows = await resultSet.json<{ address: string; balance: number }>();
 
       // Adjust balances for slow wallets
       rows = rows.map((row) => {
@@ -883,7 +823,7 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<{ address: string }[]>();
+      const rows = await resultSet.json<{ address: string }>();
 
       const addresses = rows.map((row) => row.address);
 

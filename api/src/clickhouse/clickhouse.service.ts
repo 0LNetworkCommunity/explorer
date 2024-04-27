@@ -18,7 +18,7 @@ const execFile = util.promisify(execFileNative);
 
 export interface ClickhouseQueryResponse<T> {
   meta: { name: string; type: string }[];
-  data: T[];
+  data: T;
   rows: number;
   statistics: { elapsed: number; rows_read: number; bytes_read: number };
 }
@@ -41,10 +41,10 @@ export class ClickhouseService implements OnModuleInit, OnApplicationShutdown {
       protocol = "https";
     }
 
-    const host = `${protocol}://${clickhouseConfig.host}:${clickhouseConfig.httpPort}`;
+    const url = `${protocol}://${clickhouseConfig.host}:${clickhouseConfig.httpPort}`;
 
     this.client = createClient({
-      host,
+      url,
       username: clickhouseConfig.username,
       password: clickhouseConfig.password,
       database: clickhouseConfig.database,

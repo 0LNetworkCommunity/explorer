@@ -27,7 +27,7 @@ export class UserTransactionsResolver {
           query: 'SELECT COUNT(*) as "total" FROM user_transaction',
           format: "JSONEachRow",
         })
-        .then((res) => res.json<{ total: string }[]>())
+        .then((res) => res.json<{ total: string }>())
         .then((rows) => parseInt(rows[0].total, 10)),
 
       this.clickhouseService.client
@@ -52,35 +52,33 @@ export class UserTransactionsResolver {
               "function_name",
               "timestamp"
             FROM "user_transaction"
-            ORDER BY "version" ${order === 'ASC' ? 'ASC' : 'DESC'}
+            ORDER BY "version" ${order === "ASC" ? "ASC" : "DESC"}
             LIMIT {limit:Int32} OFFSET {offset:Int32}
           `,
           format: "JSONEachRow",
           query_params: {
             limit,
-            offset
-          }
+            offset,
+          },
         })
         .then((res) =>
-          res.json<
-            {
-              hash: string;
-              version: string;
-              gas_used: string;
-              success: boolean;
-              vm_status: string;
-              sender: string;
-              sequence_number: string;
-              arguments: string;
-              max_gas_amount: string;
-              gas_unit_price: string;
-              expiration_timestamp: string;
-              module_address: string;
-              module_name: string;
-              function_name: string;
-              timestamp: string;
-            }[]
-          >(),
+          res.json<{
+            hash: string;
+            version: string;
+            gas_used: string;
+            success: boolean;
+            vm_status: string;
+            sender: string;
+            sequence_number: string;
+            arguments: string;
+            max_gas_amount: string;
+            gas_unit_price: string;
+            expiration_timestamp: string;
+            module_address: string;
+            module_name: string;
+            function_name: string;
+            timestamp: string;
+          }>(),
         )
         .then((rows) =>
           rows.map(

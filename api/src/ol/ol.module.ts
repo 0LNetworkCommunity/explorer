@@ -1,7 +1,7 @@
 import process from "node:process";
 
 import { BullModule } from "@nestjs/bullmq";
-import { DynamicModule, Module, Type } from "@nestjs/common";
+import { Module, Type } from "@nestjs/common";
 
 import { redisClient } from "../redis/redis.service.js";
 import { UserTransactionsResolver } from "./user-transactions.resolver.js";

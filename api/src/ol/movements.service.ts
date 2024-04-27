@@ -303,7 +303,7 @@ export class MovementsService {
       format: "JSONEachRow",
     });
     const userTransactionRows =
-      await resUserTransaction.json<UserTransactionDbEntity[]>();
+      await resUserTransaction.json<UserTransactionDbEntity>();
 
     const userTransactions = new Map(
       userTransactionRows.map((userTransaction) => [
@@ -346,9 +346,7 @@ export class MovementsService {
       });
 
     const blockMetadataTransactionRows =
-      await blockMetadataTransactionRes.json<
-        BlockMetadataTransactionDbEntity[]
-      >();
+      await blockMetadataTransactionRes.json<BlockMetadataTransactionDbEntity>();
 
     const blockMetadataTransactions = new Map(
       blockMetadataTransactionRows.map((blockMetadataTransaction) => {
@@ -387,7 +385,7 @@ export class MovementsService {
     });
 
     const scriptUserTransactionRows =
-      await scriptUserTransactionRes.json<ScriptUserTransactionDbEntity[]>();
+      await scriptUserTransactionRes.json<ScriptUserTransactionDbEntity>();
 
     return new Map(
       scriptUserTransactionRows.map((scriptUserTransaction) => [
@@ -424,7 +422,7 @@ export class MovementsService {
     });
 
     const genesisTransactionRows =
-      await genesisTransactionRes.json<GenesisTransactionDbEntity[]>();
+      await genesisTransactionRes.json<GenesisTransactionDbEntity>();
 
     return new Map(
       genesisTransactionRows.map((genesisTransaction) => [

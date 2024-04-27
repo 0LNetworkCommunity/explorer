@@ -29,13 +29,11 @@ export class ModulesResolver {
         format: "JSONEachRow",
       })
       .then((res) =>
-        res.json<
-          {
-            module_address: string;
-            module_name: string;
-            function_name: string;
-          }[]
-        >(),
+        res.json<{
+          module_address: string;
+          module_name: string;
+          function_name: string;
+        }>(),
       )
       .then((rows) =>
         rows.map((row) => ({

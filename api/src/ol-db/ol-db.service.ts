@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import BN from 'bn.js';
-import {
-  ClickhouseQueryResponse,
-  ClickhouseService,
-} from '../clickhouse/clickhouse.service.js';
+import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
 
 @Injectable()
 export class OlDbService {
@@ -31,10 +28,7 @@ export class OlDbService {
       `,
       format: "JSON",
     });
-    const res =
-      await resultSet.json<
-        ClickhouseQueryResponse<{ version: string }>
-      >();
+    const res = await resultSet.json<{ version: string }>();
 
     if (!res.rows) {
       return null;
@@ -53,8 +47,7 @@ export class OlDbService {
       `,
       format: "JSON",
     });
-    const res =
-      await resultSet.json<ClickhouseQueryResponse<{ version: string }>>();
+    const res = await resultSet.json<{ version: string }>();
     return res.data.map((it) => new BN(it.version));
   }
 }

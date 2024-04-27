@@ -47,12 +47,10 @@ export class OlController {
       format: "JSONEachRow",
     });
 
-    const serie = await resultSet.json<
-      {
-        time: number;
-        value: number;
-      }[]
-    >();
+    const serie = await resultSet.json<{
+      time: number;
+      value: number;
+    }>();
 
     for (let i = 0; i < serie.length; ++i) {
       const it = serie[i];
@@ -99,12 +97,10 @@ export class OlController {
       format: "JSONEachRow",
     });
 
-    const serie = await resultSet.json<
-      {
-        time: number;
-        value: number;
-      }[]
-    >();
+    const serie = await resultSet.json<{
+      time: number;
+      value: number;
+    }>();
 
     for (let i = 0; i < serie.length; ++i) {
       const it = serie[i];

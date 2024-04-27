@@ -243,7 +243,10 @@ export class NodeWatcherService {
   public async checkNodes() {
     const nodes = await this.prisma.node.findMany({
       orderBy: {
-        lastCheck: "asc",
+        lastCheck: {
+          sort: "asc",
+          nulls: 'first',
+        },
       },
       take: 10,
     });

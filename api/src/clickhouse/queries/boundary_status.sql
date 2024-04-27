@@ -1,6 +1,5 @@
 INSERT INTO "boundary_status" (
     "version",
-    "timestamp",
     "change_index",
     "incoming_fees",
     "outgoing_nominal_reward_to_vals",
@@ -9,7 +8,6 @@ INSERT INTO "boundary_status" (
 )
 SELECT
     "version",
-    "timestamp",
     "change_index",
     "incoming_fees",
     "outgoing_nominal_reward_to_vals",
@@ -19,7 +17,6 @@ FROM
   input(
     '
       version UInt64,
-      timestamp UInt64,
       change_index UInt64,
       incoming_fees UInt64,
       outgoing_nominal_reward_to_vals UInt64,

@@ -1,6 +1,5 @@
 INSERT INTO "consensus_reward" (
   "version",
-  "timestamp",
   "change_index",
 
   "nominal_reward",
@@ -12,7 +11,6 @@ INSERT INTO "consensus_reward" (
 )
 SELECT
   "version",
-  "timestamp",
   "change_index",
 
   "nominal_reward",
@@ -24,7 +22,6 @@ SELECT
 FROM
   input('
       version UInt64,
-      timestamp UInt64,
       change_index UInt64,
 
       nominal_reward UInt64,

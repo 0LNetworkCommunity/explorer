@@ -1,6 +1,5 @@
 INSERT INTO "beneficiary_policy" (
   "version",
-  "timestamp",
   "change_index",
   "lifetime_pledged",
   "lifetime_withdrawn",
@@ -9,7 +8,6 @@ INSERT INTO "beneficiary_policy" (
 )
 SELECT
   "version",
-  "timestamp",
   "change_index",
   "lifetime_pledged",
   "lifetime_withdrawn",
@@ -18,7 +16,6 @@ SELECT
 FROM
   input('
     version UInt64,
-    timestamp UInt64,
     change_index UInt64,
     lifetime_pledged UInt64,
     lifetime_withdrawn UInt64,

@@ -1,6 +1,5 @@
 INSERT INTO "event" (
   "version",
-  "timestamp",
   "creation_number",
   "account_address",
   "sequence_number",
@@ -11,7 +10,6 @@ INSERT INTO "event" (
 )
 SELECT
   "version",
-  "timestamp",
   "creation_number",
   "account_address",
   "sequence_number",
@@ -23,7 +21,6 @@ FROM
   input(
     '
       version UInt64,
-      timestamp UInt64,
       creation_number UInt64,
       account_address UInt256,
       sequence_number UInt64,

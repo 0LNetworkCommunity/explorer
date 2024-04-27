@@ -1,24 +1,19 @@
-INSERT INTO "slow_wallet" (
+INSERT INTO "multisig_account_owners" (
   "version",
   "change_index",
   "address",
-
-  "unlocked",
-  "transferred"
+  "owners"
 )
 SELECT
   "version",
   "change_index",
   "address",
-
-  "unlocked",
-  "transferred"
+  arrayMap(it -> reinterpretAsUInt256(it), "owners")
 FROM
   input('
       version UInt64,
       change_index UInt64,
       address UInt256,
-      unlocked UInt64,
-      transferred UInt64
+      owners Array(String)
   ')
   FORMAT Parquet

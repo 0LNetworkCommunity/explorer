@@ -1,6 +1,7 @@
+use std::{fs::File, sync::Arc};
+
 use arrow_array::{ArrayRef, RecordBatch};
 use parquet::{arrow::arrow_writer::ArrowWriter, file::properties::WriterProperties};
-use std::{fs::File, sync::Arc};
 
 pub struct BoundaryStatusCollection {
     version: Vec<u64>,

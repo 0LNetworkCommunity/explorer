@@ -1,7 +1,6 @@
 INSERT INTO "coin_balance" (
   "address",
   "version",
-  "timestamp",
   "balance",
   "change_index",
   "coin_address",
@@ -11,7 +10,6 @@ INSERT INTO "coin_balance" (
 SELECT
   "address",
   "version",
-  "timestamp",
   "balance",
   "change_index",
   "coin_address",
@@ -21,7 +19,6 @@ FROM
   input('
       address UInt256,
       version UInt64,
-      timestamp UInt64,
       balance UInt64,
       change_index UInt64,
       coin_address UInt256,

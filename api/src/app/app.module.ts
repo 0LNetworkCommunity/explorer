@@ -15,6 +15,7 @@ import { StatsModule } from "../stats/stats.module.js";
 import { WalletSubscriptionModule } from "../wallet-subscription/wallet-subscription.module.js";
 import { NatsModule } from "../nats/nats.module.js";
 import { OlSwapModule } from "../ol-swap/OlSwapModule.js";
+import { MultiSigModule } from "../multi-sig/multi-sig.module.js";
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { OlSwapModule } from "../ol-swap/OlSwapModule.js";
     WalletSubscriptionModule,
     OlSwapModule,
     NodeWatcherModule,
+    MultiSigModule,
   ],
   controllers: [],
   providers: [AppService],

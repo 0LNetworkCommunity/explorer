@@ -5,7 +5,6 @@ use std::{fs::File, sync::Arc};
 pub struct CoinBalanceCollection {
     address: Vec<Vec<u8>>,
     balance: Vec<u64>,
-    timestamp: Vec<u64>,
     version: Vec<u64>,
     change_index: Vec<u64>,
     coin_address: Vec<Vec<u8>>,
@@ -18,7 +17,6 @@ impl CoinBalanceCollection {
         CoinBalanceCollection {
             address: Vec::new(),
             balance: Vec::new(),
-            timestamp: Vec::new(),
             version: Vec::new(),
             change_index: Vec::new(),
             coin_address: Vec::new(),
@@ -31,7 +29,6 @@ impl CoinBalanceCollection {
         &mut self,
         address: Vec<u8>,
         balance: u64,
-        timestamp: u64,
         version: u64,
         change_index: u64,
         coin_address: Vec<u8>,
@@ -46,7 +43,6 @@ impl CoinBalanceCollection {
 
         self.address.push(address);
         self.balance.push(balance);
-        self.timestamp.push(timestamp);
         self.version.push(version);
         self.change_index.push(change_index);
         self.coin_address.push(coin_address);
@@ -61,7 +57,6 @@ impl CoinBalanceCollection {
 
         let address = FixedSizeBinaryArray::try_from_iter(self.address.iter()).unwrap();
         let balance = arrow_array::UInt64Array::from(self.balance.clone());
-        let timestamp = arrow_array::UInt64Array::from(self.timestamp.clone());
         let version = arrow_array::UInt64Array::from(self.version.clone());
         let change_index = arrow_array::UInt64Array::from(self.change_index.clone());
         let coin_address = FixedSizeBinaryArray::try_from_iter(self.coin_address.iter()).unwrap();
@@ -71,7 +66,6 @@ impl CoinBalanceCollection {
         let batch = RecordBatch::try_from_iter(vec![
             ("address", Arc::new(address) as ArrayRef),
             ("version", Arc::new(version) as ArrayRef),
-            ("timestamp", Arc::new(timestamp) as ArrayRef),
             ("balance", Arc::new(balance) as ArrayRef),
             ("change_index", Arc::new(change_index) as ArrayRef),
             ("coin_address", Arc::new(coin_address) as ArrayRef),

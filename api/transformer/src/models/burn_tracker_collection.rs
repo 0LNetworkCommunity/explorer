@@ -4,7 +4,6 @@ use std::{fs::File, sync::Arc};
 
 pub struct BurnTrackerCollection {
     version: Vec<u64>,
-    timestamp: Vec<u64>,
     change_index: Vec<u64>,
 
     address: Vec<Vec<u8>>,
@@ -19,7 +18,6 @@ impl BurnTrackerCollection {
     pub fn new() -> BurnTrackerCollection {
         BurnTrackerCollection {
             version: Vec::new(),
-            timestamp: Vec::new(),
             change_index: Vec::new(),
             address: Vec::new(),
             burn_at_last_calc: Vec::new(),
@@ -32,7 +30,6 @@ impl BurnTrackerCollection {
     pub fn push(
         &mut self,
         version: u64,
-        timestamp: u64,
         change_index: u64,
         address: Vec<u8>,
         burn_at_last_calc: u64,
@@ -41,7 +38,6 @@ impl BurnTrackerCollection {
         prev_supply: u64,
     ) {
         self.version.push(version);
-        self.timestamp.push(timestamp);
         self.change_index.push(change_index);
 
         let mut address = address;
@@ -60,7 +56,6 @@ impl BurnTrackerCollection {
         }
 
         let version = arrow_array::UInt64Array::from(self.version.clone());
-        let timestamp = arrow_array::UInt64Array::from(self.timestamp.clone());
         let change_index = arrow_array::UInt64Array::from(self.change_index.clone());
         let address = FixedSizeBinaryArray::try_from_iter(self.address.iter()).unwrap();
 
@@ -71,7 +66,6 @@ impl BurnTrackerCollection {
 
         let batch = RecordBatch::try_from_iter(vec![
             ("version", Arc::new(version) as ArrayRef),
-            ("timestamp", Arc::new(timestamp) as ArrayRef),
             ("change_index", Arc::new(change_index) as ArrayRef),
             ("address", Arc::new(address) as ArrayRef),
             ("burn_at_last_calc", Arc::new(burn_at_last_calc) as ArrayRef),

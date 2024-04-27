@@ -4,7 +4,6 @@ use std::{fs::File, sync::Arc};
 
 pub struct BoundaryStatusCollection {
     version: Vec<u64>,
-    timestamp: Vec<u64>,
     change_index: Vec<u64>,
 
     incoming_fees: Vec<u64>,
@@ -17,7 +16,6 @@ impl BoundaryStatusCollection {
     pub fn new() -> BoundaryStatusCollection {
         BoundaryStatusCollection {
             version: Vec::new(),
-            timestamp: Vec::new(),
             change_index: Vec::new(),
             incoming_fees: Vec::new(),
             outgoing_nominal_reward_to_vals: Vec::new(),
@@ -29,7 +27,6 @@ impl BoundaryStatusCollection {
     pub fn push(
         &mut self,
         version: u64,
-        timestamp: u64,
         change_index: u64,
 
         incoming_fees: u64,
@@ -38,7 +35,6 @@ impl BoundaryStatusCollection {
         system_fees_collected: u64,
     ) {
         self.version.push(version);
-        self.timestamp.push(timestamp);
         self.change_index.push(change_index);
 
         self.incoming_fees.push(incoming_fees);
@@ -54,7 +50,6 @@ impl BoundaryStatusCollection {
         }
 
         let version = arrow_array::UInt64Array::from(self.version.clone());
-        let timestamp = arrow_array::UInt64Array::from(self.timestamp.clone());
         let change_index = arrow_array::UInt64Array::from(self.change_index.clone());
         let incoming_fees = arrow_array::UInt64Array::from(self.incoming_fees.clone());
         let outgoing_nominal_reward_to_vals =
@@ -66,7 +61,6 @@ impl BoundaryStatusCollection {
 
         let batch = RecordBatch::try_from_iter(vec![
             ("version", Arc::new(version) as ArrayRef),
-            ("timestamp", Arc::new(timestamp) as ArrayRef),
             ("change_index", Arc::new(change_index) as ArrayRef),
             ("incoming_fees", Arc::new(incoming_fees) as ArrayRef),
             (

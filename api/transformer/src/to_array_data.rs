@@ -5,7 +5,7 @@ use arrow::{
 };
 use arrow_array::Array;
 use arrow_schema::Field;
-use std::{env, fs::File, sync::Arc};
+use std::sync::Arc;
 
 pub trait ToArrayData {
     fn to_array_data(&self) -> ArrayData;

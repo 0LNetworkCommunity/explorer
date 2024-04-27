@@ -4,7 +4,6 @@ use std::{fs::File, sync::Arc};
 
 pub struct ConsensusRewardCollection {
     version: Vec<u64>,
-    timestamp: Vec<u64>,
     change_index: Vec<u64>,
 
     nominal_reward: Vec<u64>,
@@ -19,7 +18,6 @@ impl ConsensusRewardCollection {
     pub fn new() -> ConsensusRewardCollection {
         ConsensusRewardCollection {
             version: Vec::new(),
-            timestamp: Vec::new(),
             change_index: Vec::new(),
             nominal_reward: Vec::new(),
             net_reward: Vec::new(),
@@ -34,7 +32,6 @@ impl ConsensusRewardCollection {
         &mut self,
 
         version: u64,
-        timestamp: u64,
         change_index: u64,
         nominal_reward: u64,
         net_reward: u64,
@@ -44,7 +41,6 @@ impl ConsensusRewardCollection {
         median_history: Vec<u64>,
     ) {
         self.version.push(version);
-        self.timestamp.push(timestamp);
         self.change_index.push(change_index);
 
         self.nominal_reward.push(nominal_reward);
@@ -65,7 +61,6 @@ impl ConsensusRewardCollection {
         }
 
         let version = arrow_array::UInt64Array::from(self.version.clone());
-        let timestamp = arrow_array::UInt64Array::from(self.timestamp.clone());
         let change_index = arrow_array::UInt64Array::from(self.change_index.clone());
 
         let nominal_reward = arrow_array::UInt64Array::from(self.nominal_reward.clone());
@@ -77,7 +72,6 @@ impl ConsensusRewardCollection {
 
         let batch = RecordBatch::try_from_iter(vec![
             ("version", Arc::new(version) as ArrayRef),
-            ("timestamp", Arc::new(timestamp) as ArrayRef),
             ("change_index", Arc::new(change_index) as ArrayRef),
             ("nominal_reward", Arc::new(nominal_reward) as ArrayRef),
             ("net_reward", Arc::new(net_reward) as ArrayRef),

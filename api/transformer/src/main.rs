@@ -6,12 +6,14 @@ use lazy_static::lazy_static;
 
 mod models;
 mod to_array_data;
+mod utils;
 
 use models::{
     AncestryCollection, BeneficiaryPolicyCollection, BlockMetadataTransactionCollection,
     BoundaryStatusCollection, BurnCounterCollection, BurnTrackerCollection, CoinBalanceCollection,
     ConsensusRewardCollection, EpochFeeMakerRegistryCollection, EventCollection,
-    GenesisTransactionCollection, ScriptCollection, SlowWalletCollection, SlowWalletListCollection,
+    GenesisTransactionCollection, MultiActionCollection, MultisigAccountOwnersCollection,
+    ScriptCollection, SlowWalletCollection, SlowWalletListCollection,
     StateCheckpointTransactionCollection, TotalSupplyCollection, TowerListCollection,
     UserTransactionCollection, VdfDifficultyCollection,
 };
@@ -76,9 +78,10 @@ fn process_changes(
     consensus_reward_collection: &mut ConsensusRewardCollection,
     boundary_status_collection: &mut BoundaryStatusCollection,
     ancestry_collection: &mut AncestryCollection,
+    multisig_account_owners_collection: &mut MultisigAccountOwnersCollection,
+    multi_action_collection: &mut MultiActionCollection,
 
     version: u64,
-    timestamp: u64,
     changes: &Vec<WriteSetChange>,
 ) {
     for (change_index, change) in changes.iter().enumerate() {
@@ -118,7 +121,6 @@ fn process_changes(
                                     coin_balance_collection.push(
                                         address,
                                         balance,
-                                        timestamp,
                                         version,
                                         change_index,
                                         coin_address,
@@ -173,12 +175,45 @@ fn process_changes(
 
                     beneficiary_policy_collection.push(
                         version,
-                        timestamp,
                         change_index,
                         lifetime_pledged,
                         lifetime_withdrawn,
                         amount_available,
                         pledgers_count,
+                    );
+                }
+
+                // 0x1::multisig_account::MultisigAccount
+                if type_address == ROOT_ACCOUNT_ADDRESS.inner()
+                    && type_module == "multisig_account"
+                    && type_name == "MultisigAccount"
+                    && type_generic_type_params_len == 0
+                {
+                    let data = &change.data.data.0;
+                    let owners_id = IdentifierWrapper::from_str("owners").unwrap();
+
+                    let owners: Vec<_> = if let Some(Value::Array(value)) = data.get(&owners_id) {
+                        value
+                            .iter()
+                            .filter_map(|v| {
+                                v.as_str().map(|s| {
+                                    utils::parse_addr(s)
+                                        .unwrap_or_else(|err| {
+                                            panic!("Failed to parse address: {}", err)
+                                        })
+                                        .0
+                                })
+                            })
+                            .collect()
+                    } else {
+                        panic!("No 'owners' array found in data");
+                    };
+
+                    multisig_account_owners_collection.push(
+                        version,
+                        change_index,
+                        address.clone(),
+                        owners,
                     );
                 }
 
@@ -208,7 +243,6 @@ fn process_changes(
 
                     slow_wallet_collection.push(
                         version,
-                        timestamp,
                         change_index,
                         address.clone(),
                         unlocked,
@@ -244,7 +278,6 @@ fn process_changes(
 
                     burn_counter_collection.push(
                         version,
-                        timestamp,
                         change_index,
                         lifetime_burned,
                         lifetime_recycled,
@@ -293,7 +326,6 @@ fn process_changes(
 
                     burn_tracker_collection.push(
                         version,
-                        timestamp,
                         change_index,
                         address.clone(),
                         burn_at_last_calc,
@@ -321,7 +353,7 @@ fn process_changes(
                     )
                     .unwrap();
 
-                    tower_list_collection.push(version, timestamp, change_index, list.len() as u64);
+                    tower_list_collection.push(version, change_index, list.len() as u64);
                 }
 
                 // 0x1::fee_maker::EpochFeeMakerRegistry
@@ -345,7 +377,6 @@ fn process_changes(
 
                     epoch_fee_maker_registry_collection.push(
                         version,
-                        timestamp,
                         change_index,
                         epoch_fees_made,
                     );
@@ -369,12 +400,7 @@ fn process_changes(
                     )
                     .unwrap();
 
-                    slow_wallet_list_collection.push(
-                        version,
-                        timestamp,
-                        change_index,
-                        list.len() as u64,
-                    );
+                    slow_wallet_list_collection.push(version, change_index, list.len() as u64);
                 }
 
                 // 0x1::tower_state::VDFDifficulty
@@ -396,7 +422,26 @@ fn process_changes(
                     .unwrap();
                     let difficulty = difficulty.parse::<u64>().unwrap();
 
-                    vdf_difficulty_collection.push(version, timestamp, change_index, difficulty);
+                    vdf_difficulty_collection.push(version, change_index, difficulty);
+                }
+
+                // 0x1::multi_action::Action<0x1::donor_voice_txs::Payment>
+                if type_address == ROOT_ACCOUNT_ADDRESS.inner()
+                    && type_module == "multi_action"
+                    && type_name == "Action"
+                    && type_generic_type_params_len == 1
+                {
+                    if let MoveType::Struct(tally_type) =
+                        change.data.typ.generic_type_params[0].clone()
+                    {
+                        multi_action_collection.push(
+                            version,
+                            change_index,
+                            address.clone(),
+                            tally_type,
+                            serde_json::to_string(&change.data).unwrap(),
+                        );
+                    }
                 }
 
                 // 0x1::proof_of_fee::ConsensusReward
@@ -461,7 +506,6 @@ fn process_changes(
 
                     consensus_reward_collection.push(
                         version,
-                        timestamp,
                         change_index,
                         nominal_reward,
                         net_reward,
@@ -519,7 +563,6 @@ fn process_changes(
 
                     boundary_status_collection.push(
                         version,
-                        timestamp,
                         change_index,
                         incoming_fees,
                         outgoing_nominal_reward_to_vals,
@@ -544,16 +587,7 @@ fn process_changes(
 
                     let tree = tree
                         .iter()
-                        .map(|addr| {
-                            let mut addr = addr.clone();
-                            addr = addr.strip_prefix("0x").expect("invalid hex value").to_owned();
-                            if addr.len() < 32 {
-                                addr = format!("{:0>32}", addr);
-                            } else {
-                                addr = format!("{:0>64}", addr);
-                            }
-                            return HexEncodedBytes::from_str(&addr).unwrap().0;
-                        })
+                        .map(|addr| utils::parse_addr(addr).unwrap().0)
                         .collect::<Vec<_>>();
                     ancestry_collection.push(address.clone(), tree);
                 }
@@ -565,7 +599,6 @@ fn process_changes(
                     // let value: u128 = from_bytes(&libra_coin_total_supply_change.value.0).unwrap();
                     total_supply_collection.push(
                         version,
-                        timestamp,
                         libra_coin_total_supply_change.value.0.clone(),
                         change_index as u64,
                     );
@@ -588,6 +621,8 @@ async fn main() {
     let mut script_collection = ScriptCollection::new();
     let mut total_supply_collection = TotalSupplyCollection::new();
     let mut coin_balance_collection = CoinBalanceCollection::new();
+    let mut multisig_account_owners_collection = MultisigAccountOwnersCollection::new();
+    let mut multi_action_collection = MultiActionCollection::new();
 
     let mut beneficiary_policy_collection = BeneficiaryPolicyCollection::new();
     let mut tower_list_collection = TowerListCollection::new();
@@ -628,11 +663,7 @@ async fn main() {
                     let info = &user_transaction.info;
                     let events = &user_transaction.events;
 
-                    event_collection.push(
-                        info.version.into(),
-                        user_transaction.timestamp.into(),
-                        events,
-                    );
+                    event_collection.push(info.version.into(), events);
 
                     process_changes(
                         &mut total_supply_collection,
@@ -648,8 +679,9 @@ async fn main() {
                         &mut consensus_reward_collection,
                         &mut boundary_status_collection,
                         &mut ancestry_collection,
+                        &mut multisig_account_owners_collection,
+                        &mut multi_action_collection,
                         info.version.into(),
-                        user_transaction.timestamp.into(),
                         &info.changes,
                     );
 
@@ -678,7 +710,7 @@ async fn main() {
                     let info = &genesis_transaction.info;
                     let events = &genesis_transaction.events;
 
-                    event_collection.push(info.version.into(), 0, events);
+                    event_collection.push(info.version.into(), events);
                     genesis_transaction_collection.push(genesis_transaction);
 
                     process_changes(
@@ -695,8 +727,9 @@ async fn main() {
                         &mut consensus_reward_collection,
                         &mut boundary_status_collection,
                         &mut ancestry_collection,
+                        &mut multisig_account_owners_collection,
+                        &mut multi_action_collection,
                         info.version.into(),
-                        0,
                         &info.changes,
                     );
                 }
@@ -710,7 +743,7 @@ async fn main() {
                     block_metadata_transaction_collection.push(block_metadata_transaction);
 
                     let events = &block_metadata_transaction.events;
-                    event_collection.push(info.version.into(), transaction.timestamp(), events);
+                    event_collection.push(info.version.into(), events);
 
                     process_changes(
                         &mut total_supply_collection,
@@ -726,8 +759,9 @@ async fn main() {
                         &mut consensus_reward_collection,
                         &mut boundary_status_collection,
                         &mut ancestry_collection,
+                        &mut multisig_account_owners_collection,
+                        &mut multi_action_collection,
                         info.version.into(),
-                        block_metadata_transaction.timestamp.into(),
                         &info.changes,
                     );
                 }
@@ -771,4 +805,7 @@ async fn main() {
     vdf_difficulty_collection.to_parquet(format!("{}/vdf_difficulty.parquet", &args.dest));
     consensus_reward_collection.to_parquet(format!("{}/consensus_reward.parquet", &args.dest));
     boundary_status_collection.to_parquet(format!("{}/boundary_status.parquet", &args.dest));
+    multisig_account_owners_collection
+        .to_parquet(format!("{}/multisig_account_owners.parquet", &args.dest));
+    multi_action_collection.to_parquet(format!("{}/multi_action.parquet", &args.dest));
 }

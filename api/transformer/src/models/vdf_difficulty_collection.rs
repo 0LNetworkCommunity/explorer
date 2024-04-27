@@ -4,7 +4,6 @@ use std::{fs::File, sync::Arc};
 
 pub struct VdfDifficultyCollection {
     version: Vec<u64>,
-    timestamp: Vec<u64>,
     change_index: Vec<u64>,
     difficulty: Vec<u64>,
 }
@@ -13,15 +12,13 @@ impl VdfDifficultyCollection {
     pub fn new() -> VdfDifficultyCollection {
         VdfDifficultyCollection {
             version: Vec::new(),
-            timestamp: Vec::new(),
             change_index: Vec::new(),
             difficulty: Vec::new(),
         }
     }
 
-    pub fn push(&mut self, version: u64, timestamp: u64, change_index: u64, difficulty: u64) {
+    pub fn push(&mut self, version: u64, change_index: u64, difficulty: u64) {
         self.version.push(version);
-        self.timestamp.push(timestamp);
         self.change_index.push(change_index);
         self.difficulty.push(difficulty);
     }
@@ -32,13 +29,11 @@ impl VdfDifficultyCollection {
         }
 
         let version = arrow_array::UInt64Array::from(self.version.clone());
-        let timestamp = arrow_array::UInt64Array::from(self.timestamp.clone());
         let change_index = arrow_array::UInt64Array::from(self.change_index.clone());
         let difficulty = arrow_array::UInt64Array::from(self.difficulty.clone());
 
         let batch = RecordBatch::try_from_iter(vec![
             ("version", Arc::new(version) as ArrayRef),
-            ("timestamp", Arc::new(timestamp) as ArrayRef),
             ("change_index", Arc::new(change_index) as ArrayRef),
             ("difficulty", Arc::new(difficulty) as ArrayRef),
         ])

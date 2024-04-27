@@ -5,7 +5,6 @@ use parquet::{arrow::arrow_writer::ArrowWriter, file::properties::WriterProperti
 
 pub struct BeneficiaryPolicyCollection {
     version: Vec<u64>,
-    timestamp: Vec<u64>,
     change_index: Vec<u64>,
 
     lifetime_pledged: Vec<u64>,
@@ -18,7 +17,6 @@ impl BeneficiaryPolicyCollection {
     pub fn new() -> BeneficiaryPolicyCollection {
         BeneficiaryPolicyCollection {
             version: Vec::new(),
-            timestamp: Vec::new(),
             change_index: Vec::new(),
 
             lifetime_pledged: Vec::new(),
@@ -31,7 +29,6 @@ impl BeneficiaryPolicyCollection {
     pub fn push(
         &mut self,
         version: u64,
-        timestamp: u64,
         change_index: u64,
 
         lifetime_pledged: u64,
@@ -40,7 +37,6 @@ impl BeneficiaryPolicyCollection {
         pledgers_count: u64,
     ) {
         self.version.push(version);
-        self.timestamp.push(timestamp);
         self.change_index.push(change_index);
 
         self.lifetime_pledged.push(lifetime_pledged);
@@ -55,7 +51,6 @@ impl BeneficiaryPolicyCollection {
         }
 
         let version = arrow_array::UInt64Array::from(self.version.clone());
-        let timestamp = arrow_array::UInt64Array::from(self.timestamp.clone());
         let change_index = arrow_array::UInt64Array::from(self.change_index.clone());
 
         let lifetime_pledged = arrow_array::UInt64Array::from(self.lifetime_pledged.clone());
@@ -65,7 +60,6 @@ impl BeneficiaryPolicyCollection {
 
         let batch = RecordBatch::try_from_iter(vec![
             ("version", Arc::new(version) as ArrayRef),
-            ("timestamp", Arc::new(timestamp) as ArrayRef),
             ("change_index", Arc::new(change_index) as ArrayRef),
             ("lifetime_pledged", Arc::new(lifetime_pledged) as ArrayRef),
             (

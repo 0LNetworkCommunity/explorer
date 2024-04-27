@@ -1,15 +1,9 @@
 use std::{fs::File, sync::Arc};
 
-use arrow::{array::make_builder, ipc::BinaryBuilder};
-use arrow_array::{
-    builder::{GenericBinaryBuilder, Int32Builder, ListBuilder},
-    ArrayRef, BinaryArray, FixedSizeBinaryArray, LargeBinaryArray, ListArray, RecordBatch,
-};
-use diem_api_types::BlockMetadataTransaction;
-use diem_api_types::HexEncodedBytes;
+use arrow_array::{ArrayRef, FixedSizeBinaryArray, ListArray, RecordBatch};
 use parquet::{arrow::arrow_writer::ArrowWriter, file::properties::WriterProperties};
 
-use crate::to_array_data::{create_array_data_2d, ToArrayData};
+use crate::to_array_data::create_array_data_2d;
 
 pub struct AncestryCollection {
     address: Vec<Vec<u8>>,

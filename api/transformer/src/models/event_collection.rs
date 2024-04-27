@@ -12,7 +12,6 @@ pub struct EventCollection {
     module_name: Vec<String>,
     struct_name: Vec<String>,
     data: Vec<String>,
-    timestamp: Vec<u64>,
 }
 
 impl EventCollection {
@@ -26,14 +25,12 @@ impl EventCollection {
             module_name: Vec::new(),
             struct_name: Vec::new(),
             data: Vec::new(),
-            timestamp: Vec::new(),
         }
     }
 
-    pub fn push(&mut self, version: u64, timestamp: u64, events: &Vec<Event>) {
+    pub fn push(&mut self, version: u64, events: &Vec<Event>) {
         for event in events {
             self.version.push(version);
-            self.timestamp.push(timestamp);
             self.creation_number.push(event.guid.creation_number.into());
 
             let mut account_address = event.guid.account_address.inner().to_vec();
@@ -65,7 +62,6 @@ impl EventCollection {
         }
 
         let version = arrow_array::UInt64Array::from(self.version.clone());
-        let timestamp = arrow_array::UInt64Array::from(self.timestamp.clone());
         let creation_number = arrow_array::UInt64Array::from(self.creation_number.clone());
         let account_address =
             FixedSizeBinaryArray::try_from_iter(self.account_address.iter()).unwrap();
@@ -79,7 +75,6 @@ impl EventCollection {
 
         let batch = RecordBatch::try_from_iter(vec![
             ("version", Arc::new(version) as ArrayRef),
-            ("timestamp", Arc::new(timestamp) as ArrayRef),
             ("creation_number", Arc::new(creation_number) as ArrayRef),
             ("account_address", Arc::new(account_address) as ArrayRef),
             ("sequence_number", Arc::new(sequence_number) as ArrayRef),

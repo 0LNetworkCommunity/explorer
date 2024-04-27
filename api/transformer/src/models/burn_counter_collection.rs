@@ -4,7 +4,6 @@ use std::{fs::File, sync::Arc};
 
 pub struct BurnCounterCollection {
     version: Vec<u64>,
-    timestamp: Vec<u64>,
     change_index: Vec<u64>,
 
     lifetime_burned: Vec<u64>,
@@ -15,7 +14,6 @@ impl BurnCounterCollection {
     pub fn new() -> BurnCounterCollection {
         BurnCounterCollection {
             version: Vec::new(),
-            timestamp: Vec::new(),
             change_index: Vec::new(),
             lifetime_burned: Vec::new(),
             lifetime_recycled: Vec::new(),
@@ -25,13 +23,11 @@ impl BurnCounterCollection {
     pub fn push(
         &mut self,
         version: u64,
-        timestamp: u64,
         change_index: u64,
         lifetime_burned: u64,
         lifetime_recycled: u64,
     ) {
         self.version.push(version);
-        self.timestamp.push(timestamp);
         self.change_index.push(change_index);
 
         self.lifetime_burned.push(lifetime_burned);
@@ -44,7 +40,6 @@ impl BurnCounterCollection {
         }
 
         let version = arrow_array::UInt64Array::from(self.version.clone());
-        let timestamp = arrow_array::UInt64Array::from(self.timestamp.clone());
         let change_index = arrow_array::UInt64Array::from(self.change_index.clone());
 
         let lifetime_burned = arrow_array::UInt64Array::from(self.lifetime_burned.clone());
@@ -52,7 +47,6 @@ impl BurnCounterCollection {
 
         let batch = RecordBatch::try_from_iter(vec![
             ("version", Arc::new(version) as ArrayRef),
-            ("timestamp", Arc::new(timestamp) as ArrayRef),
             ("change_index", Arc::new(change_index) as ArrayRef),
             ("lifetime_burned", Arc::new(lifetime_burned) as ArrayRef),
             ("lifetime_recycled", Arc::new(lifetime_recycled) as ArrayRef),

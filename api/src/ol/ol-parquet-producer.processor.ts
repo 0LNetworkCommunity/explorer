@@ -116,25 +116,22 @@ export class OlParquetProducerProcessor
       (it) => it.substring(it.length - '.parquet'.length) === '.parquet',
     );
 
-    for (const file of files) {
-      job.log(`compressing (${start}-${end}/${file}.tar.gz) ...`);
-      await execFile(
-        `tar`,
-        [
-          'czf',
-          `${file}.tar.gz`,
-          file,
-        ],
-        { cwd: parquetDir },
-      );
+    job.log(`compressing (${start}-${end}tar.gz) ...`);
+    await execFile(
+      `tar`,
+      [
+        'czf',
+        `${start}-${end}.tar.gz`,
+        ...files,
+      ],
+      { cwd: parquetDir },
+    );
 
-      job.log('uploading');
-      await this.s3Service.upload(
-        pathUtil.join(parquetDir, `${file}.tar.gz`),
-        `${PARQUETS_DIR}/${start}-${end}/${file}.tar.gz`,
-      );
-      job.log('done');
-    }
+    job.log('uploading');
+    await this.s3Service.upload(
+      pathUtil.join(parquetDir, `${start}-${end}.tar.gz`),
+      `${PARQUETS_DIR}/${start}-${end}.tar.gz`,
+    );
 
     await cleanUp(archivePath, archiveDir, parquetDir);
   }

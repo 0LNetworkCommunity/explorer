@@ -1,7 +1,3 @@
-FROM clickhouse/clickhouse-server:24.3.2.23 as clickhouse
-
-###############################################
-
 FROM rust:1.76.0 as transformerBuilder
 WORKDIR /usr/src/myapp
 COPY ./transformer .
@@ -11,7 +7,6 @@ RUN cargo install --path .
 
 FROM node:20.12.2
 
-COPY --from=clickhouse /usr/bin/clickhouse-client /usr/bin/clickhouse-client
 COPY --from=transformerBuilder /usr/local/cargo/bin/transformer /usr/local/bin/transformer
 
 WORKDIR /app
@@ -41,8 +36,7 @@ ENV S3_STORAGE_CLASS="ONEZONE_IA"
 ENV CLICKHOUSE_HOST="127.0.0.1"
 ENV CLICKHOUSE_USERNAME="ol_rw"
 ENV CLICKHOUSE_PASSWORD="********************************"
-ENV CLICKHOUSE_HTTP_PORT="8123"
-ENV CLICKHOUSE_PORT="9000"
+ENV CLICKHOUSE_PORT="8123"
 ENV CLICKHOUSE_DATABASE="olfyi"
 
 ENV DATA_API_HOST="https://data.0l.fyi"

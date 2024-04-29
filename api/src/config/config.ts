@@ -34,7 +34,6 @@ export default (): Config => {
       password: ENV.CLICKHOUSE_PASSWORD!,
       host: ENV.CLICKHOUSE_HOST!,
       port: parseInt(ENV.CLICKHOUSE_PORT!, 10),
-      httpPort: parseInt(ENV.CLICKHOUSE_HTTP_PORT!, 10),
       database: ENV.CLICKHOUSE_DATABASE!,
     },
 

@@ -108,15 +108,7 @@ export class OlClickhouseIngestorProcessor
   }
 
   private async ingest(file: string) {
-    const fileComponents = file.split("/");
-    let parquetFileName = fileComponents[fileComponents.length - 1];
-    parquetFileName = parquetFileName.substring(
-      0,
-      parquetFileName.length - ".tar.gz".length,
-    );
-
     const archivePath = await this.download(file);
-
     await this.untar(archivePath);
 
     const archiveDir = pathUtil.dirname(archivePath);
@@ -126,7 +118,7 @@ export class OlClickhouseIngestorProcessor
       if (file.endsWith(".parquet")) {
         await this.clickhouseService.insertParquetFile(
           pathUtil.join(archiveDir, file),
-        )
+        );
       }
     }
 

@@ -58,11 +58,6 @@ for (const role of roles) {
     }),
 
     BullModule.registerQueue({
-      name: "transformer",
-      connection: redisClient,
-    }),
-
-    BullModule.registerQueue({
       name: "ol-parquet-producer",
       connection: redisClient,
     }),

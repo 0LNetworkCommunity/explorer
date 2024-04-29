@@ -1,9 +1,8 @@
 import pathUtil from "node:path";
-import { execFile as execFileNative } from "node:child_process";
-import util from "node:util";
-import os from "node:os";
 import fs from "node:fs";
 
+import axios from "axios";
+import qs from "qs";
 import {
   Injectable,
   OnApplicationShutdown,
@@ -14,8 +13,6 @@ import { ConfigService } from "@nestjs/config";
 
 import { ClickhouseConfig } from "../config/config.interface.js";
 
-const execFile = util.promisify(execFileNative);
-
 export interface ClickhouseQueryResponse<T> {
   meta: { name: string; type: string }[];
   data: T;
@@ -25,7 +22,7 @@ export interface ClickhouseQueryResponse<T> {
 
 @Injectable()
 export class ClickhouseService implements OnModuleInit, OnApplicationShutdown {
-  private insertQueriesFiles = new Map<string, string>();
+  private insertQueries = new Map<string, string>();
 
   public readonly client: ClickHouseClient;
 
@@ -41,7 +38,7 @@ export class ClickhouseService implements OnModuleInit, OnApplicationShutdown {
       protocol = "https";
     }
 
-    const url = `${protocol}://${clickhouseConfig.host}:${clickhouseConfig.httpPort}`;
+    const url = `${protocol}://${clickhouseConfig.host}:${clickhouseConfig.port}`;
 
     this.client = createClient({
       url,
@@ -57,7 +54,10 @@ export class ClickhouseService implements OnModuleInit, OnApplicationShutdown {
     const files = await fs.promises.readdir(queriesDir);
     for (const file of files) {
       const queryName = file.split(".")[0];
-      this.insertQueriesFiles.set(queryName, pathUtil.join(queriesDir, file));
+      this.insertQueries.set(
+        queryName,
+        await fs.promises.readFile(pathUtil.join(queriesDir, file), "utf-8"),
+      );
     }
   }
 
@@ -67,28 +67,33 @@ export class ClickhouseService implements OnModuleInit, OnApplicationShutdown {
 
   public async insertParquetFile(path: string): Promise<void> {
     const queryName = pathUtil.basename(path).split(".")[0];
-
-    const queryPath = this.insertQueriesFiles.get(queryName);
-    if (!queryPath) {
+    const query = this.insertQueries.get(queryName);
+    if (!query) {
       throw new Error(`insert query missing for ${queryName}`);
     }
 
     const clickhouseConfig = this.config;
 
-    const clickhouseClient =
-      os.platform() === "darwin" ? "clickhouse client" : "clickhouse-client";
+    let protocol = "http";
+    if (clickhouseConfig.port === 443) {
+      protocol = "https";
+    }
 
-    await execFile("sh", [
-      "-c",
-      `cat ${path} |
-         ${clickhouseClient} \
-         -h "${clickhouseConfig.host}" \
-         --port "${clickhouseConfig.port}" \
-         -d "${clickhouseConfig.database}" \
-         -u "${clickhouseConfig.username}" \
-         --password "${clickhouseConfig.password}" \
-         --query="$(cat ${queryPath})"
-      `,
-    ]);
+    const url = `${protocol}://${clickhouseConfig.host}:${clickhouseConfig.port}/?${qs.stringify(
+      {
+        database: clickhouseConfig.database,
+        query,
+      },
+    )}`;
+
+    await axios({
+      method: "POST",
+      url,
+      auth: {
+        username: clickhouseConfig.username,
+        password: clickhouseConfig.password,
+      },
+      data: fs.createReadStream(path),
+    });
   }
 }

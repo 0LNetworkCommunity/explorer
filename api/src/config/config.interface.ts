@@ -37,7 +37,6 @@ export interface ClickhouseConfig {
   password: string;
   host: string;
   port: number;
-  httpPort: number;
   database: string;
 }
 

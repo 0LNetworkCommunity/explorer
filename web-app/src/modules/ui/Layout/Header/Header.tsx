@@ -1,10 +1,12 @@
+import React, { useRef, useState } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { Bars3Icon } from '@heroicons/react/20/solid';
+import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 import clsx from 'clsx';
-import React, { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
-/* import { useWallet } from '@aptos-labs/wallet-adapter-react';
+import { useWallet } from '@aptos-labs/wallet-adapter-react';
+
 import { PosteroWalletName } from '../../../postero-wallet';
-import { normalizeAddress } from '../../../../utils'; */
+import { normalizeAddress } from '../../../../utils';
 import Logo from '../../Logo/Logo';
 
 const navigation = [
@@ -18,7 +20,7 @@ const navigation = [
 const Header: React.FC = () => {
   const [menuIsOpen, setMenuIsOpen] = useState<boolean>(false);
 
-  /* const aptosWallet = useWallet();
+  const aptosWallet = useWallet();
   const navigate = useNavigate();
   const [searchAddress, setSearchAddress] = useState<string>('');
   const searchInput = useRef<HTMLInputElement>(null);
@@ -45,7 +47,7 @@ const Header: React.FC = () => {
 
   const sliceHexAddress = (address: string | null) =>
     address ? `${address.slice(0, 5)}...${address.slice(-3)}` : '';
- */
+
   return (
     <header className="bg-white">
       <nav className="flex px-8 py-5 flex-col">
@@ -72,7 +74,7 @@ const Header: React.FC = () => {
             ))}
           </div>
 
-          {/*  <div className="justify-end items-center gap-2 hidden justify-self-end lg:flex">
+          <div className="justify-end items-center gap-2 hidden justify-self-end lg:flex">
             {localStorage.getItem('postero_enabled') === 'true' && (
               <div className="flex items-baseline gap-2">
                 <div className="flex items-baseline space-x-4">
@@ -115,9 +117,10 @@ const Header: React.FC = () => {
                 <input
                   id="search"
                   className={clsx(
+                    'ring-1',
                     'block w-full rounded-md border-0 bg-white py-1 pl-10 pr-3',
                     'text-gray-900 text-sm',
-                    'focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-600',
+                    'focus:ring-2 ring-white ring-offset-2 ring-offset-primary-600',
                   )}
                   placeholder="Search Address"
                   type="search"
@@ -129,7 +132,6 @@ const Header: React.FC = () => {
               </div>
             </form>
           </div>
-           */}
 
           <div className="flex flex-grow justify-end lg:hidden">
             <button
@@ -167,27 +169,28 @@ const Header: React.FC = () => {
               </li>
             ))}
           </ul>
-          {/* <form className="w-full px-1" onSubmit={onSearch}>
-              <div className="relative text-gray-400 focus-within:text-gray-600">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <MagnifyingGlassIcon className="h-5 w-5" aria-hidden="true" />
-                </div>
-                <input
-                  id="search"
-                  className={clsx(
-                    'block w-full rounded-md border-0 bg-white py-1 pl-10 pr-3',
-                    'text-gray-900 text-sm',
-                    'focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-600',
-                  )}
-                  placeholder="Search Address"
-                  type="search"
-                  name="search"
-                  ref={searchInput}
-                  value={searchAddress}
-                  onChange={(event) => setSearchAddress(event.target.value)}
-                />
+          <form className="w-full px-1 py-1" onSubmit={onSearch}>
+            <div className="relative text-gray-400 focus-within:text-gray-600">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <MagnifyingGlassIcon className="h-5 w-5" aria-hidden="true" />
               </div>
-            </form> */}
+              <input
+                id="search"
+                className={clsx(
+                  'ring-1',
+                  'block w-full rounded-md border-0 bg-white py-1 pl-10 pr-3',
+                  'text-gray-900 text-sm',
+                  'focus:ring-2 ring-white ring-offset-2 ring-offset-primary-600',
+                )}
+                placeholder="Search Address"
+                type="search"
+                name="search"
+                ref={searchInput}
+                value={searchAddress}
+                onChange={(event) => setSearchAddress(event.target.value)}
+              />
+            </div>
+          </form>
         </div>
       </nav>
     </header>

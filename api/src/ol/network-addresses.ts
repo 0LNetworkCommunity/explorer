@@ -34,6 +34,15 @@ class Ip6Protocol implements INetworkProtocol {
   }
 }
 
+class DnsProtocol implements INetworkProtocol {
+  public constructor(public readonly name: string) {
+  }
+
+  public toString(): string {
+    return `/dns/${this.name}`;
+  }
+}
+
 class TcpProtocol implements INetworkProtocol {
   public constructor(public readonly port: number) {
     if (port < 0 || port > 0xFFFF) {
@@ -76,7 +85,8 @@ type NetworkProtocol =
   | Ip6Protocol
   | TcpProtocol
   | NoiseIKProtocol
-  | HandshakeProtocol;
+  | HandshakeProtocol
+  | DnsProtocol;
 
 type ProtocolDeserializer = (deserializer: BCS.Deserializer) => NetworkProtocol;
 
@@ -105,15 +115,16 @@ export class NetworkAddresses {
     },
 
     function dns(deserializer: BCS.Deserializer) {
-      throw new Error('unimplemented');
+      const name = deserializer.deserializeStr();
+      return new DnsProtocol(name);
     },
 
     function dns4(deserializer: BCS.Deserializer) {
-      throw new Error('unimplemented');
+      throw new Error('dns4 unimplemented');
     },
 
     function dns6(deserializer: BCS.Deserializer) {
-      throw new Error('unimplemented');
+      throw new Error('dns6 unimplemented');
     },
 
     function tcp(deserializer: BCS.Deserializer) {
@@ -121,7 +132,7 @@ export class NetworkAddresses {
     },
 
     function memory(deserializer: BCS.Deserializer) {
-      throw new Error('unimplemented');
+      throw new Error('memory unimplemented');
     },
 
     function noiseIK(deserializer: BCS.Deserializer) {

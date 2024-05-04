@@ -13,8 +13,6 @@ import Validators from "./routes/Validators";
 import Test from "./routes/Test";
 import Module from "./routes/Account/Modules/Module";
 import Stats from "./routes/Stats";
-import TotalSupply from "./routes/TotalSupply";
-import CirculatingSupply from "./routes/CirculatingSupply";
 import Postero from "./routes/Postero";
 import CommunityWallets from "./routes/CommunityWallets";
 
@@ -74,14 +72,6 @@ const router = createBrowserRouter([
       {
         path: "/stats",
         element: <Stats />,
-      },
-      {
-        path: "/total-supply",
-        element: <TotalSupply />,
-      },
-      {
-        path: "/circulating-supply",
-        element: <CirculatingSupply />,
       },
       {
         path: "/community-wallets",

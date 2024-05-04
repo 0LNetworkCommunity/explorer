@@ -17,53 +17,6 @@ const V0_TIMESTAMP = 1701203279;
 export class OlController {
   public constructor(private readonly clickhouseService: ClickhouseService) {}
 
-  @Get("/total-supply")
-  public async totalSupply() {
-    const resultSet = await this.clickhouseService.client.query({
-      query: `
-        SELECT
-          tupleElement("entry", 2) / 1e6 AS "value",
-          tupleElement("entry", 3) AS "time"
-        FROM (
-          SELECT
-            arrayElement(
-              arraySort(
-                (x) -> tupleElement(x, 1),
-                groupArray(
-                  tuple(
-                    "change_index",
-                    "amount",
-                    ceil("timestamp" / 1e6)
-                  )
-                )
-              ),
-              -1
-            ) AS "entry"
-          FROM "total_supply"
-          GROUP BY ceil("timestamp" / 1e6)
-          ORDER BY ceil("timestamp" / 1e6) ASC
-        )
-      `,
-      format: "JSONEachRow",
-    });
-
-    const serie = await resultSet.json<{
-      time: number;
-      value: number;
-    }>();
-
-    for (let i = 0; i < serie.length; ++i) {
-      const it = serie[i];
-      if (it.time === 0) {
-        it.time = V0_TIMESTAMP
-      } else {
-        break;
-      }
-    }
-
-    return serie;
-  }
-
   @Get("/historical-balance/:address")
   public async historicalBalance(@Param("address") address: string) {
     const query = `

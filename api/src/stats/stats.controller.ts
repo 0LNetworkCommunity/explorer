@@ -1,4 +1,4 @@
-import { Controller, Get, Res, ServiceUnavailableException } from '@nestjs/common';
+import { Controller, Get, Query, Res, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 
@@ -18,19 +18,33 @@ export class StatsController {
   }
 
   @Get()
-  public async getStats(@Res() res: Response) {
+  public async getStats(@Query('q') query: string, @Res() res: Response) {
     res.set('Content-Type', 'application/json');
 
-    if (this.cacheEnabled) {
-      const stats = await redisClient.get(STATS_CACHE_KEY);
-      if (!stats) {
-        throw new ServiceUnavailableException('Cache not ready');
+    // Check if caching is enabled and the query is not present
+    if (this.cacheEnabled && !query) {
+      const cachedStats = await redisClient.get(STATS_CACHE_KEY);
+      if (cachedStats) {
+        res.send(cachedStats);
+        return;
       }
+      throw new ServiceUnavailableException('Cache not ready');
+    }
 
-      res.send(stats);
-    } else {
-      const stats = await this.statsService.getStats();
-      res.send(stats);
+    // Handle specific queries based on the 'q' parameter
+    switch (query) {
+      case 'circulatingSupply':
+        const circulatingSupply = await this.statsService.getCirculatingSupply();
+        res.send({ circulatingSupply });
+        break;
+      case 'totalSupply':
+        const totalSupply = await this.statsService.getTotalSupply();
+        res.send({ totalSupply });
+        break;
+      default:
+        // Handle the general stats case or no query parameter provided
+        const stats = await this.statsService.getStats();
+        res.send(stats);
     }
   }
 }

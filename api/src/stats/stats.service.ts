@@ -28,6 +28,16 @@ export class StatsService {
     this.dataApiHost = config.get('dataApiHost')!
   }
 
+  public async getCirculatingSupply(): Promise<number> {
+    const supplyStats = await this.olService.getSupplyStats();
+    return Number(supplyStats.circulatingSupply.toFixed(3))
+  }
+
+  public async getTotalSupply(): Promise<number> {
+    const supplyStats = await this.olService.getSupplyStats();
+    return Number(supplyStats.totalSupply.toFixed(3))
+  }
+
   public async getStats(): Promise<Stats> {
     const supplyStats = await this.olService.getSupplyStats();
     const totalSupply: number = supplyStats.totalSupply;
@@ -166,33 +176,6 @@ export class StatsService {
     }>();
 
     return rows;
-  }
-
-  private async getTotalSupply(): Promise<number> {
-    try {
-      const resultSet = await this.clickhouseService.client.query({
-        query: `
-          SELECT
-            "amount" / 1e6 AS "totalSupply"
-          FROM "total_supply"
-          ORDER BY
-            "version" DESC,
-            "change_index"
-          DESC limit 1
-        `,
-        format: "JSONEachRow",
-      });
-      const rows = await resultSet.json<{
-        totalSupply: number;
-      }>();
-      if (!rows.length) {
-        return 0;
-      }
-      return rows[0].totalSupply;
-    } catch (error) {
-      console.error("Error in getTotalSupply:", error);
-      throw error; // Rethrow the error after logging
-    }
   }
 
   // Calculates the libra balances of all accounts

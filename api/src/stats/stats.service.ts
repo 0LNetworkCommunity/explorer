@@ -114,7 +114,7 @@ export class StatsService {
     return res;
   }
 
-  private async getWalletsBalances(addresses: string[]) {
+  private async getWalletsBalances(addresses: string[]) : Promise<WalletBalance[]> {
     if (addresses.length === 0) {
       return [];
     }
@@ -160,11 +160,8 @@ export class StatsService {
       },
       format: "JSONEachRow",
     });
-    const rows = await resultSet.json<{
-      balance: number;
-      address: string;
-    }>();
 
+    const rows: WalletBalance[] = await resultSet.json();
     return rows;
   }
 
@@ -182,9 +179,7 @@ export class StatsService {
         `,
         format: "JSONEachRow",
       });
-      const rows = await resultSet.json<{
-        totalSupply: number;
-      }>();
+      const rows: { totalSupply: number; }[] = await resultSet.json();
       if (!rows.length) {
         return 0;
       }
@@ -215,8 +210,7 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const result = await resultSet.json<{ total_balance: number }>();
-
+      const result: { total_balance: number }[] = await resultSet.json();
       // Assuming there's only one row returned
       if (result.length > 0) {
         return result[0].total_balance;
@@ -323,12 +317,12 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<{
-        timestamp: string; // Adjusted to string to match your input
+      const rows: Array<{
+        timestamp: string;
         nominalReward: number;
         netReward: number;
         clearingBid: number;
-      }>();
+      }> = await resultSet.json();
 
       // Convert timestamp from microseconds to seconds and ensure it's an integer
       const convertTimestamp = (timestamp: string) =>
@@ -391,14 +385,12 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<{
-        timestamp: number;
-        value: number;
-      }>();
+      const rows: { timestamp: number; value: number; }[] = await resultSet.json();
 
       if (!rows.length) {
         return [];
       }
+
 
       const baseTimestamp = new Date("2023-11-28T00:00:00Z").getTime() / 1000;
       if (rows[0].timestamp == 0) {
@@ -439,7 +431,7 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<{ locked_balance: number }>();
+      const rows: { locked_balance: number }[] = await resultSet.json();
 
       // Count the wallets with locked balance greater than 35000
       const count = rows.reduce(
@@ -469,11 +461,8 @@ export class StatsService {
         `,
         format: "JSONEachRow",
       });
-      const rows = await resultSet.json<{
-        timestamp: string;
-        value: string;
-      }>();
 
+      const rows: { timestamp: string; value: string; }[] = await resultSet.json();
       if (!rows.length) {
         console.warn("No data found for slow wallets over time.");
         return [];
@@ -519,10 +508,10 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<{
+      const rows: Array<{
         timestamp: number;
         address: string;
-      }>();
+      }> = await resultSet.json();
 
       // Initialize the result array and a count for accounts with timestamp > 0
       const accountsOverTime: TimestampValue[] = [];
@@ -649,10 +638,10 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<{
+      const rows: Array<{
         address: string;
         unlocked_balance: number;
-      }>();
+      }> = await resultSet.json();
 
       // Adjust the balance based on the unlocked amount
       return rows.map((row) => ({
@@ -699,7 +688,7 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      let rows = await resultSet.json<{ address: string; balance: number }>();
+      let rows: Array<{ address: string; balance: number }> = await resultSet.json();
 
       // Adjust balances for slow wallets
       rows = rows.map((row) => {
@@ -823,7 +812,7 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<{ address: string }>();
+      const rows: Array<{ address: string }> = await resultSet.json();
 
       const addresses = rows.map((row) => row.address);
 

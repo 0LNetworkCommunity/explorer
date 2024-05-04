@@ -6,6 +6,24 @@ import {
 } from "./models/transaction.model.js";
 import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
 
+interface UserTransactionRow {
+  hash: string;
+  version: string;
+  gas_used: string;
+  success: boolean;
+  vm_status: string;
+  sender: string;
+  sequence_number: string;
+  arguments: string;
+  max_gas_amount: string;
+  gas_unit_price: string;
+  expiration_timestamp: string;
+  module_address: string;
+  module_name: string;
+  function_name: string;
+  timestamp: string;
+}
+
 @Resolver()
 export class UserTransactionsResolver {
   public constructor(private readonly clickhouseService: ClickhouseService) {}
@@ -21,7 +39,7 @@ export class UserTransactionsResolver {
     @Args({ name: 'order', type: () => String })
     order: string,
   ): Promise<GqlUserTransactionCollection> {
-    const [total, items] = await Promise.all([
+    const [totalResult, itemsResult] = await Promise.all([
       this.clickhouseService.client
         .query({
           query: 'SELECT COUNT(*) as "total" FROM user_transaction',
@@ -61,48 +79,30 @@ export class UserTransactionsResolver {
             offset,
           },
         })
-        .then((res) =>
-          res.json<{
-            hash: string;
-            version: string;
-            gas_used: string;
-            success: boolean;
-            vm_status: string;
-            sender: string;
-            sequence_number: string;
-            arguments: string;
-            max_gas_amount: string;
-            gas_unit_price: string;
-            expiration_timestamp: string;
-            module_address: string;
-            module_name: string;
-            function_name: string;
-            timestamp: string;
-          }>(),
-        )
-        .then((rows) =>
-          rows.map(
-            (row) =>
-              new GqlUserTransactionDeprecated({
-                hash: row.hash,
-                version: parseInt(row.version, 10),
-                gasUsed: parseInt(row.gas_used, 10),
-                success: row.success,
-                vmStatus: row.vm_status,
-                sender: row.sender,
-                sequenceNumber: parseInt(row.sequence_number, 10),
-                maxGasAmount: parseInt(row.max_gas_amount, 10),
-                gasUnitPrice: parseInt(row.gas_unit_price, 10),
-                expirationTimestamp: parseInt(row.expiration_timestamp, 10),
-                moduleAddress: row.module_address,
-                moduleName: row.module_name,
-                functionName: row.function_name,
-                arguments: row.arguments,
-                timestamp: parseInt(row.timestamp, 10),
-              }),
-          ),
-        ),
+        .then((res) => res.json<UserTransactionRow[]>()), // Specified the type as UserTransactionRow[]
     ]);
+
+    const total = parseInt(totalResult[0].total, 10);
+
+    const items = (itemsResult as UserTransactionRow[]).map((row) => { // Casting itemsResult to UserTransactionRow[]
+      return new GqlUserTransactionDeprecated({
+        hash: row.hash,
+        version: parseInt(row.version, 10),
+        gasUsed: parseInt(row.gas_used, 10),
+        success: row.success,
+        vmStatus: row.vm_status,
+        sender: row.sender,
+        sequenceNumber: parseInt(row.sequence_number, 10),
+        maxGasAmount: parseInt(row.max_gas_amount, 10),
+        gasUnitPrice: parseInt(row.gas_unit_price, 10),
+        expirationTimestamp: parseInt(row.expiration_timestamp, 10),
+        moduleAddress: row.module_address,
+        moduleName: row.module_name,
+        functionName: row.function_name,
+        arguments: row.arguments,
+        timestamp: parseInt(row.timestamp, 10),
+      });
+    });
 
     return new GqlUserTransactionCollection(total, items);
   }

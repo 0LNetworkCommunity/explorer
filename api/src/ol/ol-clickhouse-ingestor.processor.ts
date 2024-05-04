@@ -84,7 +84,7 @@ export class OlClickhouseIngestorProcessor
       query: 'SELECT * FROM "ingested_files"',
       format: "JSONEachRow",
     });
-    const dataset = await resultSet.json<{ name: string }>();
+    const dataset: { name: string }[] = await resultSet.json();
     return _.uniq(dataset.map((it) => it.name));
   }
 

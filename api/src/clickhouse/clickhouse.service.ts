@@ -41,7 +41,7 @@ export class ClickhouseService implements OnModuleInit, OnApplicationShutdown {
     const url = `${protocol}://${clickhouseConfig.host}:${clickhouseConfig.port}`;
 
     this.client = createClient({
-      url,
+      host: url,
       username: clickhouseConfig.username,
       password: clickhouseConfig.password,
       database: clickhouseConfig.database,

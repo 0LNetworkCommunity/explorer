@@ -85,8 +85,8 @@ export class WalletSubscriptionService {
         format: "JSONCompact",
       });
 
-      const rows = await result.json<[number, string]>();
-      const balances = rows.data;
+      const rows = await result.json<[number, string][]>();
+      const balances = rows;
       const addresses = balances.map(([_, address]) =>
         Buffer.from(address, "hex"),
       );
@@ -177,9 +177,9 @@ export class WalletSubscriptionService {
         format: "JSONCompact",
       });
 
-      const rows = await result.json<[number, string]>();
+      const rows = await result.json<[number, string][]>();
 
-      const slowWallets = rows.data;
+      const slowWallets = rows;
       const addresses = slowWallets.map(([_, address]) =>
         Buffer.from(address, "hex"),
       );

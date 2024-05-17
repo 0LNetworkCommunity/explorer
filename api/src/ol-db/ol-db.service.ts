@@ -15,7 +15,7 @@ export class OlDbService {
             toUInt64(
               splitByChar(
                 '-',
-                splitByChar('/', "name")[1]
+                splitByChar('.', "name")[1]
               )[2]
           ) AS "version"
           FROM "ingested_files"

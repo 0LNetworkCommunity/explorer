@@ -1,5 +1,5 @@
-import { FC } from "react";
-import UserTransactionRow from "./UserTransactionRow";
+import { FC } from 'react';
+import UserTransactionRow from './UserTransactionRow';
 
 interface Props {
   transactions: {
@@ -16,34 +16,29 @@ interface Props {
 const TransactionsTable: FC<Props> = ({ transactions }) => {
   return (
     <div className="inline-block min-w-full py-2 align-middle px-2">
-      <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-        <table className="min-w-full divide-y divide-gray-300">
-          <thead className="bg-gray-50">
-            <tr className="text-sm font-semibold text-gray-900 text-left">
-              <th scope="col" className="px-3 py-2 font-normal">
-                Version
-              </th>
-              <th scope="col" className="px-3 py-2 font-normal">
-                Sender
-              </th>
-              <th scope="col" className="px-3 py-2 font-normal">
-                Method
-              </th>
-              <th scope="col" className="px-3 py-2 font-normal text-right">
-                Age
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
-            {transactions.map((transaction) => (
-              <UserTransactionRow
-                key={transaction.version}
-                transaction={transaction}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <table className="min-w-full">
+        <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
+          <tr>
+            <th scope="col" className="px-6 py-3 text-left font-medium text-xs">
+              Version
+            </th>
+            <th scope="col" className="px-6 py-3 text-left font-medium text-xs">
+              From
+            </th>
+            <th scope="col" className="px-6 py-3 text-left font-medium text-xs">
+              Function
+            </th>
+            <th scope="col" className="px-6 py-3 text-left font-medium text-xs">
+              Age
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {transactions.map((transaction) => (
+            <UserTransactionRow key={transaction.version} transaction={transaction} />
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };

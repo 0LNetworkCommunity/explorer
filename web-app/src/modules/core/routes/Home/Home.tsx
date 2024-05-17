@@ -62,27 +62,17 @@ const Home: FC = () => {
       {/* <section>
         <NodeMap />
       </section> */}
-      <Page __deprecated_grayBg>
+      <Page __deprecated_grayBg={false}>
         <Stats />
         <section className="mt-2 overflow-x-auto">
+          <div className="my-6 px-2	flex flex-row justify-between align-center gap-3">
+            <h2 className="text-[#141414] text-xl font-medium">Latest Transactions</h2>
+            <Link to="/transactions" className="text-base font-medium text-[#B7353B]">
+              View all
+            </Link>
+          </div>
           <Transactions />
         </section>
-        <div className="flex p-4 items-center justify-center">
-          <Link
-            to="/transactions"
-            className={clsx(
-              'rounded-md bg-primary-500',
-              'px-3.5 py-2.5',
-              'text-sm font-semibold text-white',
-              'shadow-sm',
-              'hover:bg-primary-600',
-              'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
-              'focus-visible:outline-primary-600',
-            )}
-          >
-            See all transactions
-          </Link>
-        </div>
       </Page>
     </>
   );

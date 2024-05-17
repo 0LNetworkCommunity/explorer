@@ -1,7 +1,7 @@
-import { FC } from "react";
-import { normalizeHexString } from "../../../utils";
-import { Link } from "react-router-dom";
-import HexString from "../HexString";
+import { FC } from 'react';
+import { normalizeHexString } from '../../../utils';
+import { Link } from 'react-router-dom';
+import HexString from '../HexString';
 
 interface Props {
   address: string;
@@ -13,7 +13,7 @@ const AccountAddress: FC<Props> = ({ address }) => {
   return (
     <Link
       to={`/accounts/${normalizedAddress}`}
-      className="text-blue-600 hover:text-blue-900 hover:underline"
+      className="text-[#CD3B42] hover:text-blue-900 hover:underline font-normal"
     >
       <HexString value={normalizedAddress} />
     </Link>

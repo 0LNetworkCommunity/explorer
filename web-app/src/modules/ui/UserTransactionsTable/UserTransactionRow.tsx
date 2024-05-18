@@ -21,6 +21,7 @@ const UserTransactionRow: FC<Props> = ({ transaction }) => {
   return (
     <tr
       className={clsx(
+        !transaction.success && 'bg-red-100',
         'whitespace-nowrap text-sm font-medium text-gray-900 border-b border-[#E5E5E5]',
       )}
     >

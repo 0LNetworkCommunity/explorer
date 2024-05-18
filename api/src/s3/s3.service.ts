@@ -38,7 +38,7 @@ export class S3Service {
   }
 
   public upload(path: string, dest: string): Promise<PutObjectCommandOutput> {
-    return Bluebird.any([
+    return Bluebird.race([
       Bluebird.delay(10 * 60 * 1_000).then(() => {
         throw new Error("upload timeout");
       }),
@@ -54,7 +54,7 @@ export class S3Service {
   }
 
   public async download(key: string): Promise<GetObjectCommandOutput> {
-    return Bluebird.any([
+    return await Bluebird.race([
       Bluebird.delay(10 * 60 * 1_000).then(() => {
         throw new Error('download timeout');
       }),

@@ -15,7 +15,7 @@ interface Props {
 
 const TransactionsTable: FC<Props> = ({ transactions }) => {
   return (
-    <div className="inline-block min-w-full py-2 align-middle px-2">
+    <div className="inline-block min-w-full align-middle">
       <table className="min-w-full">
         <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
           <tr>
@@ -28,7 +28,7 @@ const TransactionsTable: FC<Props> = ({ transactions }) => {
             <th scope="col" className="px-6 py-3 text-left font-medium text-xs">
               Function
             </th>
-            <th scope="col" className="px-6 py-3 text-left font-medium text-xs">
+            <th scope="col" className="px-6 py-3 text-right font-medium text-xs">
               Age
             </th>
           </tr>

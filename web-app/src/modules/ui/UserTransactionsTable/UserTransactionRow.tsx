@@ -66,7 +66,7 @@ const UserTransactionRow: FC<Props> = ({ transaction }) => {
           <span className="text-blue-500">{transaction.functionName}</span>
         </span>
       </td>
-      <td className="px-6 py-4 text-sm font-normal">{formatDistanceToNow(age)}</td>
+      <td className="px-6 py-4 text-sm font-normal text-right">{formatDistanceToNow(age)}</td>
     </tr>
   );
 };

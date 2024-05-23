@@ -505,59 +505,7 @@ export class StatsService {
 
   private async getLastEpochTotalUnlockedAmount(): Promise<number> {
     try {
-      // Query the coin_balance table to get the latest balances and versions
-      const query = `
-        SELECT
-          address,
-          argMax(balance, version) AS latest_balance,
-          max(version) AS latest_version
-        FROM coin_balance
-        WHERE coin_module = 'libra_coin'
-        GROUP BY address
-      `;
-
-      const resultSet = await this.clickhouseService.client.query({
-        query: query,
-        format: "JSONEachRow",
-      });
-
-      const rows = await resultSet.json<
-        {
-          address: string;
-          latest_balance: number;
-          latest_version: number;
-        }[]
-      >();
-
-      if (!rows.length) {
-        return 0;
-      }
-
-      // Extract versions and convert them to timestamps in batches
-      const versions = rows.map((row) => row.latest_version);
-      const chunkSize = 1000; // Adjust chunk size as necessary
-      const versionChunks = this.chunkArray<number>(versions, chunkSize);
-
-      const allTimestampMappings: { version: number; timestamp: number }[] = [];
-
-      for (const chunk of versionChunks) {
-        const timestampsMap = await this.mapVersionsToTimestamps(chunk);
-        allTimestampMappings.push(...timestampsMap);
-      }
-
-      // Map addresses to their latest balance and corresponding timestamp
-      const addressBalanceMap = new Map<string, { latest_balance: number; timestamp: number }>();
-      rows.forEach((row) => {
-        const version = row.latest_version;
-        const timestampEntry = allTimestampMappings.find((entry) => entry.version === version);
-        const timestamp = timestampEntry ? timestampEntry.timestamp : 0;
-        addressBalanceMap.set(row.address, {
-          latest_balance: row.latest_balance / 1e6,
-          timestamp,
-        });
-      });
-
-      // Query the slow_wallet table
+      // Query the slow_wallet table to get the addresses and unlocked balances
       const slowWalletQuery = `
         SELECT
           hex(SW.address) AS address,
@@ -575,31 +523,62 @@ export class StatsService {
         { address: string; unlocked_balance: number }[]
       >();
 
+      if (!slowWalletRows.length) {
+        return 0;
+      }
+
+      // Collect addresses from slow wallet rows
+      const addresses = slowWalletRows.map(row => row.address);
+
+      // Batch process addresses to get their latest balances
+      const addressChunks = this.chunkArray<string>(addresses, 1000); // Adjust chunk size as necessary
+      const balanceResults: { address: string; latest_balance: number }[] = [];
+
+      for (const chunk of addressChunks) {
+        const formattedAddresses = chunk.map(addr => `'${addr}'`).join(',');
+        const balanceQuery = `
+          SELECT
+            hex(address) AS address,
+            argMax(balance, version) / 1e6 AS latest_balance
+          FROM coin_balance
+          WHERE coin_module = 'libra_coin' AND address IN (${formattedAddresses})
+          GROUP BY address
+        `;
+
+        const balanceResultSet = await this.clickhouseService.client.query({
+          query: balanceQuery,
+          format: "JSONEachRow",
+        });
+
+        const balanceRows = await balanceResultSet.json<{ address: string; latest_balance: number }[]>();
+        console.log(`Balance query returned ${balanceRows.length} rows`);
+
+        balanceResults.push(...balanceRows);
+      }
+
+      // Create a map of address to latest balance
+      const balanceMap = new Map(balanceResults.map(row => [row.address, row.latest_balance]));
+
       // Combine data from both queries
-      const result = slowWalletRows.map((row) => {
-        const addressData = addressBalanceMap.get(row.address);
-        if (addressData) {
-          return {
-            address: row.address,
-            locked_balance: addressData.latest_balance - row.unlocked_balance,
-          };
-        } else {
-          return {
-            address: row.address,
-            locked_balance: 0,
-          };
-        }
+      const lockedBalances = slowWalletRows.map(row => {
+        const latest_balance = balanceMap.get(row.address) ?? 0;
+        const unlocked_balance = row.unlocked_balance;
+        const locked_balance = latest_balance - unlocked_balance;
+        // console.log(`Address: ${row.address}, Latest Balance: ${latest_balance}, Unlocked Balance: ${unlocked_balance}, Locked Balance: ${locked_balance}`);
+        return {
+          address: row.address,
+          locked_balance,
+        };
       });
 
       // Count the wallets with locked balance greater than 35000
-      const count = result.reduce(
+      const count = lockedBalances.reduce(
         (acc, row) => acc + (row.locked_balance > 35000 ? 1 : 0),
         0,
       );
 
       // Calculate the total amount based on the counter
       const totalUnlockedAmount = count * 35000;
-
       return totalUnlockedAmount;
     } catch (error) {
       console.error("Error in getLastEpochTotalUnlockedAmount:", error);

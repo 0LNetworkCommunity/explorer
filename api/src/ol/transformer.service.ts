@@ -2,7 +2,7 @@ import os from "node:os";
 import pathUtil from "node:path";
 import fs from "node:fs";
 import { spawn } from "node:child_process";
-// import process from 'node:process';
+import process from 'node:process';
 
 import { Injectable } from "@nestjs/common";
 
@@ -14,10 +14,15 @@ export class TransformerService {
     );
 
     await new Promise<void>((resolve, reject) => {
-      // const BIN = pathUtil.join(process.cwd(), 'transformer/target/debug/transformer');
-      const BIN = "/usr/local/bin/transformer";
+      const bin =
+        process.env.NODE_ENV === "production"
+          ? "/usr/local/bin/transformer"
+          : pathUtil.join(
+              process.cwd(),
+              "transformer/target/debug/transformer",
+            );
 
-      const proc = spawn(BIN, [...txFiles, dest], {
+      const proc = spawn(bin, [...txFiles, dest], {
         stdio: "inherit",
       });
 

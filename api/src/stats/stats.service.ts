@@ -551,8 +551,6 @@ export class StatsService {
         });
 
         const balanceRows = await balanceResultSet.json<{ address: string; latest_balance: number }[]>();
-        console.log(`Balance query returned ${balanceRows.length} rows`);
-
         balanceResults.push(...balanceRows);
       }
 

@@ -1,3 +1,5 @@
+CREATE DATABASE IF NOT EXISTS "olfyi";
+
 CREATE TABLE "user_transaction"  (
   "version" UInt64,
   "hash" UInt256,

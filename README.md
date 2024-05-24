@@ -1,17 +1,5 @@
 # 0L Explorer
 
-The 0L explorer lives at [0l.fyi](https://0l.fyi/).
-
-## Project management
-
-The project is hosted on [GitLab](https://gitlab.com/0lfyi/explorer/).
-
-## Feature requests
-
-[Feature Requests](https://gitlab.com/0lfyi/explorer/-/issues/?label_name%5B%5D=feature-request)
-
-[Request a new feature](https://gitlab.com/0lfyi/explorer/-/issues/new?issuable_template=Feature%20Request)
-
 # Structure of this repo:
 
 This repository contains the code for the 0L Network explorer and is
@@ -20,7 +8,7 @@ structured in the following way:
 - `api`: This directory contains the backend in `Nest.js`, the source for `transformer` binary
   and the required migration files.
 - `infra`: This directory contains the K8s YAML files for deployment on K8s.
-- `ol-fyi-local-infra`: This directory contains files for setting up the databased locally using docker-compose.
+- `ol-fyi-local-infra`: This directory contains files for setting up the databases locally using docker-compose.
 - `web-app`: This directory contains the client-side code for the 0L Explorer app.
 
 
@@ -34,9 +22,15 @@ Prerequisites
 Before you begin, ensure you have the following installed on your system:
 
 1. Docker: [Install Docker](https://docs.docker.com/get-docker/)
-2. Docker Compose: [Install Docker Compose](https://docs.docker.com/compose/install/)
-3. Node.js and npm: [Install Node.js](https://nodejs.org/en/download/)
-4. Rust and Cargo: [Install Rust](https://www.rust-lang.org/tools/install)
+2. Node.js and npm:
+  * Install nvm (Node Version Manager) from the [nvm GitHub repository](https://github.com/nvm-sh/nvm#installing-and-updating).
+  * Use nvm to install and use the Node.js version specified in your project's .nvmrc file:
+     ```bash
+     nvm install
+     nvm use
+     ```
+
+3. Rust and Cargo: [Install Rust](https://www.rust-lang.org/tools/install)
 
 Once you are set, follow the steps:
 
@@ -45,14 +39,13 @@ Once you are set, follow the steps:
 - Navigate to the `ol-fyi-local-infra` directory.
 
    ```bash
-   $ cd /explorer/ol-fyi-local-infra
+   cd ./ol-fyi-local-infra  
    ```
-
 
 - Once you are in the `ol-fyi-local-infra` directory, run:
 
    ```bash
-  $  docker compose up -d
+   docker compose up -d
    ```
 
 This brings all the databases up:
@@ -65,23 +58,17 @@ This brings all the databases up:
 Check the status using:
 
 ```bash
-$ docker ps
+docker ps
 ```
 
 Running Clickhouse Migrations
 ------------------------------
 
 Once the Clickhouse database is up and running,
-you can connect to it using:
+you can connect to it and execute using:
 
 ```bash 
-$ docker exec -it ol-fyi-local-infra_clickhouse_1 bash
-```
-
-Once, inside the container's shell, execute:
-
-```bash
-$ clickhouse client -h "127.0.0.1" --port 9000 -u "olfyi" --password "olfyi" -d "olfyi" -n
+docker compose exec -it clickhouse clickhouse client -h "127.0.0.1" --port 9000 -u "olfyi" --password "olfyi" -n
 ```
 
 After connecting to the clickhouse client, execute the queries to
@@ -93,25 +80,13 @@ Building the Transformer Binary
 Navigate to the transformer directory and build the project:
 
 ```bash 
-$ cd explorer/api/transformer
+cd ./api/transformer
 ```
 
 Build the binary:
 
 ```bash 
-$ cargo build
-```
-
-Copy the binary to /usr/local/bin:
-
-```bash 
-$ sudo cp /target/debug/build/transformer /usr/local/bin/
-```
-
-Make the binary executable:
-
-```bash 
-$ sudo chmod +x /usr/local/bin/transformer
+cargo build
 ```
 
 Run the backend
@@ -120,8 +95,16 @@ Run the backend
 Navigate to `api` directory.
 
 ```bash
-$ cd api
+cd api
 ```
+
+## Prerequisites
+
+```bash
+nvm install
+nvm use
+```
+
 
 ## PostgreSQL
 
@@ -137,13 +120,13 @@ We use (Primsa)[https://www.prisma.io/].
 First, install the project dependencies:
 
 ```bash
-$ npm install
+npm install
 ```
 
 Don't forget to configure the `.env` on your machine
 
 ```bash
-$ cp .env.example .env
+cp .env.example .env
 ```
 
 ## Running the app
@@ -152,34 +135,15 @@ To run your Nest application, use the following commands:
 
 ```bash
 # development
-$ npm run start
+npm run start
 
 # watch mode
-$ npm run start:dev
+npm run start:dev
 
 # production mode
-$ npm run start:prod
+npm run start:prod
 ```
 
-## Test
-
-Execute the unit and e2e tests to ensure your application is running correctly:
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-This will run the backend as shown:
-
-
-![Backend Running](./assets/images/backend-running.png)
 
 Run the client:
 ----------------
@@ -187,22 +151,17 @@ Run the client:
 Once the backend is running, run the client,
 
 ```bash
-$ cd web-app
+cd web-app
 ```
 
 First, install the project dependencies:
 
 ```bash
-$ npm install
+npm install
 ```
 
 And run it with:
 
 ```bash
-$ npm run dev
+npm run dev
 ```
-
-This will run the client as shown:
-
-
-![Client Running](./assets/images/client-running.png)

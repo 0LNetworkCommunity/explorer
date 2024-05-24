@@ -40,30 +40,63 @@ export class StatsService {
 
   public async getStats(): Promise<Stats> {
     console.log("Getting stats 1")
+    console.time("getSupplyStats");
     const supplyStats = await this.olService.getSupplyStats();
+    console.timeEnd("getSupplyStats");
+
     console.log("Getting stats 2")
+    console.time("getTotalSupply");
     const totalSupply: number = supplyStats.totalSupply;
+    console.timeEnd("getTotalSupply");
+
     console.log("Getting stats 3")
+    console.time("getSlowWalletsCountOverTime");
     const slowWalletsCountOverTime = await this.getSlowWalletsCountOverTime();
+    console.timeEnd("getSlowWalletsCountOverTime");
+
     console.log("Getting stats 4")
+    console.time("getBurnsOverTime");
     const burnOverTime = await this.getBurnsOverTime();
+    console.timeEnd("getBurnsOverTime");
+
     console.log("Getting stats 5")
+    console.time("getAccountsOnChainOverTime");
     const accountsOnChainOverTime = await this.getAccountsOnChainOverTime();
+    console.timeEnd("getAccountsOnChainOverTime");
+
     console.log("Getting stats 6")
+    console.time("getSupplyAndCapital");
     const supplyAndCapital = await this.getSupplyAndCapital(supplyStats);
+    console.timeEnd("getSupplyAndCapital");
+
     console.log("Getting stats 7")
+    console.time("getCommunityWalletsBalanceBreakdown");
     const communityWalletsBalanceBreakdown =
       await this.getCommunityWalletsBalanceBreakdown();
+    console.timeEnd("getCommunityWalletsBalanceBreakdown");
+
     console.log("Getting stats 8")
+    console.time("getLastEpochTotalUnlockedAmount");
     const lastEpochTotalUnlockedAmount =
       await this.getLastEpochTotalUnlockedAmount();
+    console.timeEnd("getLastEpochTotalUnlockedAmount");
+
     console.log("Getting stats 9")
+    console.time("getPOFValues");
     const pofValues = await this.getPOFValues(); // Empty table?
+    console.timeEnd("getPOFValues");
+
     console.log("Getting stats 10")
+    console.time("getLiquidSupplyConcentration");
     const liquidSupplyConcentration = await this.getLiquidSupplyConcentration();
+    console.timeEnd("getLiquidSupplyConcentration");
+
     console.log("Getting stats 11")
+    console.time("calculateLiquidityConcentrationLocked");
     const lockedSupplyConcentration =
       await this.calculateLiquidityConcentrationLocked();
+    console.timeEnd("calculateLiquidityConcentrationLocked");
+
 
     // calculate KPIS
     // circulating
@@ -749,7 +782,6 @@ export class StatsService {
           address
         FROM coin_balance
         WHERE coin_module = 'libra_coin'
-        GROUP BY address, version
         ORDER BY version ASC
       `;
 
@@ -764,6 +796,10 @@ export class StatsService {
           address: string;
         }[]
       >();
+
+      if (!rows.length) {
+        return [];
+      }
 
       // Extract versions
       const versions = rows.map((row) => parseInt(row.version, 10));
@@ -784,33 +820,39 @@ export class StatsService {
 
       // Initialize the result array and a count for accounts with timestamp > 0
       const accountsOverTime: TimestampValue[] = [];
-      let countOfZeroTimestamps = 0;
-      let cumulativeCount = 0;
+      const seenAddresses = new Set<string>();
+
+      const dailyCounts = new Map<number, number>();
 
       rows.forEach((row) => {
         const version = parseInt(row.version, 10);
         const timestamp = versionToTimestampMap.get(version) ?? 0;
 
-        if (timestamp === 0) {
-          countOfZeroTimestamps++;
-        } else {
-          // This is the first record after all the 0 timestamps have been counted
-          if (accountsOverTime.length === 0 && countOfZeroTimestamps > 0) {
-            // Unix timestamp for November 29th, 2023, at midnight UTC, representing the accounts that came from v5.2
-            const unixTimestampForNov29 =
-              new Date("2023-11-29T00:00:00Z").getTime() / 1000;
-            accountsOverTime.push({
-              timestamp: unixTimestampForNov29,
-              value: countOfZeroTimestamps,
-            });
-            cumulativeCount = countOfZeroTimestamps;
-          }
-          cumulativeCount++; // Increment for each unique address with timestamp > 0
-          accountsOverTime.push({
-            timestamp: timestamp,
-            value: cumulativeCount,
-          });
+        const dayTimestamp = Math.floor(timestamp / 86400) * 86400;
+
+        if (!seenAddresses.has(row.address)) {
+          seenAddresses.add(row.address);
+          const currentCount = dailyCounts.get(dayTimestamp) || 0;
+          dailyCounts.set(dayTimestamp, currentCount + 1);
         }
+      });
+
+      // Convert daily counts to the desired format
+      dailyCounts.forEach((count, timestamp) => {
+        accountsOverTime.push({
+          timestamp: timestamp,
+          value: count,
+        });
+      });
+
+      // Ensure the array is sorted by timestamp
+      accountsOverTime.sort((a, b) => a.timestamp - b.timestamp);
+
+      // Accumulate counts over time
+      let runningTotal = 0;
+      accountsOverTime.forEach((entry) => {
+        runningTotal += entry.value;
+        entry.value = runningTotal;
       });
 
       return accountsOverTime;

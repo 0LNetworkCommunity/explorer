@@ -25,6 +25,8 @@ import { WalletSubscriptionModule } from "../wallet-subscription/wallet-subscrip
 import { NatsModule } from "../nats/nats.module.js";
 import { MovementsResolver } from "./movements.resolver.js";
 import { MovementsService } from "./movements.service.js";
+import { TransactionsResolver } from "./transactions.resolver.js";
+import { PrismaModule } from "../prisma/prisma.module.js";
 
 const roles = process.env.ROLES!.split(",");
 
@@ -48,6 +50,7 @@ for (const role of roles) {
   imports: [
     S3Module,
     NatsModule,
+    PrismaModule,
     ClickhouseModule,
     OlDbModule,
     WalletSubscriptionModule,
@@ -86,6 +89,8 @@ for (const role of roles) {
     OlService,
     MovementsService,
     TransformerService,
+
+    TransactionsResolver,
 
     ...workers,
   ],

@@ -45,3 +45,20 @@ model Node {
   isUp          Boolean?
   ledgerVersion BigInt?
 }
+
+model PendingTransaction {
+  hash                    Bytes    @id
+  sender                  Bytes
+  sequenceNumber          BigInt
+  maxGasAmount            BigInt
+  gasUnitPrice            BigInt
+  expirationTimestampSecs BigInt
+  chainId                 Int
+  publicKey               Bytes
+  signature               Bytes
+  functionName            String
+  moduleAddress           Bytes
+  moduleName              String
+  args                    Bytes[]
+  typeArgs                String[]
+}

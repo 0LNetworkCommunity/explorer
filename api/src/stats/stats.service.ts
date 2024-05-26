@@ -39,59 +39,48 @@ export class StatsService {
   }
 
   public async getStats(): Promise<Stats> {
-    console.log("Getting stats 1")
     console.time("getSupplyStats");
     const supplyStats = await this.olService.getSupplyStats();
     console.timeEnd("getSupplyStats");
 
-    console.log("Getting stats 2")
     console.time("getTotalSupply");
     const totalSupply: number = supplyStats.totalSupply;
     console.timeEnd("getTotalSupply");
 
-    console.log("Getting stats 3")
     console.time("getSlowWalletsCountOverTime");
     const slowWalletsCountOverTime = await this.getSlowWalletsCountOverTime();
     console.timeEnd("getSlowWalletsCountOverTime");
 
-    console.log("Getting stats 4")
     console.time("getBurnsOverTime");
     const burnOverTime = await this.getBurnsOverTime();
     console.timeEnd("getBurnsOverTime");
 
-    console.log("Getting stats 5")
     console.time("getAccountsOnChainOverTime");
     const accountsOnChainOverTime = await this.getAccountsOnChainOverTime();
     console.timeEnd("getAccountsOnChainOverTime");
 
-    console.log("Getting stats 6")
     console.time("getSupplyAndCapital");
     const supplyAndCapital = await this.getSupplyAndCapital(supplyStats);
     console.timeEnd("getSupplyAndCapital");
 
-    console.log("Getting stats 7")
     console.time("getCommunityWalletsBalanceBreakdown");
     const communityWalletsBalanceBreakdown =
       await this.getCommunityWalletsBalanceBreakdown();
     console.timeEnd("getCommunityWalletsBalanceBreakdown");
 
-    console.log("Getting stats 8")
     console.time("getLastEpochTotalUnlockedAmount");
     const lastEpochTotalUnlockedAmount =
       await this.getLastEpochTotalUnlockedAmount();
     console.timeEnd("getLastEpochTotalUnlockedAmount");
 
-    console.log("Getting stats 9")
     console.time("getPOFValues");
     const pofValues = await this.getPOFValues(); // Empty table?
     console.timeEnd("getPOFValues");
 
-    console.log("Getting stats 10")
     console.time("getLiquidSupplyConcentration");
     const liquidSupplyConcentration = await this.getLiquidSupplyConcentration();
     console.timeEnd("getLiquidSupplyConcentration");
 
-    console.log("Getting stats 11")
     console.time("calculateLiquidityConcentrationLocked");
     const lockedSupplyConcentration =
       await this.calculateLiquidityConcentrationLocked();
@@ -365,10 +354,10 @@ export class StatsService {
 
       const rows = await resultSet.json<
         {
-          version: number;
-          nominalReward: number;
-          netReward: number;
-          clearingBid: number;
+          version: string;
+          nominalReward: string;
+          netReward: string;
+          clearingBid: string;
         }[]
       >();
 
@@ -380,8 +369,16 @@ export class StatsService {
         };
       }
 
+      // Clean and parse the rows
+      const cleanedRows = rows.map(row => ({
+        version: parseInt(String(row.version).replace('\n', ''), 10),
+        nominalReward: parseFloat(String(row.nominalReward).replace('\n', '')),
+        netReward: parseFloat(String(row.netReward).replace('\n', '')),
+        clearingBid: parseFloat(String(row.clearingBid).replace('\n', '')),
+      }));
+
       // Extract versions and convert them to timestamps
-      const versions = rows.map((row) => row.version);
+      const versions = cleanedRows.map(row => row.version);
       const chunkSize = 1000; // Adjust chunk size as necessary
       const versionChunks = this.chunkArray<number>(versions, chunkSize);
 
@@ -392,42 +389,28 @@ export class StatsService {
         allTimestampMappings.push(...timestampsMap);
       }
 
+
       // Helper to convert version to timestamp
       const convertVersionToTimestamp = (version: number) => {
-        const timestampEntry = allTimestampMappings.find((entry) => entry.version === version);
+        const timestampEntry = allTimestampMappings.find(entry => entry.version === version);
         return timestampEntry ? Math.floor(timestampEntry.timestamp) : 0;
       };
 
-      // Set the base timestamp for the first entry
-      const baseTimestamp = new Date("2023-11-28T00:00:00Z").getTime() / 1000;
-
-      // Helper to adjust first timestamp
-      const adjustFirstTimestamp = (array: Array<TimestampValue>) => {
-        if (array.length > 0) {
-          array[0].timestamp = baseTimestamp;
-        }
-        return array;
-      };
-
       // Transform the data into the desired format and adjust timestamps
-      const clearingBidOverTime = adjustFirstTimestamp(
-        rows.map((row) => ({
-          timestamp: convertVersionToTimestamp(row.version),
-          value: row.clearingBid,
-        })),
-      );
-      const nominalRewardOverTime = adjustFirstTimestamp(
-        rows.map((row) => ({
-          timestamp: convertVersionToTimestamp(row.version),
-          value: row.nominalReward,
-        })),
-      );
-      const netRewardOverTime = adjustFirstTimestamp(
-        rows.map((row) => ({
-          timestamp: convertVersionToTimestamp(row.version),
-          value: row.netReward,
-        })),
-      );
+      const clearingBidOverTime = cleanedRows.map(row => ({
+        timestamp: convertVersionToTimestamp(row.version),
+        value: row.clearingBid,
+      }));
+
+      const nominalRewardOverTime = cleanedRows.map(row => ({
+        timestamp: convertVersionToTimestamp(row.version),
+        value: row.nominalReward,
+      }));
+
+      const netRewardOverTime = cleanedRows.map(row => ({
+        timestamp: convertVersionToTimestamp(row.version),
+        value: row.netReward,
+      }));
 
       return {
         clearingBidOverTime,
@@ -907,20 +890,16 @@ export class StatsService {
   // Liquidity concentration
 
   private async getLiquidSupplyConcentration() {
-    console.log("stats 101")
     // Fetch community wallets to exclude
     const communityWallets = await this.olService.getCommunityWallets();
-    console.log("stats 102")
     // Fetch slow wallets' unlocked balances
     const slowWalletsUnlockedBalances =
       await this.getSlowWalletsUnlockedBalances();
-    console.log("stats 103")
     // Fetch all other wallets' balances, excluding community wallets and including adjustments for slow wallets
     const allWalletsBalances = await this.getAllWalletsBalances(
       communityWallets,
       slowWalletsUnlockedBalances,
     );
-    console.log("stats 104")
     // Bin the balances into the specified ranges
     const bins = this.binBalances(allWalletsBalances);
 
@@ -1170,12 +1149,9 @@ export class StatsService {
   // Locked concentration
   // Main method to calculate liquidity concentration for locked balances
   private async calculateLiquidityConcentrationLocked(): Promise<any> {
-    console.log("stats 110")
     const lockedBalances = await this.getLockedBalancesForSlowWallets();
-    console.log("stats 111")
     const accountsLocked =
       this.calculateLockedBalancesConcentration(lockedBalances);
-    console.log("stats 112")
     const avgTotalVestingTime =
       this.calculateAvgTotalVestingTime(accountsLocked);
     return {

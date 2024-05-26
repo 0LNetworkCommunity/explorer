@@ -28,13 +28,13 @@ export class OlDbService {
       `,
       format: "JSON",
     });
-    const res = await resultSet.json<{ version: string }>();
+    const res: Array<{ version: string }> = await resultSet.json();
 
-    if (!res.rows) {
+    if (!res) {
       return null;
     }
 
-    return new BN(res.data[0].version).add(new BN(99));
+    return new BN(res[0].version).add(new BN(99));
   }
 
   public async getIngestedVersions(after?: BN): Promise<BN[]> {
@@ -47,7 +47,7 @@ export class OlDbService {
       `,
       format: "JSON",
     });
-    const res = await resultSet.json<{ version: string }>();
-    return res.data.map((it) => new BN(it.version));
+    const res:Array<{ version: string }> = await resultSet.json();
+    return res.map((it) => new BN(it.version));
   }
 }

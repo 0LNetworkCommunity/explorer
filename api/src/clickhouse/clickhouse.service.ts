@@ -38,10 +38,9 @@ export class ClickhouseService implements OnModuleInit, OnApplicationShutdown {
       protocol = "https";
     }
 
-    const url = `${protocol}://${clickhouseConfig.host}:${clickhouseConfig.port}`;
-
+    const host = `${protocol}://${clickhouseConfig.host}:${clickhouseConfig.port}`;
     this.client = createClient({
-      url,
+      host,
       username: clickhouseConfig.username,
       password: clickhouseConfig.password,
       database: clickhouseConfig.database,

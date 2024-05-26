@@ -1,5 +1,4 @@
 import { Query, Resolver } from "@nestjs/graphql";
-
 import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
 import { GqlModule } from "./models/modules.model.js";
 
@@ -8,32 +7,31 @@ export class ModulesResolver {
   public constructor(private readonly clickhouseService: ClickhouseService) {}
 
   @Query(() => [GqlModule])
-  async modules(
-  ): Promise<GqlModule[]> {
+  async modules(): Promise<GqlModule[]> {
     const accountsModules = new Map<string, Map<string, string[]>>();
 
     const rows = await this.clickhouseService.client
       .query({
         query: `
           SELECT
-          	hex("module_address") as "module_address",
-          	"module_name",
-          	"function_name"
+            hex("module_address") as "module_address",
+            "module_name",
+            "function_name"
           FROM
-          	"user_transaction_v7"
+            "user_transaction_v7"
           GROUP BY
-          	"module_address",
-          	"module_name",
-          	"function_name"
+            "module_address",
+            "module_name",
+            "function_name"
         `,
         format: "JSONEachRow",
       })
       .then((res) =>
-        res.json<{
+        res.json<Array<{
           module_address: string;
           module_name: string;
           function_name: string;
-        }>(),
+        }>>(), // Explicitly typed as an array
       )
       .then((rows) =>
         rows.map((row) => ({
@@ -42,9 +40,9 @@ export class ModulesResolver {
           functionName: row.function_name,
         })),
       );
-    
+
     for (const row of rows) {
-      let accountModules = accountsModules.get(row.moduleAddress)
+      let accountModules = accountsModules.get(row.moduleAddress);
       if (!accountModules) {
         accountModules = new Map();
         accountsModules.set(row.moduleAddress, accountModules);

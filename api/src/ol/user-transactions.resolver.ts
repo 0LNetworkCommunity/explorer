@@ -1,5 +1,4 @@
 import { Args, Int, Query, Resolver } from "@nestjs/graphql";
-
 import {
   GqlUserTransactionDeprecated,
   GqlUserTransactionCollection,
@@ -12,14 +11,9 @@ export class UserTransactionsResolver {
 
   @Query(() => GqlUserTransactionCollection)
   async userTransactions(
-    @Args({ name: 'limit', type: () => Int })
-    limit: number,
-
-    @Args({ name: 'offset', type: () => Int })
-    offset: number,
-
-    @Args({ name: 'order', type: () => String })
-    order: string,
+    @Args({ name: 'limit', type: () => Int }) limit: number,
+    @Args({ name: 'offset', type: () => Int }) offset: number,
+    @Args({ name: 'order', type: () => String }) order: string,
   ): Promise<GqlUserTransactionCollection> {
     const [total, items] = await Promise.all([
       this.clickhouseService.client
@@ -27,7 +21,7 @@ export class UserTransactionsResolver {
           query: 'SELECT COUNT(*) as "total" FROM user_transaction',
           format: "JSONEachRow",
         })
-        .then((res) => res.json<{ total: string }>())
+        .then((res) => res.json<{ total: string }[]>()) // Corrected to specify an array
         .then((rows) => parseInt(rows[0].total, 10)),
 
       this.clickhouseService.client
@@ -78,7 +72,7 @@ export class UserTransactionsResolver {
             module_name: string;
             function_name: string;
             timestamp: string;
-          }>(),
+          }[]>(), // Corrected to specify an array
         )
         .then((rows) =>
           rows.map(

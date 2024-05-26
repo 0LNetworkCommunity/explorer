@@ -175,7 +175,7 @@ export class StatsService {
     return res;
   }
 
-  private async getWalletsBalances(addresses: string[]) {
+  private async getWalletsBalances(addresses: string[]): Promise<{ balance: number; address: string; }[]> {
     if (addresses.length === 0) {
       return [];
     }
@@ -224,43 +224,10 @@ export class StatsService {
     const rows = await resultSet.json<{
       balance: number;
       address: string;
-    }>();
+    }[]>();
 
     return rows;
-  }
-
-  // Calculates the libra balances of all accounts
-  private async getTotalLibraBalances(): Promise<number> {
-    try {
-      const query = `
-        SELECT
-            SUM(latest_balance) / 1e6 AS total_balance
-        FROM (
-            SELECT
-                argMax(balance, version) AS latest_balance
-            FROM coin_balance
-            WHERE coin_module = 'libra_coin'
-            GROUP BY address
-        )
-      `;
-
-      const resultSet = await this.clickhouseService.client.query({
-        query: query,
-        format: "JSONEachRow",
-      });
-
-      const result = await resultSet.json<{ total_balance: number }>();
-
-      // Assuming there's only one row returned
-      if (result.length > 0) {
-        return result[0].total_balance;
-      }
-      return 0;
-    } catch (error) {
-      console.error("Error in getTotalBalances:", error);
-      throw error;
-    }
-  }
+}
 
   private async getCommunityWalletsBalanceBreakdown(): Promise<NameValue[]> {
     // List of addresses and their names
@@ -357,12 +324,12 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<{
+      const rows: Array<{
         version: string;
         nominalReward: string;
         netReward: string;
         clearingBid: string;
-      }>();
+      }> = await resultSet.json();
 
       if (!rows.length) {
         return {
@@ -442,10 +409,10 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<{
+      const rows: Array<{
         version: string;
         value: number;
-      }>();
+      }> = await resultSet.json();
 
       if (!rows.length) {
         return [];
@@ -507,7 +474,7 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<{ locked_balance: number }>();
+      const rows: Array<{ locked_balance: number }> = await resultSet.json();
 
       // Sum the locked Amount
       const totalLockedAmount = rows.reduce(
@@ -538,10 +505,10 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const slowWalletRows = await slowWalletResultSet.json<{
+      const slowWalletRows: Array<{
         address: string;
         unlocked_balance: number;
-      }>();
+      }> = await slowWalletResultSet.json();
 
       if (!slowWalletRows.length) {
         return 0;
@@ -570,10 +537,11 @@ export class StatsService {
           format: "JSONEachRow",
         });
 
-        const balanceRows = await balanceResultSet.json<{
+        const balanceRows: Array<{
           address: string;
           latest_balance: number;
-        }>();
+        }> = await balanceResultSet.json();
+
         balanceResults.push(...balanceRows);
       }
 
@@ -699,10 +667,10 @@ export class StatsService {
       format: "JSONEachRow",
     });
 
-    const rows = await resultSet.json<{
+    const rows: Array<{
       timestamp: string;
       version: string;
-    }>();
+    }> = await resultSet.json();
 
     return rows.map((row) => ({
       version: parseInt(row.version, 10),
@@ -722,10 +690,10 @@ export class StatsService {
             `,
         format: "JSONEachRow",
       });
-      const rows = await resultSet.json<{
+      const rows: Array<{
         version: string;
         value: string;
-      }>();
+      }> = await resultSet.json();
 
       if (!rows.length) {
         console.warn("No data found for slow wallets over time.");
@@ -782,10 +750,10 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<{
+      const rows: Array<{
         version: string;
         address: string;
-      }>();
+      }> = await resultSet.json();
 
       if (!rows.length) {
         return [];
@@ -937,11 +905,11 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<{
+      const rows: Array<{
         address: string;
         latest_balance: number;
         latest_version: number;
-      }>();
+      }> = await resultSet.json();
 
       if (!rows.length) {
         return [];
@@ -994,10 +962,10 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const slowWalletRows = await slowWalletResultSet.json<{
+      const slowWalletRows: Array<{
         address: string;
         unlocked_balance: number;
-      }>();
+      }> = await slowWalletResultSet.json();
 
       // Combine data from both queries
       const result = slowWalletRows.map((row) => {
@@ -1064,11 +1032,11 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<{
+      const rows: Array<{
         address: string;
         balance: number;
         latest_version: number;
-      }>();
+      }> = await resultSet.json();
 
       if (!rows.length) {
         return [];
@@ -1229,7 +1197,7 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<{ address: string }>();
+      const rows: Array<{ address: string }> = await resultSet.json();
 
       const addresses = rows.map((row) => row.address);
 

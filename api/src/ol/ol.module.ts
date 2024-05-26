@@ -141,6 +141,6 @@ for (const role of roles) {
     ...workers,
   ],
   controllers: [OlController],
-  exports: [OlService, TransformerService],
+  exports: [OlService, TransformerService, CommunityWalletsResolver],
 })
 export class OlModule {}

@@ -29,6 +29,17 @@ export default (): Config => {
       storageClass: ENV.S3_STORAGE_CLASS!,
     },
 
+    minio: {
+      region: ENV.MINIO_REGION!,
+      endpoint: ENV.MINIO_ENDPOINT!,
+      accessKey: ENV.MINIO_ACCESS_KEY_ID!,
+      secretKey: ENV.MINIO_SECRET_ACCESS_KEY!,
+      port: ENV.MINIO_PORT ? parseInt(ENV.MINIO_PORT, 10) : 443,
+      useSSL: ENV.MINIO_USE_SSL ? ENV.MINIO_USE_SSL === "true" : true,
+      bucket: ENV.MINIO_BUCKET!,
+      storageClass: ENV.MINIO_STORAGE_CLASS!,
+    },
+
     clickhouse: {
       username: ENV.CLICKHOUSE_USERNAME!,
       password: ENV.CLICKHOUSE_PASSWORD!,

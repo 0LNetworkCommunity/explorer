@@ -6,6 +6,7 @@ export interface Config {
   info: InfoConfig;
   ol: OlConfig;
   s3: S3Config;
+  minio: MinioConfig;
   clickhouse: ClickhouseConfig;
   apn?: ApnConfig;
   firebase?: FirebaseConfig;
@@ -22,6 +23,17 @@ export interface OlConfig {
 }
 
 export interface S3Config {
+  region: string;
+  endpoint: string;
+  accessKey: string;
+  secretKey: string;
+  port: number;
+  useSSL: boolean;
+  bucket: string;
+  storageClass: string;
+}
+
+export interface MinioConfig {
   region: string;
   endpoint: string;
   accessKey: string;

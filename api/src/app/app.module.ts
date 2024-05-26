@@ -16,6 +16,7 @@ import { WalletSubscriptionModule } from "../wallet-subscription/wallet-subscrip
 import { NatsModule } from "../nats/nats.module.js";
 import { OlSwapModule } from "../ol-swap/OlSwapModule.js";
 import { MultiSigModule } from "../multi-sig/multi-sig.module.js";
+import { MinioModule } from '../minio/minio.module.js';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { MultiSigModule } from "../multi-sig/multi-sig.module.js";
     }),
 
     S3Module,
+    MinioModule,
     ClickhouseModule,
     OlModule,
     NodeWatcherModule,

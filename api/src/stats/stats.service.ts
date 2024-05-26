@@ -15,6 +15,7 @@ import {
 import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
 import { OlService } from "../ol/ol.service.js";
 import _ from "lodash";
+import { CommunityWalletsResolver } from "../ol/community-wallets.resolver.js";
 
 @Injectable()
 export class StatsService {
@@ -23,6 +24,7 @@ export class StatsService {
   public constructor(
     private readonly clickhouseService: ClickhouseService,
     private readonly olService: OlService,
+    private readonly communityWalletsResolver: CommunityWalletsResolver,
     config: ConfigService,
   ) {
     this.dataApiHost = config.get("dataApiHost")!;
@@ -85,6 +87,10 @@ export class StatsService {
     const lockedSupplyConcentration =
       await this.calculateLiquidityConcentrationLocked();
     console.timeEnd("calculateLiquidityConcentrationLocked");
+
+    console.time("getTopUnlockedBalanceWallets");
+    const topAccounts = await this.getTopUnlockedBalanceWallets(100, supplyStats.circulatingSupply);
+    console.timeEnd("getTopUnlockedBalanceWallets");
 
     // calculate KPIS
     // circulating
@@ -153,6 +159,7 @@ export class StatsService {
       clearingBidoverTime: pofValues.clearingBidOverTime, // net rewards? also available on the pofValues object
       liquidSupplyConcentration: liquidSupplyConcentration,
       lockedSupplyConcentration: lockedSupplyConcentration,
+      topAccounts,
 
       // kpis
       circulatingSupply,
@@ -1002,15 +1009,17 @@ export class StatsService {
     slowWalletsUnlockedBalances: { address: string; unlockedBalance: number }[],
   ): Promise<{ address: string; balance: number }[]> {
     try {
-      // Convert community wallets to a format suitable for the SQL query
-      const communityWalletsFormatted = communityWallets
-        .map((wallet) => `'${wallet}'`)
-        .join(",");
+      function getLast15Chars(address: string): string {
+        return address.slice(-15).toUpperCase();
+      }
+
+      // Convert community wallets to a Set for easy lookup
+      const communityAddresses = new Set(communityWallets.map(wallet => wallet.toUpperCase()));
 
       // Convert slow wallets to a map for easy access
       const slowWalletsMap = new Map(
         slowWalletsUnlockedBalances.map((wallet) => [
-          wallet.address,
+          wallet.address.toUpperCase(),
           wallet.unlockedBalance,
         ]),
       );
@@ -1023,7 +1032,6 @@ export class StatsService {
           max(version) AS latest_version
         FROM coin_balance
         WHERE coin_module = 'libra_coin'
-        AND NOT has([${communityWalletsFormatted}], hex(address))
         GROUP BY address
       `;
 
@@ -1042,48 +1050,31 @@ export class StatsService {
         return [];
       }
 
-      // Extract versions and convert them to timestamps
-      const versions = rows.map((row) => row.latest_version);
-      const chunkSize = 1000; // Adjust chunk size as necessary
-      const versionChunks = this.chunkArray<number>(versions, chunkSize);
-
-      const allTimestampMappings = (
-        await Promise.all(
-          versionChunks.map((chunk) => this.mapVersionsToTimestamps(chunk)),
-        )
-      ).flat();
-
-      // Use a Map for faster version-to-timestamp lookup
-      const versionToTimestampMap = new Map<number, number>(
-        allTimestampMappings.map(({ version, timestamp }) => [
-          version,
-          timestamp,
-        ]),
-      );
-
-      // Map addresses to their balances and corresponding timestamps
-      const addressBalanceMap = new Map<
-        string,
-        { balance: number; timestamp: number }
-      >();
-      rows.forEach((row) => {
-        const version = row.latest_version;
-        const timestamp = versionToTimestampMap.get(version) ?? 0;
-        addressBalanceMap.set(row.address, {
-          balance: row.balance,
-          timestamp,
-        });
+      // Create a map of address to latest balance, excluding community wallets
+      const addressBalanceMap = new Map<string, number>();
+      rows.forEach(row => {
+        const address = row.address.toUpperCase();
+        if (!communityAddresses.has(address)) {
+          addressBalanceMap.set(address, row.balance);
+        }
       });
 
       // Adjust balances for slow wallets
-      const result = rows.map((row) => {
-        const unlockedBalance = slowWalletsMap.get(row.address);
-        // Check if there's an unlocked balance, if not, use the original balance
-        if (unlockedBalance !== undefined) {
-          return { address: row.address, balance: unlockedBalance };
+      slowWalletsUnlockedBalances.forEach(row => {
+        const address = getLast15Chars(row.address);
+        for (const [key, value] of addressBalanceMap.entries()) {
+          if (getLast15Chars(key) === address) {
+            addressBalanceMap.set(key, row.unlockedBalance);
+            break;
+          }
         }
-        return { address: row.address, balance: row.balance };
       });
+
+      // Convert the map to an array
+      const result = Array.from(addressBalanceMap.entries()).map(([address, balance]) => ({
+        address,
+        balance,
+      }));
 
       return result;
     } catch (error) {
@@ -1091,6 +1082,7 @@ export class StatsService {
       throw error;
     }
   }
+
 
   private binGenericBalances(
     balances: BalanceItem[],
@@ -1249,5 +1241,98 @@ export class StatsService {
         value: Math.round(vestingMonths * 100) / 100, // Round to two decimal places for readability
       };
     });
+  }
+
+  private async getTopUnlockedBalanceWallets(limit: number, circulatingSupply: number): Promise<{ address: string; unlockedBalance: number; percentOfCirculating: number }[]> {
+    try {
+      function toHexString(decimalString: string): string {
+        return BigInt(decimalString).toString(16).toUpperCase();
+      }
+
+      function getLast15Chars(address: string): string {
+        return address.slice(-15).toUpperCase();
+      }
+
+      // Get the list of community wallets
+      const communityWallets = await this.communityWalletsResolver.communityWallets();
+      const communityAddresses = new Set(communityWallets.map(wallet => wallet.address.toString('hex').toUpperCase()));
+
+      // Query to get the latest balances and versions from coin_balance
+      const coinBalanceQuery = `
+        SELECT
+          address,
+          argMax(balance, version) AS latest_balance
+        FROM coin_balance
+        WHERE coin_module = 'libra_coin'
+        GROUP BY address
+      `;
+
+      const coinBalanceResultSet = await this.clickhouseService.client.query({
+        query: coinBalanceQuery,
+        format: "JSONEachRow",
+      });
+
+      const coinBalanceRows: Array<{
+        address: string;
+        latest_balance: number;
+      }> = await coinBalanceResultSet.json();
+
+      if (!coinBalanceRows.length) {
+        return [];
+      }
+
+      // Create a map of address to latest balance
+      const addressBalanceMap = new Map<string, number>();
+      coinBalanceRows.forEach(row => {
+        const address = toHexString(row.address).toUpperCase();
+        if (!communityAddresses.has(address)) {
+          addressBalanceMap.set(address, row.latest_balance / 1e6);
+        }
+      });
+
+      // Query to get the latest unlocked balances from slow_wallet
+      const slowWalletQuery = `
+        SELECT
+          hex(address) AS address,
+          argMax(unlocked, version) / 1e6 AS unlocked_balance
+        FROM slow_wallet
+        GROUP BY address
+      `;
+
+      const slowWalletResultSet = await this.clickhouseService.client.query({
+        query: slowWalletQuery,
+        format: "JSONEachRow",
+      });
+
+      const slowWalletRows: Array<{
+        address: string;
+        unlocked_balance: number;
+      }> = await slowWalletResultSet.json();
+
+      // Adjust balances: replace balance with unlocked balance for slow wallets
+      slowWalletRows.forEach(row => {
+        const address = getLast15Chars(row.address);
+        for (const [key, value] of addressBalanceMap.entries()) {
+          if (getLast15Chars(key) === address) {
+            addressBalanceMap.set(key, row.unlocked_balance);
+            break;
+          }
+        }
+      });
+
+      // Convert the map to an array and calculate percentOfCirculating
+      const result = Array.from(addressBalanceMap.entries()).map(([address, unlockedBalance]) => ({
+        address,
+        unlockedBalance,
+        percentOfCirculating: (unlockedBalance / circulatingSupply) * 100,
+      }));
+
+      // Sort by unlockedBalance and take the top N
+      result.sort((a, b) => b.unlockedBalance - a.unlockedBalance);
+      return result.slice(0, limit);
+    } catch (error) {
+      console.error("Error in getTopUnlockedBalanceWallets:", error);
+      throw error;
+    }
   }
 }

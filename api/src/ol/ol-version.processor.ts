@@ -375,7 +375,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
 
     for (const address of rows.data.address) {
       this.natsService.nc.publish(
-        `wallet.${address}`,
+        `wallet.${address}.movement`,
         OlVersionProcessor.jsonCodec.encode({
           version,
         }),

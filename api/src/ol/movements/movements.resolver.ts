@@ -1,7 +1,7 @@
 import { Args, Resolver, Subscription } from "@nestjs/graphql";
 import { Repeater } from "@repeaterjs/repeater";
 
-import { NatsService } from "../nats/nats.service.js";
+import { NatsService } from "../../nats/nats.service.js";
 
 @Resolver()
 export class MovementsResolver {

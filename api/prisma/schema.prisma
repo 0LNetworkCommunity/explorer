@@ -46,6 +46,13 @@ model Node {
   ledgerVersion BigInt?
 }
 
+enum PendingTransactionStatus {
+  UNKNOWN
+  SENT
+  ON_CHAIN
+  EXPIRED
+}
+
 model PendingTransaction {
   hash                    Bytes    @id
   sender                  Bytes
@@ -61,4 +68,5 @@ model PendingTransaction {
   moduleName              String
   args                    Bytes[]
   typeArgs                String[]
+  status PendingTransactionStatus @default(UNKNOWN)
 }

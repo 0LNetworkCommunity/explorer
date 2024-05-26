@@ -12,7 +12,7 @@ export type AbstractTransaction =
   | GqlScriptUserTransaction;
 
 export const GqlTransaction = createUnionType({
-  name: "Transaction",
+  name: "ChainTransaction",
   types: () =>
     [
       GqlGenesisTransaction,

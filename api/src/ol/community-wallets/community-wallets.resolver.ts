@@ -1,9 +1,9 @@
 import { Query, Resolver } from "@nestjs/graphql";
 import _ from "lodash";
-import { GqlCommunityWallet } from "./models/community-wallet.model.js";
+import { GqlCommunityWallet } from "../models/community-wallet.model.js";
 import { communityWallets } from "./community-wallets.js";
-import { OlService } from "./ol.service.js";
-import { parseAddress } from "../utils.js";
+import { OlService } from "../ol.service.js";
+import { parseAddress } from "../../utils.js";
 
 @Resolver()
 export class CommunityWalletsResolver {

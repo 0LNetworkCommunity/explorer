@@ -3,8 +3,8 @@ import _ from "lodash";
 import Bluebird from "bluebird";
 import BN from "bn.js";
 
-import { OlService } from "./ol.service.js";
-import { GqlValidator } from "./models/validator.model.js";
+import { OlService } from "../ol.service.js";
+import { GqlValidator } from "../models/validator.model.js";
 
 interface ValidatorPerformance {
   validators: {

@@ -7,6 +7,7 @@ import {
 } from "./GqlAbstractTransaction.js";
 
 export type GqlUserTransactionInput = AbstractTransactionInput & {
+  hash: Uint8Array;
   sender: Buffer;
   success: boolean;
   moduleAddress: Buffer;
@@ -20,6 +21,9 @@ export type GqlUserTransactionInput = AbstractTransactionInput & {
   implements: () => [GqlAbstractTransaction],
 })
 export class GqlUserTransaction implements GqlAbstractTransaction {
+  @Field(() => Buffer)
+  public hash: Uint8Array;
+
   @Field(() => BN)
   public version: BN;
 
@@ -45,6 +49,7 @@ export class GqlUserTransaction implements GqlAbstractTransaction {
   public arguments: string;
 
   public constructor(input: GqlUserTransactionInput) {
+    this.hash = input.hash;
     this.sender = input.sender;
     this.timestamp = input.timestamp;
     this.version = input.version;

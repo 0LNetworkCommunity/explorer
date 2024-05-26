@@ -1,10 +1,10 @@
 import { Parent, ResolveField, Resolver } from "@nestjs/graphql";
 import BN from "bn.js";
 
-import { OlService } from "./ol.service.js";
-import { GqlValidator, GqlValidatorCurrentBid, GqlValidatorGrade, GqlVouch } from "./models/validator.model.js";
-import { GqlAccount } from "./models/account.model.js";
-import { parseAddress } from "../utils.js";
+import { OlService } from "../ol.service.js";
+import { GqlValidator, GqlValidatorCurrentBid, GqlValidatorGrade, GqlVouch } from "../models/validator.model.js";
+import { GqlAccount } from "../models/account.model.js";
+import { parseAddress } from "../../utils.js";
 
 @Resolver(GqlValidator)
 export class ValidatorResolver {

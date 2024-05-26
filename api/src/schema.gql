@@ -6,6 +6,12 @@ interface AbstractTransaction {
   version: BigInt!
 }
 
+type Module {
+  address: String!
+  name: String!
+  functions: [String!]!
+}
+
 type GqlUserTransactionDeprecated {
   hash: String!
   version: Float!
@@ -27,12 +33,6 @@ type GqlUserTransactionDeprecated {
 type UserTransactionCollection {
   size: Float!
   items: [GqlUserTransactionDeprecated!]!
-}
-
-type Module {
-  address: String!
-  name: String!
-  functions: [String!]!
 }
 
 type ValidatorGrade {
@@ -110,18 +110,28 @@ type PaginatedMovements {
   pageInfo: PageInfo!
 }
 
-type BlockMetadataTransaction implements AbstractTransaction {
-  version: BigInt!
-  epoch: BigInt!
-  timestamp: BigInt!
+type CommunityWallet {
+  name: String
+  description: String
+  address: Bytes!
 }
 
-type GenesisTransaction implements AbstractTransaction {
-  version: BigInt!
+type Transaction {
+  hash: Bytes!
+  status: TransactionStatus!
+  onChainTransaction: AbstractTransaction
+}
+
+enum TransactionStatus {
+  UNKNOWN
+  SENT
+  ON_CHAIN
+  EXPIRED
 }
 
 type UserTransaction implements AbstractTransaction {
   version: BigInt!
+  hash: Bytes!
   timestamp: BigInt!
   success: Boolean!
   sender: Bytes!
@@ -131,6 +141,12 @@ type UserTransaction implements AbstractTransaction {
   arguments: String!
 }
 
+type BlockMetadataTransaction implements AbstractTransaction {
+  version: BigInt!
+  epoch: BigInt!
+  timestamp: BigInt!
+}
+
 type ScriptUserTransaction implements AbstractTransaction {
   version: BigInt!
   timestamp: BigInt!
@@ -138,10 +154,8 @@ type ScriptUserTransaction implements AbstractTransaction {
   sender: Bytes!
 }
 
-type CommunityWallet {
-  name: String
-  description: String
-  address: Bytes!
+type GenesisTransaction implements AbstractTransaction {
+  version: BigInt!
 }
 
 type Node {
@@ -164,6 +178,7 @@ type Query {
   account(address: Bytes!): Account
   validators: [Validator!]!
   communityWallets: [CommunityWallet!]!
+  walletTransactions(address: Bytes!): [Transaction!]!
   nodes: [Node!]
 }
 
@@ -179,4 +194,5 @@ enum DeviceType {
 
 type Subscription {
   walletMovement(address: Bytes!): String!
+  walletTransaction(address: Bytes!): String!
 }

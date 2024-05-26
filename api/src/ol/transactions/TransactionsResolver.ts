@@ -1,108 +1,33 @@
-import { Args, Mutation, Resolver } from "@nestjs/graphql";
-import { Deserializer, Serializer, TransactionPayload, SignedTransaction, TransactionPayloadEntryFunction, TransactionAuthenticatorEd25519 } from "@aptos-labs/ts-sdk";
-import axios from "axios";
-import { sha3_256 } from '@noble/hashes/sha3';
-import { PrismaService } from "../prisma/prisma.service.js";
-import { Prisma } from "@prisma/client";
+import { Args, Mutation, Resolver, Query, Subscription } from "@nestjs/graphql";
+import { Inject } from "@nestjs/common";
+import { Repeater } from "@repeaterjs/repeater";
+
+import { Types } from "../../types.js";
+import { ITransaction, ITransactionsService } from "./interfaces.js";
+import { Transaction } from "./Transaction.js";
 
 @Resolver()
 export class TransactionsResolver {
-
   public constructor(
-    private readonly prisma: PrismaService,
+    @Inject(Types.ITransactionsService)
+    private readonly transactionsService: ITransactionsService,
   ) {}
 
+  @Query(() => [Transaction], { name: "walletTransactions" })
+  public async getWalletTransactions(
+    @Args("address", { type: () => Buffer })
+    address: Uint8Array,
+  ): Promise<ITransaction[]> {
+    return this.transactionsService.getWalletTransactions(address);
+  }
 
   @Mutation(() => Boolean)
   public async newTransaction(
     @Args("signedTransaction", { type: () => Buffer })
-    sigendTransactionArg: Buffer,
+    signedTransaction: Buffer,
   ) {
-    console.log("newTransaction", sigendTransactionArg);
-
-    const deserializer = new Deserializer(sigendTransactionArg);
-    const signedTransaction = SignedTransaction.deserialize(deserializer);
-
-    console.log('sender', signedTransaction.raw_txn.sender.toUint8Array());
-    console.log('sequence_number', signedTransaction.raw_txn.sequence_number);
-    console.log('max_gas_amount', signedTransaction.raw_txn.max_gas_amount);
-    console.log('gas_unit_price', signedTransaction.raw_txn.gas_unit_price);
-    console.log('expiration_timestamp_secs', signedTransaction.raw_txn.expiration_timestamp_secs);
-    console.log('chain_id', signedTransaction.raw_txn.chain_id.chainId);
-
-    const serializer = new Serializer();
-    signedTransaction.serialize(serializer);
-
-    if (
-      signedTransaction.raw_txn.payload instanceof
-      TransactionPayloadEntryFunction
-    ) {
-      const txHash = sha3_256
-        .create()
-        .update(sha3_256.create().update("DIEM::Transaction").digest())
-        .update(new Uint8Array([0]))
-        .update(serializer.toUint8Array())
-        .digest();
-
-      if (signedTransaction.authenticator instanceof TransactionAuthenticatorEd25519) {
-        console.log(
-          'public_key',
-          signedTransaction.authenticator.public_key.toUint8Array()
-        );
-        console.log(
-          'signature',
-          signedTransaction.authenticator.signature.toUint8Array()
-        );
-      console.log('>>>', signedTransaction.authenticator instanceof TransactionAuthenticatorEd25519);
-
-      const entryFunctionPayload = signedTransaction.raw_txn.payload;
-
-      const { entryFunction } = entryFunctionPayload;
-      entryFunction.function_name.identifier;
-
-      console.log('function_name', entryFunction.function_name.identifier);
-      console.log('module_address', entryFunction.module_name.address.data);
-      console.log('module_name', entryFunction.module_name.name);
-      console.log('args', entryFunction.args);
-      console.log('type_args', entryFunction.type_args);
-
-      const toBytea = (input: Uint8Array) => {
-        return (
-          `\\x${Buffer.from(input).toString('hex')}`
-        );
-      };
-
-      await this.prisma.$queryRaw`
-        INSERT INTO "PendingTransaction" (
-          "hash", "sender", "sequenceNumber",
-          "maxGasAmount", "gasUnitPrice", "expirationTimestampSecs",
-          "chainId", "publicKey", "signature", "functionName",
-          "moduleAddress", "moduleName", "args",
-          "typeArgs"
-        ) VALUES (
-          ${txHash},
-          ${signedTransaction.raw_txn.sender.toUint8Array()},
-          ${signedTransaction.raw_txn.sequence_number},
-          ${signedTransaction.raw_txn.max_gas_amount},
-          ${signedTransaction.raw_txn.gas_unit_price},
-          ${signedTransaction.raw_txn.expiration_timestamp_secs},
-          ${signedTransaction.raw_txn.chain_id.chainId},
-          ${signedTransaction.authenticator.public_key.toUint8Array()},
-          ${signedTransaction.authenticator.signature.toUint8Array()},
-          ${entryFunction.function_name.identifier},
-          ${entryFunction.module_name.address.data},
-          ${entryFunction.module_name.name.identifier},
-          ${Prisma.raw(
-            `'{${entryFunction.args
-              .map((arg) => toBytea(arg.bcsToBytes()))
-              .join(",")}}'`,
-          )},
-          ${[]}
-        )
-        ON CONFLICT DO NOTHING
-      `;
-      }
-    }
+    const txHash =
+      await this.transactionsService.newTransaction(signedTransaction);
 
     // try {
     //   const res = await axios<{
@@ -116,7 +41,6 @@ export class TransactionsResolver {
     //     data: sigendTransactionArg,
     //   });
     //   console.log(res.status);
-
 
     //   // status: 400,
     //   // statusText: 'Bad Request',
@@ -227,9 +151,50 @@ export class TransactionsResolver {
     //   }
     // }
 
-
-
     return true;
   }
 
+  @Subscription((returns) => String)
+  public async walletTransaction(
+    @Args({ name: "address", type: () => Buffer })
+    address: Buffer,
+  ) {
+    console.log("SUB", "walletTransaction", address.toString("hex"));
+
+    const walletAddress = address.toString("hex").toUpperCase();
+    return new Repeater(async (push, stop) => {
+      let timeout: NodeJS.Timeout | undefined;
+
+      const ping = () => {
+        timeout = setTimeout(() => {
+          push({
+            walletTransaction: new Date().toISOString(),
+          });
+
+          ping();
+        }, 3_000);
+      };
+      ping();
+
+      // const sub = this.natsService.nc.subscribe(`wallet.${walletAddress}`, {
+      //   callback(err, msg) {
+      //     if (err) {
+      //       stop(err);
+      //     } else {
+      //       const { version } = msg.json<{ version: string }>();
+      //       push({
+      //         walletMovement: version,
+      //       });
+      //     }
+      //   },
+      // });
+
+      await stop;
+      if (timeout !== undefined) {
+        clearTimeout(timeout);
+      }
+
+      // sub.unsubscribe();
+    });
+  }
 }

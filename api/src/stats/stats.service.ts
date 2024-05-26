@@ -39,20 +39,53 @@ export class StatsService {
   }
 
   public async getStats(): Promise<Stats> {
+    console.time("getSupplyStats");
     const supplyStats = await this.olService.getSupplyStats();
+    console.timeEnd("getSupplyStats");
+
+    console.time("getTotalSupply");
     const totalSupply: number = supplyStats.totalSupply;
+    console.timeEnd("getTotalSupply");
+
+    console.time("getSlowWalletsCountOverTime");
     const slowWalletsCountOverTime = await this.getSlowWalletsCountOverTime();
+    console.timeEnd("getSlowWalletsCountOverTime");
+
+    console.time("getBurnsOverTime");
     const burnOverTime = await this.getBurnsOverTime();
+    console.timeEnd("getBurnsOverTime");
+
+    console.time("getAccountsOnChainOverTime");
     const accountsOnChainOverTime = await this.getAccountsOnChainOverTime();
+    console.timeEnd("getAccountsOnChainOverTime");
+
+    console.time("getSupplyAndCapital");
     const supplyAndCapital = await this.getSupplyAndCapital(supplyStats);
+    console.timeEnd("getSupplyAndCapital");
+
+    console.time("getCommunityWalletsBalanceBreakdown");
     const communityWalletsBalanceBreakdown =
-    await this.getCommunityWalletsBalanceBreakdown();
+      await this.getCommunityWalletsBalanceBreakdown();
+    console.timeEnd("getCommunityWalletsBalanceBreakdown");
+
+    console.time("getLastEpochTotalUnlockedAmount");
     const lastEpochTotalUnlockedAmount =
-    await this.getLastEpochTotalUnlockedAmount();
+      await this.getLastEpochTotalUnlockedAmount();
+    console.timeEnd("getLastEpochTotalUnlockedAmount");
+
+    console.time("getPOFValues");
     const pofValues = await this.getPOFValues(); // Empty table?
+    console.timeEnd("getPOFValues");
+
+    console.time("getLiquidSupplyConcentration");
     const liquidSupplyConcentration = await this.getLiquidSupplyConcentration();
+    console.timeEnd("getLiquidSupplyConcentration");
+
+    console.time("calculateLiquidityConcentrationLocked");
     const lockedSupplyConcentration =
-    await this.calculateLiquidityConcentrationLocked();
+      await this.calculateLiquidityConcentrationLocked();
+    console.timeEnd("calculateLiquidityConcentrationLocked");
+
 
     // calculate KPIS
     // circulating
@@ -306,7 +339,7 @@ export class StatsService {
     try {
       const query = `
         SELECT
-          timestamp,
+          version,
           nominal_reward / 1e6 AS nominalReward,
           net_reward / 1e6 AS netReward,
           clearing_bid AS clearingBid
@@ -321,47 +354,63 @@ export class StatsService {
 
       const rows = await resultSet.json<
         {
-          timestamp: string; // Adjusted to string to match your input
-          nominalReward: number;
-          netReward: number;
-          clearingBid: number;
+          version: string;
+          nominalReward: string;
+          netReward: string;
+          clearingBid: string;
         }[]
       >();
 
-      // Convert timestamp from microseconds to seconds and ensure it's an integer
-      const convertTimestamp = (timestamp: string) =>
-        Math.floor(Number(timestamp) / 1e6);
+      if (!rows.length) {
+        return {
+          clearingBidOverTime: [],
+          nominalRewardOverTime: [],
+          netRewardOverTime: [],
+        };
+      }
 
-      // Set the base timestamp for the first entry
-      const baseTimestamp = new Date("2023-11-28T00:00:00Z").getTime() / 1000;
+      // Clean and parse the rows
+      const cleanedRows = rows.map(row => ({
+        version: parseInt(String(row.version).replace('\n', ''), 10),
+        nominalReward: parseFloat(String(row.nominalReward).replace('\n', '')),
+        netReward: parseFloat(String(row.netReward).replace('\n', '')),
+        clearingBid: parseFloat(String(row.clearingBid).replace('\n', '')),
+      }));
 
-      // Helper to adjust first timestamp
-      const adjustFirstTimestamp = (array: Array<TimestampValue>) => {
-        if (array.length > 0) {
-          array[0].timestamp = baseTimestamp;
-        }
-        return array;
+      // Extract versions and convert them to timestamps
+      const versions = cleanedRows.map(row => row.version);
+      const chunkSize = 1000; // Adjust chunk size as necessary
+      const versionChunks = this.chunkArray<number>(versions, chunkSize);
+
+      const allTimestampMappings: { version: number; timestamp: number }[] = [];
+
+      for (const chunk of versionChunks) {
+        const timestampsMap = await this.mapVersionsToTimestamps(chunk);
+        allTimestampMappings.push(...timestampsMap);
+      }
+
+
+      // Helper to convert version to timestamp
+      const convertVersionToTimestamp = (version: number) => {
+        const timestampEntry = allTimestampMappings.find(entry => entry.version === version);
+        return timestampEntry ? Math.floor(timestampEntry.timestamp) : 0;
       };
 
       // Transform the data into the desired format and adjust timestamps
-      const clearingBidOverTime = adjustFirstTimestamp(
-        rows.map((row) => ({
-          timestamp: convertTimestamp(row.timestamp),
-          value: row.clearingBid,
-        })),
-      );
-      const nominalRewardOverTime = adjustFirstTimestamp(
-        rows.map((row) => ({
-          timestamp: convertTimestamp(row.timestamp),
-          value: row.nominalReward,
-        })),
-      );
-      const netRewardOverTime = adjustFirstTimestamp(
-        rows.map((row) => ({
-          timestamp: convertTimestamp(row.timestamp),
-          value: row.netReward,
-        })),
-      );
+      const clearingBidOverTime = cleanedRows.map(row => ({
+        timestamp: convertVersionToTimestamp(row.version),
+        value: row.clearingBid,
+      }));
+
+      const nominalRewardOverTime = cleanedRows.map(row => ({
+        timestamp: convertVersionToTimestamp(row.version),
+        value: row.nominalReward,
+      }));
+
+      const netRewardOverTime = cleanedRows.map(row => ({
+        timestamp: convertVersionToTimestamp(row.version),
+        value: row.netReward,
+      }));
 
       return {
         clearingBidOverTime,
@@ -378,10 +427,10 @@ export class StatsService {
     try {
       const query = `
         SELECT
-          toInt32(divide("timestamp", 1000000)) AS "timestamp", // Convert to Unix timestamp
-          divide("lifetime_burned", 1000000) AS "value" // Divide by 1e6
+          "version",
+          divide("lifetime_burned", 1000000) AS "value"
         FROM "burn_counter"
-        ORDER BY "timestamp"
+        ORDER BY "version" ASC
       `;
 
       const resultSet = await this.clickhouseService.client.query({
@@ -391,7 +440,7 @@ export class StatsService {
 
       const rows = await resultSet.json<
         {
-          timestamp: number;
+          version: string;
           value: number;
         }[]
       >();
@@ -400,14 +449,29 @@ export class StatsService {
         return [];
       }
 
+      // Extract versions and convert them to timestamps
+      const versions = rows.map((row) => parseInt(row.version, 10));
+      const timestampsMap = await this.mapVersionsToTimestamps(versions);
+
+      const burnsOverTime = rows.map((row) => {
+        const version = parseInt(row.version, 10);
+        const timestampEntry = timestampsMap.find((entry) => entry.version === version);
+        const timestamp = timestampEntry ? timestampEntry.timestamp : 0;
+
+        return {
+          timestamp,
+          value: row.value,
+        };
+      });
+
       const baseTimestamp = new Date("2023-11-28T00:00:00Z").getTime() / 1000;
-      if (rows[0].timestamp == 0) {
-        rows[0].timestamp = baseTimestamp;
+      if (burnsOverTime[0].timestamp == 0) {
+        burnsOverTime[0].timestamp = baseTimestamp;
       }
 
-      return rows.map((row) => ({
-        timestamp: row.timestamp,
-        value: row.value,
+      return burnsOverTime.map((item) => ({
+        timestamp: Math.round(item.timestamp),
+        value: item.value,
       }));
     } catch (error) {
       console.error("Error in getBurnsOverTime:", error);
@@ -415,7 +479,8 @@ export class StatsService {
     }
   }
 
-  private async getSlowWalletsLockedAmount(): Promise<number> {
+
+  private async getSlowWalletsUnlockedAmount(): Promise<number> {
     try {
       const query = `
       SELECT
@@ -441,7 +506,7 @@ export class StatsService {
 
       const rows = await resultSet.json<{ locked_balance: number }[]>();
 
-      // Sum the locked balances
+      // Sum the locked Amount
       const totalLockedAmount = rows.reduce(
         (acc, row) => acc + row.locked_balance,
         0,
@@ -449,46 +514,85 @@ export class StatsService {
 
       return totalLockedAmount;
     } catch (error) {
-      console.error("Error in getSlowWalletsLockedAmount:", error);
+      console.error("Error in getSlowWalletsUnlockedAmount:", error);
       throw error;
     }
   }
 
   private async getLastEpochTotalUnlockedAmount(): Promise<number> {
     try {
-      const query = `
-      SELECT
-        hex(SW.address) AS address,
-       (latest_balance - max(SW.unlocked)) / 1e6 AS locked_balance
-      FROM
-        slow_wallet SW
-      JOIN
-        (SELECT
-          address,
-          argMax(balance, timestamp) as latest_balance
-        FROM coin_balance
-        WHERE coin_module = 'libra_coin'
-        GROUP BY address) AS CB
-      ON SW.address = CB.address
-      GROUP BY SW.address, latest_balance
+      // Query the slow_wallet table to get the addresses and unlocked balances
+      const slowWalletQuery = `
+        SELECT
+          hex(SW.address) AS address,
+          max(SW.unlocked) / 1e6 AS unlocked_balance
+        FROM slow_wallet SW
+        GROUP BY SW.address
       `;
 
-      const resultSet = await this.clickhouseService.client.query({
-        query: query,
+      const slowWalletResultSet = await this.clickhouseService.client.query({
+        query: slowWalletQuery,
         format: "JSONEachRow",
       });
 
-      const rows = await resultSet.json<{ locked_balance: number }[]>();
+      const slowWalletRows = await slowWalletResultSet.json<
+        { address: string; unlocked_balance: number }[]
+      >();
+
+      if (!slowWalletRows.length) {
+        return 0;
+      }
+
+      // Collect addresses from slow wallet rows
+      const addresses = slowWalletRows.map(row => row.address);
+
+      // Batch process addresses to get their latest balances
+      const addressChunks = this.chunkArray<string>(addresses, 1000); // Adjust chunk size as necessary
+      const balanceResults: { address: string; latest_balance: number }[] = [];
+
+      for (const chunk of addressChunks) {
+        const formattedAddresses = chunk.map(addr => `'${addr}'`).join(',');
+        const balanceQuery = `
+          SELECT
+            hex(address) AS address,
+            argMax(balance, version) / 1e6 AS latest_balance
+          FROM coin_balance
+          WHERE coin_module = 'libra_coin' AND address IN (${formattedAddresses})
+          GROUP BY address
+        `;
+
+        const balanceResultSet = await this.clickhouseService.client.query({
+          query: balanceQuery,
+          format: "JSONEachRow",
+        });
+
+        const balanceRows = await balanceResultSet.json<{ address: string; latest_balance: number }[]>();
+        balanceResults.push(...balanceRows);
+      }
+
+      // Create a map of address to latest balance
+      const balanceMap = new Map(balanceResults.map(row => [row.address, row.latest_balance]));
+
+      // Combine data from both queries
+      const lockedBalances = slowWalletRows.map(row => {
+        const latest_balance = balanceMap.get(row.address) ?? 0;
+        const unlocked_balance = row.unlocked_balance;
+        const locked_balance = latest_balance - unlocked_balance;
+        // console.log(`Address: ${row.address}, Latest Balance: ${latest_balance}, Unlocked Balance: ${unlocked_balance}, Locked Balance: ${locked_balance}`);
+        return {
+          address: row.address,
+          locked_balance,
+        };
+      });
 
       // Count the wallets with locked balance greater than 35000
-      const count = rows.reduce(
+      const count = lockedBalances.reduce(
         (acc, row) => acc + (row.locked_balance > 35000 ? 1 : 0),
         0,
       );
 
       // Calculate the total amount based on the counter
       const totalUnlockedAmount = count * 35000;
-
       return totalUnlockedAmount;
     } catch (error) {
       console.error("Error in getLastEpochTotalUnlockedAmount:", error);
@@ -496,21 +600,122 @@ export class StatsService {
     }
   }
 
-  private async getSlowWalletsCountOverTime(): Promise<TimestampValue[]> {
+  // HELPER METHODS
+
+  private chunkArray<T>(array: T[], chunkSize: number): T[][] {
+    const results: T[][] = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+      results.push(array.slice(i, i + chunkSize));
+    }
+    return results;
+  }
+
+  private async mapVersionsToTimestamps(versions: number[]): Promise<{ version: number; timestamp: number }[]> {
+    const versionsString = versions.join(', ');
+    const query = `
+      WITH
+
+        "gen_txs" AS (
+          SELECT ("version" + 1) as "version"
+          FROM "genesis_transaction"
+          WHERE
+          "genesis_transaction"."version" IN (${versionsString})
+        ),
+
+        "txs" AS (
+          SELECT "timestamp", "version"
+          FROM "block_metadata_transaction"
+          WHERE "version" IN (SELECT "version" FROM "gen_txs")
+
+          UNION ALL
+
+          SELECT "timestamp", "version"
+          FROM "state_checkpoint_transaction"
+          WHERE "version" IN (SELECT "version" FROM "gen_txs")
+
+          UNION ALL
+
+          SELECT "timestamp", "version"
+          FROM "user_transaction"
+          WHERE "version" IN (SELECT "version" FROM "gen_txs")
+
+          UNION ALL
+
+          SELECT "timestamp", "version"
+          FROM "script"
+          WHERE "version" IN (SELECT "version" FROM "gen_txs")
+
+        ),
+
+        "tx_timestamps" AS (
+          SELECT
+            toUInt64("txs"."timestamp" - 1) as "timestamp",
+            toUInt64("version" - 1) as "version"
+          FROM "txs"
+
+          UNION ALL
+
+          SELECT "timestamp", "version"
+          FROM "block_metadata_transaction"
+          WHERE "version" IN (${versionsString})
+
+          UNION ALL
+
+          SELECT "timestamp", "version"
+          FROM "state_checkpoint_transaction"
+          WHERE "version" IN (${versionsString})
+
+          UNION ALL
+
+          SELECT "timestamp", "version"
+          FROM "user_transaction"
+          WHERE "version" IN (${versionsString})
+
+          UNION ALL
+
+          SELECT "timestamp", "version"
+          FROM "script"
+          WHERE "version" IN (${versionsString})
+        )
+
+        SELECT "timestamp", "version"
+        FROM "tx_timestamps"
+        ORDER BY "version" ASC
+    `;
+    const resultSet = await this.clickhouseService.client.query({
+      query,
+      query_params: { versions },
+      format: "JSONEachRow",
+    });
+
+    const rows = await resultSet.json<
+      {
+        timestamp: string;
+        version: string;
+      }[]
+    >();
+
+    return rows.map((row) => ({
+      version: parseInt(row.version, 10),
+      timestamp: parseInt(row.timestamp, 10) / 1_000_000, // Convert to seconds
+    }));
+  }
+
+  public async getSlowWalletsCountOverTime(): Promise<TimestampValue[]> {
     try {
       const resultSet = await this.clickhouseService.client.query({
         query: `
               SELECT
-                "timestamp",
+                "version",
                 "list_count" AS "value"
               FROM "slow_wallet_list"
-              ORDER BY "timestamp" ASC
+              ORDER BY "version" ASC
             `,
         format: "JSONEachRow",
       });
       const rows = await resultSet.json<
         {
-          timestamp: string;
+          version: string;
           value: string;
         }[]
       >();
@@ -520,11 +725,20 @@ export class StatsService {
         return [];
       }
 
-      // Convert to desired structure with number conversion
-      const slowWalletsOverTime = rows.map((row) => ({
-        timestamp: parseInt(row.timestamp, 10) / 1_000_000,
-        value: parseInt(row.value, 10),
-      }));
+      // Extract versions and convert them to timestamps
+      const versions = rows.map((row) => parseInt(row.version, 10));
+      const timestampsMap = await this.mapVersionsToTimestamps(versions);
+
+      const slowWalletsOverTime = rows.map((row) => {
+        const version = parseInt(row.version, 10);
+        const timestampEntry = timestampsMap.find((entry) => entry.version === version);
+        const timestamp = timestampEntry ? timestampEntry.timestamp : 0;
+
+        return {
+          timestamp,
+          value: parseInt(row.value, 10),
+        };
+      });
 
       const baseTimestamp = new Date("2023-11-28T00:00:00Z").getTime() / 1000;
       if (slowWalletsOverTime[0].timestamp == 0) {
@@ -538,7 +752,7 @@ export class StatsService {
 
       return result;
     } catch (error) {
-      console.error("Error in getSlowWalletsOverTime:", error);
+      console.error("Error in getSlowWalletsCountOverTime:", error);
       throw error;
     }
   }
@@ -547,12 +761,11 @@ export class StatsService {
     try {
       const query = `
         SELECT
-          toInt32(divide(min(timestamp), 1000000)) AS timestamp,
+          version,
           address
         FROM coin_balance
         WHERE coin_module = 'libra_coin'
-        GROUP BY address
-        ORDER BY timestamp ASC
+        ORDER BY version ASC
       `;
 
       const resultSet = await this.clickhouseService.client.query({
@@ -562,37 +775,67 @@ export class StatsService {
 
       const rows = await resultSet.json<
         {
-          timestamp: number;
+          version: string;
           address: string;
         }[]
       >();
 
+      if (!rows.length) {
+        return [];
+      }
+
+      // Extract versions
+      const versions = rows.map((row) => parseInt(row.version, 10));
+
+      // Split versions into smaller chunks to avoid query length issues
+      const chunkSize = 1000; // Adjust chunk size as necessary
+      const versionChunks = this.chunkArray<number>(versions, chunkSize);
+
+      // Process each chunk concurrently
+      const allTimestampMappings = (await Promise.all(
+        versionChunks.map((chunk) => this.mapVersionsToTimestamps(chunk))
+      )).flat();
+
+      // Use a Map for faster version-to-timestamp lookup
+      const versionToTimestampMap = new Map<number, number>(
+        allTimestampMappings.map(({ version, timestamp }) => [version, timestamp])
+      );
+
       // Initialize the result array and a count for accounts with timestamp > 0
       const accountsOverTime: TimestampValue[] = [];
-      let countOfZeroTimestamps = 0;
-      let cumulativeCount = 0;
+      const seenAddresses = new Set<string>();
+
+      const dailyCounts = new Map<number, number>();
 
       rows.forEach((row) => {
-        if (row.timestamp == 0) {
-          countOfZeroTimestamps++;
-        } else {
-          // This is the first record after all the 0 timestamps have been counted
-          if (accountsOverTime.length === 0 && countOfZeroTimestamps > 0) {
-            // Unix timestamp for November 29th, 2023, at midnight UTC, representing the accounts that came from v5.2
-            const unixTimestampForNov29 =
-              new Date("2023-11-29T00:00:00Z").getTime() / 1000;
-            accountsOverTime.push({
-              timestamp: unixTimestampForNov29,
-              value: countOfZeroTimestamps,
-            });
-            cumulativeCount = countOfZeroTimestamps;
-          }
-          cumulativeCount++; // Increment for each unique address with timestamp > 0
-          accountsOverTime.push({
-            timestamp: row.timestamp,
-            value: cumulativeCount,
-          });
+        const version = parseInt(row.version, 10);
+        const timestamp = versionToTimestampMap.get(version) ?? 0;
+
+        const dayTimestamp = Math.floor(timestamp / 86400) * 86400;
+
+        if (!seenAddresses.has(row.address)) {
+          seenAddresses.add(row.address);
+          const currentCount = dailyCounts.get(dayTimestamp) || 0;
+          dailyCounts.set(dayTimestamp, currentCount + 1);
         }
+      });
+
+      // Convert daily counts to the desired format
+      dailyCounts.forEach((count, timestamp) => {
+        accountsOverTime.push({
+          timestamp: timestamp,
+          value: count,
+        });
+      });
+
+      // Ensure the array is sorted by timestamp
+      accountsOverTime.sort((a, b) => a.timestamp - b.timestamp);
+
+      // Accumulate counts over time
+      let runningTotal = 0;
+      accountsOverTime.forEach((entry) => {
+        runningTotal += entry.value;
+        entry.value = runningTotal;
       });
 
       return accountsOverTime;
@@ -649,17 +892,14 @@ export class StatsService {
   private async getLiquidSupplyConcentration() {
     // Fetch community wallets to exclude
     const communityWallets = await this.olService.getCommunityWallets();
-
     // Fetch slow wallets' unlocked balances
     const slowWalletsUnlockedBalances =
       await this.getSlowWalletsUnlockedBalances();
-
     // Fetch all other wallets' balances, excluding community wallets and including adjustments for slow wallets
     const allWalletsBalances = await this.getAllWalletsBalances(
       communityWallets,
       slowWalletsUnlockedBalances,
     );
-
     // Bin the balances into the specified ranges
     const bins = this.binBalances(allWalletsBalances);
 
@@ -670,35 +910,97 @@ export class StatsService {
     { address: string; unlockedBalance: number }[]
   > {
     try {
+      // Query to get the latest balances and versions
       const query = `
-        SELECT
-          hex(SW.address) AS address,
-          IF(latest_balance > max(SW.unlocked), max(SW.unlocked) / 1e6, latest_balance / 1e6) AS unlocked_balance
-        FROM
-          slow_wallet SW
-        JOIN
-          (SELECT
-            address,
-            argMax(balance, timestamp) as latest_balance
-          FROM coin_balance
-          WHERE coin_module = 'libra_coin'
-          GROUP BY address) AS CB
-        ON SW.address = CB.address
-        GROUP BY SW.address, latest_balance
-      `;
+      SELECT
+        address,
+        argMax(balance, version) AS latest_balance,
+        max(version) AS latest_version
+      FROM coin_balance
+      WHERE coin_module = 'libra_coin'
+      GROUP BY address
+    `;
 
       const resultSet = await this.clickhouseService.client.query({
         query: query,
         format: "JSONEachRow",
       });
 
-      const rows =
-        await resultSet.json<{ address: string; unlocked_balance: number }[]>();
+      const rows = await resultSet.json<
+        {
+          address: string;
+          latest_balance: number;
+          latest_version: number;
+        }[]
+      >();
 
-      // Adjust the balance based on the unlocked amount
-      return rows.map((row) => ({
+      if (!rows.length) {
+        return [];
+      }
+
+      // Extract versions and convert them to timestamps
+      const versions = rows.map((row) => row.latest_version);
+      const chunkSize = 1000; // Adjust chunk size as necessary
+      const versionChunks = this.chunkArray<number>(versions, chunkSize);
+
+      const allTimestampMappings = (await Promise.all(
+        versionChunks.map((chunk) => this.mapVersionsToTimestamps(chunk))
+      )).flat();
+
+      // Use a Map for faster version-to-timestamp lookup
+      const versionToTimestampMap = new Map<number, number>(
+        allTimestampMappings.map(({ version, timestamp }) => [version, timestamp])
+      );
+
+      // Create a map of address to latest balance and timestamp
+      const addressBalanceMap = new Map<string, { latest_balance: number; timestamp: number }>();
+      rows.forEach((row) => {
+        const version = row.latest_version;
+        const timestamp = versionToTimestampMap.get(version) ?? 0;
+        addressBalanceMap.set(row.address, {
+          latest_balance: row.latest_balance / 1e6,
+          timestamp,
+        });
+      });
+
+      // Query the slow_wallet table and join with the addressBalanceMap data
+      const slowWalletQuery = `
+      SELECT
+        hex(SW.address) AS address,
+        max(SW.unlocked) / 1e6 AS unlocked_balance
+      FROM slow_wallet SW
+      GROUP BY SW.address
+    `;
+
+      const slowWalletResultSet = await this.clickhouseService.client.query({
+        query: slowWalletQuery,
+        format: "JSONEachRow",
+      });
+
+      const slowWalletRows = await slowWalletResultSet.json<
+        { address: string; unlocked_balance: number }[]
+      >();
+
+      // Combine data from both queries
+      const result = slowWalletRows.map((row) => {
+        const addressData = addressBalanceMap.get(row.address);
+        if (addressData) {
+          return {
+            address: row.address,
+            unlockedBalance: Math.min(row.unlocked_balance, addressData.latest_balance),
+          };
+        } else {
+          return {
+            address: row.address,
+            unlockedBalance: row.unlocked_balance,
+          };
+        }
+      });
+
+      // Ensure all balances are non-negative
+      return result.map((row) => ({
         address: row.address,
-        unlockedBalance: Math.max(0, row.unlocked_balance), // Corrected field name to match the query result
+        unlockedBalance: Math.max(0, row.unlockedBalance),
       }));
     } catch (error) {
       console.error("Error in getSlowWalletsUnlockedBalances:", error);
@@ -728,10 +1030,11 @@ export class StatsService {
       const query = `
         SELECT
           hex(address) AS address,
-          argMax(balance, timestamp) / 1e6 AS balance
-          FROM coin_balance
-          WHERE coin_module = 'libra_coin'
-          AND NOT has([${communityWalletsFormatted}], hex(address))
+          argMax(balance, version) / 1e6 AS balance,
+          max(version) AS latest_version
+        FROM coin_balance
+        WHERE coin_module = 'libra_coin'
+        AND NOT has([${communityWalletsFormatted}], hex(address))
         GROUP BY address
       `;
 
@@ -740,19 +1043,54 @@ export class StatsService {
         format: "JSONEachRow",
       });
 
-      let rows = await resultSet.json<{ address: string; balance: number }[]>();
+      const rows = await resultSet.json<
+        {
+          address: string;
+          balance: number;
+          latest_version: number;
+        }[]
+      >();
+
+      if (!rows.length) {
+        return [];
+      }
+
+      // Extract versions and convert them to timestamps
+      const versions = rows.map((row) => row.latest_version);
+      const chunkSize = 1000; // Adjust chunk size as necessary
+      const versionChunks = this.chunkArray<number>(versions, chunkSize);
+
+      const allTimestampMappings = (await Promise.all(
+        versionChunks.map((chunk) => this.mapVersionsToTimestamps(chunk))
+      )).flat();
+
+      // Use a Map for faster version-to-timestamp lookup
+      const versionToTimestampMap = new Map<number, number>(
+        allTimestampMappings.map(({ version, timestamp }) => [version, timestamp])
+      );
+
+      // Map addresses to their balances and corresponding timestamps
+      const addressBalanceMap = new Map<string, { balance: number; timestamp: number }>();
+      rows.forEach((row) => {
+        const version = row.latest_version;
+        const timestamp = versionToTimestampMap.get(version) ?? 0;
+        addressBalanceMap.set(row.address, {
+          balance: row.balance,
+          timestamp,
+        });
+      });
 
       // Adjust balances for slow wallets
-      rows = rows.map((row) => {
+      const result = rows.map((row) => {
         const unlockedBalance = slowWalletsMap.get(row.address);
         // Check if there's an unlocked balance, if not, use the original balance
         if (unlockedBalance !== undefined) {
           return { address: row.address, balance: unlockedBalance };
         }
-        return row;
+        return { address: row.address, balance: row.balance };
       });
 
-      return rows;
+      return result;
     } catch (error) {
       console.error("Error in getAllWalletsBalances:", error);
       throw error;

@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios from "axios";
 
@@ -14,8 +14,9 @@ import {
 } from "./types.js";
 import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
 import { OlService } from "../ol/ol.service.js";
+import { ICommunityWalletsService } from "../ol/community-wallets/interfaces.js";
+import { Types } from "../types.js";
 import _ from "lodash";
-import { CommunityWalletsResolver } from "../ol/community-wallets.resolver.js";
 
 @Injectable()
 export class StatsService {
@@ -24,7 +25,10 @@ export class StatsService {
   public constructor(
     private readonly clickhouseService: ClickhouseService,
     private readonly olService: OlService,
-    private readonly communityWalletsResolver: CommunityWalletsResolver,
+
+    @Inject(Types.ICommunityWalletsService)
+    private readonly communityWalletsService: ICommunityWalletsService,
+
     config: ConfigService,
   ) {
     this.dataApiHost = config.get("dataApiHost")!;
@@ -234,39 +238,6 @@ export class StatsService {
     }>();
 
     return rows;
-  }
-
-  // Calculates the libra balances of all accounts
-  private async getTotalLibraBalances(): Promise<number> {
-    try {
-      const query = `
-        SELECT
-            SUM(latest_balance) / 1e6 AS total_balance
-        FROM (
-            SELECT
-                argMax(balance, version) AS latest_balance
-            FROM coin_balance
-            WHERE coin_module = 'libra_coin'
-            GROUP BY address
-        )
-      `;
-
-      const resultSet = await this.clickhouseService.client.query({
-        query: query,
-        format: "JSONEachRow",
-      });
-
-      const result = await resultSet.json<{ total_balance: number }>();
-
-      // Assuming there's only one row returned
-      if (result.length > 0) {
-        return result[0].total_balance;
-      }
-      return 0;
-    } catch (error) {
-      console.error("Error in getTotalBalances:", error);
-      throw error;
-    }
   }
 
   private async getCommunityWalletsBalanceBreakdown(): Promise<NameValue[]> {
@@ -1286,7 +1257,8 @@ export class StatsService {
       }
 
       // Get the list of community wallets
-      const communityWallets = await this.communityWalletsResolver.communityWallets();
+      const communityWallets =
+        await this.communityWalletsService.getCommunityWallets();
       const communityAddresses = new Set(communityWallets.map(wallet => wallet.address.toString('hex').toUpperCase()));
 
       // Query to get the latest balances and versions from coin_balance

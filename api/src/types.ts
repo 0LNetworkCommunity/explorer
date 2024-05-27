@@ -5,4 +5,5 @@ export enum Types {
   ITransactionsFactory = "ITransactionsFactory",
   ITransaction = "ITransaction",
   IOnChainTransactionsRepository = "IOnChainTransactionsRepository",
+  ICommunityWalletsService = "ICommunityWalletsService",
 }

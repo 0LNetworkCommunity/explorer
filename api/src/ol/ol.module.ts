@@ -35,6 +35,7 @@ import { MovementsResolver } from "./movements/movements.resolver.js";
 import { MovementsService } from "./movements/movements.service.js";
 
 import { CommunityWalletsResolver } from "./community-wallets/community-wallets.resolver.js";
+import { CommunityWalletsService } from "./community-wallets/community-wallets.service.js";
 
 import { TransactionsResolver } from "./transactions/TransactionsResolver.js";
 import { TransactionResolver } from "./transactions/TransactionResolver.js";
@@ -107,7 +108,12 @@ for (const role of roles) {
 
     ValidatorResolver,
     ValidatorsResolver,
+
     CommunityWalletsResolver,
+    {
+      provide: Types.ICommunityWalletsService,
+      useClass: CommunityWalletsService,
+    },
 
     OlService,
     MovementsService,
@@ -141,6 +147,6 @@ for (const role of roles) {
     ...workers,
   ],
   controllers: [OlController],
-  exports: [OlService, TransformerService, CommunityWalletsResolver],
+  exports: [OlService, TransformerService, Types.ICommunityWalletsService],
 })
 export class OlModule {}

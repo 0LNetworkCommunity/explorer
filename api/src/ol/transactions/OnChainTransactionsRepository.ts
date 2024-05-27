@@ -1,16 +1,13 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import BN from "bn.js";
-import { Decimal } from "decimal.js";
 
 import {
   BlockMetadataTransactionDbEntity,
   GenesisTransactionDbEntity,
   IOnChainTransactionsRepository,
-  ITransactionsFactory,
   ScriptUserTransactionDbEntity,
   UserTransactionDbEntity,
 } from "./interfaces.js";
-import { Types } from "../../types.js";
 import { ClickhouseService } from "../../clickhouse/clickhouse.service.js";
 import { GqlUserTransaction } from "../models/GqlUserTransaction.js";
 import { GqlBlockMetadataTransaction } from "../models/GqlBlockMetadataTransaction.js";

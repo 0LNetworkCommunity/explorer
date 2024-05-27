@@ -1,4 +1,6 @@
 import { PendingTransactionStatus } from "@prisma/client";
+import { SignedTransaction } from "@aptos-labs/ts-sdk";
+
 import { GqlUserTransaction } from "../models/GqlUserTransaction.js";
 import { GqlBlockMetadataTransaction } from "../models/GqlBlockMetadataTransaction.js";
 import { GqlScriptUserTransaction } from "../models/GqlScriptUserTransaction.js";
@@ -6,22 +8,44 @@ import { GqlGenesisTransaction } from "../models/GqlGenesisTransaction.js";
 import { AbstractTransaction } from "../models/GqlTransaction.js";
 
 export interface ITransactionsRepository {
-  newTransaction(signedTransaction: Uint8Array): Promise<Uint8Array>;
+  newTransaction(signedTransaction: SignedTransaction): Promise<boolean>;
   getWalletTransactions(address: Uint8Array): Promise<ITransaction[]>;
+  getTransactionByHash(hash: Uint8Array): Promise<ITransaction>;
+  getTransactionsExpiredAfter(
+    timestamp: number,
+    limit: number,
+  ): Promise<Uint8Array[]>;
+  updateTransactionStatus(
+    hash: Uint8Array,
+    from: PendingTransactionStatus | undefined,
+    to: PendingTransactionStatus,
+  ): Promise<boolean>;
 }
 
 export interface ITransactionsService {
-  newTransaction(signedTransaction: Uint8Array): Promise<Uint8Array>;
+  newTransaction(signedTransaction: SignedTransaction): Promise<boolean>;
   getWalletTransactions(address: Uint8Array): Promise<ITransaction[]>;
+  getTransactionByHash(hash: Uint8Array): Promise<ITransaction>;
+  getTransactionsExpiredAfter(
+    timestamp: number,
+    limit: number,
+  ): Promise<Uint8Array[]>;
+  updateTransactionStatus(
+    hash: Uint8Array,
+    from: PendingTransactionStatus | undefined,
+    to: PendingTransactionStatus,
+  ): Promise<void>;
 }
 
 export interface TransactionArgs {
   hash: Uint8Array;
+  sender: Uint8Array;
   status: PendingTransactionStatus;
 }
 
 export interface ITransaction {
   hash: Uint8Array;
+  sender: Uint8Array;
 
   init(args: TransactionArgs): void;
 }

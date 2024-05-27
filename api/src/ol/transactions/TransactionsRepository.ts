@@ -1,9 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
-import { sha3_256 } from "@noble/hashes/sha3";
+import { PendingTransactionStatus, Prisma } from "@prisma/client";
 import {
-  Deserializer,
-  Serializer,
   SignedTransaction,
   TransactionPayloadEntryFunction,
   TransactionAuthenticatorEd25519,
@@ -16,6 +13,7 @@ import {
 } from "./interfaces.js";
 import { PrismaService } from "../../prisma/prisma.service.js";
 import { Types } from "../../types.js";
+import { getTransactionHash } from "../../utils.js";
 
 @Injectable()
 export class TransactionsRepository implements ITransactionsRepository {
@@ -27,24 +25,13 @@ export class TransactionsRepository implements ITransactionsRepository {
   ) {}
 
   public async newTransaction(
-    signedTransactionArg: Uint8Array,
-  ): Promise<Uint8Array> {
-    const deserializer = new Deserializer(signedTransactionArg);
-    const signedTransaction = SignedTransaction.deserialize(deserializer);
-
-    const serializer = new Serializer();
-    signedTransaction.serialize(serializer);
-
+    signedTransaction: SignedTransaction,
+  ): Promise<boolean> {
     if (
       signedTransaction.raw_txn.payload instanceof
       TransactionPayloadEntryFunction
     ) {
-      const txHash = sha3_256
-        .create()
-        .update(sha3_256.create().update("DIEM::Transaction").digest())
-        .update(new Uint8Array([0]))
-        .update(serializer.toUint8Array())
-        .digest();
+      const txHash = getTransactionHash(signedTransaction);
 
       if (
         signedTransaction.authenticator instanceof
@@ -59,7 +46,7 @@ export class TransactionsRepository implements ITransactionsRepository {
           return `\\x${Buffer.from(input).toString("hex")}`;
         };
 
-        await this.prisma.$queryRaw`
+        const affectedRows = await this.prisma.$queryRaw<{ hash: Buffer }[]>`
           INSERT INTO "PendingTransaction" (
             "hash", "sender", "sequenceNumber",
             "maxGasAmount", "gasUnitPrice", "expirationTimestampSecs",
@@ -87,11 +74,15 @@ export class TransactionsRepository implements ITransactionsRepository {
             ${[]}
           )
           ON CONFLICT DO NOTHING
+          RETURNING "hash"
         `;
-
+        if (affectedRows.length) {
+          return true;
+        }
+        return false;
+      } else {
         throw new Error("unsupported transaction authenticator");
       }
-      return txHash;
     }
 
     throw new Error("unsupported transaction payload type");
@@ -110,10 +101,77 @@ export class TransactionsRepository implements ITransactionsRepository {
       rows.map((row) =>
         this.transactionsFactory.createTransaction({
           hash: row.hash,
-          // sender: row.sender,
+          sender: row.sender,
           status: row.status,
         }),
       ),
     );
+  }
+
+  public async getTransactionByHash(hash: Uint8Array): Promise<ITransaction> {
+    const transaction = await this.prisma.pendingTransaction.findFirst({
+      where: {
+        hash: Buffer.from(hash),
+      },
+    });
+    if (!transaction) {
+      throw new Error("transaction not found");
+    }
+
+    return this.transactionsFactory.createTransaction({
+      hash: transaction.hash,
+      sender: transaction.sender,
+      status: transaction.status,
+    });
+  }
+
+  public async getTransactionsExpiredAfter(
+    timestamp: number,
+    limit: number,
+  ): Promise<Uint8Array[]> {
+    const transactions = await this.prisma.pendingTransaction.findMany({
+      select: {
+        hash: true,
+      },
+      where: {
+        expirationTimestampSecs: { lt: timestamp },
+        status: PendingTransactionStatus.UNKNOWN,
+      },
+      take: limit,
+      orderBy: {
+        expirationTimestampSecs: "asc",
+      },
+    });
+    return transactions.map((tx) => tx.hash);
+  }
+
+  public async updateTransactionStatus(
+    hash: Uint8Array,
+    from: PendingTransactionStatus | undefined,
+    to: PendingTransactionStatus,
+  ): Promise<boolean> {
+    if (from !== undefined) {
+      const hashes = await this.prisma.$queryRaw<{ hash: Buffer }[]>`
+        UPDATE "PendingTransaction"
+        SET "status" = (${to})::"PendingTransactionStatus"
+        WHERE
+          "hash" = ${Prisma.raw(`'\\x${Buffer.from(hash).toString("hex")}'`)}
+        AND
+          "status" = (${from})::"PendingTransactionStatus"
+        RETURNING "hash"
+      `;
+      return hashes.length > 0;
+    }
+
+    const hashes = await this.prisma.$queryRaw<{ hash: Buffer }[]>`
+      UPDATE "PendingTransaction"
+      SET "status" = (${to})::"PendingTransactionStatus"
+      WHERE
+        "hash" = ${Prisma.raw(`'\\x${Buffer.from(hash).toString("hex")}'`)}
+      AND
+        "status" != (${to})::"PendingTransactionStatus"
+      RETURNING "hash"
+    `;
+    return hashes.length > 0;
   }
 }

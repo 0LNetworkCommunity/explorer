@@ -118,13 +118,13 @@ type CommunityWallet {
 
 type Transaction {
   hash: Bytes!
+  sender: Bytes!
   status: TransactionStatus!
   onChainTransaction: AbstractTransaction
 }
 
 enum TransactionStatus {
   UNKNOWN
-  SENT
   ON_CHAIN
   EXPIRED
 }
@@ -183,7 +183,7 @@ type Query {
 }
 
 type Mutation {
-  newTransaction(signedTransaction: Bytes!): Boolean!
+  newTransaction(signedTransaction: Bytes!): Transaction!
   walletSubscribe(walletAddress: Bytes!, deviceToken: String!, deviceType: DeviceType!): Boolean!
 }
 
@@ -194,5 +194,5 @@ enum DeviceType {
 
 type Subscription {
   walletMovement(address: Bytes!): String!
-  walletTransaction(address: Bytes!): String!
+  walletTransaction(address: Bytes!): Transaction!
 }

@@ -48,7 +48,6 @@ model Node {
 
 enum PendingTransactionStatus {
   UNKNOWN
-  SENT
   ON_CHAIN
   EXPIRED
 }

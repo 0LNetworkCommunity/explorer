@@ -43,6 +43,7 @@ import { TransactionsRepository } from "./transactions/TransactionsRepository.js
 import { TransactionsService } from "./transactions/TransactionsService.js";
 import { Transaction } from "./transactions/Transaction.js";
 import { OnChainTransactionsRepository } from "./transactions/OnChainTransactionsRepository.js";
+import { ExpiredTransactionsProcessor } from "./transactions/ExpiredTransactionsProcessor.js";
 
 const roles = process.env.ROLES!.split(",");
 
@@ -51,6 +52,7 @@ const workersMap = new Map<string, Type<any>>([
   ["parquet-producer-processor", OlParquetProducerProcessor],
   ["version-processor", OlVersionProcessor],
   ["clickhouse-ingestor-processor", OlClickhouseIngestorProcessor],
+  ["expired-transactions-processor", ExpiredTransactionsProcessor],
 ]);
 
 const workers: Type<any>[] = [];
@@ -88,6 +90,11 @@ for (const role of roles) {
 
     BullModule.registerQueue({
       name: "ol-version",
+      connection: redisClient,
+    }),
+
+    BullModule.registerQueue({
+      name: "expired-transactions",
       connection: redisClient,
     }),
   ],

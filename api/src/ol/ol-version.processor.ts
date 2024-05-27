@@ -4,15 +4,16 @@ import fs from "node:fs";
 
 import _ from "lodash";
 import { InjectQueue, Processor, WorkerHost } from "@nestjs/bullmq";
-import { OnModuleInit } from "@nestjs/common";
+import { Inject, OnModuleInit } from "@nestjs/common";
 import { Job, Queue } from "bullmq";
 import BN from "bn.js";
 import axios from "axios";
 import Bluebird from "bluebird";
-import { Types } from "aptos";
+import { Types as AptosTypes } from "aptos";
 import { JSONCodec } from "nats";
 import { ConfigService } from "@nestjs/config";
 import qs from "qs";
+import { PendingTransactionStatus } from "@prisma/client";
 
 import { OlDbService } from "../ol-db/ol-db.service.js";
 import { ClickhouseQueryResponse, ClickhouseService } from "../clickhouse/clickhouse.service.js";
@@ -21,7 +22,9 @@ import { NotPendingTransaction } from "./types.js";
 import { OlConfig } from "../config/config.interface.js";
 import { WalletSubscriptionService } from "../wallet-subscription/wallet-subscription.service.js";
 import { NatsService } from "../nats/nats.service.js";
-import { bnBisect } from "../utils.js";
+import { bnBisect, parseHexString } from "../utils.js";
+import { ITransactionsService } from "./transactions/interfaces.js";
+import { Types } from "../types.js";
 
 const ZERO = new BN(0);
 const ONE = new BN(1);
@@ -63,6 +66,9 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     private readonly natsService: NatsService,
 
     private readonly walletSubscriptionService: WalletSubscriptionService,
+
+    @Inject(Types.ITransactionsService)
+    private readonly transactionsService: ITransactionsService,
   ) {
     super();
 
@@ -246,7 +252,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       })}`,
       signal: AbortSignal.timeout(5 * 60 * 1_000), // 5 minutes
     });
-    const transactions: Types.Transaction[] = res.data;
+    const transactions: AptosTypes.Transaction[] = res.data;
 
     if (!transactions.length) {
       throw new Error(`transaction not found ${version}`);
@@ -280,7 +286,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     }
   }
 
-  private async ingestTransaction(transaction: Types.Transaction) {
+  private async ingestTransaction(transaction: AptosTypes.Transaction) {
     if (transaction.type === "pending_transaction") {
       return;
     }
@@ -342,6 +348,15 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       notPendingTransaction.version,
     );
     await this.publishChanges(notPendingTransaction.version);
+
+    if (transaction.type === "user_transaction") {
+      const userTransaction = transaction as AptosTypes.UserTransaction;
+      await this.transactionsService.updateTransactionStatus(
+        parseHexString(userTransaction.hash),
+        undefined,
+        PendingTransactionStatus.ON_CHAIN,
+      );
+    }
   }
 
   private async publishChanges(version: string) {

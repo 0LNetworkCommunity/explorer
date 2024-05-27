@@ -1,9 +1,6 @@
 import { Parent, ResolveField, Resolver } from "@nestjs/graphql";
 import { Transaction } from "./Transaction.js";
-import {
-  AbstractTransaction,
-  GqlTransaction,
-} from "../models/GqlTransaction.js";
+import { AbstractTransaction } from "../models/GqlTransaction.js";
 import { IOnChainTransactionsRepository, ITransaction } from "./interfaces.js";
 import { Inject } from "@nestjs/common";
 import { Types } from "../../types.js";

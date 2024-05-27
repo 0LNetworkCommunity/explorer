@@ -84,10 +84,18 @@ export class TransactionsResolver {
     @Args({ name: "address", type: () => Buffer })
     address: Buffer,
   ) {
-    const walletAddress = address.toString("hex").toUpperCase();
+    let address32: Uint8Array;
+    if (address.length === 16) {
+      address32 = new Uint8Array(Buffer.concat([Buffer.alloc(16), address]));
+    } else if (address.length === 32) {
+      address32 = address;
+    } else {
+      throw new Error(`invalid address length ${address.length}`);
+    }
+
     return new Repeater(async (push, stop) => {
       const sub = this.natsService.nc.subscribe(
-        `wallet.${walletAddress}.transaction`,
+        `wallet.${Buffer.from(address32).toString("hex").toUpperCase()}.transaction`,
         {
           callback: async (err, msg) => {
             if (err) {

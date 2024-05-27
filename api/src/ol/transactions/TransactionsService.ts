@@ -34,6 +34,8 @@ export class TransactionsService implements ITransactionsService {
         .toUpperCase();
 
       const hash = getTransactionHash(signedTransaction);
+      console.log(`PUB wallet.${sender}.transaction`);
+
       this.natsService.nc.publish(
         `wallet.${sender}.transaction`,
         TransactionsService.jsonCodec.encode({
@@ -80,6 +82,7 @@ export class TransactionsService implements ITransactionsService {
         .toString("hex")
         .toUpperCase();
 
+      console.log(`PUB wallet.${sender}.transaction`);
       this.natsService.nc.publish(
         `wallet.${sender}.transaction`,
         TransactionsService.jsonCodec.encode({

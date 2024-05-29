@@ -1,6 +1,7 @@
 import { JSONCodec } from "nats";
 import { Inject, Injectable } from "@nestjs/common";
 import { SignedTransaction } from "@aptos-labs/ts-sdk";
+import { PendingTransactionStatus } from "@prisma/client";
 
 import {
   ITransaction,
@@ -10,7 +11,6 @@ import {
 import { Types } from "../../types.js";
 import { NatsService } from "../../nats/nats.service.js";
 import { getTransactionHash } from "../../utils.js";
-import { PendingTransactionStatus } from "@prisma/client";
 
 @Injectable()
 export class TransactionsService implements ITransactionsService {
@@ -27,17 +27,12 @@ export class TransactionsService implements ITransactionsService {
     signedTransaction: SignedTransaction,
   ): Promise<boolean> {
     if (await this.transactionsRepository.newTransaction(signedTransaction)) {
-      const sender = Buffer.from(
-        signedTransaction.raw_txn.sender.toUint8Array(),
-      )
-        .toString("hex")
-        .toUpperCase();
-
       const hash = getTransactionHash(signedTransaction);
-      console.log(`PUB wallet.${sender}.transaction`);
 
       this.natsService.nc.publish(
-        `wallet.${sender}.transaction`,
+        this.natsService.getWalletTransactionChannel(
+          signedTransaction.raw_txn.sender.toUint8Array(),
+        ),
         TransactionsService.jsonCodec.encode({
           hash: Buffer.from(hash).toString("hex").toUpperCase(),
         }),
@@ -77,14 +72,8 @@ export class TransactionsService implements ITransactionsService {
       await this.transactionsRepository.updateTransactionStatus(hash, from, to)
     ) {
       const transaction = await this.getTransactionByHash(hash);
-
-      const sender = Buffer.from(transaction.sender)
-        .toString("hex")
-        .toUpperCase();
-
-      console.log(`PUB wallet.${sender}.transaction`);
       this.natsService.nc.publish(
-        `wallet.${sender}.transaction`,
+        this.natsService.getWalletTransactionChannel(transaction.sender),
         TransactionsService.jsonCodec.encode({
           hash: Buffer.from(transaction.hash).toString("hex").toUpperCase(),
         }),
@@ -92,4 +81,3 @@ export class TransactionsService implements ITransactionsService {
     }
   }
 }
-

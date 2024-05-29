@@ -35,6 +35,14 @@ export class TransactionsResolver {
     return this.transactionsService.getWalletTransactions(address);
   }
 
+  @Query(() => Transaction, { name: "transaction" })
+  public async getTransaction(
+    @Args("hash", { type: () => Buffer })
+    hash: Uint8Array,
+  ): Promise<ITransaction> {
+    return this.transactionsService.getTransactionByHash(hash);
+  }
+
   @Mutation(() => Transaction)
   public async newTransaction(
     @Args("signedTransaction", { type: () => Buffer })
@@ -84,18 +92,9 @@ export class TransactionsResolver {
     @Args({ name: "address", type: () => Buffer })
     address: Buffer,
   ) {
-    let address32: Uint8Array;
-    if (address.length === 16) {
-      address32 = new Uint8Array(Buffer.concat([Buffer.alloc(16), address]));
-    } else if (address.length === 32) {
-      address32 = address;
-    } else {
-      throw new Error(`invalid address length ${address.length}`);
-    }
-
     return new Repeater(async (push, stop) => {
       const sub = this.natsService.nc.subscribe(
-        `wallet.${Buffer.from(address32).toString("hex").toUpperCase()}.transaction`,
+        this.natsService.getWalletTransactionChannel(address),
         {
           callback: async (err, msg) => {
             if (err) {

@@ -33,4 +33,30 @@ export class NatsService implements OnModuleInit, OnApplicationShutdown {
     await this.nc.drain();
     await done;
   }
+
+  public getWalletTransactionChannel(address: Uint8Array): string {
+    let address32: Uint8Array;
+    if (address.length === 16) {
+      address32 = new Uint8Array(Buffer.concat([Buffer.alloc(16), address]));
+    } else if (address.length === 32) {
+      address32 = address;
+    } else {
+      throw new Error(`invalid address length ${address.length}`);
+    }
+
+    return `wallet.${Buffer.from(address32).toString("hex").toUpperCase()}.transaction`;
+  }
+
+  public getWalletMovementChannel(address: Uint8Array): string {
+    let address32: Uint8Array;
+    if (address.length === 16) {
+      address32 = new Uint8Array(Buffer.concat([Buffer.alloc(16), address]));
+    } else if (address.length === 32) {
+      address32 = address;
+    } else {
+      throw new Error(`invalid address length ${address.length}`);
+    }
+
+    return `wallet.${Buffer.from(address32).toString("hex").toUpperCase()}.movement`;
+  }
 }

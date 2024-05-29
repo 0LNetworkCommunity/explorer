@@ -389,8 +389,9 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     }
 
     for (const address of rows.data.address) {
+      const chan = this.natsService.getWalletMovementChannel(Buffer.from(address, "hex"));
       this.natsService.nc.publish(
-        `wallet.${address}.movement`,
+        chan,
         OlVersionProcessor.jsonCodec.encode({
           version,
         }),

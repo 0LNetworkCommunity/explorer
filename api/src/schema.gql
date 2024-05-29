@@ -179,6 +179,7 @@ type Query {
   validators: [Validator!]!
   communityWallets: [CommunityWallet!]!
   walletTransactions(address: Bytes!): [Transaction!]!
+  transaction(hash: Bytes!): Transaction!
   nodes: [Node!]
 }
 

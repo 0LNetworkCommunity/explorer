@@ -352,23 +352,23 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     if (transaction.type === "user_transaction") {
       const userTransaction = transaction as AptosTypes.UserTransaction;
 
-      // returns false if no pending transaction was found. We need to explicitly trigger
-      // the transaction event for this wallet
-      if (
-        !(await this.transactionsService.updateTransactionStatus(
-          parseHexString(userTransaction.hash),
+      const txHash = parseHexString(userTransaction.hash);
+      const transactionUpdated = await this.transactionsService.updateTransactionStatus(
+          txHash,
           undefined,
           PendingTransactionStatus.ON_CHAIN,
-        ))
-      ) {
+        );
+
+      // `updateTransactionStatus` returns false if no pending transaction was found. We need to explicitly trigger
+      // the transaction event in that case.
+
+      if (!transactionUpdated) {
         this.natsService.nc.publish(
           this.natsService.getWalletTransactionChannel(
-            Buffer.from(userTransaction.sender, "hex"),
+            parseHexString(userTransaction.sender),
           ),
           OlVersionProcessor.jsonCodec.encode({
-            hash: Buffer.from(userTransaction.hash, "hex")
-              .toString("hex")
-              .toUpperCase(),
+            hash: Buffer.from(txHash).toString("hex").toUpperCase(),
           }),
         );
       }

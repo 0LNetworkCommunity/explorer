@@ -17,6 +17,9 @@ import { NatsModule } from "../nats/nats.module.js";
 import { OlSwapModule } from "../ol-swap/OlSwapModule.js";
 import { MultiSigModule } from "../multi-sig/multi-sig.module.js";
 
+// Test purposes
+import { OsmosisModule } from "../clickhouse/bridged-networks/osmosis/OsmosisModule.js";
+
 @Module({
   imports: [
     NatsModule,
@@ -47,6 +50,7 @@ import { MultiSigModule } from "../multi-sig/multi-sig.module.js";
     OlSwapModule,
     NodeWatcherModule,
     MultiSigModule,
+    OsmosisModule,
   ],
   controllers: [],
   providers: [AppService],

@@ -99,13 +99,13 @@ type Movement {
   transaction: AbstractTransaction!
 }
 
-type GqlMovementEdge {
+type MovementEdge {
   cursor: String!
   node: Movement!
 }
 
 type PaginatedMovements {
-  edges: [GqlMovementEdge!]
+  edges: [MovementEdge!]
   totalCount: Float!
   pageInfo: PageInfo!
 }

@@ -2,10 +2,9 @@ import { Field, ObjectType } from "@nestjs/graphql";
 import BN from "bn.js";
 import { Decimal } from "decimal.js";
 
-import { AbstractTransaction } from "./GqlTransaction.js";
-import { GqlAbstractTransaction } from "./GqlAbstractTransaction.js";
+import { AbstractTransaction } from "./AbstractTransaction.js";
 
-export interface GqlMovementInput {
+export interface MovementInput {
   amount: Decimal;
   unlockedAmount: Decimal;
   lockedAmount: Decimal;
@@ -17,8 +16,8 @@ export interface GqlMovementInput {
 }
 
 @ObjectType("Movement")
-export class GqlMovement {
-  public constructor(input: GqlMovementInput) {
+export class Movement {
+  public constructor(input: MovementInput) {
     this.balance = input.balance;
     this.lockedBalance = input.lockedBalance;
 
@@ -48,6 +47,6 @@ export class GqlMovement {
   @Field(() => BN)
   public version: BN;
 
-  @Field(() => GqlAbstractTransaction)
+  @Field(() => AbstractTransaction)
   public transaction: AbstractTransaction;
 }

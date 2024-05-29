@@ -6,7 +6,7 @@ export interface AbstractTransactionInput {
 }
 
 @InterfaceType("AbstractTransaction")
-export abstract class GqlAbstractTransaction {
+export abstract class AbstractTransaction {
   @Field(() => BN)
   version: BN;
 }

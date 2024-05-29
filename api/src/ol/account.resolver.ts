@@ -13,7 +13,7 @@ import { OlService } from "./ol.service.js";
 import { GqlAccount } from "./models/account.model.js";
 import { GqlSlowWallet } from "./models/slow-wallet.model.js";
 import { OrderDirection } from "./models/Paginated.js";
-import { PaginatedMovements } from "./models/movements.model.js";
+import { PaginatedMovements } from "./models/PaginatedMovements.js";
 import { MovementsService } from "./movements/movements.service.js";
 
 export interface CoinStoreResource {

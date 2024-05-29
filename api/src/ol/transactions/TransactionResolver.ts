@@ -1,10 +1,10 @@
 import { Parent, ResolveField, Resolver } from "@nestjs/graphql";
-import { Transaction } from "./Transaction.js";
-import { AbstractTransaction } from "../models/GqlTransaction.js";
-import { IOnChainTransactionsRepository, ITransaction } from "./interfaces.js";
 import { Inject } from "@nestjs/common";
+
+import { Transaction } from "./Transaction.js";
+import { IOnChainTransactionsRepository, ITransaction } from "./interfaces.js";
 import { Types } from "../../types.js";
-import { GqlAbstractTransaction } from "../models/GqlAbstractTransaction.js";
+import { AbstractTransaction } from "../models/AbstractTransaction.js";
 
 @Resolver(Transaction)
 export class TransactionResolver {
@@ -13,7 +13,7 @@ export class TransactionResolver {
     private readonly onChainTransactionsRepository: IOnChainTransactionsRepository,
   ) {}
 
-  @ResolveField(() => GqlAbstractTransaction, { nullable: true })
+  @ResolveField(() => AbstractTransaction, { nullable: true })
   public async onChainTransaction(
     @Parent() transaction: ITransaction,
   ): Promise<AbstractTransaction | null> {

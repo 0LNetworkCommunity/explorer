@@ -3,10 +3,10 @@ import BN from "bn.js";
 
 import {
   AbstractTransactionInput,
-  GqlAbstractTransaction,
-} from "./GqlAbstractTransaction.js";
+  AbstractTransaction,
+} from "./AbstractTransaction.js";
 
-export type GqlUserTransactionInput = AbstractTransactionInput & {
+export type UserTransactionInput = AbstractTransactionInput & {
   hash: Uint8Array;
   sender: Buffer;
   success: boolean;
@@ -18,9 +18,9 @@ export type GqlUserTransactionInput = AbstractTransactionInput & {
 };
 
 @ObjectType("UserTransaction", {
-  implements: () => [GqlAbstractTransaction],
+  implements: () => [AbstractTransaction],
 })
-export class GqlUserTransaction implements GqlAbstractTransaction {
+export class UserTransaction implements AbstractTransaction {
   @Field(() => Buffer)
   public hash: Uint8Array;
 
@@ -48,7 +48,7 @@ export class GqlUserTransaction implements GqlAbstractTransaction {
   @Field(() => String)
   public arguments: string;
 
-  public constructor(input: GqlUserTransactionInput) {
+  public constructor(input: UserTransactionInput) {
     this.hash = input.hash;
     this.sender = input.sender;
     this.timestamp = input.timestamp;

@@ -1,11 +1,11 @@
 import { PendingTransactionStatus } from "@prisma/client";
 import { SignedTransaction } from "@aptos-labs/ts-sdk";
 
-import { GqlUserTransaction } from "../models/GqlUserTransaction.js";
-import { GqlBlockMetadataTransaction } from "../models/GqlBlockMetadataTransaction.js";
-import { GqlScriptUserTransaction } from "../models/GqlScriptUserTransaction.js";
-import { GqlGenesisTransaction } from "../models/GqlGenesisTransaction.js";
-import { AbstractTransaction } from "../models/GqlTransaction.js";
+import { UserTransaction } from "../models/UserTransaction.js";
+import { BlockMetadataTransaction } from "../models/BlockMetadataTransaction.js";
+import { ScriptUserTransaction } from "../models/ScriptUserTransaction.js";
+import { GenesisTransaction } from "../models/GenesisTransaction.js";
+import { AbstractTransaction } from "../models/Transaction.js";
 
 export interface ITransactionsRepository {
   newTransaction(signedTransaction: SignedTransaction): Promise<boolean>;
@@ -34,7 +34,7 @@ export interface ITransactionsService {
     hash: Uint8Array,
     from: PendingTransactionStatus | undefined,
     to: PendingTransactionStatus,
-  ): Promise<void>;
+  ): Promise<boolean>;
 }
 
 export interface TransactionArgs {
@@ -61,19 +61,19 @@ export interface IOnChainTransactionsRepository {
 
   getUserTransactionsByVersions(
     versions: number[],
-  ): Promise<Map<string, GqlUserTransaction>>;
+  ): Promise<Map<string, UserTransaction>>;
 
   getBlockMetadataTransactionsByVersions(
     versions: number[],
-  ): Promise<Map<string, GqlBlockMetadataTransaction>>;
+  ): Promise<Map<string, BlockMetadataTransaction>>;
 
   getScriptUserTransactionsByVersions(
     versions: number[],
-  ): Promise<Map<string, GqlScriptUserTransaction>>;
+  ): Promise<Map<string, ScriptUserTransaction>>;
 
   getGenesisTransactionsByVersions(
     versions: number[],
-  ): Promise<Map<string, GqlGenesisTransaction>>;
+  ): Promise<Map<string, GenesisTransaction>>;
 }
 
 export interface GenesisTransactionDbEntity {

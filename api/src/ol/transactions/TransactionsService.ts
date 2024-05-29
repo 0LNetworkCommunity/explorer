@@ -67,7 +67,7 @@ export class TransactionsService implements ITransactionsService {
     hash: Uint8Array,
     from: PendingTransactionStatus | undefined,
     to: PendingTransactionStatus,
-  ): Promise<void> {
+  ): Promise<boolean> {
     if (
       await this.transactionsRepository.updateTransactionStatus(hash, from, to)
     ) {
@@ -78,6 +78,8 @@ export class TransactionsService implements ITransactionsService {
           hash: Buffer.from(transaction.hash).toString("hex").toUpperCase(),
         }),
       );
+      return true;
     }
+    return false;
   }
 }

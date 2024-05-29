@@ -7,9 +7,9 @@ import { Decimal } from "decimal.js";
 
 import { NatsService } from "../../nats/nats.service.js";
 import { OlConfig } from "../../config/config.interface.js";
-import { GqlMovement } from "../models/GqlMovement.js";
+import { Movement } from "../models/Movement.js";
 import { OrderDirection, PageInfo } from "../models/Paginated.js";
-import { PaginatedMovements } from "../models/movements.model.js";
+import { PaginatedMovements } from "../models/PaginatedMovements.js";
 import { IOnChainTransactionsRepository } from "../transactions/interfaces.js";
 import { Types } from "../../types.js";
 
@@ -189,7 +189,7 @@ export class MovementsService {
         unlockedAmount = unlockedAmount.minus(prevUnlockedBalance);
       }
 
-      return new GqlMovement({
+      return new Movement({
         version: new BN(version),
         transaction: transaction!,
         lockedBalance: lockedBalance.div(1e6),

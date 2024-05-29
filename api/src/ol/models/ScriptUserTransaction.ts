@@ -3,19 +3,19 @@ import BN from "bn.js";
 
 import {
   AbstractTransactionInput,
-  GqlAbstractTransaction,
-} from "./GqlAbstractTransaction.js";
+  AbstractTransaction,
+} from "./AbstractTransaction.js";
 
-export type GqlScriptUserTransactionInput = AbstractTransactionInput & {
+export type ScriptUserTransactionInput = AbstractTransactionInput & {
   sender: Buffer;
   success: boolean;
   timestamp: BN;
 };
 
 @ObjectType("ScriptUserTransaction", {
-  implements: () => [GqlAbstractTransaction],
+  implements: () => [AbstractTransaction],
 })
-export class GqlScriptUserTransaction implements GqlAbstractTransaction {
+export class ScriptUserTransaction implements AbstractTransaction {
   @Field(() => BN)
   public version: BN;
 
@@ -28,7 +28,7 @@ export class GqlScriptUserTransaction implements GqlAbstractTransaction {
   @Field(() => Buffer)
   public sender: Buffer;
 
-  public constructor(input: GqlScriptUserTransactionInput) {
+  public constructor(input: ScriptUserTransactionInput) {
     this.sender = input.sender;
     this.timestamp = input.timestamp;
     this.version = input.version;

@@ -9,11 +9,11 @@ import {
   UserTransactionDbEntity,
 } from "./interfaces.js";
 import { ClickhouseService } from "../../clickhouse/clickhouse.service.js";
-import { GqlUserTransaction } from "../models/GqlUserTransaction.js";
-import { GqlBlockMetadataTransaction } from "../models/GqlBlockMetadataTransaction.js";
-import { GqlScriptUserTransaction } from "../models/GqlScriptUserTransaction.js";
-import { GqlGenesisTransaction } from "../models/GqlGenesisTransaction.js";
-import { AbstractTransaction } from "../models/GqlTransaction.js";
+import { UserTransaction } from "../models/UserTransaction.js";
+import { BlockMetadataTransaction } from "../models/BlockMetadataTransaction.js";
+import { ScriptUserTransaction } from "../models/ScriptUserTransaction.js";
+import { GenesisTransaction } from "../models/GenesisTransaction.js";
+import { AbstractTransaction } from "../models/Transaction.js";
 
 @Injectable()
 export class OnChainTransactionsRepository
@@ -30,7 +30,7 @@ export class OnChainTransactionsRepository
 
   public async getUserTransactionsByVersions(
     versions: number[],
-  ): Promise<Map<string, GqlUserTransaction>> {
+  ): Promise<Map<string, UserTransaction>> {
     if (!versions.length) {
       return new Map();
     }
@@ -62,7 +62,7 @@ export class OnChainTransactionsRepository
     const userTransactions = new Map(
       userTransactionRows.map((userTransaction) => [
         userTransaction.version,
-        new GqlUserTransaction({
+        new UserTransaction({
           hash: Buffer.from(userTransaction.hash, "hex"),
           sender: Buffer.from(userTransaction.sender, "hex"),
           timestamp: new BN(userTransaction.timestamp),
@@ -81,7 +81,7 @@ export class OnChainTransactionsRepository
 
   public async getBlockMetadataTransactionsByVersions(
     versions: number[],
-  ): Promise<Map<string, GqlBlockMetadataTransaction>> {
+  ): Promise<Map<string, BlockMetadataTransaction>> {
     if (!versions.length) {
       return new Map();
     }
@@ -107,7 +107,7 @@ export class OnChainTransactionsRepository
       blockMetadataTransactionRows.map((blockMetadataTransaction) => {
         return [
           blockMetadataTransaction.version,
-          new GqlBlockMetadataTransaction({
+          new BlockMetadataTransaction({
             timestamp: new BN(blockMetadataTransaction.timestamp),
             version: new BN(blockMetadataTransaction.version),
             epoch: new BN(blockMetadataTransaction.epoch),
@@ -121,7 +121,7 @@ export class OnChainTransactionsRepository
 
   public async getScriptUserTransactionsByVersions(
     versions: number[],
-  ): Promise<Map<string, GqlScriptUserTransaction>> {
+  ): Promise<Map<string, ScriptUserTransaction>> {
     if (!versions.length) {
       return new Map();
     }
@@ -145,7 +145,7 @@ export class OnChainTransactionsRepository
     return new Map(
       scriptUserTransactionRows.map((scriptUserTransaction) => [
         scriptUserTransaction.version,
-        new GqlScriptUserTransaction({
+        new ScriptUserTransaction({
           sender: Buffer.from(scriptUserTransaction.sender, "hex"),
           timestamp: new BN(scriptUserTransaction.timestamp),
           version: new BN(scriptUserTransaction.version),
@@ -157,7 +157,7 @@ export class OnChainTransactionsRepository
 
   public async getGenesisTransactionsByVersions(
     versions: number[],
-  ): Promise<Map<string, GqlGenesisTransaction>> {
+  ): Promise<Map<string, GenesisTransaction>> {
     if (!versions.length) {
       return new Map();
     }
@@ -182,7 +182,7 @@ export class OnChainTransactionsRepository
     return new Map(
       genesisTransactionRows.map((genesisTransaction) => [
         genesisTransaction.version,
-        new GqlGenesisTransaction({
+        new GenesisTransaction({
           version: new BN(genesisTransaction.version),
         }),
       ]),
@@ -191,7 +191,7 @@ export class OnChainTransactionsRepository
 
   public async getUserTransactionsByHashes(
     hashes: Uint8Array[],
-  ): Promise<Map<string, GqlUserTransaction>> {
+  ): Promise<Map<string, UserTransaction>> {
     if (!hashes.length) {
       return new Map();
     }
@@ -237,7 +237,7 @@ export class OnChainTransactionsRepository
     const userTransactions = new Map(
       userTransactionRows.map((userTransaction) => [
         Buffer.from(userTransaction.hash, "hex").toString("hex").toUpperCase(),
-        new GqlUserTransaction({
+        new UserTransaction({
           hash: Buffer.from(userTransaction.hash, "hex"),
           sender: Buffer.from(userTransaction.sender, "hex"),
           timestamp: new BN(userTransaction.timestamp),

@@ -3,19 +3,19 @@ import BN from "bn.js";
 
 import {
   AbstractTransactionInput,
-  GqlAbstractTransaction,
-} from "./GqlAbstractTransaction.js";
+  AbstractTransaction,
+} from "./AbstractTransaction.js";
 
-export type GqlBlockMetadataTransactionInput = AbstractTransactionInput & {
+export type BlockMetadataTransactionInput = AbstractTransactionInput & {
   epoch: BN;
   timestamp: BN;
 };
 
 @ObjectType("BlockMetadataTransaction", {
-  implements: () => [GqlAbstractTransaction],
+  implements: () => [AbstractTransaction],
 })
-export class GqlBlockMetadataTransaction implements GqlAbstractTransaction {
-  public constructor(input: GqlBlockMetadataTransactionInput) {
+export class BlockMetadataTransaction implements AbstractTransaction {
+  public constructor(input: BlockMetadataTransactionInput) {
     this.timestamp = input.timestamp;
     this.version = input.version;
     this.epoch = input.epoch;

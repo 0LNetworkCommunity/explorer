@@ -7,13 +7,16 @@ import {
 } from "@aptos-labs/ts-sdk";
 
 import {
+  IOnChainTransactionsRepository,
   ITransaction,
   ITransactionsFactory,
   ITransactionsRepository,
+  TransactionArgs,
 } from "./interfaces.js";
 import { PrismaService } from "../../prisma/prisma.service.js";
 import { Types } from "../../types.js";
 import { getTransactionHash } from "../../utils.js";
+import { UserTransaction } from "../models/UserTransaction.js";
 
 @Injectable()
 export class TransactionsRepository implements ITransactionsRepository {
@@ -22,6 +25,9 @@ export class TransactionsRepository implements ITransactionsRepository {
 
     @Inject(Types.ITransactionsFactory)
     private readonly transactionsFactory: ITransactionsFactory,
+
+    @Inject(Types.IOnChainTransactionsRepository)
+    private readonly onChainTransactionsRepository: IOnChainTransactionsRepository,
   ) {}
 
   public async newTransaction(
@@ -109,20 +115,43 @@ export class TransactionsRepository implements ITransactionsRepository {
   }
 
   public async getTransactionByHash(hash: Uint8Array): Promise<ITransaction> {
+    let args: TransactionArgs | undefined;
+
     const transaction = await this.prisma.pendingTransaction.findFirst({
       where: {
         hash: Buffer.from(hash),
       },
     });
-    if (!transaction) {
+    if (transaction) {
+      args = {
+        hash: transaction.hash,
+        sender: transaction.sender,
+        status: transaction.status,
+      };
+    } else {
+      const onChainTransactions =
+        await this.onChainTransactionsRepository.getTransactionsByHashes([
+          hash,
+        ]);
+      const onChainTransaction = onChainTransactions.get(
+        Buffer.from(hash).toString("hex").toUpperCase(),
+      );
+      if (onChainTransaction) {
+        if (onChainTransaction instanceof UserTransaction) {
+          args = {
+            hash: onChainTransaction.hash,
+            sender: onChainTransaction.sender,
+            status: PendingTransactionStatus.ON_CHAIN,
+          };
+        }
+      }
+    }
+
+    if (!args) {
       throw new Error("transaction not found");
     }
 
-    return this.transactionsFactory.createTransaction({
-      hash: transaction.hash,
-      sender: transaction.sender,
-      status: transaction.status,
-    });
+    return this.transactionsFactory.createTransaction(args);
   }
 
   public async getTransactionsExpiredAfter(

@@ -113,7 +113,7 @@ export class OsmosisLiveProcessor extends WorkerHost implements OnModuleInit {
               if (msg['@type'] === '/osmosis.poolmanager.v1beta1.MsgSwapExactAmountIn' || msg['@type'] === '/osmosis.poolmanager.v1beta1.MsgSwapExactAmountOut') {
                 await this.handlePoolSwapEvent(msg, timestamp, txhash);
               } else if (msg['@type'] === '/osmosis.tokenfactory.v1beta1.MsgMint') {
-                // await this.handleMintEvent(msg, timestamp, txhash);
+                await this.handleMintEvent(msg, timestamp, txhash);
               } else if (msg['@type'] === '/osmosis.tokenfactory.v1beta1.MsgBurn') {
                 await this.handleBurnEvent(msg, timestamp, txhash);
               } else if (msg['@type'] === '/cosmos.bank.v1beta1.MsgSend') {

@@ -29,7 +29,7 @@ interface PoolSwapEvent {
 export class OsmosisHistoricalProcessor extends WorkerHost {
   private readonly endpoint = 'https://osmosis.numia.xyz/v2/txs';
   private readonly pageSize = 100;
-  private readonly bigQueryClient = new BigQuery();
+  private readonly bigQueryClient: BigQuery;
 
   constructor(
     private readonly clickhouseService: ClickhouseService,
@@ -38,6 +38,13 @@ export class OsmosisHistoricalProcessor extends WorkerHost {
     private readonly osmosisQueue: Queue,
   ) {
     super();
+    // Path to service account key file
+    const keyFile = './bigquery_service_account.json';
+
+    // Create a BigQuery client
+    this.bigQueryClient = new BigQuery({
+      keyFilename: keyFile,
+    });
   }
 
   public async process(job: Job<any, any, string>): Promise<any> {
@@ -56,9 +63,9 @@ export class OsmosisHistoricalProcessor extends WorkerHost {
   }
 
   public async triggerFetchHistoricalData() {
-    // await this.osmosisQueue.add("fetchHistoricalData", undefined);
+    await this.osmosisQueue.add("fetchHistoricalData", undefined);
     // await this.fetchMintBurnEvents();
-    await this.fetchPoolSwapEvents();
+    // await this.fetchPoolSwapEvents();
   }
 
   private async fetchHistoricalData() {
@@ -161,7 +168,7 @@ export class OsmosisHistoricalProcessor extends WorkerHost {
     for (const row of rows) {
       const side = row.denom_in === 'factory/osmo19hdqma2mj0vnmgcxag6ytswjnr8a3y07q7e70p/wLIBRA' ? 'buy' : 'sell';
       const swapEvent = {
-        timestamp: new Date(row.ingestion_timestamp).getTime(),
+        timestamp: new Date(row.ingestion_timestamp.value).getTime(),
         sender: row.sender,
         side,
         amount: side === 'buy' ? row.parsed_amount_in : row.parsed_amount_out,
@@ -171,8 +178,7 @@ export class OsmosisHistoricalProcessor extends WorkerHost {
   }
 
   private async insertMintBurnEvent(event: MintBurnEvent) {
-    console.log('Mint/Burn Event:', event);
-    /*
+    // console.log('Mint/Burn Event:', event);
     await this.clickhouseService.client.insert({
       table: 'mint_burn_events',
       values: {
@@ -182,12 +188,10 @@ export class OsmosisHistoricalProcessor extends WorkerHost {
         address: event.address,
       }
     });
-    */
   }
 
   private async insertTransferEvent(event: TransferEvent) {
-    console.log('Transfer Event:', event);
-    /*
+    // console.log('Transfer Event:', event);
     await this.clickhouseService.client.insert({
       table: 'transfer_events',
       values: {
@@ -197,12 +201,10 @@ export class OsmosisHistoricalProcessor extends WorkerHost {
         amount: event.amount,
       }
     });
-    */
   }
 
   private async insertSwapEvent(event: PoolSwapEvent) {
-    console.log('Pool Swap Event:', event);
-    /*
+    // console.log('Pool Swap Event:', event);
     await this.clickhouseService.client.insert({
       table: 'pool_swap_events',
       values: {
@@ -212,6 +214,5 @@ export class OsmosisHistoricalProcessor extends WorkerHost {
         amount: event.amount,
       }
     });
-    */
   }
 }

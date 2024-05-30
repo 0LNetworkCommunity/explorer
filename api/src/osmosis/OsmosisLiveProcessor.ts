@@ -3,7 +3,8 @@ import { OnModuleInit } from "@nestjs/common";
 import { Job, Queue } from "bullmq";
 import axios from "axios";
 import Bluebird from "bluebird";
-import { ClickhouseService } from '../../clickhouse.service.js';
+
+import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
 
 interface PoolSwapEvent {
   timestamp: number;

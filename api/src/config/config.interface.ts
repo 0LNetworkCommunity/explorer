@@ -5,6 +5,7 @@ export interface Config {
 
   info: InfoConfig;
   ol: OlConfig;
+  numia: NumiaConfig;
   s3: S3Config;
   clickhouse: ClickhouseConfig;
   apn?: ApnConfig;
@@ -52,4 +53,8 @@ export interface FirebaseConfig {
 
 export interface NatsConfig {
   servers: string;
+}
+
+export interface NumiaConfig {
+  apiKey?: string;
 }

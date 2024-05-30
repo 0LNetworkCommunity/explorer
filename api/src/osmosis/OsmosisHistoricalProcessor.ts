@@ -1,8 +1,11 @@
-import { InjectQueue, Processor, WorkerHost } from "@nestjs/bullmq";
 import { Job, Queue } from "bullmq";
+import { BigQuery } from "@google-cloud/bigquery";
 import axios from "axios";
-import { ClickhouseService } from '../../clickhouse.service.js';
-import { BigQuery } from '@google-cloud/bigquery';
+import { InjectQueue, Processor, WorkerHost } from "@nestjs/bullmq";
+import { ConfigService } from "@nestjs/config";
+
+import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
+import { NumiaConfig } from "../config/config.interface.js";
 
 interface MintBurnEvent {
   timestamp: number;
@@ -27,19 +30,28 @@ interface PoolSwapEvent {
 
 @Processor("osmosis-historical")
 export class OsmosisHistoricalProcessor extends WorkerHost {
-  private readonly endpoint = 'https://osmosis.numia.xyz/v2/txs';
+  private readonly endpoint = "https://osmosis.numia.xyz/v2/txs";
+
   private readonly pageSize = 100;
+
+  private readonly numiaApiKey?: string;
+
   private readonly bigQueryClient: BigQuery;
 
   constructor(
+    config: ConfigService,
+
     private readonly clickhouseService: ClickhouseService,
 
     @InjectQueue("osmosis-historical")
     private readonly osmosisQueue: Queue,
   ) {
     super();
+
+    this.numiaApiKey = config.get<NumiaConfig>("numia")?.apiKey;
+
     // Path to service account key file
-    const keyFile = './bigquery_service_account.json';
+    const keyFile = "./bigquery_service_account.json";
 
     // Create a BigQuery client
     this.bigQueryClient = new BigQuery({
@@ -74,64 +86,64 @@ export class OsmosisHistoricalProcessor extends WorkerHost {
   }
 
   private async fetchMintBurnEvents() {
-    let page = 1;
-    let hasMore = true;
-
-    while (hasMore) {
+    for (let page = 1; ; ++page) {
       const url = `${this.endpoint}/osmo19hdqma2mj0vnmgcxag6ytswjnr8a3y07q7e70p?pageSize=${this.pageSize}&page=${page}`;
-      console.log(url)
       const response = await axios.get(url, {
         headers: {
-          Authorization: `Bearer ${process.env.NUMIA_API_KEY}`,
+          Authorization: `Bearer ${this.numiaApiKey}`,
         },
       });
       const events = response.data;
 
       if (events.length === 0) {
-        hasMore = false;
-        continue;
+        break;
       }
 
       for (const event of events) {
         const timestamp = new Date(event.blockTimestamp).getTime();
-        const type = event.messageTypes[0] === '/osmosis.tokenfactory.v1beta1.MsgMint' ? 'mint' : 'burn';
+        const type =
+          event.messageTypes[0] === "/osmosis.tokenfactory.v1beta1.MsgMint"
+            ? "mint"
+            : "burn";
         const amount = event.messages[0].amount.amount;
-        const address = type === 'mint' ? event.messages[0].mint_to_address : event.messages[0].burn_from_address;
+        const address =
+          type === "mint"
+            ? event.messages[0].mint_to_address
+            : event.messages[0].burn_from_address;
 
         await this.insertMintBurnEvent({ timestamp, type, amount, address });
 
-        if (type === 'mint') {
+        if (type === "mint") {
           // Not a proper DFS, just one hop away from minter
-          await this.fetchTransfersForAddress(event.messages[0].mint_to_address);
+          await this.fetchTransfersForAddress(
+            event.messages[0].mint_to_address,
+          );
         }
       }
-
-      page++;
     }
   }
 
   private async fetchTransfersForAddress(address: string) {
-    let page = 1;
-    let hasMore = true;
-
-    while (hasMore) {
+    for (let page = 1; ; ++page) {
       const url = `${this.endpoint}/${address}?pageSize=${this.pageSize}&page=${page}`;
       const response = await axios.get(url, {
         headers: {
-          Authorization: `Bearer ${process.env.NUMIA_API_KEY}`,
+          Authorization: `Bearer ${this.numiaApiKey}`,
         },
       });
       const events = response.data;
 
       if (events.length === 0) {
-        hasMore = false;
-        continue;
+        break;
       }
 
       for (const event of events) {
-        if (event.messageTypes.includes('/cosmos.bank.v1beta1.MsgSend')) {
+        if (event.messageTypes.includes("/cosmos.bank.v1beta1.MsgSend")) {
           for (const message of event.messages) {
-            if (message.amount[0].denom === 'factory/osmo19hdqma2mj0vnmgcxag6ytswjnr8a3y07q7e70p/wLIBRA') {
+            if (
+              message.amount[0].denom ===
+              "factory/osmo19hdqma2mj0vnmgcxag6ytswjnr8a3y07q7e70p/wLIBRA"
+            ) {
               const transferEvent = {
                 timestamp: new Date(event.blockTimestamp).getTime(),
                 from: message.from_address,
@@ -143,8 +155,6 @@ export class OsmosisHistoricalProcessor extends WorkerHost {
           }
         }
       }
-
-      page++;
     }
   }
 
@@ -166,12 +176,16 @@ export class OsmosisHistoricalProcessor extends WorkerHost {
     const [rows] = await this.bigQueryClient.query(query);
 
     for (const row of rows) {
-      const side = row.denom_in === 'factory/osmo19hdqma2mj0vnmgcxag6ytswjnr8a3y07q7e70p/wLIBRA' ? 'buy' : 'sell';
+      const side =
+        row.denom_in ===
+        "factory/osmo19hdqma2mj0vnmgcxag6ytswjnr8a3y07q7e70p/wLIBRA"
+          ? "buy"
+          : "sell";
       const swapEvent = {
         timestamp: new Date(row.ingestion_timestamp.value).getTime(),
         sender: row.sender,
         side,
-        amount: side === 'buy' ? row.parsed_amount_in : row.parsed_amount_out,
+        amount: side === "buy" ? row.parsed_amount_in : row.parsed_amount_out,
       };
       await this.insertSwapEvent(swapEvent);
     }
@@ -180,39 +194,39 @@ export class OsmosisHistoricalProcessor extends WorkerHost {
   private async insertMintBurnEvent(event: MintBurnEvent) {
     // console.log('Mint/Burn Event:', event);
     await this.clickhouseService.client.insert({
-      table: 'mint_burn_events',
+      table: "mint_burn_events",
       values: {
         timestamp: event.timestamp,
         type: event.type,
         amount: event.amount,
         address: event.address,
-      }
+      },
     });
   }
 
   private async insertTransferEvent(event: TransferEvent) {
     // console.log('Transfer Event:', event);
     await this.clickhouseService.client.insert({
-      table: 'transfer_events',
+      table: "transfer_events",
       values: {
         timestamp: event.timestamp,
         from: event.from,
         to: event.to,
         amount: event.amount,
-      }
+      },
     });
   }
 
   private async insertSwapEvent(event: PoolSwapEvent) {
     // console.log('Pool Swap Event:', event);
     await this.clickhouseService.client.insert({
-      table: 'pool_swap_events',
+      table: "pool_swap_events",
       values: {
         timestamp: event.timestamp,
         sender: event.sender,
         side: event.side,
         amount: event.amount,
-      }
+      },
     });
   }
 }

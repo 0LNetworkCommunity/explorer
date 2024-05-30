@@ -2,11 +2,11 @@ import process from "node:process";
 import { BullModule } from "@nestjs/bullmq";
 import { Module, Type } from "@nestjs/common";
 
-import { redisClient } from "../../../redis/redis.service.js";
-import { ClickhouseModule } from "../../clickhouse.module.js";
 import { OsmosisLiveProcessor } from "./OsmosisLiveProcessor.js";
 import { OsmosisHistoricalProcessor } from "./OsmosisHistoricalProcessor.js";
-import { OsmosisController } from './osmosis.controller.js';
+import { OsmosisController } from "./OsmosisController.js";
+import { ClickhouseModule } from "../clickhouse/clickhouse.module.js";
+import { redisClient } from "../redis/redis.service.js";
 
 const roles = process.env.ROLES!.split(",");
 

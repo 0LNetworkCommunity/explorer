@@ -18,6 +18,10 @@ export default (): Config => {
       dataApiHost: ENV.DATA_API_HOST!,
     },
 
+    numia: {
+      apiKey: ENV.NUMIA_API_KEY,
+    },
+
     s3: {
       region: ENV.S3_REGION!,
       endpoint: ENV.S3_ENDPOINT!,

@@ -12,10 +12,10 @@ const roles = process.env.ROLES!.split(",");
 
 const workers: Type<any>[] = [];
 if (roles.includes("osmosis-live-processor")) {
-  workers.push(OsmosisLiveProcessor);
+  // workers.push(OsmosisLiveProcessor);
 }
 if (roles.includes("osmosis-historical-processor")) {
-  workers.push(OsmosisHistoricalProcessor);
+  // workers.push(OsmosisHistoricalProcessor);
 }
 
 @Module({

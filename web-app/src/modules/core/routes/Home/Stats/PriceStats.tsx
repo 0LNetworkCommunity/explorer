@@ -1,10 +1,10 @@
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
+import clsx from 'clsx';
 
 import Logo from '../../../../ui/Logo/Logo';
 import { OL_COINGECKO_URL } from '../../../../../contants';
 import CoingeckoLogo from '../../../../assets/images/coingecko.png';
-import clsx from 'clsx';
 
 const PriceStats: FC = () => {
   const priceIsIncreasing = true;
@@ -64,7 +64,7 @@ const PriceStats: FC = () => {
       </div>
       {/* @TODO: DUMMY DATA */}
       <div className="flex gap-0.5 items-end mt-2">
-        <span className="text-4xl	font-medium mr-2">$0.01495</span>
+        <span className="text-4xl	font-medium mr-2">$0.00000</span>
         {priceIsIncreasing ? upIcon : downIcon}
         <span
           className={clsx(
@@ -80,22 +80,22 @@ const PriceStats: FC = () => {
       <div className="flex flex-col py-5 gap-2 border-b border-[#E5E5E5]">
         <div className="flex justify-between items-center">
           <span className="text-lg font-extralight">Marketcap</span>
-          <span className="text-lg font-medium">$134,591,404</span>
+          <span className="text-lg font-medium">$000,000,000</span>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-lg font-extralight">Trading Volume (24hrs)</span>
-          <span className="text-lg font-medium">$965,826</span>
+          <span className="text-lg font-medium">$000,000</span>
         </div>
       </div>
       {/* @TODO: DUMMY DATA */}
       <div className="grid grid-cols-2 pt-5 gap-2">
         <div className="flex flex-col items-start">
           <span className="text-lg font-extralight">Marketcap</span>
-          <span className="text-lg font-medium">$134,591,404</span>
+          <span className="text-lg font-medium">$000,000,000</span>
         </div>
         <div className="flex flex-col items-start">
           <span className="text-lg font-extralight">Trading Volume (24hrs)</span>
-          <span className="text-lg font-medium">$965,826</span>
+          <span className="text-lg font-medium">$000,000</span>
         </div>
       </div>
     </div>

@@ -17,6 +17,8 @@ const Stats: FC = () => {
   const validatorSet = useValidatorSet();
   const ledgerInfo = useLedgerInfo();
 
+  const dev = location.search.includes('dev=true');
+
   useEffect(() => {
     let timeout: NodeJS.Timeout | undefined = undefined;
     const load = async () => {
@@ -62,29 +64,33 @@ const Stats: FC = () => {
 
   return (
     <dl className="flex flex-col gap-[4px]">
-      <div className="grid grid-cols-1 gap-[4px] md:grid-cols-2">
-        <PriceStats />
-        <div className="bg-[#F5F5F5] p-5 relative overflow-hidden">
-          <div className="flex flex-col gap-4 relative z-20">
-            <span className="text-xl font-bold">Validator Map</span>
-            <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
-              {/* @TODO: DUMMY DATA */}
-              <div className="flex flex-col">
-                <span className="text-lg font-extralight">Total Validators</span>
-                <span className="text-xl font-medium">15</span>
-              </div>
-              {/* @TODO: DUMMY DATA */}
-              <div className="flex flex-col">
-                <span className="text-lg font-extralight">Eligible</span>
-                <span className="text-xl font-medium">70</span>
+      {dev && (
+        <div className="grid grid-cols-1 gap-[4px] md:grid-cols-2">
+          <PriceStats />
+
+          <div className="bg-[#F5F5F5] p-5 relative overflow-hidden">
+            <div className="flex flex-col gap-4 relative z-20">
+              <span className="text-xl font-bold">Validator Map</span>
+              <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
+                {/* @TODO: DUMMY DATA */}
+                <div className="flex flex-col">
+                  <span className="text-lg font-extralight">Total Validators</span>
+                  <span className="text-xl font-medium">15</span>
+                </div>
+                {/* @TODO: DUMMY DATA */}
+                <div className="flex flex-col">
+                  <span className="text-lg font-extralight">Eligible</span>
+                  <span className="text-xl font-medium">70</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="md:absolute md:top-[-80px] md:right-[-90px] md:h-[300px] md:w-[600px] z-10">
-            <NodeMap />
+            <div className="md:absolute md:top-[-80px] md:right-[-90px] md:h-[300px] md:w-[600px] z-10">
+              <NodeMap />
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
       <div className="grid grid-cols-2 gap-[4px] md:grid-cols-4">
         <div className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
           <span className="text-sm font-medium text-[#525252]">Total Supply</span>
@@ -96,6 +102,7 @@ const Stats: FC = () => {
             {totalSupply ? `${d3Format('.3f')(Math.floor(totalSupply.amount / 1e6) / 1e3)}B` : null}
           </span>
         </div>
+
         <Link
           to={ledgerInfo ? `/blocks/${ledgerInfo.block_height}` : '/'}
           className="flex flex-col bg-[#F5F5F5] p-5 gap-2"
@@ -109,6 +116,7 @@ const Stats: FC = () => {
             {ledgerInfo ? parseInt(ledgerInfo.block_height, 10).toLocaleString() : null}
           </span>
         </Link>
+
         <div className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
           <span className="text-sm font-medium text-[#525252]">Epoch</span>
           <span
@@ -119,6 +127,7 @@ const Stats: FC = () => {
             {ledgerInfo ? parseInt(ledgerInfo.epoch, 10).toLocaleString() : null}
           </span>
         </div>
+
         <NavLink to="/validators" className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
           <span className="text-sm font-medium text-[#525252]">Validators</span>
           <span
@@ -129,6 +138,7 @@ const Stats: FC = () => {
             {validatorSet ? validatorSet.active_validators.length : null}
           </span>
         </NavLink>
+
         <div className="flex flex-col bg-[#F5F5F5] p-5">
           <span className="text-sm font-medium text-[#525252]">
             Next Epoch
@@ -148,28 +158,34 @@ const Stats: FC = () => {
             {nextEpoch ? <Countdown date={nextEpoch} /> : null}
           </span>
         </div>
-        {/* @TODO: DUMMY DATA */}
-        <div className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
-          <span className="text-sm font-medium text-[#525252]">Transactions</span>
-          <span
-            className={`text-2xl md:text-3xl tracking-tight text-[#141414] h-8 rounded ${
-              !totalSupply ? 'animate-pulse bg-gray-300 text-2xl space-y-4' : ''
-            }`}
-          >
-            XXXX
-          </span>
-        </div>
-        {/* @TODO: DUMMY DATA */}
-        <div className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
-          <span className="text-sm font-medium text-[#525252]">Total Accounts</span>
-          <span
-            className={`text-2xl md:text-3xl tracking-tight text-[#141414] h-8 rounded ${
-              !totalSupply ? 'animate-pulse bg-gray-300 text-2xl space-y-4' : ''
-            }`}
-          >
-            XXXX
-          </span>
-        </div>
+
+        {dev && (
+          <>
+            {/* @TODO: DUMMY DATA */}
+            <div className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
+              <span className="text-sm font-medium text-[#525252]">Transactions</span>
+              <span
+                className={`text-2xl md:text-3xl tracking-tight text-[#141414] h-8 rounded ${
+                  !totalSupply ? 'animate-pulse bg-gray-300 text-2xl space-y-4' : ''
+                }`}
+              >
+                XXXX
+              </span>
+            </div>
+
+            {/* @TODO: DUMMY DATA */}
+            <div className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
+              <span className="text-sm font-medium text-[#525252]">Total Accounts</span>
+              <span
+                className={`text-2xl md:text-3xl tracking-tight text-[#141414] h-8 rounded ${
+                  !totalSupply ? 'animate-pulse bg-gray-300 text-2xl space-y-4' : ''
+                }`}
+              >
+                XXXX
+              </span>
+            </div>
+          </>
+        )}
       </div>
     </dl>
   );

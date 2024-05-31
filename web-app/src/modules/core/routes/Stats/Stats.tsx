@@ -233,7 +233,7 @@ const Coinstats = () => {
           </div>
 
           <div className="mt-5">
-            <h3 className="text-base font-semibold text-gray-900">Top 100 Liquid accounts</h3>
+            <h3 className="text-base font-semibold text-gray-900">Top 100 Liquid Accounts</h3>
 
             <div className="relative overflow-hidden rounded-lg bg-white shadow mt-2">
               <div className="overflow-x-auto">
@@ -248,7 +248,7 @@ const Coinstats = () => {
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
                         Liquid Balance
                       </th>
@@ -281,7 +281,7 @@ const Coinstats = () => {
                               {account.address}
                             </a>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">
                             <Money>{account.unlockedBalance}</Money>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">

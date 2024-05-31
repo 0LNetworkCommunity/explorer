@@ -24,7 +24,7 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const [searchAddress, setSearchAddress] = useState<string>('');
   const searchInput = useRef<HTMLInputElement>(null);
-   const connectWallet = () => {
+  const connectWallet = () => {
     aptosWallet.connect(PosteroWalletName);
   };
 
@@ -50,7 +50,7 @@ const Header: React.FC = () => {
 
   return (
     <header className="bg-white">
-      <nav className="flex px-8 py-5 flex-col">
+      <nav className="flex px-8 py-5 flex-col max-w-screen-2xl mx-auto">
         <div className="flex items-center gap-20">
           <Link to="/">
             <Logo className="h-10 w-10 p-2 rounded bg-[#CD3B42]" withText={false} />

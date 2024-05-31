@@ -35,7 +35,8 @@ const CommunityWallets: FC = () => {
             <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
               <a
                 className="text-gray-900 hover:underline hover:text-primary-500"
-                href="https://github.com/0LNetworkCommunity/explorer/edit/main/api/src/ol/community-wallets.ts"
+                href="https://github.com/0LNetworkCommunity/explorer/edit/main/api/src/ol/community-wallets/community-wallets.ts"
+                target="_blank"
               >
                 Edit this page
               </a>
@@ -46,7 +47,7 @@ const CommunityWallets: FC = () => {
             <table className="min-w-full divide-y divide-gray-300">
               <thead className="bg-gray-50 text-left text-sm text-gray-900">
                 <tr>
-                  <th scope="col" className="px-3 py-2 font-normal">
+                  <th scope="col" className="px-3 py-2 font-normal text-center">
                     Wallet
                   </th>
                   <th scope="col" className="px-3 py-2 font-normal">
@@ -55,7 +56,7 @@ const CommunityWallets: FC = () => {
                   <th scope="col" className="px-3 py-2 font-normal">
                     Description
                   </th>
-                  <th scope="col" className="px-3 py-2 font-normal">
+                  <th scope="col" className="px-3 py-2 font-normal text-right">
                     Balance
                   </th>
                 </tr>

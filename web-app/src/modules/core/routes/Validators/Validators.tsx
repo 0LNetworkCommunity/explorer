@@ -1,11 +1,10 @@
-import { FC } from "react";
-import { gql, useQuery } from "@apollo/client";
-import _ from "lodash";
-import Page from "../../../ui/Page";
-import AccountAddress from "../../../ui/AccountAddress";
-import clsx from "clsx";
-import { LIBRA_SIGN } from "../../../../contants";
-import { CheckIcon, XMarkIcon } from "@heroicons/react/20/solid";
+import { FC } from 'react';
+import { gql, useQuery } from '@apollo/client';
+import Page from '../../../ui/Page';
+import AccountAddress from '../../../ui/AccountAddress';
+import Money from '../../../ui/Money';
+import clsx from 'clsx';
+import { CheckIcon, XMarkIcon } from '@heroicons/react/20/solid';
 
 const GET_VALIDATORS = gql`
   query GetValidators {
@@ -71,26 +70,22 @@ const Validators: FC = () => {
   }
 
   if (data) {
-    const validatorSet = data.validators.filter((it) => it.inSet)
+    const validatorSet = data.validators.filter((it) => it.inSet);
     const eligible = data.validators.length - validatorSet.length;
 
     return (
       <Page __deprecated_grayBg>
-        <section className="mt-2 flow-root">
+        <section className="my-2 flow-root">
           <div>
-            <dl className="grid gap-0.5 overflow-hidden rounded-2xl text-center grid-cols-3">
-              <div className="flex flex-col bg-gray-400/5 p-4">
-                <dt className="text-sm font-semibold leading-6 text-gray-600">
-                  Validator Set
-                </dt>
+            <dl className="md:w-1/2 grid gap-0.5 shadow overflow-hidden rounded-lg text-center grid-cols-2 m-2">
+              <div className="flex flex-col bg-white p-4">
+                <dt className="text-sm font-semibold leading-6 text-gray-600">Validator Set</dt>
                 <dd className="order-first text-3xl tracking-tight text-gray-900 font-mono">
                   {validatorSet.length}
                 </dd>
               </div>
-              <div className="flex flex-col bg-gray-400/5 p-4">
-                <dt className="text-sm font-semibold leading-6 text-gray-600">
-                  Eligible
-                </dt>
+              <div className="flex flex-col bg-white p-4">
+                <dt className="text-sm font-semibold leading-6 text-gray-600">Eligible</dt>
                 <dd className="order-first text-3xl tracking-tight text-gray-900 font-mono">
                   {eligible}
                 </dd>
@@ -105,8 +100,8 @@ const Validators: FC = () => {
                   <thead className="bg-gray-50">
                     <tr
                       className={clsx(
-                        "divide-x divide-gray-200",
-                        "text-left text-sm font-semibold text-gray-900"
+                        'divide-x divide-gray-200',
+                        'text-left text-sm font-semibold text-gray-900 text-center',
                       )}
                     >
                       <th scope="col" className="py-3 px-2">
@@ -140,14 +135,14 @@ const Validators: FC = () => {
                       <tr
                         key={validator.address}
                         className={clsx(
-                          "divide-x divide-gray-200",
-                          "whitespace-nowrap text-sm text-gray-500 even:bg-gray-50"
+                          'divide-x divide-gray-200',
+                          'whitespace-nowrap text-sm text-gray-500 even:bg-gray-50 text-center',
                         )}
                       >
                         <td className="px-2 py-2 pl-3">
                           <AccountAddress address={validator.address} />
                         </td>
-                        <td className="px-2 py-2 text-center">
+                        <td className="px-2 py-2">
                           {validator.inSet ? (
                             <CheckIcon className="w-5 h-5 text-green-500 inline" />
                           ) : (
@@ -155,7 +150,7 @@ const Validators: FC = () => {
                           )}
                         </td>
                         <td className="px-2 py-2">
-                          {validator.votingPower.toLocaleString()}
+                          {Number(validator.votingPower).toLocaleString()}
                         </td>
                         <td className="px-2 py-2">
                           {validator.grade.compliant ? (
@@ -165,18 +160,21 @@ const Validators: FC = () => {
                           )}
                           {`${validator.grade.proposedBlocks.toLocaleString()} / ${validator.grade.failedBlocks.toLocaleString()}`}
                         </td>
-                        <td className="px-2 py-2">
+                        <td className="px-2 py-2 text-center">
                           {validator.vouches.length.toLocaleString()}
                         </td>
                         <td className="px-2 py-2 font-mono text-right">
                           {`${validator.currentBid.currentBid.toLocaleString()} (${validator.currentBid.expirationEpoch.toLocaleString()})`}
                         </td>
                         <td className="px-2 py-2 font-mono text-right">
-                          {`${LIBRA_SIGN} ${validator.account.balance.toLocaleString()}`}
+                          <Money>{Number(validator.account.balance)}</Money>
                         </td>
                         <td className="px-2 py-2 font-mono text-right">
-                          {validator.account.slowWallet &&
-                            `${LIBRA_SIGN} ${validator.account.slowWallet.unlocked.toLocaleString()}`}
+                          {validator.account.slowWallet ? (
+                            <Money>{Number(validator.account.slowWallet.unlocked)}</Money>
+                          ) : (
+                            ''
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -189,7 +187,7 @@ const Validators: FC = () => {
       </Page>
     );
   }
-  
+
   console.log('error', error);
 
   if (error) {
@@ -200,8 +198,7 @@ const Validators: FC = () => {
     );
   }
 
-
-  return null
+  return null;
 };
 
 export default Validators;

@@ -24,16 +24,15 @@ const Page: FC<Props> = ({ title, children, __deprecated_grayBg: grayBg, mainCla
         </header>
       )}
 
-      <main
+      <div
         className={clsx(
-          'max-w-screen-2xl mx-auto',
           'py-3 px-3 flex-grow',
           grayBg && 'bg-gray-100',
           mainClassName && mainClassName,
         )}
       >
-        {children}
-      </main>
+        <main className="max-w-screen-2xl mx-auto">{children}</main>
+      </div>
     </>
   );
 };

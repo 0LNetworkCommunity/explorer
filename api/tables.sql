@@ -1,3 +1,5 @@
+CREATE DATABASE IF NOT EXISTS "olfyi" ON CLUSTER "olfyi";
+
 CREATE TABLE "user_transaction" ON CLUSTER "olfyi" (
   "version" UInt64,
   "hash" UInt256,

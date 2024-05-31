@@ -38,7 +38,7 @@ const Home: FC = () => {
   return (
     <>
       <section className="pt-5 lg:pt-20 pb-12 lg:pb-8">
-        <div className="max-w-7xl mx-auto px-8">
+        <div className="max-w-[1200px] mx-auto px-3">
           <div className="flex flex-col lg:flex-row justify-between gap-6">
             <div className="max-w-max lg:max-w-2xl">
               <h1 className="pb-3 font-medium text-5xl text-[#141414]">0L Network Explorer</h1>
@@ -58,10 +58,7 @@ const Home: FC = () => {
           </div>
         </div>
       </section>
-      {/* <section>
-        <NodeMap />
-      </section> */}
-      <Page __deprecated_grayBg={false}>
+      <Page __deprecated_grayBg={false} mainClassName={'max-w-[1200px] w-full mx-auto'}>
         <Stats />
         <section className="mt-2 overflow-x-auto">
           <div className="my-6 px-2	flex flex-row justify-between align-center gap-3">

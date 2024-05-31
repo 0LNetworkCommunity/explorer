@@ -8,7 +8,7 @@ const CI_COMMIT_SHA: string = import.meta.env.VITE_CI_COMMIT_SHA;
 const Footer: React.FC = () => {
   return (
     <footer className="bg-[#0A0A0A] text-white">
-      <div className="pt-14 pb-8 px-3 max-w-[1280px] mx-auto flex flex-col gap-32">
+      <div className="pt-14 pb-8 px-3 max-w-screen-2xl mx-auto flex flex-col gap-32">
         <div className="flex flex-col items-center justify-center gap-8 text-center">
           <Logo withText={false} className="h-14 w-14" />
           <p className="flex flex-col justify-center items-center gap-4">

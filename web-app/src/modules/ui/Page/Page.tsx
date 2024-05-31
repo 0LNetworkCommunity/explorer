@@ -22,7 +22,9 @@ const Page: FC<Props> = ({ title, children, __deprecated_grayBg: grayBg }) => {
           </div>
         </header>
       )}
-      <main className={clsx('py-3 px-3 flex-grow', grayBg && 'bg-gray-100')}>{children}</main>
+      <main className={clsx('py-3 px-3 flex-grow pb-20 w-full', grayBg && 'bg-gray-100')}>
+        <div className="max-w-screen-2xl mx-auto">{children}</div>
+      </main>
     </>
   );
 };

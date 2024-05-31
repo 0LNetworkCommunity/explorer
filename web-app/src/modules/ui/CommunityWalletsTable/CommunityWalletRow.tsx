@@ -3,8 +3,7 @@ import { FC } from 'react';
 import { ICommunityWalletInfo } from '../../interface/CommunityWallets.interface';
 import AccountAddress from '../AccountAddress';
 import { IAccountInfo } from '../../interface/Account.interface';
-import LibraAmount from '../LibraAmount';
-import Decimal from 'decimal.js';
+import Money from '../Money';
 
 interface Props {
   communityWalletInfo: ICommunityWalletInfo;
@@ -30,15 +29,15 @@ const CommunityWalletRow: FC<Props> = ({ communityWalletInfo }) => {
 
   return (
     <tr>
-      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-center">
         <AccountAddress address={communityWalletInfo.address} />
       </td>
       <td className="whitespace-nowrap py-2 px-3 text-sm font-medium text-gray-900">
         {communityWalletInfo.name}
       </td>
       <td className="px-3 py-4 text-sm text-gray-500">{communityWalletInfo.description}</td>
-      <td className="px-3 py-4 text-sm text-gray-500">
-        {data.account.balance && <LibraAmount>{new Decimal(data.account.balance)}</LibraAmount>}
+      <td className="px-3 py-4 text-sm text-gray-500 text-right whitespace-nowrap">
+        {data.account.balance && <Money>{Number(data.account.balance)}</Money>}
       </td>
     </tr>
   );

@@ -4,9 +4,10 @@ import { FC, PropsWithChildren, ReactNode } from 'react';
 type Props = PropsWithChildren<{
   title?: string | ReactNode;
   __deprecated_grayBg: boolean;
+  mainClassName?: string;
 }>;
 
-const Page: FC<Props> = ({ title, children, __deprecated_grayBg: grayBg }) => {
+const Page: FC<Props> = ({ title, children, __deprecated_grayBg: grayBg, mainClassName = '' }) => {
   return (
     <>
       {title && (
@@ -22,8 +23,16 @@ const Page: FC<Props> = ({ title, children, __deprecated_grayBg: grayBg }) => {
           </div>
         </header>
       )}
-      <main className={clsx('py-3 px-3 flex-grow pb-20 w-full', grayBg && 'bg-gray-100')}>
-        <div className="max-w-screen-2xl mx-auto">{children}</div>
+
+      <main
+        className={clsx(
+          'max-w-screen-2xl mx-auto',
+          'py-3 px-3 flex-grow',
+          grayBg && 'bg-gray-100',
+          mainClassName && mainClassName,
+        )}
+      >
+        {children}
       </main>
     </>
   );

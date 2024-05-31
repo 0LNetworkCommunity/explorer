@@ -4,6 +4,8 @@ import { Link, NavLink } from 'react-router-dom';
 import useAptos from '../../../aptos';
 import { useLedgerInfo, useTotalSupply, useValidatorSet } from '../../../ol';
 import Countdown from '../../../ui/Countdown';
+import PriceStats from './Stats/PriceStats';
+import NodeMap from '../../../ui/NodeMap';
 
 const Stats: FC = () => {
   const aptos = useAptos();
@@ -20,12 +22,8 @@ const Stats: FC = () => {
     const load = async () => {
       timeout = undefined;
 
-      const blockResource = await aptos.getAccountResource(
-        '0x1',
-        '0x1::block::BlockResource',
-      );
-      const epochIntervalMs =
-        parseInt((blockResource.data as any).epoch_interval, 10) / 1_000;
+      const blockResource = await aptos.getAccountResource('0x1', '0x1::block::BlockResource');
+      const epochIntervalMs = parseInt((blockResource.data as any).epoch_interval, 10) / 1_000;
 
       const events = await aptos.getEventsByEventHandle(
         '0x1',
@@ -63,58 +61,115 @@ const Stats: FC = () => {
   }, []);
 
   return (
-    <dl className="grid grid-cols-2 gap-0.5 overflow-hidden rounded-2xl text-center md:grid-cols-5">
-      <div className="flex flex-col bg-gray-400/5 p-4 h-18">
-        <dd className={`order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8 rounded ${!totalSupply ? "animate-pulse bg-gray-300 space-y-4" : ""}`}>
-          {totalSupply ?
-            `${d3Format('.3f')(Math.floor(totalSupply.amount / 1e6) / 1e3)}B` :
-            null
-          }
-        </dd>
-        <dt className="text-sm font-semibold leading-6 text-gray-600">
-          Total Supply
-        </dt>
+    <dl className="flex flex-col gap-[4px]">
+      <div className="grid grid-cols-1 gap-[4px] md:grid-cols-2">
+        <PriceStats />
+        <div className="bg-[#F5F5F5] p-5 relative overflow-hidden">
+          <div className="flex flex-col gap-4 relative z-20">
+            <span className="text-xl font-bold">Validator Map</span>
+            <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
+              {/* @TODO: DUMMY DATA */}
+              <div className="flex flex-col">
+                <span className="text-lg font-extralight">Total Validators</span>
+                <span className="text-xl font-medium">15</span>
+              </div>
+              {/* @TODO: DUMMY DATA */}
+              <div className="flex flex-col">
+                <span className="text-lg font-extralight">Eligible</span>
+                <span className="text-xl font-medium">70</span>
+              </div>
+            </div>
+          </div>
+          <div className="md:absolute md:top-[-80px] md:right-[-90px] md:h-[300px] md:w-[600px] z-10">
+            <NodeMap />
+          </div>
+        </div>
       </div>
-      <div className="flex flex-col bg-gray-400/5 p-4 h-18">
+      <div className="grid grid-cols-2 gap-[4px] md:grid-cols-4">
+        <div className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
+          <span className="text-sm font-medium text-[#525252]">Total Supply</span>
+          <span
+            className={`text-2xl md:text-3xl tracking-tight text-[#141414] h-8 rounded ${
+              !totalSupply ? 'animate-pulse bg-gray-300 text-2xl space-y-4' : ''
+            }`}
+          >
+            {totalSupply ? `${d3Format('.3f')(Math.floor(totalSupply.amount / 1e6) / 1e3)}B` : null}
+          </span>
+        </div>
         <Link
           to={ledgerInfo ? `/blocks/${ledgerInfo.block_height}` : '/'}
-          className="hover:underline"
+          className="flex flex-col bg-[#F5F5F5] p-5 gap-2"
         >
-          <dd className={`order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8 rounded ${!ledgerInfo ? "animate-pulse bg-gray-300 space-y-4" : ""}`}>
+          <span className="text-sm font-medium text-[#525252]">Block Height</span>
+          <span
+            className={`hover:underline text-2xl md:text-3xl tracking-tight text-[#141414] h-8 rounded ${
+              !ledgerInfo ? 'animate-pulse bg-gray-300 space-y-4' : ''
+            }`}
+          >
             {ledgerInfo ? parseInt(ledgerInfo.block_height, 10).toLocaleString() : null}
-          </dd>
-          <dt className="text-sm font-semibold leading-6 text-gray-600">
-            Block Height
-          </dt>
+          </span>
         </Link>
-      </div>
-      <div className="flex flex-col bg-gray-400/5 p-4">
-        <dt className="text-sm font-semibold leading-6 text-gray-600">Epoch</dt>
-        <dd className={`order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8 rounded ${!ledgerInfo ? "animate-pulse bg-gray-300 space-y-4" : ""}`}>
-          {ledgerInfo ? parseInt(ledgerInfo.epoch, 10).toLocaleString() : null}
-        </dd>
-      </div>
-      <div className="flex flex-col bg-gray-400/5 p-4">
-        <NavLink to="/validators" className="hover:underline">
-          <dd className={`order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8 rounded ${!validatorSet ? "animate-pulse bg-gray-300 space-y-4" : ""}`}>
+        <div className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
+          <span className="text-sm font-medium text-[#525252]">Epoch</span>
+          <span
+            className={`text-2xl md:text-3xl tracking-tight text-[#141414] h-8 rounded ${
+              !ledgerInfo ? 'animate-pulse bg-gray-300 space-y-4' : ''
+            }`}
+          >
+            {ledgerInfo ? parseInt(ledgerInfo.epoch, 10).toLocaleString() : null}
+          </span>
+        </div>
+        <NavLink to="/validators" className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
+          <span className="text-sm font-medium text-[#525252]">Validators</span>
+          <span
+            className={`hover:underline text-2xl md:text-3xl tracking-tight text-[#141414] h-8 rounded ${
+              !validatorSet ? 'animate-pulse bg-gray-300 space-y-4' : ''
+            }`}
+          >
             {validatorSet ? validatorSet.active_validators.length : null}
-          </dd>
-          <dt className="text-sm font-semibold leading-6 text-gray-600">
-            Validators
-          </dt>
+          </span>
         </NavLink>
-      </div>
-
-      <div className="flex flex-col bg-gray-400/5 p-4">
-        <dt className="text-sm font-semibold leading-6 text-gray-600">
-          Next Epoch
-          <div className={`text-xs text-gray-400 h-4 rounded ${!nextEpoch ? "animate-pulse bg-gray-300 space-y-4" : ""}`}>
-            {nextEpoch ? nextEpochDate : null}
-          </div>
-        </dt>
-        <dd className={`order-first text-2xl md:text-3xl tracking-tight text-gray-900 font-mono h-8 rounded ${!nextEpoch ? "animate-pulse bg-gray-300 space-y-4" : ""}`}>
-          {nextEpoch ? <Countdown date={nextEpoch} /> : null}
-        </dd>
+        <div className="flex flex-col bg-[#F5F5F5] p-5">
+          <span className="text-sm font-medium text-[#525252]">
+            Next Epoch
+            <div
+              className={`text-xs text-gray-400 h-4 rounded ${
+                !nextEpoch ? 'animate-pulse bg-gray-300 space-y-4' : ''
+              }`}
+            >
+              {nextEpoch ? nextEpochDate : null}
+            </div>
+          </span>
+          <span
+            className={`text-2xl md:text-3xl tracking-tight text-[#141414] h-8 rounded ${
+              !nextEpoch ? 'animate-pulse bg-gray-300 space-y-4' : ''
+            }`}
+          >
+            {nextEpoch ? <Countdown date={nextEpoch} /> : null}
+          </span>
+        </div>
+        {/* @TODO: DUMMY DATA */}
+        <div className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
+          <span className="text-sm font-medium text-[#525252]">Transactions</span>
+          <span
+            className={`text-2xl md:text-3xl tracking-tight text-[#141414] h-8 rounded ${
+              !totalSupply ? 'animate-pulse bg-gray-300 text-2xl space-y-4' : ''
+            }`}
+          >
+            XXXX
+          </span>
+        </div>
+        {/* @TODO: DUMMY DATA */}
+        <div className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
+          <span className="text-sm font-medium text-[#525252]">Total Accounts</span>
+          <span
+            className={`text-2xl md:text-3xl tracking-tight text-[#141414] h-8 rounded ${
+              !totalSupply ? 'animate-pulse bg-gray-300 text-2xl space-y-4' : ''
+            }`}
+          >
+            XXXX
+          </span>
+        </div>
       </div>
     </dl>
   );

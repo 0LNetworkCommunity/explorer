@@ -16,7 +16,7 @@ function NodeMap(): ReactNode {
   const apollo = useApolloClient();
   const [points, setPoints] = useState<[number, number][]>();
   const mapRef = useRef<HTMLDivElement>(null);
-  const [dimensions, setDimensions] = useState({ width: 688, height: 488 });
+  const [dimensions, setDimensions] = useState({ width: 688 / 3, height: 488 / 3 });
 
   useEffect(() => {
     function handleResize() {
@@ -59,7 +59,7 @@ function NodeMap(): ReactNode {
   }, [apollo, dimensions]);
 
   return (
-    <div ref={mapRef} className="lg:pb-6 w-full max-w-[700px] mx-auto">
+    <div ref={mapRef} className="lg:pb-6 w-full max-w-[500px] mx-auto">
       <div
         className="relative w-full bg-[#F5F5F5] bg-cover bg-center"
         style={{

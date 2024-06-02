@@ -3,6 +3,7 @@ import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { AppModule } from "./app/app.module.js";
 import getConfig from "./config/config.js";
+import { BullBoardService } from './bullboard/bullboard.service.js';
 
 async function bootstrap() {
   const config = getConfig();
@@ -14,6 +15,13 @@ async function bootstrap() {
   app.disable("x-powered-by");
   app.set("trust proxy", 1);
   app.enableCors();
+
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  if (!isProduction) {
+    const bullBoardService = app.get(BullBoardService);
+    app.use('/ui', bullBoardService.getServerAdapter().getRouter());
+  }
 
   await app.listen(config.port);
 }

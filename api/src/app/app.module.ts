@@ -16,9 +16,9 @@ import { WalletSubscriptionModule } from "../wallet-subscription/wallet-subscrip
 import { NatsModule } from "../nats/nats.module.js";
 import { OlSwapModule } from "../ol-swap/OlSwapModule.js";
 import { MultiSigModule } from "../multi-sig/multi-sig.module.js";
+import { OsmosisModule } from "../osmosis/OsmosisModule.js";
 
 // Test purposes
-import { OsmosisModule } from "../clickhouse/bridged-networks/osmosis/OsmosisModule.js";
 
 @Module({
   imports: [

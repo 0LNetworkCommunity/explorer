@@ -49,7 +49,7 @@ export class OsmosisHistoricalProcessor extends WorkerHost {
 
   private readonly TOKEN_DENOM = 'factory/osmo19hdqma2mj0vnmgcxag6ytswjnr8a3y07q7e70p/wLIBRA';
 
-  constructor(
+  public constructor(
     config: ConfigService,
 
     private readonly clickhouseService: ClickhouseService,

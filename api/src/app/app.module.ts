@@ -16,6 +16,9 @@ import { WalletSubscriptionModule } from "../wallet-subscription/wallet-subscrip
 import { NatsModule } from "../nats/nats.module.js";
 import { OlSwapModule } from "../ol-swap/OlSwapModule.js";
 import { MultiSigModule } from "../multi-sig/multi-sig.module.js";
+import { OsmosisModule } from "../osmosis/OsmosisModule.js";
+
+// Test purposes
 
 @Module({
   imports: [
@@ -47,6 +50,7 @@ import { MultiSigModule } from "../multi-sig/multi-sig.module.js";
     OlSwapModule,
     NodeWatcherModule,
     MultiSigModule,
+    OsmosisModule,
   ],
   controllers: [],
   providers: [AppService],

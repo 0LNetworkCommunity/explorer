@@ -12,13 +12,13 @@ export class UserTransactionsResolver {
 
   @Query(() => GqlUserTransactionCollection)
   async userTransactions(
-    @Args({ name: 'limit', type: () => Int })
+    @Args({ name: "limit", type: () => Int })
     limit: number,
 
-    @Args({ name: 'offset', type: () => Int })
+    @Args({ name: "offset", type: () => Int })
     offset: number,
 
-    @Args({ name: 'order', type: () => String })
+    @Args({ name: "order", type: () => String })
     order: string,
   ): Promise<GqlUserTransactionCollection> {
     const [total, items] = await Promise.all([

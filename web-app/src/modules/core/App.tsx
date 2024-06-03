@@ -1,13 +1,12 @@
-import { FC } from "react";
-import { RouterProvider } from "react-router-dom";
-import { ApolloProvider } from "@apollo/client";
-import {
-  AptosWalletAdapterProvider,
-  Wallet,
-} from "@aptos-labs/wallet-adapter-react";
-import { PosteroWallet } from "../postero-wallet";
-import apolloClient from "./apollo";
-import router from "./router";
+import { FC } from 'react';
+import { RouterProvider } from 'react-router-dom';
+import { ApolloProvider } from '@apollo/client';
+import { AptosWalletAdapterProvider, Wallet } from '@aptos-labs/wallet-adapter-react';
+import { PosteroWallet } from '../postero-wallet';
+import apolloClient from './apollo';
+import router from './router';
+import { ThemeProvider } from 'styled-components';
+import { GlobalStyle, theme } from './styles';
 
 const wallets: Wallet[] = [];
 
@@ -21,11 +20,14 @@ const App: FC = () => {
       plugins={wallets}
       autoConnect={true}
       onError={(error) => {
-        console.log("error", error);
+        console.log('error', error);
       }}
     >
       <ApolloProvider client={apolloClient}>
-        <RouterProvider router={router} />
+        <ThemeProvider theme={theme}>
+          <GlobalStyle />
+          <RouterProvider router={router} />
+        </ThemeProvider>
       </ApolloProvider>
     </AptosWalletAdapterProvider>
   );

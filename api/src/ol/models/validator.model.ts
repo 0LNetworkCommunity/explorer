@@ -1,5 +1,5 @@
-import { Field, ObjectType } from '@nestjs/graphql';
-import BN from 'bn.js';
+import { Field, ObjectType } from "@nestjs/graphql";
+import BN from "bn.js";
 
 interface GqlValidatorGradeInput {
   compliant: boolean;
@@ -8,7 +8,7 @@ interface GqlValidatorGradeInput {
   ratio: number;
 }
 
-@ObjectType('ValidatorGrade')
+@ObjectType("ValidatorGrade")
 export class GqlValidatorGrade {
   public constructor(input: GqlValidatorGradeInput) {
     this.compliant = input.compliant;
@@ -36,11 +36,12 @@ interface GqlValidatorInput {
   failedProposals: BN;
   successfulProposals: BN;
   inSet: boolean;
+  index: BN;
   networkAddresses?: string;
   fullnodeAddresses?: string;
 }
 
-@ObjectType('Validator')
+@ObjectType("Validator")
 export class GqlValidator {
   public constructor(input: GqlValidatorInput) {
     this.address = input.address;
@@ -48,12 +49,16 @@ export class GqlValidator {
     this.failedProposals = input.failedProposals;
     this.successfulProposals = input.successfulProposals;
     this.inSet = input.inSet;
+    this.index = input.index;
     this.networkAddresses = input.networkAddresses;
     this.fullnodeAddresses = input.fullnodeAddresses;
   }
 
   @Field(() => Boolean)
   public inSet: boolean;
+
+  @Field(() => BN)
+  public index: BN;
 
   @Field(() => Buffer)
   public address: Buffer;
@@ -80,7 +85,7 @@ interface GqlVouchInput {
   inSet: boolean;
 }
 
-@ObjectType('Vouch')
+@ObjectType("Vouch")
 export class GqlVouch {
   public constructor(input: GqlVouchInput) {
     this.epoch = input.epoch;
@@ -103,7 +108,7 @@ interface GqlValidatorCurrentBidInput {
   expirationEpoch: number;
 }
 
-@ObjectType('ValidatorCurrentBid')
+@ObjectType("ValidatorCurrentBid")
 export class GqlValidatorCurrentBid {
   public constructor(input: GqlValidatorCurrentBidInput) {
     this.currentBid = input.currentBid;

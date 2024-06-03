@@ -1,6 +1,7 @@
 export interface IValidator {
   address: string;
   inSet: boolean;
+  index: number;
   votingPower: number;
   account: {
     balance: number;
@@ -19,5 +20,5 @@ export interface IValidator {
   currentBid: {
     currentBid: number;
     expirationEpoch: number;
-  };
+  } | null;
 }

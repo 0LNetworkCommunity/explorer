@@ -44,6 +44,7 @@ type ValidatorGrade {
 
 type Validator {
   inSet: Boolean!
+  index: BigInt!
   address: Bytes!
   networkAddresses: String
   fullnodeAddresses: String

@@ -29,30 +29,27 @@ export class ValidatorsResolver {
     const validatorPerformances =
       validatorPerformanceRes.data as ValidatorPerformance;
 
-    const currentValidators = validatorSet.activeValidators.map(
-      (validator) => {
-        const validatorPerformance =
-          validatorPerformances.validators[
-            validator.config.validatorIndex.toNumber()
-          ];
+    const currentValidators = validatorSet.activeValidators.map((validator) => {
+      const validatorPerformance =
+        validatorPerformances.validators[
+          validator.config.validatorIndex.toNumber()
+        ];
 
-        return new GqlValidator({
-          address: validator.addr,
-          votingPower: validator.votingPower,
-          failedProposals: new BN(validatorPerformance.failed_proposals),
-          successfulProposals: new BN(
-            validatorPerformance.successful_proposals,
-          ),
-          inSet: true,
-          networkAddresses: validator.config.networkAddresses,
-          fullnodeAddresses: validator.config.fullnodeAddresses,
-        });
-      },
-    );
+      return new GqlValidator({
+        address: validator.addr,
+        votingPower: validator.votingPower,
+        failedProposals: new BN(validatorPerformance.failed_proposals),
+        successfulProposals: new BN(validatorPerformance.successful_proposals),
+        inSet: true,
+        index: validator.config.validatorIndex,
+        networkAddresses: validator.config.networkAddresses,
+        fullnodeAddresses: validator.config.fullnodeAddresses,
+      });
+    });
 
     let eligible = await this.olService.getEligibleValidators();
-    eligible = eligible.filter((address) =>
-      !currentValidators.find((it) => it.address.equals(address)),
+    eligible = eligible.filter(
+      (address) => !currentValidators.find((it) => it.address.equals(address)),
     );
 
     const eligibleValidators = await Bluebird.map(eligible, async (address) => {
@@ -63,6 +60,7 @@ export class ValidatorsResolver {
         failedProposals: new BN(grade.failedBlocks),
         successfulProposals: new BN(grade.proposedBlocks),
         inSet: false,
+        index: new BN(-1),
       });
     });
 

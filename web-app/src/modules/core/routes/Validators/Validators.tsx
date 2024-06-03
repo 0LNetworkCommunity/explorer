@@ -8,6 +8,7 @@ const GET_VALIDATORS = gql`
   query GetValidators {
     validators {
       inSet
+      index
       address
       votingPower
       account {
@@ -33,10 +34,11 @@ const GET_VALIDATORS = gql`
 `;
 
 const Validators: FC = () => {
-  const { loading, data, error } = useQuery<{
+  const { data, error } = useQuery<{
     validators: {
       address: string;
       inSet: boolean;
+      index: number;
       votingPower: number;
       account: {
         balance: number;
@@ -59,34 +61,26 @@ const Validators: FC = () => {
     }[];
   }>(GET_VALIDATORS);
 
-  if (!data && loading) {
-    return (
-      <Page __deprecated_grayBg>
-        <div>Loading...</div>
-      </Page>
-    );
-  }
-
-  if (data) {
-    return (
-      <Page __deprecated_grayBg>
-        <section className="my-2 flow-root">
-          <ValidatorsStats validators={data.validators} />
-          <ValidatorsTable validators={data.validators} />
-        </section>
-      </Page>
-    );
-  }
-
-  console.log('error', error);
-
   if (error) {
+    console.log('error', error);
     return (
       <Page __deprecated_grayBg>
         <p>{`Error: ${error.message}`}</p>
       </Page>
     );
   }
+
+  return (
+    <Page>
+      <h1 className="font-space-grotesk text-3xl md:text-4xl font-medium leading-[44px] tracking-[-0.02em] text-left mt-6 mb-6">
+        Validators
+      </h1>
+      <section className="my-2 flow-root">
+        <ValidatorsStats validators={data && data.validators} />
+        <ValidatorsTable validators={data && data.validators} />
+      </section>
+    </Page>
+  );
 
   return null;
 };

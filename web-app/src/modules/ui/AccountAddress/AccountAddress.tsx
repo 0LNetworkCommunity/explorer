@@ -2,6 +2,8 @@ import { FC } from 'react';
 import { normalizeHexString } from '../../../utils';
 import { Link } from 'react-router-dom';
 import HexString from '../HexString';
+import CopyIcon from '../Icons/CopyIcon';
+import AddressAvatar from '../AddressAvatar/AddressAvatar';
 
 interface Props {
   address: string;
@@ -10,13 +12,28 @@ interface Props {
 const AccountAddress: FC<Props> = ({ address }) => {
   const normalizedAddress = normalizeHexString(address);
 
+  const handleCopy = () => {
+    navigator.clipboard
+      .writeText(address)
+      .then(() => {
+        console.log('Address copied to clipboard');
+      })
+      .catch((err) => {
+        console.error('Failed to copy address: ', err);
+      });
+  };
+
   return (
-    <Link
-      to={`/accounts/${normalizedAddress}`}
-      className="text-[#CD3B42] hover:text-blue-900 hover:underline font-normal"
-    >
-      <HexString value={normalizedAddress} />
-    </Link>
+    <div className="flex items-center">
+      <AddressAvatar address={normalizedAddress} />
+      <Link
+        to={`/accounts/${normalizedAddress}`}
+        className="text-[#CD3B42] hover:text-blue-900 hover:underline font-normal"
+      >
+        <HexString value={normalizedAddress} />
+      </Link>
+      <CopyIcon onClick={handleCopy} />
+    </div>
   );
 };
 

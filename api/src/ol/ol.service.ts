@@ -3,7 +3,13 @@ import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
 import { OlConfig } from "../config/config.interface.js";
-import { ConsensusReward, RawDonorVoiceRegistry, RawValidatorSet, ValidatorGrade, ValidatorSet } from "./types.js";
+import {
+  ConsensusReward,
+  RawDonorVoiceRegistry,
+  RawValidatorSet,
+  ValidatorGrade,
+  ValidatorSet,
+} from "./types.js";
 import { NetworkAddresses } from "./network-addresses.js";
 import BN from "bn.js";
 import { parseAddress } from "../utils.js";
@@ -46,7 +52,7 @@ export class OlService {
     const res = await this.aptosClient.view({
       function: "0x1::account::exists_at",
       type_arguments: [],
-      arguments: [`0x${address.toString('hex')}`],
+      arguments: [`0x${address.toString("hex")}`],
     });
     return res[0] as boolean;
   }
@@ -65,7 +71,7 @@ export class OlService {
     const res = await this.aptosClient.view({
       function: "0x1::proof_of_fee::current_bid",
       type_arguments: [],
-      arguments: [`0x${address.toString('hex')}`],
+      arguments: [`0x${address.toString("hex")}`],
     });
     const currentBid = res as [string, string];
     return {
@@ -102,7 +108,7 @@ export class OlService {
     const res = await this.aptosClient.view({
       function: "0x1::vouch::all_vouchers",
       type_arguments: [],
-      arguments: [`0x${address.toString('hex')}`],
+      arguments: [`0x${address.toString("hex")}`],
     });
     return res;
   }
@@ -149,7 +155,6 @@ export class OlService {
       "0x1::stake::ValidatorSet",
     );
     const data = res.data as RawValidatorSet;
-
     return {
       activeValidators: data.active_validators.map((validator) => {
         const fullnodeAddresses = Buffer.from(

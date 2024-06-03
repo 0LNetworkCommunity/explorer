@@ -3,7 +3,7 @@ import { FC, PropsWithChildren, ReactNode } from 'react';
 
 type Props = PropsWithChildren<{
   title?: string | ReactNode;
-  __deprecated_grayBg: boolean;
+  __deprecated_grayBg?: boolean;
   mainClassName?: string;
 }>;
 
@@ -31,7 +31,7 @@ const Page: FC<Props> = ({ title, children, __deprecated_grayBg: grayBg, mainCla
           mainClassName && mainClassName,
         )}
       >
-        <main className="max-w-screen-2xl mx-auto">{children}</main>
+        <main className="max-w-screen-xl mx-auto sm:px-6 md:px-24 lg:px-32">{children}</main>
       </div>
     </>
   );

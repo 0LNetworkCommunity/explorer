@@ -25,4 +25,6 @@ export interface IValidator {
     amount: number;
     percentage: number;
   } | null;
+  city: string | null;
+  country: string | null;
 }

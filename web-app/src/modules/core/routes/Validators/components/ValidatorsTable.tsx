@@ -98,6 +98,10 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
         value1 = Number(a.account.balance);
         value2 = Number(b.account.balance);
         break;
+      case 'location':
+        value1 = a.country ? a.country + a.city : '';
+        value2 = b.country ? b.country + b.city : '';
+        break;
       case 'balance':
         value1 = Number(a.account.balance);
         value2 = Number(b.account.balance);
@@ -118,6 +122,7 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
   let sortedValidators;
   let cumulativeValidators;
 
+  console.log(validators);
   if (validators) {
     filteredValidators = getFilteredValidators();
     sortedValidators = getSortedValidators(filteredValidators);
@@ -151,8 +156,8 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
   const columns = [
     { key: 'address', label: 'Address', className: '' },
     //...(isActive ? [{ key: 'index', label: 'Set Position', className: '' }] : []),
-    { key: 'vouches', label: 'Active Vouches', className: '' },
-    { key: 'currentBid', label: 'Current Bid (Expiration Epoch)', className: 'text-right' },
+    { key: 'vouches', label: 'Vouches', className: '' },
+    { key: 'currentBid', label: 'Bid (Exp. Epoch)', className: 'text-right' },
     ...(isActive
       ? [
           {
@@ -162,8 +167,9 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
           },
         ]
       : []),
+    { key: 'location', label: 'Location', className: 'text-left' },
     { key: 'balance', label: 'Balance', className: 'text-right' },
-    { key: 'unlocked', label: 'Unlocked', className: 'text-right' },
+    // { key: 'unlocked', label: 'Unlocked', className: 'text-right' },
   ];
 
   return (
@@ -173,7 +179,7 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
         <div className="inline-block min-w-full py-2 align-middle">
           <div className="overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-[#FAFAFA]">
                 <tr className="text-left text-sm">
                   {columns.map((col) => (
                     <SortableTh

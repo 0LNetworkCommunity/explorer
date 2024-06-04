@@ -23,7 +23,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ percentage, amount }) => {
           </span>
         )}
       </div>
-      <span style={{ width: '35px', textAlign: 'right' }}>{Math.round(percentage)}%</span>
+      <span style={{ width: '35px', textAlign: 'right' }}>{Math.floor(percentage)}%</span>
     </div>
   );
 };

@@ -8,7 +8,7 @@ interface ToggleButtonProps {
 
 const ToggleButton: FC<ToggleButtonProps> = ({ isActive, setIsActive }) => {
   return (
-    <div className="inline-flex border border-gray-200 rounded-md overflow-hidden shadow-sm mb-6">
+    <div className="inline-flex border border-[#D6D6D6] rounded-md overflow-hidden shadow-sm mb-6">
       <button
         onClick={() => setIsActive(true)}
         className={clsx(

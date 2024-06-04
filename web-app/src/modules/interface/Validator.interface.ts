@@ -21,4 +21,8 @@ export interface IValidator {
     currentBid: number;
     expirationEpoch: number;
   } | null;
+  cumulativeBalance: {
+    amount: number;
+    percentage: number;
+  } | null;
 }

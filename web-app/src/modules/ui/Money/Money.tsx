@@ -19,7 +19,7 @@ const Money: FC<Props> = ({ children, decimalPlaces }) => {
         },
   );
 
-  return <span title={`${children}`}>{`Ƚ ${str}`}</span>;
+  return <span className="whitespace-nowrap" title={`${children}`}>{`Ƚ ${str}`}</span>;
 };
 
 export default Money;

@@ -1,15 +1,15 @@
-import fs from 'node:fs';
-import { Readable } from 'node:stream';
+import fs from "node:fs";
+import { Readable } from "node:stream";
 
-import _ from 'lodash';
-import { Injectable, Logger } from '@nestjs/common';
-import maxmind, { CityResponse } from 'maxmind';
-import { GetObjectCommand } from '@aws-sdk/client-s3';
+import _ from "lodash";
+import { Injectable, Logger } from "@nestjs/common";
+import maxmind, { CityResponse } from "maxmind";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
 
-import { OlService } from '../ol/ol.service.js';
-import { PrismaService } from '../prisma/prisma.service.js';
-import { S3Service } from '../s3/s3.service.js';
-import axios from 'axios';
+import { OlService } from "../ol/ol.service.js";
+import { PrismaService } from "../prisma/prisma.service.js";
+import { S3Service } from "../s3/s3.service.js";
+import axios from "axios";
 
 const LEDGER_VERSION_LIMIT = 30n;
 const DEFAULT_UPSTREAMS = [
@@ -115,7 +115,6 @@ export class NodeWatcherService {
 
   public async updateValidatorLocations() {
     await this.downloadGeoIpDb();
-
     const res = await this.prisma.$queryRaw<{ ip: string }[]>`
       SELECT "validatorIp" as "ip"
       FROM "Validator"
@@ -138,6 +137,8 @@ export class NodeWatcherService {
       ip: string;
       latitude: number;
       longitude: number;
+      city: string;
+      country: string;
     }[] = [];
 
     for (const ip of ips) {
@@ -147,25 +148,38 @@ export class NodeWatcherService {
           ip,
           latitude: r.location.latitude,
           longitude: r.location.longitude,
+          city: r.city?.names?.en || "Unknown",
+          country: r.country?.names?.en || "Unknown",
         });
       }
     }
 
     const placeholders = nodes.map(
-      (_, i) => `($${1 + i * 3}, $${2 + i * 3}, $${3 + i * 3})`,
+      (_, i) =>
+        `($${1 + i * 5}, $${2 + i * 5}, $${3 + i * 5}, $${4 + i * 5}, $${5 + i * 5})`,
     );
+
     const params = _.flatten(
-      nodes.map((node) => [node.ip, node.latitude, node.longitude]),
+      nodes.map((node) => [
+        node.ip,
+        node.latitude,
+        node.longitude,
+        node.city,
+        node.country,
+      ]),
     );
     const nodeIps = nodes.map((node) => node.ip);
 
     const query = `
-      INSERT INTO "Node" ("ip", "latitude", "longitude")
+      INSERT INTO "Node" ("ip", "latitude", "longitude", "city", "country")
       VALUES ${placeholders.join(",")}
       ON CONFLICT ("ip")
       DO UPDATE SET
         "latitude" = EXCLUDED."latitude",
-        "longitude" = EXCLUDED."longitude"
+        "longitude" = EXCLUDED."longitude",
+        "city" = EXCLUDED."city",
+        "country" = EXCLUDED."country"
+    
     `;
 
     await this.prisma.$queryRawUnsafe(query, ...params);
@@ -245,7 +259,7 @@ export class NodeWatcherService {
       orderBy: {
         lastCheck: {
           sort: "asc",
-          nulls: 'first',
+          nulls: "first",
         },
       },
       take: 10,

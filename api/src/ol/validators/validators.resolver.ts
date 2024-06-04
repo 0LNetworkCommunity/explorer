@@ -4,6 +4,7 @@ import Bluebird from "bluebird";
 import BN from "bn.js";
 
 import { OlService } from "../ol.service.js";
+import { PrismaService } from "../../prisma/prisma.service.js";
 import { GqlValidator } from "../models/validator.model.js";
 
 interface ValidatorPerformance {
@@ -15,7 +16,10 @@ interface ValidatorPerformance {
 
 @Resolver()
 export class ValidatorsResolver {
-  public constructor(private readonly olService: OlService) {}
+  public constructor(
+    private readonly olService: OlService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Query(() => [GqlValidator])
   async validators(): Promise<GqlValidator[]> {
@@ -26,6 +30,15 @@ export class ValidatorsResolver {
       );
 
     const validatorSet = await this.olService.getValidatorSet();
+
+    const nodes = await this.prisma.node.findMany({
+      select: {
+        ip: true,
+        city: true,
+        country: true,
+      },
+    });
+
     const validatorPerformances =
       validatorPerformanceRes.data as ValidatorPerformance;
 
@@ -34,6 +47,13 @@ export class ValidatorsResolver {
         validatorPerformances.validators[
           validator.config.validatorIndex.toNumber()
         ];
+
+      const valIp =
+        validator.config.networkAddresses &&
+        validator.config.networkAddresses.split("/")[2];
+      const node = nodes.find((node) => node["ip"] == valIp);
+      const city = node && node["city"] ? node["city"] : "";
+      const country = node && node["country"] ? node["country"] : "";
 
       return new GqlValidator({
         address: validator.addr,
@@ -44,6 +64,8 @@ export class ValidatorsResolver {
         index: validator.config.validatorIndex,
         networkAddresses: validator.config.networkAddresses,
         fullnodeAddresses: validator.config.fullnodeAddresses,
+        city: city,
+        country: country,
       });
     });
 

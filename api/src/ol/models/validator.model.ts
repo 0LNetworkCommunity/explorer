@@ -39,6 +39,8 @@ interface GqlValidatorInput {
   index: BN;
   networkAddresses?: string;
   fullnodeAddresses?: string;
+  city?: string;
+  country?: string;
 }
 
 @ObjectType("Validator")
@@ -52,6 +54,8 @@ export class GqlValidator {
     this.index = input.index;
     this.networkAddresses = input.networkAddresses;
     this.fullnodeAddresses = input.fullnodeAddresses;
+    this.city = input.city;
+    this.country = input.country;
   }
 
   @Field(() => Boolean)
@@ -68,6 +72,12 @@ export class GqlValidator {
 
   @Field(() => String, { nullable: true })
   public fullnodeAddresses?: string;
+
+  @Field(() => String, { nullable: true })
+  public city?: string;
+
+  @Field(() => String, { nullable: true })
+  public country?: string;
 
   @Field(() => BN)
   public votingPower: BN;

@@ -44,6 +44,8 @@ model Node {
   lastCheck     DateTime?
   isUp          Boolean?
   ledgerVersion BigInt?
+  city          String?
+  country       String?
 }
 
 enum PendingTransactionStatus {

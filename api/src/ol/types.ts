@@ -37,7 +37,7 @@ export interface ConsensusReward {
 }
 
 export interface ValidatorSet {
-  activeValidators:  {
+  activeValidators: {
     addr: Buffer;
     config: {
       consensusPubkey: string;
@@ -47,6 +47,12 @@ export interface ValidatorSet {
     };
     votingPower: BN;
   }[];
+}
+
+export interface ValidatorConfig {
+  consensus_pubkey: string;
+  fullnode_addresses?: string;
+  network_addresses?: string;
 }
 
 export interface RawValidatorSet {
@@ -64,5 +70,5 @@ export interface RawValidatorSet {
 
 export interface RawDonorVoiceRegistry {
   liquidation_queue: unknown[];
-  list: string[]
+  list: string[];
 }

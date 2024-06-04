@@ -29,6 +29,8 @@ const GET_VALIDATORS = gql`
         failedBlocks
         proposedBlocks
       }
+      city
+      country
     }
   }
 `;

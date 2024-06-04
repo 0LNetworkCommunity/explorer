@@ -48,6 +48,8 @@ type Validator {
   address: Bytes!
   networkAddresses: String
   fullnodeAddresses: String
+  city: String
+  country: String
   votingPower: BigInt!
   failedProposals: BigInt!
   successfulProposals: BigInt!

@@ -205,7 +205,7 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
                       />
                     ))
                   : Array.from({ length: 10 }).map((_, index) => (
-                      <ValidatorRowSkeleton key={index} />
+                      <ValidatorRowSkeleton key={index} isActive={isActive} />
                     ))}
               </tbody>
             </table>

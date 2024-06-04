@@ -13,8 +13,8 @@ type SortOrder = 'asc' | 'desc';
 
 const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
   const [sortColumn, setSortColumn] = useState<string>('index');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
-  const [previousSortColumn, setPreviousSortColumn] = useState<string>('address');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [previousSortColumn, setPreviousSortColumn] = useState<string>('vouches');
   const [isActive, setIsActive] = useState(true);
 
   const handleSort = (column: string) => {
@@ -94,6 +94,10 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
         value1 = a.currentBid ? a.currentBid.currentBid : 0;
         value2 = b.currentBid ? b.currentBid.currentBid : 0;
         break;
+      case 'cumulativeShare':
+        value1 = Number(a.account.balance);
+        value2 = Number(b.account.balance);
+        break;
       case 'balance':
         value1 = Number(a.account.balance);
         value2 = Number(b.account.balance);
@@ -112,9 +116,28 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
 
   let filteredValidators;
   let sortedValidators;
+  let cumulativeValidators;
+
   if (validators) {
     filteredValidators = getFilteredValidators();
     sortedValidators = getSortedValidators(filteredValidators);
+
+    const totalBalance = sortedValidators.reduce((acc, v) => acc + Number(v.account.balance), 0);
+
+    let cumulativeBalanceAmount = 0;
+    cumulativeValidators = sortedValidators.map((validator) => {
+      cumulativeBalanceAmount += Number(validator.account.balance);
+
+      const cumulativeBalance = {
+        amount: cumulativeBalanceAmount,
+        percentage: (cumulativeBalanceAmount / totalBalance) * 100,
+      };
+
+      return {
+        ...validator,
+        cumulativeBalance,
+      };
+    });
   }
 
   function handleSetActive(boo: boolean) {
@@ -127,9 +150,18 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
 
   const columns = [
     { key: 'address', label: 'Address', className: '' },
-    ...(isActive ? [{ key: 'index', label: 'Set Position', className: '' }] : []),
+    //...(isActive ? [{ key: 'index', label: 'Set Position', className: '' }] : []),
     { key: 'vouches', label: 'Active Vouches', className: '' },
     { key: 'currentBid', label: 'Current Bid (Expiration Epoch)', className: 'text-right' },
+    ...(isActive
+      ? [
+          {
+            key: 'cumulativeShare',
+            label: 'Cumulative Share (%)',
+            className: 'text-left whitespace-nowrap',
+          },
+        ]
+      : []),
     { key: 'balance', label: 'Balance', className: 'text-right' },
     { key: 'unlocked', label: 'Unlocked', className: 'text-right' },
   ];
@@ -158,8 +190,8 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {sortedValidators
-                  ? sortedValidators.map((validator) => (
+                {cumulativeValidators
+                  ? cumulativeValidators.map((validator) => (
                       <ValidatorRow
                         key={validator.address}
                         validator={validator}

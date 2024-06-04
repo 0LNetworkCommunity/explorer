@@ -22,10 +22,7 @@ const SortableTh: FC<SortableThProps> = ({
   return (
     <th
       scope="col"
-      className={clsx(
-        'text-xs cursor-pointer font-medium py-3 px-6 text-[#525252] whitespace-nowrap',
-        className,
-      )}
+      className={clsx('text-xs cursor-pointer font-medium py-3 px-6 text-[#525252]', className)}
       onClick={() => onSort(column)}
     >
       {children}

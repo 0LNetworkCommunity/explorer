@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import AccountAddress from '../../../../ui/AccountAddress';
 import Money from '../../../../ui/Money';
 import { IValidator } from '../../../../interface/Validator.interface';
+import ProgressBar from './ProgressBar';
 
 interface ValidatorRowProps {
   validator: IValidator;
@@ -15,21 +16,29 @@ const ValidatorRow: FC<ValidatorRowProps> = ({ validator, isActive }) => {
       <td className="px-2 md:px-4 lg:px-6 py-4">
         <AccountAddress address={validator.address} />
       </td>
-      {isActive && (
+      {/*isActive && (
         <td className="px-2 md:px-4 lg:px-6 py-4 text-center">{Number(validator.index) + 1}</td>
-      )}
+      )*/}
       <td className="px-2 md:px-4 lg:px-6 py-4 text-center">
         {validator.vouches.length.toLocaleString()}
       </td>
-      <td className="px-2 md:px-4 lg:px-6 py-4 font-mono text-right">
+      <td className="px-2 md:px-4 lg:px-6 py-4 text-right">
         {`${validator.currentBid && validator.currentBid.currentBid.toLocaleString()} (${
           validator.currentBid && validator.currentBid.expirationEpoch.toLocaleString()
         })`}
       </td>
-      <td className="px-2 md:px-4 lg:px-6 py-4 font-mono text-right">
+      {isActive && (
+        <td className="px-2 md:px-4 lg:px-6 py-4">
+          <ProgressBar
+            percentage={validator.cumulativeBalance ? validator.cumulativeBalance.percentage : 0}
+            amount={validator.cumulativeBalance ? validator.cumulativeBalance.amount : 0}
+          />
+        </td>
+      )}
+      <td className="px-2 md:px-4 lg:px-6 py-4 text-right">
         <Money>{Number(validator.account.balance)}</Money>
       </td>
-      <td className="px-2 md:px-4 lg:px-6 py-4 font-mono text-right">
+      <td className="px-2 md:px-4 lg:px-6 py-4 text-right">
         {validator.account.slowWallet ? (
           <Money>{Number(validator.account.slowWallet.unlocked)}</Money>
         ) : (

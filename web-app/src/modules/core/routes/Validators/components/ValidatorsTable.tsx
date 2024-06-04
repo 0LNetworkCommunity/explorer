@@ -1,9 +1,9 @@
 import { FC, useState } from 'react';
-import clsx from 'clsx';
-import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/20/solid';
-import AccountAddress from '../../../../ui/AccountAddress';
-import Money from '../../../../ui/Money';
 import { IValidator } from '../../../../interface/Validator.interface';
+import ToggleButton from './ToggleButton';
+import SortableTh from './SortableTh';
+import ValidatorRow from './ValidatorRow';
+import ValidatorRowSkeleton from './ValidatorRowSkeleton';
 
 interface ValidatorsTableProps {
   validators?: IValidator[];
@@ -14,12 +14,14 @@ type SortOrder = 'asc' | 'desc';
 const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
   const [sortColumn, setSortColumn] = useState<string>('index');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [previousSortColumn, setPreviousSortColumn] = useState<string>('address');
   const [isActive, setIsActive] = useState(true);
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
+      setPreviousSortColumn(sortColumn);
       setSortColumn(column);
       setSortOrder('asc');
     }
@@ -39,53 +41,14 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
 
   const getSortedValidators = (filteredValidators: IValidator[]) => {
     const sortedValidators = [...filteredValidators].sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
-
-      switch (sortColumn) {
-        case 'address':
-          aValue = a.address;
-          bValue = b.address;
-          break;
-        case 'index':
-          aValue = Number(a.index);
-          bValue = Number(b.index);
-          break;
-        case 'votingPower':
-          aValue = a.votingPower;
-          bValue = b.votingPower;
-          break;
-        case 'grade':
-          aValue = a.grade.compliant ? 1 : 0;
-          bValue = b.grade.compliant ? 1 : 0;
-          if (aValue === bValue) {
-            aValue = a.grade.proposedBlocks - a.grade.failedBlocks;
-            bValue = b.grade.proposedBlocks - b.grade.failedBlocks;
-          }
-          break;
-        case 'vouches':
-          aValue = a.vouches.length;
-          bValue = b.vouches.length;
-          break;
-        case 'currentBid':
-          aValue = a.currentBid ? a.currentBid.currentBid : 0;
-          bValue = b.currentBid ? b.currentBid.currentBid : 0;
-          break;
-        case 'balance':
-          aValue = Number(a.account.balance);
-          bValue = Number(b.account.balance);
-          break;
-        case 'unlocked':
-          aValue = a.account.slowWallet ? Number(a.account.slowWallet.unlocked) : 0;
-          bValue = b.account.slowWallet ? Number(b.account.slowWallet.unlocked) : 0;
-          break;
-        default:
-          aValue = a.address;
-          bValue = b.address;
-      }
+      const [aValue, bValue] = getValue(a, b, sortColumn);
+      const [aPreviousValue, bPreviousValue] = getValue(a, b, previousSortColumn);
 
       if (aValue === bValue) {
-        return a.address.localeCompare(b.address);
+        if (aPreviousValue === bPreviousValue) {
+          return a.address.localeCompare(b.address);
+        }
+        return aPreviousValue < bPreviousValue ? -1 : 1;
       }
 
       return aValue < bValue ? -1 : 1;
@@ -98,6 +61,55 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
     return sortedValidators;
   };
 
+  const getValue = (a: IValidator, b: IValidator, column: string): [any, any] => {
+    let value1: any;
+    let value2: any;
+
+    switch (column) {
+      case 'address':
+        value1 = a.address;
+        value2 = b.address;
+        break;
+      case 'index':
+        value1 = Number(a.index);
+        value2 = Number(b.index);
+        break;
+      case 'votingPower':
+        value1 = a.votingPower;
+        value2 = b.votingPower;
+        break;
+      case 'grade':
+        value1 = a.grade.compliant ? 1 : 0;
+        value2 = b.grade.compliant ? 1 : 0;
+        if (value1 === value2) {
+          value1 = a.grade.proposedBlocks - a.grade.failedBlocks;
+          value2 = b.grade.proposedBlocks - b.grade.failedBlocks;
+        }
+        break;
+      case 'vouches':
+        value1 = a.vouches.length;
+        value2 = b.vouches.length;
+        break;
+      case 'currentBid':
+        value1 = a.currentBid ? a.currentBid.currentBid : 0;
+        value2 = b.currentBid ? b.currentBid.currentBid : 0;
+        break;
+      case 'balance':
+        value1 = Number(a.account.balance);
+        value2 = Number(b.account.balance);
+        break;
+      case 'unlocked':
+        value1 = a.account.slowWallet ? Number(a.account.slowWallet.unlocked) : 0;
+        value2 = b.account.slowWallet ? Number(b.account.slowWallet.unlocked) : 0;
+        break;
+      default:
+        value1 = a.address;
+        value2 = b.address;
+    }
+
+    return [value1, value2];
+  };
+
   let filteredValidators;
   let sortedValidators;
   if (validators) {
@@ -106,164 +118,56 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
   }
 
   function handleSetActive(boo: boolean) {
-    if (isActive && sortColumn == 'index') {
+    /*if (isActive && sortColumn == 'index') {
       setSortColumn('vouches');
       setSortOrder('asc');
-    }
+    }*/
     setIsActive(boo);
   }
 
+  const columns = [
+    { key: 'address', label: 'Address', className: '' },
+    ...(isActive ? [{ key: 'index', label: 'Set Position', className: '' }] : []),
+    { key: 'vouches', label: 'Active Vouches', className: '' },
+    { key: 'currentBid', label: 'Current Bid (Expiration Epoch)', className: 'text-right' },
+    { key: 'balance', label: 'Balance', className: 'text-right' },
+    { key: 'unlocked', label: 'Unlocked', className: 'text-right' },
+  ];
+
   return (
     <div className="pt-8 pb-8">
-      <div className="inline-flex border border-gray-200 rounded-md overflow-hidden shadow-sm mb-6">
-        <button
-          onClick={() => handleSetActive(true)}
-          className={clsx(
-            'px-4 py-3',
-            isActive ? 'bg-[var(--Colors-Background-bg-active,#FAFAFA)]' : 'bg-white',
-            'border-r border-gray-200',
-          )}
-        >
-          <span>Active</span>
-        </button>
-        <button
-          onClick={() => handleSetActive(false)}
-          className={clsx(
-            'px-4 py-3',
-            !isActive ? 'bg-[var(--Colors-Background-bg-active,#FAFAFA)]' : 'bg-white',
-          )}
-        >
-          Inactive
-        </button>
-      </div>
+      <ToggleButton isActive={isActive} setIsActive={handleSetActive} />
       <div className="overflow-x-auto">
         <div className="inline-block min-w-full py-2 align-middle">
-          <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5">
+          <div className="overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr className="text-left text-sm">
-                  <th
-                    scope="col"
-                    className="text-xs cursor-pointer font-medium py-3 px-6 text-[#525252] whitespace-nowrap"
-                    onClick={() => handleSort('address')}
-                  >
-                    Address
-                    {sortColumn === 'address' &&
-                      (sortOrder === 'asc' ? (
-                        <ArrowUpIcon className="w-4 h-4 inline" />
-                      ) : (
-                        <ArrowDownIcon className="w-4 h-4 inline" />
-                      ))}
-                  </th>
-                  {isActive && (
-                    <th
-                      scope="col"
-                      className="text-xs cursor-pointer font-medium py-3 px-6 text-[#525252] whitespace-nowrap"
-                      onClick={() => handleSort('index')}
+                  {columns.map((col) => (
+                    <SortableTh
+                      key={col.key}
+                      column={col.key}
+                      sortColumn={sortColumn}
+                      sortOrder={sortOrder}
+                      onSort={handleSort}
+                      className={col.className}
                     >
-                      Set Position
-                      {sortColumn === 'index' &&
-                        (sortOrder === 'asc' ? (
-                          <ArrowUpIcon className="w-4 h-4 inline" />
-                        ) : (
-                          <ArrowDownIcon className="w-4 h-4 inline" />
-                        ))}
-                    </th>
-                  )}
-                  <th
-                    scope="col"
-                    className="text-xs cursor-pointer font-medium py-3 px-6 text-[#525252]"
-                    onClick={() => handleSort('vouches')}
-                  >
-                    Active Vouches
-                    {sortColumn === 'vouches' &&
-                      (sortOrder === 'asc' ? (
-                        <ArrowUpIcon className="w-4 h-4 inline" />
-                      ) : (
-                        <ArrowDownIcon className="w-4 h-4 inline" />
-                      ))}
-                  </th>
-                  <th
-                    scope="col"
-                    className="text-xs cursor-pointer font-medium py-3 px-6 text-[#525252] text-right"
-                    onClick={() => handleSort('currentBid')}
-                  >
-                    Current Bid (Expiration Epoch)
-                    {sortColumn === 'currentBid' &&
-                      (sortOrder === 'asc' ? (
-                        <ArrowUpIcon className="w-4 h-4 inline" />
-                      ) : (
-                        <ArrowDownIcon className="w-4 h-4 inline" />
-                      ))}
-                  </th>
-                  <th
-                    scope="col"
-                    className="text-xs cursor-pointer font-medium py-3 px-6 text-[#525252] text-right"
-                    onClick={() => handleSort('balance')}
-                  >
-                    Balance
-                    {sortColumn === 'balance' &&
-                      (sortOrder === 'asc' ? (
-                        <ArrowUpIcon className="w-4 h-4 inline" />
-                      ) : (
-                        <ArrowDownIcon className="w-4 h-4 inline" />
-                      ))}
-                  </th>
-                  <th
-                    scope="col"
-                    className="text-xs cursor-pointer font-medium py-3 px-6 text-[#525252] text-right"
-                    onClick={() => handleSort('unlocked')}
-                  >
-                    Unlocked
-                    {sortColumn === 'unlocked' &&
-                      (sortOrder === 'asc' ? (
-                        <ArrowUpIcon className="w-4 h-4 inline" />
-                      ) : (
-                        <ArrowDownIcon className="w-4 h-4 inline" />
-                      ))}
-                  </th>
+                      {col.label}
+                    </SortableTh>
+                  ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
                 {sortedValidators
                   ? sortedValidators.map((validator) => (
-                      <tr
+                      <ValidatorRow
                         key={validator.address}
-                        className={clsx('whitespace-nowrap text-sm text-gray-500 text-center')}
-                      >
-                        <td className="px-2 md:px-4 lg:px-6 py-4">
-                          <AccountAddress address={validator.address} />
-                        </td>
-                        {isActive && (
-                          <td className="px-2 md:px-4 lg:px-6 py-4 text-center">
-                            {Number(validator.index) + 1}
-                          </td>
-                        )}
-                        <td className="px-2 md:px-4 lg:px-6 py-4 text-center">
-                          {validator.vouches.length.toLocaleString()}
-                        </td>
-                        <td className="px-2 md:px-4 lg:px-6 py-4 font-mono text-right">
-                          {`${
-                            validator.currentBid && validator.currentBid.currentBid.toLocaleString()
-                          } (${
-                            validator.currentBid &&
-                            validator.currentBid.expirationEpoch.toLocaleString()
-                          })`}
-                        </td>
-                        <td className="px-2 md:px-4 lg:px-6 py-4 font-mono text-right">
-                          <Money>{Number(validator.account.balance)}</Money>
-                        </td>
-                        <td className="px-2 md:px-4 lg:px-6 py-4 font-mono text-right">
-                          {validator.account.slowWallet ? (
-                            <Money>{Number(validator.account.slowWallet.unlocked)}</Money>
-                          ) : (
-                            ''
-                          )}
-                        </td>
-                      </tr>
+                        validator={validator}
+                        isActive={isActive}
+                      />
                     ))
                   : Array.from({ length: 10 }).map((_, index) => (
-                      <ValidatorSkeletonRow key={index} />
+                      <ValidatorRowSkeleton key={index} />
                     ))}
               </tbody>
             </table>
@@ -273,28 +177,5 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
     </div>
   );
 };
-
-const ValidatorSkeletonRow = () => (
-  <tr className={clsx('whitespace-nowrap text-sm text-gray-500 text-center')}>
-    <td className="px-2 md:px-4 lg:px-6 py-4">
-      <div className="animate-pulse bg-gray-200 h-4 w-24 mx-auto rounded"></div>
-    </td>
-    <td className="px-2 md:px-4 lg:px-6 py-4">
-      <div className="animate-pulse bg-gray-200 h-4 w-12 mx-auto rounded"></div>
-    </td>
-    <td className="px-2 md:px-4 lg:px-6 py-4">
-      <div className="animate-pulse bg-gray-200 h-4 w-12 mx-auto rounded"></div>
-    </td>
-    <td className="px-2 md:px-4 lg:px-6 py-4">
-      <div className="animate-pulse bg-gray-200 h-4 w-24 mx-auto rounded"></div>
-    </td>
-    <td className="px-2 md:px-4 lg:px-6 py-4">
-      <div className="animate-pulse bg-gray-200 h-4 w-24 mx-auto rounded"></div>
-    </td>
-    <td className="px-2 md:px-4 lg:px-6 py-4">
-      <div className="animate-pulse bg-gray-200 h-4 w-24 mx-auto rounded"></div>
-    </td>
-  </tr>
-);
 
 export default ValidatorsTable;

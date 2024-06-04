@@ -76,6 +76,17 @@ export class ValidatorsResolver {
 
     const eligibleValidators = await Bluebird.map(eligible, async (address) => {
       const grade = await this.olService.getValidatorGrade(address);
+
+      // Ready to fetch city and country for inactive validators
+      /*
+      const config = await this.olService.getValidatorConfig(address);
+      const valIp =
+        config.network_addresses && config.network_addresses.split("/")[2];
+      const node = nodes.find((node) => node["ip"] == valIp);
+      const city = node && node["city"] ? node["city"] : "";
+      const country = node && node["country"] ? node["country"] : "";
+      */
+
       return new GqlValidator({
         address,
         votingPower: new BN(0),
@@ -83,6 +94,8 @@ export class ValidatorsResolver {
         successfulProposals: new BN(grade.proposedBlocks),
         inSet: false,
         index: new BN(-1),
+        city: "",
+        country: "",
       });
     });
 

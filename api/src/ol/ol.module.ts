@@ -67,12 +67,12 @@ for (const role of roles) {
 }
 
 // Centralize queue definitions in an array for better reusability
-const queues = [
-  { name: "ol-clickhouse-ingestor", connection: redisClient},
-  { name: "ol-parquet-producer", connection: redisClient },
-  { name: "ol-version-batch", connection: redisClient },
-  { name: "ol-version", connection: redisClient },
-  { name: "expired-transactions", connection: redisClient },
+const queueNames = [
+  "ol-clickhouse-ingestor",
+  "ol-parquet-producer",
+  "ol-version-batch",
+  "ol-version",
+  "expired-transactions",
 ];
 
 
@@ -87,9 +87,9 @@ const queues = [
 
     // Register queues using a loop to simplify and maintain consistency
     BullModule.registerQueue(
-      ...queues.map(queue => ({
-        name: queue.name,
-        connection: queue.connection,
+      ...queueNames.map(name => ({
+        name,
+        connection: redisClient,
       }))
     ),
   ],
@@ -145,14 +145,4 @@ const queues = [
   controllers: [OlController],
   exports: [OlService, TransformerService, Types.ICommunityWalletsService, BullBoardService],
 })
-export class OlModule {
-  isProduction = process.env.NODE_ENV === 'production';
-
-  constructor(private readonly bullBoardService: BullBoardService) {
-    if (!this.isProduction) {
-      // Setup BullBoard for the queues in local development environment
-      // Utilize the same queue array to ensure consistency
-      this.bullBoardService.setupBullBoard(queues);
-    }
-  }
-}
+export class OlModule {}

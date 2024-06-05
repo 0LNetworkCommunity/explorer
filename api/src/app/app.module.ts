@@ -45,7 +45,6 @@ import { MultiSigModule } from "../multi-sig/multi-sig.module.js";
     StatsModule,
     WalletSubscriptionModule,
     OlSwapModule,
-    NodeWatcherModule,
     MultiSigModule,
   ],
   controllers: [],

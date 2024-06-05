@@ -16,9 +16,7 @@ async function bootstrap() {
   app.set("trust proxy", 1);
   app.enableCors();
 
-  const isProduction = process.env.NODE_ENV === 'production';
-
-  if (!isProduction) {
+  if (process.env.NODE_ENV !== 'production') {
     const bullBoardService = app.get(BullBoardService);
     app.use('/ui', bullBoardService.getServerAdapter().getRouter());
   }

@@ -93,7 +93,10 @@ export class StatsService {
     console.timeEnd("calculateLiquidityConcentrationLocked");
 
     console.time("getTopUnlockedBalanceWallets");
-    const topAccounts = await this.getTopUnlockedBalanceWallets(100, supplyStats.circulatingSupply);
+    const topAccounts = await this.getTopUnlockedBalanceWallets(
+      100,
+      supplyStats.circulatingSupply,
+    );
     console.timeEnd("getTopUnlockedBalanceWallets");
 
     // calculate KPIS
@@ -835,6 +838,34 @@ export class StatsService {
     }
   }
 
+  public async getTotalUniqueAccounts(): Promise<number> {
+    try {
+      const query = `
+        SELECT COUNT(DISTINCT address) AS unique_accounts
+        FROM coin_balance
+        WHERE coin_module = 'libra_coin'
+      `;
+
+      const resultSet = await this.clickhouseService.client.query({
+        query: query,
+        format: "JSONEachRow",
+      });
+
+      const rows = await resultSet.json<{ unique_accounts: number }[]>();
+
+      if (rows.length === 0) {
+        return 0;
+      }
+
+      const uniqueAccountsCount = Number(rows[0]);
+
+      return uniqueAccountsCount;
+    } catch (error) {
+      console.error("Error in getTotalUniqueAccounts:", error);
+      throw error;
+    }
+  }
+
   private async getSupplyAndCapital(supplyStats: SupplyStats): Promise<{
     supplyAllocation: NameValue[];
     individualsCapital: NameValue[];
@@ -1017,7 +1048,9 @@ export class StatsService {
       }
 
       // Convert community wallets to a Set for easy lookup
-      const communityAddresses = new Set(communityWallets.map(wallet => wallet.toUpperCase()));
+      const communityAddresses = new Set(
+        communityWallets.map((wallet) => wallet.toUpperCase()),
+      );
 
       // Convert slow wallets to a map for easy access
       const slowWalletsMap = new Map(
@@ -1055,7 +1088,7 @@ export class StatsService {
 
       // Create a map of address to latest balance, excluding community wallets
       const addressBalanceMap = new Map<string, number>();
-      rows.forEach(row => {
+      rows.forEach((row) => {
         const address = row.address.toUpperCase();
         if (!communityAddresses.has(address)) {
           addressBalanceMap.set(address, row.balance);
@@ -1063,7 +1096,7 @@ export class StatsService {
       });
 
       // Adjust balances for slow wallets
-      slowWalletsUnlockedBalances.forEach(row => {
+      slowWalletsUnlockedBalances.forEach((row) => {
         const address = getLast15Chars(row.address);
         for (const [key, value] of addressBalanceMap.entries()) {
           if (getLast15Chars(key) === address) {
@@ -1074,10 +1107,12 @@ export class StatsService {
       });
 
       // Convert the map to an array
-      const result = Array.from(addressBalanceMap.entries()).map(([address, balance]) => ({
-        address,
-        balance,
-      }));
+      const result = Array.from(addressBalanceMap.entries()).map(
+        ([address, balance]) => ({
+          address,
+          balance,
+        }),
+      );
 
       return result;
     } catch (error) {
@@ -1085,7 +1120,6 @@ export class StatsService {
       throw error;
     }
   }
-
 
   private binGenericBalances(
     balances: BalanceItem[],
@@ -1246,7 +1280,12 @@ export class StatsService {
     });
   }
 
-  private async getTopUnlockedBalanceWallets(limit: number, circulatingSupply: number): Promise<{ address: string; unlockedBalance: number; percentOfCirculating: number }[]> {
+  private async getTopUnlockedBalanceWallets(
+    limit: number,
+    circulatingSupply: number,
+  ): Promise<
+    { address: string; unlockedBalance: number; percentOfCirculating: number }[]
+  > {
     try {
       function toHexString(decimalString: string): string {
         return BigInt(decimalString).toString(16).toUpperCase();
@@ -1259,7 +1298,11 @@ export class StatsService {
       // Get the list of community wallets
       const communityWallets =
         await this.communityWalletsService.getCommunityWallets();
-      const communityAddresses = new Set(communityWallets.map(wallet => wallet.address.toString('hex').toUpperCase()));
+      const communityAddresses = new Set(
+        communityWallets.map((wallet) =>
+          wallet.address.toString("hex").toUpperCase(),
+        ),
+      );
 
       // Query to get the latest balances and versions from coin_balance
       const coinBalanceQuery = `
@@ -1287,7 +1330,7 @@ export class StatsService {
 
       // Create a map of address to latest balance
       const addressBalanceMap = new Map<string, number>();
-      coinBalanceRows.forEach(row => {
+      coinBalanceRows.forEach((row) => {
         const address = toHexString(row.address).toUpperCase();
         if (!communityAddresses.has(address)) {
           addressBalanceMap.set(address, row.latest_balance / 1e6);
@@ -1314,7 +1357,7 @@ export class StatsService {
       }> = await slowWalletResultSet.json();
 
       // Adjust balances: replace balance with unlocked balance for slow wallets
-      slowWalletRows.forEach(row => {
+      slowWalletRows.forEach((row) => {
         const address = getLast15Chars(row.address);
         for (const [key, value] of addressBalanceMap.entries()) {
           if (getLast15Chars(key) === address) {
@@ -1325,11 +1368,13 @@ export class StatsService {
       });
 
       // Convert the map to an array and calculate percentOfCirculating
-      const result = Array.from(addressBalanceMap.entries()).map(([address, unlockedBalance]) => ({
-        address,
-        unlockedBalance,
-        percentOfCirculating: (unlockedBalance / circulatingSupply) * 100,
-      }));
+      const result = Array.from(addressBalanceMap.entries()).map(
+        ([address, unlockedBalance]) => ({
+          address,
+          unlockedBalance,
+          percentOfCirculating: (unlockedBalance / circulatingSupply) * 100,
+        }),
+      );
 
       // Sort by unlockedBalance and take the top N
       result.sort((a, b) => b.unlockedBalance - a.unlockedBalance);

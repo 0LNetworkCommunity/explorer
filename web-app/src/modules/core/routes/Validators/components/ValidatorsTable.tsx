@@ -79,8 +79,6 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
         value2 = b.votingPower;
         break;
       case 'grade':
-        value1 = a.grade.compliant ? 1 : 0;
-        value2 = b.grade.compliant ? 1 : 0;
         if (value1 === value2) {
           value1 = a.grade.proposedBlocks - a.grade.failedBlocks;
           value2 = b.grade.proposedBlocks - b.grade.failedBlocks;
@@ -122,7 +120,6 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
   let sortedValidators;
   let cumulativeValidators;
 
-  console.log(validators);
   if (validators) {
     filteredValidators = getFilteredValidators();
     sortedValidators = getSortedValidators(filteredValidators);
@@ -156,9 +153,10 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
   const columns = [
     { key: 'address', label: 'Address', className: '' },
     //...(isActive ? [{ key: 'index', label: 'Set Position', className: '' }] : []),
+    { key: 'grade', label: 'Grade', className: 'text-center' },
     { key: 'vouches', label: 'Vouches', className: '' },
     { key: 'currentBid', label: 'Bid (Exp. Epoch)', className: 'text-right' },
-    ...(isActive
+    /*...(isActive
       ? [
           {
             key: 'cumulativeShare',
@@ -166,7 +164,7 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
             className: 'text-left whitespace-nowrap',
           },
         ]
-      : []),
+      : []),*/
     { key: 'location', label: 'Location', className: 'text-left' },
     { key: 'balance', label: 'Balance', className: 'text-right' },
     // { key: 'unlocked', label: 'Unlocked', className: 'text-right' },

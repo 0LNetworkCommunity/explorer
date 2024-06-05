@@ -5,7 +5,6 @@ interface GqlValidatorGradeInput {
   compliant: boolean;
   proposedBlocks: number;
   failedBlocks: number;
-  ratio: number;
 }
 
 @ObjectType("ValidatorGrade")
@@ -14,7 +13,6 @@ export class GqlValidatorGrade {
     this.compliant = input.compliant;
     this.proposedBlocks = input.proposedBlocks;
     this.failedBlocks = input.failedBlocks;
-    this.ratio = input.ratio;
   }
 
   @Field(() => Boolean)
@@ -25,16 +23,12 @@ export class GqlValidatorGrade {
 
   @Field(() => Number)
   public failedBlocks: number;
-
-  @Field(() => Number)
-  public ratio: number;
 }
 
 interface GqlValidatorInput {
   address: Buffer;
   votingPower: BN;
-  failedProposals: BN;
-  successfulProposals: BN;
+  grade: GqlValidatorGradeInput;
   inSet: boolean;
   index: BN;
   networkAddresses?: string;
@@ -48,8 +42,7 @@ export class GqlValidator {
   public constructor(input: GqlValidatorInput) {
     this.address = input.address;
     this.votingPower = input.votingPower;
-    this.failedProposals = input.failedProposals;
-    this.successfulProposals = input.successfulProposals;
+    this.grade = input.grade;
     this.inSet = input.inSet;
     this.index = input.index;
     this.networkAddresses = input.networkAddresses;
@@ -87,6 +80,9 @@ export class GqlValidator {
 
   @Field(() => BN)
   public successfulProposals: BN;
+
+  @Field(() => GqlValidatorGrade, { nullable: true })
+  public grade?: GqlValidatorGrade;
 }
 
 interface GqlVouchInput {

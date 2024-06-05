@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import HexString from '../HexString';
 import CopyIcon from '../Icons/CopyIcon';
 import AddressAvatar from '../AddressAvatar/AddressAvatar';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface Props {
   address: string;
@@ -16,7 +18,7 @@ const AccountAddress: FC<Props> = ({ address }) => {
     navigator.clipboard
       .writeText(address)
       .then(() => {
-        console.log('Address copied to clipboard');
+        toast.success('Address copied to clipboard');
       })
       .catch((err) => {
         console.error('Failed to copy address: ', err);

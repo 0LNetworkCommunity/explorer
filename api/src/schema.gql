@@ -39,7 +39,6 @@ type ValidatorGrade {
   compliant: Boolean!
   proposedBlocks: Float!
   failedBlocks: Float!
-  ratio: Float!
 }
 
 type Validator {
@@ -53,9 +52,9 @@ type Validator {
   votingPower: BigInt!
   failedProposals: BigInt!
   successfulProposals: BigInt!
+  grade: ValidatorGrade
   account: Account!
   vouches: [Vouch!]!
-  grade: ValidatorGrade!
   currentBid: ValidatorCurrentBid!
 }
 

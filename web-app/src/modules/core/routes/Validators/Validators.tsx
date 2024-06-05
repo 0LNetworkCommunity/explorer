@@ -17,17 +17,17 @@ const GET_VALIDATORS = gql`
           unlocked
         }
       }
+      grade {
+        compliant
+        failedBlocks
+        proposedBlocks
+      }
       vouches {
         epoch
       }
       currentBid {
         currentBid
         expirationEpoch
-      }
-      grade {
-        compliant
-        failedBlocks
-        proposedBlocks
       }
       city
       country

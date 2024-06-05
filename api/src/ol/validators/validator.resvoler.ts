@@ -2,7 +2,12 @@ import { Parent, ResolveField, Resolver } from "@nestjs/graphql";
 import BN from "bn.js";
 
 import { OlService } from "../ol.service.js";
-import { GqlValidator, GqlValidatorCurrentBid, GqlValidatorGrade, GqlVouch } from "../models/validator.model.js";
+import {
+  GqlValidator,
+  GqlValidatorCurrentBid,
+  GqlValidatorGrade,
+  GqlVouch,
+} from "../models/validator.model.js";
 import { GqlAccount } from "../models/account.model.js";
 import { parseAddress } from "../../utils.js";
 
@@ -43,7 +48,6 @@ export class ValidatorResolver {
       compliant: grade.compliant,
       proposedBlocks: grade.proposedBlocks,
       failedBlocks: grade.failedBlocks,
-      ratio: grade.ratio,
     });
   }
 

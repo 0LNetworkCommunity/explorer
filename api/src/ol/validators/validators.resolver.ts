@@ -7,13 +7,6 @@ import { OlService } from "../ol.service.js";
 import { PrismaService } from "../../prisma/prisma.service.js";
 import { GqlValidator } from "../models/validator.model.js";
 
-interface ValidatorPerformance {
-  validators: {
-    failed_proposals: string;
-    successful_proposals: string;
-  }[];
-}
-
 @Resolver()
 export class ValidatorsResolver {
   public constructor(
@@ -23,14 +16,7 @@ export class ValidatorsResolver {
 
   @Query(() => [GqlValidator])
   async validators(): Promise<GqlValidator[]> {
-    const validatorPerformanceRes =
-      await this.olService.aptosClient.getAccountResource(
-        "0x01",
-        "0x1::stake::ValidatorPerformance",
-      );
-
     const validatorSet = await this.olService.getValidatorSet();
-
     const nodes = await this.prisma.node.findMany({
       select: {
         ip: true,
@@ -39,35 +25,30 @@ export class ValidatorsResolver {
       },
     });
 
-    const validatorPerformances =
-      validatorPerformanceRes.data as ValidatorPerformance;
+    const currentValidators = await Bluebird.map(
+      validatorSet.activeValidators,
+      async (validator) => {
+        const grade = await this.olService.getValidatorGrade(validator.addr);
+        const valIp =
+          validator.config.networkAddresses &&
+          validator.config.networkAddresses.split("/")[2];
+        const node = nodes.find((node) => node["ip"] == valIp);
+        const city = node && node["city"] ? node["city"] : "";
+        const country = node && node["country"] ? node["country"] : "";
 
-    const currentValidators = validatorSet.activeValidators.map((validator) => {
-      const validatorPerformance =
-        validatorPerformances.validators[
-          validator.config.validatorIndex.toNumber()
-        ];
-
-      const valIp =
-        validator.config.networkAddresses &&
-        validator.config.networkAddresses.split("/")[2];
-      const node = nodes.find((node) => node["ip"] == valIp);
-      const city = node && node["city"] ? node["city"] : "";
-      const country = node && node["country"] ? node["country"] : "";
-
-      return new GqlValidator({
-        address: validator.addr,
-        votingPower: validator.votingPower,
-        failedProposals: new BN(validatorPerformance.failed_proposals),
-        successfulProposals: new BN(validatorPerformance.successful_proposals),
-        inSet: true,
-        index: validator.config.validatorIndex,
-        networkAddresses: validator.config.networkAddresses,
-        fullnodeAddresses: validator.config.fullnodeAddresses,
-        city: city,
-        country: country,
-      });
-    });
+        return new GqlValidator({
+          address: validator.addr,
+          votingPower: validator.votingPower,
+          grade: grade,
+          inSet: true,
+          index: validator.config.validatorIndex,
+          networkAddresses: validator.config.networkAddresses,
+          fullnodeAddresses: validator.config.fullnodeAddresses,
+          city: city,
+          country: country,
+        });
+      },
+    );
 
     let eligible = await this.olService.getEligibleValidators();
     eligible = eligible.filter(
@@ -90,12 +71,11 @@ export class ValidatorsResolver {
       return new GqlValidator({
         address,
         votingPower: new BN(0),
-        failedProposals: new BN(grade.failedBlocks),
-        successfulProposals: new BN(grade.proposedBlocks),
+        grade: grade,
         inSet: false,
         index: new BN(-1),
-        city: "",
-        country: "",
+        // city: city,
+        // country: country
       });
     });
 

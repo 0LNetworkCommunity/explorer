@@ -7,6 +7,7 @@ import apolloClient from './apollo';
 import router from './router';
 import { ThemeProvider } from 'styled-components';
 import { GlobalStyle, theme } from './styles';
+import { ToastContainer, Slide } from 'react-toastify';
 
 const wallets: Wallet[] = [];
 
@@ -26,6 +27,19 @@ const App: FC = () => {
       <ApolloProvider client={apolloClient}>
         <ThemeProvider theme={theme}>
           <GlobalStyle />
+          <ToastContainer
+            position="bottom-center"
+            autoClose={3000}
+            hideProgressBar
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            transition={Slide}
+            theme="dark"
+          />
           <RouterProvider router={router} />
         </ThemeProvider>
       </ApolloProvider>

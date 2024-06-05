@@ -11,7 +11,6 @@ export interface ValidatorGrade {
   compliant: boolean;
   proposedBlocks: number;
   failedBlocks: number;
-  ratio: number;
 }
 
 export interface CurrentBid {

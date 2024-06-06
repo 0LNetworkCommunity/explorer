@@ -5,18 +5,14 @@ import ValidatorsTable from './components/ValidatorsTable';
 import ValidatorsStats from './components/ValidatorsStats';
 
 const GET_VALIDATORS = gql`
-  query GetValidators {
-    validators {
+  query Validators {
+    getValidators {
       inSet
       index
       address
       votingPower
-      account {
-        balance
-        slowWallet {
-          unlocked
-        }
-      }
+      balance
+      unlocked
       grade {
         compliant
         failedBlocks
@@ -37,17 +33,13 @@ const GET_VALIDATORS = gql`
 
 const Validators: FC = () => {
   const { data, error } = useQuery<{
-    validators: {
+    getValidators: {
       address: string;
       inSet: boolean;
       index: number;
       votingPower: number;
-      account: {
-        balance: number;
-        slowWallet: {
-          unlocked: number;
-        } | null;
-      };
+      balance: number;
+      unlocked: number;
       vouches: {
         epoch: number;
       }[];
@@ -72,14 +64,16 @@ const Validators: FC = () => {
     );
   }
 
+  console.log('data', data?.getValidators);
+
   return (
     <Page>
       <h1 className="font-space-grotesk text-3xl md:text-4xl font-medium leading-[44px] tracking-[-0.02em] text-left mt-6 mb-6">
         Validators
       </h1>
       <section className="my-2 flow-root">
-        <ValidatorsStats validators={data && data.validators} />
-        <ValidatorsTable validators={data && data.validators} />
+        <ValidatorsStats validators={data && data.getValidators} />
+        <ValidatorsTable validators={data && data.getValidators} />
       </section>
     </Page>
   );

@@ -3,12 +3,8 @@ export interface IValidator {
   inSet: boolean;
   index: number;
   votingPower: number;
-  account: {
-    balance: number;
-    slowWallet: {
-      unlocked: number;
-    } | null;
-  };
+  balance?: number;
+  unlocked?: number;
   vouches: {
     epoch: number;
   }[];

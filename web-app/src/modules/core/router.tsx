@@ -15,7 +15,6 @@ import Test from './routes/Test';
 import Module from './routes/Account/Modules/Module';
 import Stats from './routes/Stats';
 import Postero from './routes/Postero';
-import CommunityWallets from './routes/CommunityWallets';
 
 const router = createBrowserRouter([
   {
@@ -77,10 +76,6 @@ const router = createBrowserRouter([
       {
         path: '/stats',
         element: <Stats />,
-      },
-      {
-        path: '/community-wallets',
-        element: <CommunityWallets />,
       },
       {
         path: '/postero',

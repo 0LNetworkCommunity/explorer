@@ -1,84 +1,28 @@
+// src/validators/validators.resolver.ts
 import { Query, Resolver } from "@nestjs/graphql";
-import _ from "lodash";
-import Bluebird from "bluebird";
-import BN from "bn.js";
-
-import { OlService } from "../ol.service.js";
-import { PrismaService } from "../../prisma/prisma.service.js";
+import { ServiceUnavailableException } from "@nestjs/common";
+import { ValidatorsService } from "./validators.service.js";
 import { GqlValidator } from "../models/validator.model.js";
+import { redisClient } from "../../redis/redis.service.js";
+import { VALIDATORS_CACHE_KEY } from "../constants.js";
 
-@Resolver()
+@Resolver(() => GqlValidator)
 export class ValidatorsResolver {
-  public constructor(
-    private readonly olService: OlService,
-    private readonly prisma: PrismaService,
-  ) {}
+  private cacheEnabled = true; // Set to true if cache is enabled
+
+  public constructor(private readonly validatorsService: ValidatorsService) {}
 
   @Query(() => [GqlValidator])
-  async validators(): Promise<GqlValidator[]> {
-    const validatorSet = await this.olService.getValidatorSet();
-    const nodes = await this.prisma.node.findMany({
-      select: {
-        ip: true,
-        city: true,
-        country: true,
-      },
-    });
+  async getValidators(): Promise<GqlValidator[]> {
+    if (this.cacheEnabled) {
+      const cachedValidators = await redisClient.get(VALIDATORS_CACHE_KEY);
+      if (cachedValidators) {
+        return JSON.parse(cachedValidators);
+      }
+      // throw new ServiceUnavailableException("Cache not ready");
+    }
 
-    const currentValidators = await Bluebird.map(
-      validatorSet.activeValidators,
-      async (validator) => {
-        const grade = await this.olService.getValidatorGrade(validator.addr);
-        const valIp =
-          validator.config.networkAddresses &&
-          validator.config.networkAddresses.split("/")[2];
-        const node = nodes.find((node) => node["ip"] == valIp);
-        const city = node && node["city"] ? node["city"] : "";
-        const country = node && node["country"] ? node["country"] : "";
-
-        return new GqlValidator({
-          address: validator.addr,
-          votingPower: validator.votingPower,
-          grade: grade,
-          inSet: true,
-          index: validator.config.validatorIndex,
-          networkAddresses: validator.config.networkAddresses,
-          fullnodeAddresses: validator.config.fullnodeAddresses,
-          city: city,
-          country: country,
-        });
-      },
-    );
-
-    let eligible = await this.olService.getEligibleValidators();
-    eligible = eligible.filter(
-      (address) => !currentValidators.find((it) => it.address.equals(address)),
-    );
-
-    const eligibleValidators = await Bluebird.map(eligible, async (address) => {
-      const grade = await this.olService.getValidatorGrade(address);
-
-      // Ready to fetch city and country for inactive validators
-      /*
-      const config = await this.olService.getValidatorConfig(address);
-      const valIp =
-        config.network_addresses && config.network_addresses.split("/")[2];
-      const node = nodes.find((node) => node["ip"] == valIp);
-      const city = node && node["city"] ? node["city"] : "";
-      const country = node && node["country"] ? node["country"] : "";
-      */
-
-      return new GqlValidator({
-        address,
-        votingPower: new BN(0),
-        grade: grade,
-        inSet: false,
-        index: new BN(-1),
-        // city: city,
-        // country: country
-      });
-    });
-
-    return [...currentValidators, ...eligibleValidators];
+    const validators = await this.validatorsService.getValidators();
+    return validators;
   }
 }

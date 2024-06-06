@@ -71,3 +71,27 @@ export interface RawDonorVoiceRegistry {
   liquidation_queue: unknown[];
   list: string[];
 }
+
+export interface CoinStoreResource {
+  coin: {
+    value: string;
+  };
+  deposit_events: {
+    counter: string;
+    guid: {
+      id: {
+        addr: string;
+        creation_num: string;
+      };
+    };
+  };
+  withdraw_events: {
+    counter: string;
+    guid: {
+      id: {
+        addr: string;
+        creation_num: string;
+      };
+    };
+  };
+}

@@ -12,9 +12,9 @@ import Logo from '../../Logo/Logo';
 const navigation = [
   { name: 'Home', to: '/' },
   { name: 'Transactions', to: '/transactions' },
+  { name: 'Accounts', to: '/accounts' },
   { name: 'Validators', to: '/validators' },
   { name: 'Stats', to: '/stats' },
-  { name: 'Community Wallets', to: '/community-wallets' },
 ];
 
 const Header: React.FC = () => {

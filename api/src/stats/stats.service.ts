@@ -838,6 +838,103 @@ export class StatsService {
     }
   }
 
+  public async getAccountsStats(): Promise<{
+    totalAccounts: number;
+    activeAddressesCount: {
+      lastDay: number;
+      last30Days: number;
+      last90Days: number;
+    };
+  }> {
+    const totalAccounts = await this.getTotalUniqueAccounts();
+    const activeAddressesCount = await this.getActiveAddressesCount();
+    return { totalAccounts, activeAddressesCount };
+  }
+
+  public async getActiveAddressesCount(): Promise<{
+    lastDay: number;
+    last30Days: number;
+    last90Days: number;
+  }> {
+    try {
+      const query = `
+        SELECT
+          version,
+          address
+        FROM coin_balance
+        WHERE coin_module = 'libra_coin'
+        ORDER BY version ASC
+      `;
+
+      const resultSet = await this.clickhouseService.client.query({
+        query: query,
+        format: "JSONEachRow",
+      });
+
+      const rows = await resultSet.json<{
+        version: string;
+        address: string;
+      }>();
+
+      if (!rows.length) {
+        return {
+          lastDay: 0,
+          last30Days: 0,
+          last90Days: 0,
+        };
+      }
+
+      const versions = rows.map((row) => parseInt(row.version, 10));
+      const chunkSize = 1000;
+      const versionChunks = this.chunkArray<number>(versions, chunkSize);
+      const allTimestampMappings = (
+        await Promise.all(
+          versionChunks.map((chunk) => this.mapVersionsToTimestamps(chunk)),
+        )
+      ).flat();
+
+      const versionToTimestampMap = new Map<number, number>(
+        allTimestampMappings.map(({ version, timestamp }) => [
+          version,
+          timestamp,
+        ]),
+      );
+
+      const now = Math.floor(Date.now() / 1000);
+      const oneDayAgo = now - 86400;
+      const thirtyDaysAgo = now - 30 * 86400;
+      const ninetyDaysAgo = now - 90 * 86400;
+
+      const seenAddressesLastDay = new Set<string>();
+      const seenAddressesLast30Days = new Set<string>();
+      const seenAddressesLast90Days = new Set<string>();
+
+      rows.forEach((row) => {
+        const version = parseInt(row.version, 10);
+        const timestamp = versionToTimestampMap.get(version) ?? 0;
+
+        if (timestamp >= oneDayAgo) {
+          seenAddressesLastDay.add(row.address);
+        }
+        if (timestamp >= thirtyDaysAgo) {
+          seenAddressesLast30Days.add(row.address);
+        }
+        if (timestamp >= ninetyDaysAgo) {
+          seenAddressesLast90Days.add(row.address);
+        }
+      });
+
+      return {
+        lastDay: seenAddressesLastDay.size,
+        last30Days: seenAddressesLast30Days.size,
+        last90Days: seenAddressesLast90Days.size,
+      };
+    } catch (error) {
+      console.error("Error in getActiveAddressesCount:", error);
+      throw error;
+    }
+  }
+
   public async getTotalUniqueAccounts(): Promise<number> {
     try {
       const query = `
@@ -856,8 +953,8 @@ export class StatsService {
       if (rows.length === 0) {
         return 0;
       }
-
-      const uniqueAccountsCount = Number(rows[0]);
+      console.log(rows);
+      const uniqueAccountsCount = Number(rows[0]["unique_accounts"]);
 
       return uniqueAccountsCount;
     } catch (error) {
@@ -991,12 +1088,12 @@ export class StatsService {
 
       // Query the slow_wallet table and join with the addressBalanceMap data
       const slowWalletQuery = `
-        SELECT
-          hex(SW.address) AS address,
-          max(SW.unlocked) / 1e6 AS unlocked_balance
-        FROM slow_wallet SW
-        GROUP BY SW.address
-      `;
+      SELECT
+        hex(SW.address) AS address,
+        max(SW.unlocked) / 1e6 AS unlocked_balance
+      FROM slow_wallet SW
+      GROUP BY SW.address
+    `;
 
       const slowWalletResultSet = await this.clickhouseService.client.query({
         query: slowWalletQuery,
@@ -1299,9 +1396,7 @@ export class StatsService {
       const communityWallets =
         await this.communityWalletsService.getCommunityWallets();
       const communityAddresses = new Set(
-        communityWallets.map((wallet) =>
-          wallet.address.toString("hex").toUpperCase(),
-        ),
+        communityWallets.map((wallet) => wallet.address),
       );
 
       // Query to get the latest balances and versions from coin_balance

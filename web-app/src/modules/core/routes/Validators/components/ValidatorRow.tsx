@@ -3,16 +3,17 @@ import clsx from 'clsx';
 import AccountAddress from '../../../../ui/AccountAddress';
 import Money from '../../../../ui/Money';
 import { IValidator } from '../../../../interface/Validator.interface';
-// import ProgressBar from './ProgressBar';
+import ProgressBar from './ProgressBar';
 import { CheckIcon, XMarkIcon } from '@heroicons/react/20/solid';
 
 interface ValidatorRowProps {
   validator: IValidator;
+  isActive: boolean;
 }
 
-const ValidatorRow: FC<ValidatorRowProps> = ({ validator }) => {
+const ValidatorRow: FC<ValidatorRowProps> = ({ validator, isActive = false }) => {
   return (
-    <tr className={clsx('whitespace-nowrap text-sm text-gray-500 text-center')}>
+    <tr className={clsx('whitespace-nowrap text-sm text-[#141414] text-center')}>
       <td className="px-2 md:px-4 lg:px-6 py-4">
         <AccountAddress address={validator.address} />
       </td>
@@ -35,23 +36,23 @@ const ValidatorRow: FC<ValidatorRowProps> = ({ validator }) => {
           validator.currentBid && validator.currentBid.expirationEpoch.toLocaleString()
         })`}
       </td>
-      {/*isActive && (
+      <td className="px-2 md:px-4 lg:px-6 py-4 text-right">
+        <Money>{Number(validator.balance)}</Money>
+      </td>
+      {isActive && (
         <td className="px-2 md:px-4 lg:px-6 py-4">
           <ProgressBar
             percentage={validator.cumulativeBalance ? validator.cumulativeBalance.percentage : 0}
             amount={validator.cumulativeBalance ? validator.cumulativeBalance.amount : 0}
           />
         </td>
-      )*/}
+      )}
       <td className="px-2 md:px-4 lg:px-6 py-4 text-left">
         {validator.city ? `${validator.city}, ${validator.country}` : 'Unknown'}
       </td>
-      <td className="px-2 md:px-4 lg:px-6 py-4 text-right">
-        <Money>{Number(validator.account.balance)}</Money>
-      </td>
       {/*<td className="px-2 md:px-4 lg:px-6 py-4 text-right">
         {validator.account.slowWallet ? (
-          <Money>{Number(validator.account.slowWallet.unlocked)}</Money>
+          <Money>{Number(validator.unlocked)}</Money>
         ) : (
           ''
         )}

@@ -35,6 +35,16 @@ type UserTransactionCollection {
   items: [GqlUserTransactionDeprecated!]!
 }
 
+type SlowWallet {
+  transferred: Decimal!
+  unlocked: Decimal!
+}
+
+type ValidatorCurrentBid {
+  currentBid: Float!
+  expirationEpoch: Float!
+}
+
 type ValidatorGrade {
   compliant: Boolean!
   proposedBlocks: Float!
@@ -44,29 +54,21 @@ type ValidatorGrade {
 type Validator {
   inSet: Boolean!
   index: BigInt!
-  address: Bytes!
-  networkAddresses: String
-  fullnodeAddresses: String
+  address: String!
   city: String
   country: String
   votingPower: BigInt!
-  failedProposals: BigInt!
-  successfulProposals: BigInt!
   grade: ValidatorGrade
-  account: Account!
-  vouches: [Vouch!]!
-  currentBid: ValidatorCurrentBid!
+  vouches: [Vouch!]
+  currentBid: ValidatorCurrentBid
+  balance: Float
+  unlocked: Float
 }
 
 type Vouch {
   epoch: BigInt!
   address: Bytes!
   inSet: Boolean!
-}
-
-type ValidatorCurrentBid {
-  currentBid: Float!
-  expirationEpoch: Float!
 }
 
 type Account {
@@ -79,11 +81,6 @@ type Account {
 enum OrderDirection {
   ASC
   DESC
-}
-
-type SlowWallet {
-  transferred: Decimal!
-  unlocked: Decimal!
 }
 
 type PageInfo {
@@ -112,10 +109,25 @@ type PaginatedMovements {
   pageInfo: PageInfo!
 }
 
-type CommunityWallet {
+type CumulativeShare {
+  amount: Float!
+  percentage: Float!
+}
+
+type GqlTopAccount {
+  rank: Int!
+  address: String!
+  publicName: String!
+  balance: Float!
+  cumulativeShare: CumulativeShare!
+}
+
+type GqlCommunityWallet {
+  rank: Float!
+  address: String!
   name: String
   description: String
-  address: Bytes!
+  balance: Float
 }
 
 type Transaction {
@@ -178,8 +190,9 @@ type Query {
   userTransactions(limit: Int!, offset: Int!, order: String!): UserTransactionCollection!
   modules: [Module!]!
   account(address: Bytes!): Account
-  validators: [Validator!]!
-  communityWallets: [CommunityWallet!]!
+  getTopAccounts(limit: Float! = 100): [GqlTopAccount!]!
+  getValidators: [Validator!]!
+  getCommunityWallets: [GqlCommunityWallet!]!
   walletTransactions(address: Bytes!): [Transaction!]!
   transaction(hash: Bytes!): Transaction!
   nodes: [Node!]

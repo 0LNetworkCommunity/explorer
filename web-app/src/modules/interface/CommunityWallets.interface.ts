@@ -1,5 +1,7 @@
-export interface ICommunityWalletInfo {
-  description: string | null;
-  name: string | null;
+export interface ICommunityWallet {
+  rank: number;
   address: string;
+  name?: string;
+  balance: number;
+  description?: string;
 }

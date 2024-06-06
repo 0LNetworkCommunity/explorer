@@ -1,6 +1,6 @@
 import { FC, useState } from 'react';
 import { IValidator } from '../../../../interface/Validator.interface';
-import ToggleButton from './ToggleButton';
+import ToggleButton from '../../../../ui/ToggleButton';
 import SortableTh from './SortableTh';
 import ValidatorRow from './ValidatorRow';
 import ValidatorRowSkeleton from './ValidatorRowSkeleton';
@@ -15,7 +15,13 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
   const [sortColumn, setSortColumn] = useState<string>('index');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [previousSortColumn, setPreviousSortColumn] = useState<string>('vouches');
-  const [isActive, setIsActive] = useState(true);
+  const [isActive] = useState(true);
+  const [activeValue, setActiveValue] = useState<string>('active');
+
+  const toggleOptions = [
+    { label: 'Active', value: 'active' },
+    { label: 'Inactive', value: 'inactive' },
+  ];
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -30,11 +36,10 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
   const getFilteredValidators = () => {
     return validators
       ? validators.filter((validator) => {
-          if (isActive) {
+          if (activeValue === 'active') {
             return validator.inSet;
-          } else {
-            return !validator.inSet;
           }
+          return !validator.inSet;
         })
       : [];
   };
@@ -93,20 +98,20 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
         value2 = b.currentBid ? b.currentBid.currentBid : 0;
         break;
       case 'cumulativeShare':
-        value1 = Number(a.account.balance);
-        value2 = Number(b.account.balance);
+        value1 = Number(a.balance);
+        value2 = Number(b.balance);
         break;
       case 'location':
         value1 = a.country ? a.country + a.city : '';
         value2 = b.country ? b.country + b.city : '';
         break;
       case 'balance':
-        value1 = Number(a.account.balance);
-        value2 = Number(b.account.balance);
+        value1 = Number(a.balance);
+        value2 = Number(b.balance);
         break;
       case 'unlocked':
-        value1 = a.account.slowWallet ? Number(a.account.slowWallet.unlocked) : 0;
-        value2 = b.account.slowWallet ? Number(b.account.slowWallet.unlocked) : 0;
+        value1 = a.unlocked ? Number(a.unlocked) : 0;
+        value2 = b.unlocked ? Number(b.unlocked) : 0;
         break;
       default:
         value1 = a.address;
@@ -124,11 +129,11 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
     filteredValidators = getFilteredValidators();
     sortedValidators = getSortedValidators(filteredValidators);
 
-    const totalBalance = sortedValidators.reduce((acc, v) => acc + Number(v.account.balance), 0);
+    const totalBalance = validators.reduce((acc, v) => acc + Number(v.balance), 0);
 
     let cumulativeBalanceAmount = 0;
     cumulativeValidators = sortedValidators.map((validator) => {
-      cumulativeBalanceAmount += Number(validator.account.balance);
+      cumulativeBalanceAmount += Number(validator.balance);
 
       const cumulativeBalance = {
         amount: cumulativeBalanceAmount,
@@ -142,21 +147,13 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
     });
   }
 
-  function handleSetActive(boo: boolean) {
-    /*if (isActive && sortColumn == 'index') {
-      setSortColumn('vouches');
-      setSortOrder('asc');
-    }*/
-    setIsActive(boo);
-  }
-
   const columns = [
     { key: 'address', label: 'Address', className: '' },
-    //...(isActive ? [{ key: 'index', label: 'Set Position', className: '' }] : []),
     { key: 'grade', label: 'Grade', className: 'text-center' },
     { key: 'vouches', label: 'Vouches', className: '' },
     { key: 'currentBid', label: 'Bid (Exp. Epoch)', className: 'text-right' },
-    /*...(isActive
+    { key: 'balance', label: 'Balance', className: 'text-right' },
+    ...(isActive
       ? [
           {
             key: 'cumulativeShare',
@@ -164,15 +161,14 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
             className: 'text-left whitespace-nowrap',
           },
         ]
-      : []),*/
+      : []),
     { key: 'location', label: 'Location', className: 'text-left' },
-    { key: 'balance', label: 'Balance', className: 'text-right' },
     // { key: 'unlocked', label: 'Unlocked', className: 'text-right' },
   ];
 
   return (
-    <div className="pt-8 pb-8">
-      <ToggleButton isActive={isActive} setIsActive={handleSetActive} />
+    <div className="py-8">
+      <ToggleButton options={toggleOptions} activeValue={activeValue} onToggle={setActiveValue} />
       <div className="overflow-x-auto">
         <div className="inline-block min-w-full py-2 align-middle">
           <div className="overflow-hidden">

@@ -15,7 +15,6 @@ import { NetworkAddresses } from "./network-addresses.js";
 import BN from "bn.js";
 import { parseAddress } from "../utils.js";
 import { SupplyStats } from "./types.js";
-import { Validator } from "@prisma/client";
 
 @Injectable()
 export class OlService {

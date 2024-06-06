@@ -23,9 +23,13 @@ import { OlClickhouseIngestorProcessor } from "./ol-clickhouse-ingestor.processo
 import { OlController } from "./ol.controller.js";
 
 import { ValidatorsResolver } from "./validators/validators.resolver.js";
-import { ValidatorResolver } from "./validators/validator.resvoler.js";
+import { ValidatorsProcessor } from "./validators/validators.processor.js";
+import { ValidatorsService } from "./validators/validators.service.js";
 
 import { AccountResolver } from "./account.resolver.js";
+import { AccountsResolver } from "./accounts/accounts.resolver.js";
+import { AccountsService } from "./accounts/accounts.service.js";
+import { AccountsProcessor } from "./accounts/accounts.processor.js";
 
 import { TransformerService } from "./transformer.service.js";
 
@@ -36,6 +40,7 @@ import { MovementsService } from "./movements/movements.service.js";
 
 import { CommunityWalletsResolver } from "./community-wallets/community-wallets.resolver.js";
 import { CommunityWalletsService } from "./community-wallets/community-wallets.service.js";
+import { CommunityWalletsProcessor } from "./community-wallets/community-wallets.processor.js";
 
 import { TransactionsResolver } from "./transactions/TransactionsResolver.js";
 import { TransactionResolver } from "./transactions/TransactionResolver.js";
@@ -54,6 +59,7 @@ const workersMap = new Map<string, Type<any>>([
   ["version-processor", OlVersionProcessor],
   ["clickhouse-ingestor-processor", OlClickhouseIngestorProcessor],
   ["expired-transactions-processor", ExpiredTransactionsProcessor],
+  ["accounts-processor", AccountsProcessor],
 ]);
 
 const workers: Type<any>[] = [];
@@ -98,6 +104,21 @@ for (const role of roles) {
       name: "expired-transactions",
       connection: redisClient,
     }),
+
+    BullModule.registerQueue({
+      name: "accounts",
+      connection: redisClient,
+    }),
+
+    BullModule.registerQueue({
+      name: "community-wallets",
+      connection: redisClient,
+    }),
+
+    BullModule.registerQueue({
+      name: "validators",
+      connection: redisClient,
+    }),
   ],
   providers: [
     UserTransactionsResolver,
@@ -105,11 +126,17 @@ for (const role of roles) {
     MovementsResolver,
 
     AccountResolver,
+    AccountsResolver,
+    AccountsService,
+    AccountsProcessor,
 
-    ValidatorResolver,
     ValidatorsResolver,
+    ValidatorsService,
+    ValidatorsProcessor,
 
     CommunityWalletsResolver,
+    CommunityWalletsService,
+    CommunityWalletsProcessor,
     {
       provide: Types.ICommunityWalletsService,
       useClass: CommunityWalletsService,

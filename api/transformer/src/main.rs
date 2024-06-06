@@ -657,13 +657,12 @@ async fn main() {
 
         let it = transactions.iter();
         for transaction in it {
+            event_collection.push(transaction);
+
             match transaction {
                 Transaction::PendingTransaction(_) => {}
                 Transaction::UserTransaction(user_transaction) => {
                     let info = &user_transaction.info;
-                    let events = &user_transaction.events;
-
-                    event_collection.push(info.version.into(), events);
 
                     process_changes(
                         &mut total_supply_collection,
@@ -708,9 +707,7 @@ async fn main() {
                 }
                 Transaction::GenesisTransaction(genesis_transaction) => {
                     let info = &genesis_transaction.info;
-                    let events = &genesis_transaction.events;
 
-                    event_collection.push(info.version.into(), events);
                     genesis_transaction_collection.push(genesis_transaction);
 
                     process_changes(
@@ -741,9 +738,6 @@ async fn main() {
                     assert_eq!(info.success, true);
 
                     block_metadata_transaction_collection.push(block_metadata_transaction);
-
-                    let events = &block_metadata_transaction.events;
-                    event_collection.push(info.version.into(), events);
 
                     process_changes(
                         &mut total_supply_collection,

@@ -1,5 +1,5 @@
 use arrow_array::{ArrayRef, FixedSizeBinaryArray, RecordBatch};
-use diem_api_types::Event;
+use diem_api_types::{Event, Transaction};
 use parquet::{arrow::arrow_writer::ArrowWriter, file::properties::WriterProperties};
 use std::{fs::File, sync::Arc};
 
@@ -12,6 +12,7 @@ pub struct EventCollection {
     module_name: Vec<String>,
     struct_name: Vec<String>,
     data: Vec<String>,
+    index: Vec<u64>,
 }
 
 impl EventCollection {
@@ -25,11 +26,42 @@ impl EventCollection {
             module_name: Vec::new(),
             struct_name: Vec::new(),
             data: Vec::new(),
+            index: Vec::new(),
         }
     }
 
-    pub fn push(&mut self, version: u64, events: &Vec<Event>) {
-        for event in events {
+    pub fn push(
+        &mut self,
+        transaction: &Transaction
+    ) {
+        match transaction {
+            Transaction::PendingTransaction(_) => {}
+            Transaction::UserTransaction(user_transaction) => {
+                let info = &user_transaction.info;
+                let events = &user_transaction.events;
+                self.push_events(info.version.into(), events);
+            }
+            Transaction::GenesisTransaction(genesis_transaction) => {
+                let info = &genesis_transaction.info;
+                let events = &genesis_transaction.events;
+                self.push_events(info.version.into(), events);
+            }
+            Transaction::BlockMetadataTransaction(block_metadata_transaction) => {
+                let info = &block_metadata_transaction.info;
+                let events = &block_metadata_transaction.events;
+                self.push_events(info.version.into(), events);
+            }
+            Transaction::StateCheckpointTransaction(_) => {}
+        }
+    }
+
+    fn push_events(
+        &mut self,
+        version: u64,
+        events: &Vec<Event>
+    ) {
+        for (index, event) in events.iter().enumerate() {
+            self.index.push(index as u64);
             self.version.push(version);
             self.creation_number.push(event.guid.creation_number.into());
 
@@ -62,6 +94,7 @@ impl EventCollection {
         }
 
         let version = arrow_array::UInt64Array::from(self.version.clone());
+        let index = arrow_array::UInt64Array::from(self.index.clone());
         let creation_number = arrow_array::UInt64Array::from(self.creation_number.clone());
         let account_address =
             FixedSizeBinaryArray::try_from_iter(self.account_address.iter()).unwrap();
@@ -75,6 +108,7 @@ impl EventCollection {
 
         let batch = RecordBatch::try_from_iter(vec![
             ("version", Arc::new(version) as ArrayRef),
+            ("index", Arc::new(index) as ArrayRef),
             ("creation_number", Arc::new(creation_number) as ArrayRef),
             ("account_address", Arc::new(account_address) as ArrayRef),
             ("sequence_number", Arc::new(sequence_number) as ArrayRef),

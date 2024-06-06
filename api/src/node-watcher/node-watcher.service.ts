@@ -137,8 +137,8 @@ export class NodeWatcherService {
       ip: string;
       latitude: number;
       longitude: number;
-      city: string;
-      country: string;
+      city: string | null;
+      country: string | null;
     }[] = [];
 
     for (const ip of ips) {
@@ -148,8 +148,8 @@ export class NodeWatcherService {
           ip,
           latitude: r.location.latitude,
           longitude: r.location.longitude,
-          city: r.city?.names?.en || "Unknown",
-          country: r.country?.names?.en || "Unknown",
+          city: r.city?.names?.en || null,
+          country: r.country?.names?.en || null,
         });
       }
     }
@@ -179,7 +179,6 @@ export class NodeWatcherService {
         "longitude" = EXCLUDED."longitude",
         "city" = EXCLUDED."city",
         "country" = EXCLUDED."country"
-    
     `;
 
     await this.prisma.$queryRawUnsafe(query, ...params);
@@ -273,7 +272,7 @@ export class NodeWatcherService {
       const res = await axios({
         method: "GET",
         url: `http://${ip}:8080/v1`,
-        signal: AbortSignal.timeout(5000), //Aborts request after 5 seconds
+        signal: AbortSignal.timeout(5000), // Aborts request after 5 seconds
         validateStatus: (status) => status === 200,
       });
 

@@ -137,8 +137,8 @@ export class NodeWatcherService {
       ip: string;
       latitude: number;
       longitude: number;
-      city: string;
-      country: string;
+      city?: string;
+      country?: string;
     }[] = [];
 
     for (const ip of ips) {
@@ -148,8 +148,8 @@ export class NodeWatcherService {
           ip,
           latitude: r.location.latitude,
           longitude: r.location.longitude,
-          city: r.city?.names?.en || "Unknown",
-          country: r.country?.names?.en || "Unknown",
+          city: r?.city?.names?.en,
+          country: r?.country?.names?.en,
         });
       }
     }

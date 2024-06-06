@@ -1,11 +1,11 @@
 import { FC } from 'react';
-import { normalizeHexString } from '../../../utils';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
+import { normalizeHexString } from '../../../utils';
 import HexString from '../HexString';
 import CopyIcon from '../Icons/CopyIcon';
 import AddressAvatar from '../AddressAvatar/AddressAvatar';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 interface Props {
   address: string;
@@ -34,7 +34,13 @@ const AccountAddress: FC<Props> = ({ address }) => {
       >
         <HexString value={normalizedAddress} />
       </Link>
-      <CopyIcon onClick={handleCopy} />
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="ml-2 text-gray-400 active:scale-95 active:text-gray-200"
+      >
+        <CopyIcon />
+      </button>
     </div>
   );
 };

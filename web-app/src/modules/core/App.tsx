@@ -1,13 +1,15 @@
 import { FC } from 'react';
 import { RouterProvider } from 'react-router-dom';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, Slide } from 'react-toastify';
+import { ThemeProvider } from 'styled-components';
 import { ApolloProvider } from '@apollo/client';
 import { AptosWalletAdapterProvider, Wallet } from '@aptos-labs/wallet-adapter-react';
+
 import { PosteroWallet } from '../postero-wallet';
 import apolloClient from './apollo';
 import router from './router';
-import { ThemeProvider } from 'styled-components';
 import { GlobalStyle, theme } from './styles';
-import { ToastContainer, Slide } from 'react-toastify';
 
 const wallets: Wallet[] = [];
 

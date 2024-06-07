@@ -30,6 +30,7 @@ const AccountAddress: FC<Props> = ({ address }) => {
       <AddressAvatar address={normalizedAddress} />
       <Link
         to={`/accounts/${normalizedAddress}`}
+        target="_blank"
         className="text-[#CD3B42] hover:text-blue-900 hover:underline font-normal"
       >
         <HexString value={normalizedAddress} />

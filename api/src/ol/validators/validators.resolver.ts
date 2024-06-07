@@ -33,19 +33,19 @@ export class ValidatorsResolver {
           validator.config.networkAddresses &&
           validator.config.networkAddresses.split("/")[2];
         const node = nodes.find((node) => node["ip"] == valIp);
-        const city = node && node["city"] ? node["city"] : "";
-        const country = node && node["country"] ? node["country"] : "";
+        const city = node && node["city"] ? node["city"] : undefined;
+        const country = node && node["country"] ? node["country"] : undefined;
 
         return new GqlValidator({
           address: validator.addr,
           votingPower: validator.votingPower,
-          grade: grade,
+          grade,
           inSet: true,
           index: validator.config.validatorIndex,
           networkAddresses: validator.config.networkAddresses,
           fullnodeAddresses: validator.config.fullnodeAddresses,
-          city: city,
-          country: country,
+          city,
+          country,
         });
       },
     );

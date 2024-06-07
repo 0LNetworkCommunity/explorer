@@ -1,8 +1,10 @@
 import { FC } from 'react';
 import { gql, useQuery } from '@apollo/client';
+
 import Page from '../../../ui/Page';
 import ValidatorsTable from './components/ValidatorsTable';
 import ValidatorsStats from './components/ValidatorsStats';
+import { IValidator } from '../../../interface/Validator.interface';
 
 const GET_VALIDATORS = gql`
   query GetValidators {
@@ -37,36 +39,13 @@ const GET_VALIDATORS = gql`
 
 const Validators: FC = () => {
   const { data, error } = useQuery<{
-    validators: {
-      address: string;
-      inSet: boolean;
-      index: number;
-      votingPower: number;
-      account: {
-        balance: number;
-        slowWallet: {
-          unlocked: number;
-        } | null;
-      };
-      vouches: {
-        epoch: number;
-      }[];
-      grade: {
-        compliant: boolean;
-        failedBlocks: number;
-        proposedBlocks: number;
-      };
-      currentBid: {
-        currentBid: number;
-        expirationEpoch: number;
-      };
-    }[];
+    validators: IValidator[];
   }>(GET_VALIDATORS);
 
   if (error) {
     console.log('error', error);
     return (
-      <Page __deprecated_grayBg>
+      <Page>
         <p>{`Error: ${error.message}`}</p>
       </Page>
     );
@@ -83,8 +62,6 @@ const Validators: FC = () => {
       </section>
     </Page>
   );
-
-  return null;
 };
 
 export default Validators;

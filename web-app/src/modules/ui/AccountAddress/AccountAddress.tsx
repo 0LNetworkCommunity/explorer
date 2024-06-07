@@ -27,7 +27,9 @@ const AccountAddress: FC<Props> = ({ address }) => {
 
   return (
     <div className="flex items-center">
-      <AddressAvatar address={normalizedAddress} />
+      <div className="mr-1.5">
+        <AddressAvatar address={normalizedAddress} />
+      </div>
       <Link
         to={`/accounts/${normalizedAddress}`}
         className="text-[#CD3B42] hover:text-blue-900 hover:underline font-normal"

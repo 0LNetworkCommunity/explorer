@@ -196,11 +196,7 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
               <tbody className="divide-y divide-gray-200 bg-white">
                 {cumulativeValidators
                   ? cumulativeValidators.map((validator) => (
-                      <ValidatorRow
-                        key={validator.address}
-                        validator={validator}
-                        isActive={isActive}
-                      />
+                      <ValidatorRow key={validator.address} validator={validator} />
                     ))
                   : Array.from({ length: 10 }).map((_, index) => (
                       <ValidatorRowSkeleton key={index} isActive={isActive} />

@@ -11,7 +11,6 @@ import AccountModules from './routes/Account/Modules';
 import Block from './routes/Block';
 import Root from './Root';
 import Validators from './routes/Validators';
-import Test from './routes/Test';
 import Module from './routes/Account/Modules/Module';
 import Stats from './routes/Stats';
 import Postero from './routes/Postero';
@@ -85,10 +84,6 @@ const router = createBrowserRouter([
       {
         path: '/postero',
         element: <Postero />,
-      },
-      {
-        path: '/test',
-        element: <Test />,
       },
     ],
   },

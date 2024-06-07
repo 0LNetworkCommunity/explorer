@@ -4,9 +4,9 @@ export interface IValidator {
   index: number;
   votingPower: number;
   account: {
-    balance: number;
+    balance: string;
     slowWallet: {
-      unlocked: number;
+      unlocked: string;
     } | null;
   };
   vouches: {

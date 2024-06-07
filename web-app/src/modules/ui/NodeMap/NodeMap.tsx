@@ -76,6 +76,7 @@ function NodeMap(): ReactNode {
               left: point[0] - 5,
               width: 6,
               height: 6,
+              borderRadius: 2,
             }}
           />
         ))}

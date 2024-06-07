@@ -4,8 +4,37 @@ import { Link, NavLink } from 'react-router-dom';
 import useAptos from '../../../aptos';
 import { useLedgerInfo, useTotalSupply, useValidatorSet } from '../../../ol';
 import Countdown from '../../../ui/Countdown';
-import PriceStats from './Stats/PriceStats';
 import NodeMap from '../../../ui/NodeMap';
+
+const Validators = () => {
+  const validatorSet = useValidatorSet();
+
+  return (
+    <div className="bg-[#F5F5F5] p-5 relative overflow-hidden min-h-60">
+      <div className="flex flex-col gap-4 relative z-20">
+        <NavLink to="/validators" className="text-xl font-bold">
+          Validators
+        </NavLink>
+        <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
+          <div className="flex flex-col">
+            <span className="text-lg font-extralight">Total Validators</span>
+            <span className="text-xl font-medium">
+              {validatorSet ? validatorSet.active_validators.length : null}
+            </span>
+          </div>
+
+          {/* <div className="flex flex-col">
+            <span className="text-lg font-extralight">Eligible</span>
+            <span className="text-xl font-medium">70</span>
+          </div> */}
+        </div>
+      </div>
+      <div className="md:absolute md:top-[-80px] md:right-[-90px] md:h-[300px] md:w-[600px] z-10">
+        <NodeMap />
+      </div>
+    </div>
+  );
+};
 
 const Stats: FC = () => {
   const aptos = useAptos();
@@ -14,10 +43,7 @@ const Stats: FC = () => {
   const [nextEpochDate, setNextEpochDate] = useState<string>();
 
   const totalSupply = useTotalSupply();
-  const validatorSet = useValidatorSet();
   const ledgerInfo = useLedgerInfo();
-
-  const dev = location.search.includes('dev=true');
 
   useEffect(() => {
     let timeout: NodeJS.Timeout | undefined = undefined;
@@ -63,35 +89,14 @@ const Stats: FC = () => {
   }, []);
 
   return (
-    <dl className="flex flex-col gap-[4px]">
-      {dev && (
-        <div className="grid grid-cols-1 gap-[4px] md:grid-cols-2">
-          <PriceStats />
+    <dl className="flex flex-col">
+      <div className="grid md:grid-cols-4 grid-cols-2 gap-2">
+        {/* <PriceStats /> */}
 
-          <div className="bg-[#F5F5F5] p-5 relative overflow-hidden">
-            <div className="flex flex-col gap-4 relative z-20">
-              <span className="text-xl font-bold">Validator Map</span>
-              <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
-                {/* @TODO: DUMMY DATA */}
-                <div className="flex flex-col">
-                  <span className="text-lg font-extralight">Total Validators</span>
-                  <span className="text-xl font-medium">15</span>
-                </div>
-                {/* @TODO: DUMMY DATA */}
-                <div className="flex flex-col">
-                  <span className="text-lg font-extralight">Eligible</span>
-                  <span className="text-xl font-medium">70</span>
-                </div>
-              </div>
-            </div>
-            <div className="md:absolute md:top-[-80px] md:right-[-90px] md:h-[300px] md:w-[600px] z-10">
-              <NodeMap />
-            </div>
-          </div>
+        <div className="row-span-2 col-span-2">
+          <Validators />
         </div>
-      )}
 
-      <div className="grid grid-cols-2 gap-[4px] md:grid-cols-4">
         <div className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
           <span className="text-sm font-medium text-[#525252]">Total Supply</span>
           <span
@@ -128,17 +133,6 @@ const Stats: FC = () => {
           </span>
         </div>
 
-        <NavLink to="/validators" className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
-          <span className="text-sm font-medium text-[#525252]">Validators</span>
-          <span
-            className={`hover:underline text-2xl md:text-3xl tracking-tight text-[#141414] h-8 rounded ${
-              !validatorSet ? 'animate-pulse bg-gray-300 space-y-4' : ''
-            }`}
-          >
-            {validatorSet ? validatorSet.active_validators.length : null}
-          </span>
-        </NavLink>
-
         <div className="flex flex-col bg-[#F5F5F5] p-5">
           <span className="text-sm font-medium text-[#525252]">
             Next Epoch
@@ -159,7 +153,7 @@ const Stats: FC = () => {
           </span>
         </div>
 
-        {dev && (
+        {false && (
           <>
             {/* @TODO: DUMMY DATA */}
             <div className="flex flex-col bg-[#F5F5F5] p-5 gap-2">

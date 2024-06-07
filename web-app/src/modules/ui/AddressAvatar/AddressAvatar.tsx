@@ -2,9 +2,10 @@ import React, { useEffect, useRef } from 'react';
 
 interface AddressAvatarProps {
   address: string;
+  size?: 'sm' | 'md';
 }
 
-const AddressAvatar: React.FC<AddressAvatarProps> = ({ address }) => {
+const AddressAvatar: React.FC<AddressAvatarProps> = ({ address, size = 'sm' }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Function to convert hexadecimal to binary
@@ -14,8 +15,8 @@ const AddressAvatar: React.FC<AddressAvatarProps> = ({ address }) => {
     }, '');
   };
 
-  // Function to generate an avatar 16x16 from a hexadecimal address
-  const generateAvatar = (hexAddress: string) => {
+  // Function to generate an avatar from a hexadecimal address
+  const generateAvatar = (hexAddress: string, pixelSize: number) => {
     const binaryData = hexToBinary(hexAddress);
     const canvas = canvasRef.current;
     if (canvas) {
@@ -52,7 +53,7 @@ const AddressAvatar: React.FC<AddressAvatarProps> = ({ address }) => {
             const colorIndex = parseInt(bit, 2) % selectedColors.length;
             const color = selectedColors[colorIndex];
             ctx.fillStyle = color;
-            ctx.fillRect(x * 2, y * 2, 2, 2); // Each color block is 2x2 pixels
+            ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
           }
         }
       }
@@ -61,13 +62,21 @@ const AddressAvatar: React.FC<AddressAvatarProps> = ({ address }) => {
 
   useEffect(() => {
     if (address) {
-      generateAvatar(address);
+      const pixelSize = size === 'sm' ? 2 : size === 'md' ? 7 : 14;
+      generateAvatar(address, pixelSize);
     }
-  }, [address]);
+  }, [address, size]);
+
+  const canvasSize = size === 'sm' ? 16 : size === 'md' ? 56 : 112;
 
   return (
     <div>
-      <canvas ref={canvasRef} width={16} height={16} className="rounded-full mr-1.5"></canvas>
+      <canvas
+        ref={canvasRef}
+        width={canvasSize}
+        height={canvasSize}
+        className="rounded-full mr-1.5"
+      ></canvas>
     </div>
   );
 };

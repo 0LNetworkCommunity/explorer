@@ -1,6 +1,7 @@
 import { AptosClient } from "aptos";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import BN from "bn.js";
 
 import { OlConfig } from "../config/config.interface.js";
 import {
@@ -12,10 +13,8 @@ import {
   ValidatorSet,
 } from "./types.js";
 import { NetworkAddresses } from "./network-addresses.js";
-import BN from "bn.js";
 import { parseAddress } from "../utils.js";
 import { SupplyStats } from "./types.js";
-import { Validator } from "@prisma/client";
 
 @Injectable()
 export class OlService {

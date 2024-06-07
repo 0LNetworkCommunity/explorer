@@ -13,7 +13,7 @@ const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
   }
 
-  tr {
+  tr, td {
     height: 64px;
   }
 `;

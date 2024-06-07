@@ -953,7 +953,6 @@ export class StatsService {
       if (rows.length === 0) {
         return 0;
       }
-      console.log(rows);
       const uniqueAccountsCount = Number(rows[0]["unique_accounts"]);
 
       return uniqueAccountsCount;

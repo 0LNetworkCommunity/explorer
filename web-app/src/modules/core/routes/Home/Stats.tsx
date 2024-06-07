@@ -2,7 +2,13 @@ import { format as d3Format } from 'd3-format';
 import { FC, useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import useAptos from '../../../aptos';
-import { useLedgerInfo, useTotalSupply, useValidatorSet, useAccountsStats } from '../../../ol';
+import {
+  useLedgerInfo,
+  useTotalSupply,
+  useValidatorSet,
+  useAccountsStats,
+  useTotalTransactions,
+} from '../../../ol';
 import Countdown from '../../../ui/Countdown';
 import PriceStats from './Stats/PriceStats';
 import NodeMap from '../../../ui/NodeMap';
@@ -17,6 +23,7 @@ const Stats: FC = () => {
   const validatorSet = useValidatorSet();
   const ledgerInfo = useLedgerInfo();
   const accountsStats = useAccountsStats();
+  const totalTransactions = useTotalTransactions();
 
   const dev = location.search.includes('dev=true');
 
@@ -162,15 +169,14 @@ const Stats: FC = () => {
 
         {dev && (
           <>
-            {/* @TODO: DUMMY DATA */}
             <div className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
               <span className="text-sm font-medium text-[#525252]">Transactions</span>
               <span
                 className={`text-2xl md:text-3xl tracking-tight text-[#141414] h-8 rounded ${
-                  !totalSupply ? 'animate-pulse bg-gray-300 text-2xl space-y-4' : ''
+                  !totalTransactions ? 'animate-pulse bg-gray-300 text-2xl space-y-4' : ''
                 }`}
               >
-                XXXX
+                {totalTransactions?.toLocaleString()}
               </span>
             </div>
 

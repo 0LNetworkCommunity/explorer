@@ -186,6 +186,7 @@ scalar BigInt
 scalar Decimal
 
 type Query {
+  userTransactionsCount: Int!
   userTransactions(limit: Int!, offset: Int!, order: String!): UserTransactionCollection!
   modules: [Module!]!
   account(address: Bytes!): Account

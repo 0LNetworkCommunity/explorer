@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { gql, useQuery } from '@apollo/client';
 import { Types } from 'aptos';
 import useAptos from '../aptos';
 import { config } from '../../config';
@@ -150,4 +151,16 @@ export const useAccountsStats = (): AccountStats | undefined => {
   }, []);
 
   return accountsStats;
+};
+
+export const useTotalTransactions = (): number | undefined => {
+  const GET_USER_TRANSACTIONS = gql`
+    query GetUserTransactions {
+      userTransactionsCount
+    }
+  `;
+
+  const { data } = useQuery<{ userTransactionsCount: number }>(GET_USER_TRANSACTIONS);
+  console.log('>>> data', data);
+  return data?.userTransactionsCount;
 };

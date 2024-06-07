@@ -10,6 +10,25 @@ import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
 export class UserTransactionsResolver {
   public constructor(private readonly clickhouseService: ClickhouseService) {}
 
+  @Query(() => Int)
+  async userTransactionsCount(): Promise<number> {
+    const result = await this.clickhouseService.client
+      .query({
+        query: 'SELECT COUNT(*) as "total" FROM user_transaction',
+        format: "JSONEachRow",
+      })
+      .then((res) => res.json<{ total: string }[]>());
+
+    // Verifica se o resultado está definido e se contém o campo 'total'
+    if (result && result.length > 0) {
+      const total = Number(result[0]["total"]);
+      return total;
+    }
+
+    // Caso não haja resultado, retorna 0 ou lança um erro apropriado
+    throw new Error("Failed to fetch user transactions count");
+  }
+
   @Query(() => GqlUserTransactionCollection)
   async userTransactions(
     @Args({ name: "limit", type: () => Int })

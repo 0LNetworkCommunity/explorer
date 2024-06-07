@@ -109,9 +109,8 @@ export class GqlValidator {
 }
 
 interface GqlVouchInput {
-  epoch: BN;
-  address: Buffer;
-  inSet: boolean;
+  epoch: number;
+  address: string;
 }
 
 @ObjectType("Vouch")
@@ -119,15 +118,11 @@ export class GqlVouch {
   public constructor(input: GqlVouchInput) {
     this.epoch = input.epoch;
     this.address = input.address;
-    this.inSet = input.inSet;
   }
 
-  @Field(() => BN)
-  public epoch: BN;
+  @Field(() => Number)
+  public epoch: number;
 
-  @Field(() => Buffer)
-  public address: Buffer;
-
-  @Field(() => Boolean)
-  public inSet: boolean;
+  @Field(() => String)
+  public address: string;
 }

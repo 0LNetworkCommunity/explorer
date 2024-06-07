@@ -19,6 +19,7 @@ const GET_VALIDATORS = gql`
         proposedBlocks
       }
       vouches {
+        address
         epoch
       }
       currentBid {
@@ -42,6 +43,7 @@ const Validators: FC = () => {
       unlocked: number;
       vouches: {
         epoch: number;
+        address: string;
       }[];
       grade: {
         compliant: boolean;

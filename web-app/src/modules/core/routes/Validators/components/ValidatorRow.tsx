@@ -3,8 +3,9 @@ import clsx from 'clsx';
 import AccountAddress from '../../../../ui/AccountAddress';
 import Money from '../../../../ui/Money';
 import { IValidator } from '../../../../interface/Validator.interface';
-import ProgressBar from './ProgressBar';
 import { CheckIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import ProgressBar from './ProgressBar';
+import Vouches from './Vouches';
 
 interface ValidatorRowProps {
   validator: IValidator;
@@ -12,6 +13,7 @@ interface ValidatorRowProps {
 }
 
 const ValidatorRow: FC<ValidatorRowProps> = ({ validator, isActive = false }) => {
+  console.log(validator);
   return (
     <tr className={clsx('whitespace-nowrap text-sm text-[#141414] text-center')}>
       <td className="px-2 md:px-4 lg:px-6 py-4">
@@ -29,7 +31,7 @@ const ValidatorRow: FC<ValidatorRowProps> = ({ validator, isActive = false }) =>
         / {validator.grade.proposedBlocks.toLocaleString()}
       </td>
       <td className="px-2 md:px-4 lg:px-6 py-4 text-center">
-        {validator.vouches.length.toLocaleString()}
+        <Vouches vouches={validator.vouches} />
       </td>
       <td className="px-2 md:px-4 lg:px-6 py-4 text-right">
         {`${validator.currentBid && validator.currentBid.currentBid.toLocaleString()} (${

@@ -7,6 +7,7 @@ export interface IValidator {
   unlocked?: number;
   vouches: {
     epoch: number;
+    address: string;
   }[];
   grade: {
     compliant: boolean;

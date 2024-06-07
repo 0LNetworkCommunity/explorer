@@ -95,19 +95,43 @@ export class ValidatorsService {
   }
 
   public async getVouches(address: Buffer): Promise<GqlVouch[]> {
-    const vouchesRes = await this.olService.aptosClient.getAccountResource(
+    const allVouchesRes = await this.olService.aptosClient.getAccountResource(
       `0x${address.toString("hex")}`,
       "0x1::vouch::MyVouches",
     );
-    const vouches = vouchesRes.data as {
+
+    const validVouchesRes = await this.olService.aptosClient.view({
+      function: "0x1::vouch::true_friends",
+      type_arguments: [],
+      arguments: [`0x${address.toString("hex")}`],
+    });
+
+    const allVouches = allVouchesRes.data as {
       epoch_vouched: string[];
       my_buddies: string[];
     };
-    return vouches.my_buddies.map((address, index) => {
+
+    const all = allVouches.my_buddies.map((address, index) => {
+      return {
+        address: parseAddress(address).toString("hex").toLocaleUpperCase(),
+        epoch: Number(allVouches.epoch_vouched[index]),
+      };
+    });
+
+    let validVouches = validVouchesRes[0] as string[];
+    validVouches = validVouches.map((address) =>
+      parseAddress(address).toString("hex").toLocaleUpperCase(),
+    );
+    const activeVouches = all.filter((vouch) =>
+      validVouches.includes(vouch.address),
+    );
+
+    return activeVouches.map((vouch) => {
       return new GqlVouch({
-        address: parseAddress(address),
-        epoch: new BN(vouches.epoch_vouched[index]),
-        inSet: true,
+        address: parseAddress(vouch.address)
+          .toString("hex")
+          .toLocaleUpperCase(),
+        epoch: Number(vouch.epoch),
       });
     });
   }

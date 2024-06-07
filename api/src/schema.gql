@@ -66,9 +66,8 @@ type Validator {
 }
 
 type Vouch {
-  epoch: BigInt!
-  address: Bytes!
-  inSet: Boolean!
+  epoch: Float!
+  address: String!
 }
 
 type Account {

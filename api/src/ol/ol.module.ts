@@ -45,6 +45,7 @@ import { TransactionsService } from "./transactions/TransactionsService.js";
 import { Transaction } from "./transactions/Transaction.js";
 import { OnChainTransactionsRepository } from "./transactions/OnChainTransactionsRepository.js";
 import { ExpiredTransactionsProcessor } from "./transactions/ExpiredTransactionsProcessor.js";
+import { BullBoardService } from '../bullboard/bullboard.service.js';
 
 const roles = process.env.ROLES!.split(",");
 
@@ -65,6 +66,16 @@ for (const role of roles) {
   }
 }
 
+// Centralize queue definitions in an array for better reusability
+const queueNames = [
+  "ol-clickhouse-ingestor",
+  "ol-parquet-producer",
+  "ol-version-batch",
+  "ol-version",
+  "expired-transactions",
+];
+
+
 @Module({
   imports: [
     S3Module,
@@ -74,30 +85,13 @@ for (const role of roles) {
     OlDbModule,
     WalletSubscriptionModule,
 
-    BullModule.registerQueue({
-      name: "ol-clickhouse-ingestor",
-      connection: redisClient,
-    }),
-
-    BullModule.registerQueue({
-      name: "ol-parquet-producer",
-      connection: redisClient,
-    }),
-
-    BullModule.registerQueue({
-      name: "ol-version-batch",
-      connection: redisClient,
-    }),
-
-    BullModule.registerQueue({
-      name: "ol-version",
-      connection: redisClient,
-    }),
-
-    BullModule.registerQueue({
-      name: "expired-transactions",
-      connection: redisClient,
-    }),
+    // Register queues using a loop to simplify and maintain consistency
+    BullModule.registerQueue(
+      ...queueNames.map(name => ({
+        name,
+        connection: redisClient,
+      }))
+    ),
   ],
   providers: [
     UserTransactionsResolver,
@@ -118,6 +112,8 @@ for (const role of roles) {
     OlService,
     MovementsService,
     TransformerService,
+
+    BullBoardService,
 
     // Transactions
     TransactionResolver,
@@ -147,6 +143,6 @@ for (const role of roles) {
     ...workers,
   ],
   controllers: [OlController],
-  exports: [OlService, TransformerService, Types.ICommunityWalletsService],
+  exports: [OlService, TransformerService, Types.ICommunityWalletsService, BullBoardService],
 })
 export class OlModule {}

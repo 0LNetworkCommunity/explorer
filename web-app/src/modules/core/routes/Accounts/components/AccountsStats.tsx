@@ -1,9 +1,13 @@
-// src/pages/Accounts/components/AccountsStats.tsx
 import { FC, useEffect, useState } from 'react';
 import StatsCard from '../../../../ui/StatsCard';
 
 const AccountsStats: FC = () => {
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<{
+    totalAccounts: string | null;
+    dailyActiveAccounts: string | null;
+    monthlyActiveAccounts: string | null;
+    quarterActiveAccounts: string | null;
+  }>({
     totalAccounts: null,
     dailyActiveAccounts: null,
     monthlyActiveAccounts: null,

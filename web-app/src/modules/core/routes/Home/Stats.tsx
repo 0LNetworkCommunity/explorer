@@ -2,7 +2,7 @@ import { format as d3Format } from 'd3-format';
 import { FC, useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import useAptos from '../../../aptos';
-import { useLedgerInfo, useTotalSupply, useValidatorSet } from '../../../ol';
+import { useLedgerInfo, useTotalSupply, useValidatorSet, useAccountsStats } from '../../../ol';
 import Countdown from '../../../ui/Countdown';
 import PriceStats from './Stats/PriceStats';
 import NodeMap from '../../../ui/NodeMap';
@@ -16,6 +16,7 @@ const Stats: FC = () => {
   const totalSupply = useTotalSupply();
   const validatorSet = useValidatorSet();
   const ledgerInfo = useLedgerInfo();
+  const accountsStats = useAccountsStats();
 
   const dev = location.search.includes('dev=true');
 
@@ -173,15 +174,14 @@ const Stats: FC = () => {
               </span>
             </div>
 
-            {/* @TODO: DUMMY DATA */}
             <div className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
               <span className="text-sm font-medium text-[#525252]">Total Accounts</span>
               <span
                 className={`text-2xl md:text-3xl tracking-tight text-[#141414] h-8 rounded ${
-                  !totalSupply ? 'animate-pulse bg-gray-300 text-2xl space-y-4' : ''
+                  !accountsStats ? 'animate-pulse bg-gray-300 text-2xl space-y-4' : ''
                 }`}
               >
-                XXXX
+                {accountsStats ? accountsStats.totalAccounts?.toLocaleString() : null}
               </span>
             </div>
           </>

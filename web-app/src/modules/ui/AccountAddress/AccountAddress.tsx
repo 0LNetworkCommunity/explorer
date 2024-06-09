@@ -14,7 +14,10 @@ interface Props {
 const AccountAddress: FC<Props> = ({ address }) => {
   const normalizedAddress = normalizeHexString(address);
 
-  const handleCopy = () => {
+  const handleCopy = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
     navigator.clipboard
       .writeText(address)
       .then(() => {

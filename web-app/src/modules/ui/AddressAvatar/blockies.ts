@@ -56,7 +56,8 @@ function createImageData(size: number) {
     for (let x = 0; x < dataWidth; x++) {
       // this makes foreground and background color to have a 43% (1/2.3) probability
       // spot color has 13% chance
-      row[x] = Math.floor(rand() * 2.3);
+      const v = Math.floor(rand() * 2.3);
+      row[x] = v;
     }
     const r = row.slice(0, mirrorWidth);
     r.reverse();
@@ -71,22 +72,21 @@ function createImageData(size: number) {
 }
 
 function buildOpts(opts: Partial<Options>): Options {
-  const newOpts = {
+  const seed = opts.seed || Math.floor(Math.random() * Math.pow(10, 16)).toString(16);
+  seedrand(seed);
+
+  return {
     size: opts.size || 8,
     scale: opts.scale || 4,
     color: opts.color || createColor(),
     bgcolor: opts.bgcolor || createColor(),
     spotcolor: opts.spotcolor || createColor(),
-    seed: opts.seed || Math.floor(Math.random() * Math.pow(10, 16)).toString(16),
+    seed,
   };
-
-  seedrand(newOpts.seed);
-
-  return newOpts;
 }
 
-export function renderIcon(options: Partial<Options>, canvas: HTMLCanvasElement) {
-  let opts = buildOpts(options);
+function renderIcon(options: Partial<Options>, canvas: HTMLCanvasElement) {
+  const opts = buildOpts(options);
 
   const imageData = createImageData(opts.size);
   const width = Math.sqrt(imageData.length);
@@ -106,7 +106,6 @@ export function renderIcon(options: Partial<Options>, canvas: HTMLCanvasElement)
 
       // if data is 2, choose spot color, if 1 choose foreground
       cc.fillStyle = imageData[i] == 1 ? opts.color : opts.spotcolor;
-
       cc.fillRect(col * opts.scale, row * opts.scale, opts.scale, opts.scale);
     }
   }

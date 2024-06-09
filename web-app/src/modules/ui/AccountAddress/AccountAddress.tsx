@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { normalizeHexString } from '../../../utils';
 import HexString from '../HexString';
 import CopyIcon from '../Icons/CopyIcon';
-import AddressAvatar from '../AddressAvatar/AddressAvatar';
+import AddressAvatar from '../AddressAvatar';
 
 interface Props {
   address: string;

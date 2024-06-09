@@ -47,9 +47,15 @@ const UserMovement: FC<Props> = ({ movement }) => {
         {`::${transaction.moduleName}::`}
         <span className="text-blue-500">{transaction.functionName}</span>
       </div>
-      <div>
-        <AccountAddress address={`${transaction.sender.toString('hex').toUpperCase()}`} />
-      </div>
+      {!(
+        moduleAddress === '01' &&
+        transaction.moduleName == 'diem_governance' &&
+        transaction.functionName == 'trigger_epoch'
+      ) && (
+        <div>
+          <AccountAddress address={`${transaction.sender.toString('hex').toUpperCase()}`} />
+        </div>
+      )}
     </div>
   );
 };

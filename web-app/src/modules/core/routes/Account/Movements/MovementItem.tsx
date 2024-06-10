@@ -1,12 +1,18 @@
 import { FC } from 'react';
 import { format } from 'date-fns';
-import { BlockMetadataTransaction, Movement, ScriptUserTransaction, TransactionType, UserTransaction } from '../../../../movements';
+import clsx from 'clsx';
+import {
+  BlockMetadataTransaction,
+  Movement,
+  ScriptUserTransaction,
+  TransactionType,
+  UserTransaction,
+} from '../../../../movements';
 
 import GenesisMovement from './GenesisMovement';
 import BlockMetadataMovement from './BlockMetadataMovement';
 import UserMovement from './UserMovement';
 import LibraAmount from '../../../../ui/LibraAmount';
-import clsx from 'clsx';
 
 const MovementItem: FC<{ movement: Movement }> = ({ movement }) => {
   const success =

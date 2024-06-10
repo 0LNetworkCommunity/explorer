@@ -13,7 +13,6 @@ interface VouchesProps {
 }
 
 const Vouches: FC<VouchesProps> = ({ vouches }) => {
-  console.log(vouches);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleOpenModal = () => {

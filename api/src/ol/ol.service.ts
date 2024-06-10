@@ -1,6 +1,7 @@
 import { AptosClient } from "aptos";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import BN from "bn.js";
 
 import { OlConfig } from "../config/config.interface.js";
 import {
@@ -12,7 +13,6 @@ import {
   ValidatorSet,
 } from "./types.js";
 import { NetworkAddresses } from "./network-addresses.js";
-import BN from "bn.js";
 import { parseAddress } from "../utils.js";
 import { SupplyStats } from "./types.js";
 
@@ -182,21 +182,12 @@ export class OlService {
   }
 
   public async getValidatorConfig(address: Buffer): Promise<ValidatorConfig> {
-    let config;
-    try {
-      const res = await this.aptosClient.view({
-        function: "0x1::stake::get_validator_config",
-        type_arguments: [],
-        arguments: [`0x${address.toString("hex")}`],
-      });
-      config = res as [string, string, string];
-    } catch (error) {
-      return {
-        consensus_pubkey: "",
-        fullnode_addresses: "",
-        network_addresses: "",
-      };
-    }
+    const res = await this.aptosClient.view({
+      function: "0x1::stake::get_validator_config",
+      type_arguments: [],
+      arguments: [`0x${address.toString("hex")}`],
+    });
+    const config = res as [string, string, string];
 
     const fullnodeAddresses = config[1]
       ? NetworkAddresses.fromBytes(

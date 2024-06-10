@@ -18,6 +18,11 @@ const GET_VALIDATORS = gql`
         failedBlocks
         proposedBlocks
       }
+      grade {
+        compliant
+        failedBlocks
+        proposedBlocks
+      }
       vouches {
         address
         epoch
@@ -60,13 +65,11 @@ const Validators: FC = () => {
   if (error) {
     console.log('error', error);
     return (
-      <Page __deprecated_grayBg>
+      <Page>
         <p>{`Error: ${error.message}`}</p>
       </Page>
     );
   }
-
-  console.log('data', data?.getValidators);
 
   return (
     <Page>
@@ -79,8 +82,6 @@ const Validators: FC = () => {
       </section>
     </Page>
   );
-
-  return null;
 };
 
 export default Validators;

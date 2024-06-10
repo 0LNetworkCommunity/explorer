@@ -7,6 +7,9 @@ import { OL_COINGECKO_URL } from '../../../../../contants';
 import CoingeckoLogo from '../../../../assets/images/coingecko.png';
 
 const PriceStats: FC = () => {
+
+  const dev = location.search.includes('dev=true');
+
   const priceIsIncreasing = true;
 
   const upIcon = (
@@ -63,41 +66,47 @@ const PriceStats: FC = () => {
         </div>
       </div>
       {/* @TODO: DUMMY DATA */}
-      <div className="flex gap-0.5 items-end mt-2">
-        <span className="text-4xl	font-medium mr-2">$0.00000</span>
-        {priceIsIncreasing ? upIcon : downIcon}
-        <span
-          className={clsx(
-            `flex gap-2 font-medium text-sm ${
-              priceIsIncreasing ? `text-[#079455]` : `text-red-600`
-            }`,
-          )}
-        >
-          2.57%
-        </span>
-      </div>
+      {dev && (
+        <div className="flex gap-0.5 items-end mt-2">
+          <span className="text-4xl	font-medium mr-2">$0.00000</span>
+          {priceIsIncreasing ? upIcon : downIcon}
+          <span
+            className={clsx(
+              `flex gap-2 font-medium text-sm ${
+                priceIsIncreasing ? `text-[#079455]` : `text-red-600`
+              }`,
+            )}
+          >
+            2.57%
+          </span>
+        </div>
+      )}
       {/* @TODO: DUMMY DATA */}
-      <div className="flex flex-col py-5 gap-2 border-b border-[#E5E5E5]">
-        <div className="flex justify-between items-center">
-          <span className="text-lg font-extralight">Marketcap</span>
-          <span className="text-lg font-medium">$000,000,000</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-lg font-extralight">Trading Volume (24hrs)</span>
-          <span className="text-lg font-medium">$000,000</span>
-        </div>
-      </div>
-      {/* @TODO: DUMMY DATA */}
-      <div className="grid grid-cols-2 pt-5 gap-2">
-        <div className="flex flex-col items-start">
-          <span className="text-lg font-extralight">Marketcap</span>
-          <span className="text-lg font-medium">$000,000,000</span>
-        </div>
-        <div className="flex flex-col items-start">
-          <span className="text-lg font-extralight">Trading Volume (24hrs)</span>
-          <span className="text-lg font-medium">$000,000</span>
-        </div>
-      </div>
+      {dev && (
+        <>
+          <div className="flex flex-col py-5 gap-2 border-b border-[#E5E5E5]">
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-extralight">Marketcap</span>
+              <span className="text-lg font-medium">$000,000,000</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-extralight">Trading Volume (24hrs)</span>
+              <span className="text-lg font-medium">$000,000</span>
+            </div>
+          </div>
+          {/* @TODO: DUMMY DATA */}
+          <div className="grid grid-cols-2 pt-5 gap-2">
+            <div className="flex flex-col items-start">
+              <span className="text-lg font-extralight">Marketcap</span>
+              <span className="text-lg font-medium">$000,000,000</span>
+            </div>
+            <div className="flex flex-col items-start">
+              <span className="text-lg font-extralight">Trading Volume (24hrs)</span>
+              <span className="text-lg font-medium">$000,000</span>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

@@ -1,13 +1,12 @@
-import clsx from 'clsx';
 import { FC, PropsWithChildren, ReactNode } from 'react';
+import clsx from 'clsx';
 
 type Props = PropsWithChildren<{
   title?: string | ReactNode;
   __deprecated_grayBg?: boolean;
-  mainClassName?: string;
 }>;
 
-const Page: FC<Props> = ({ title, children, __deprecated_grayBg: grayBg, mainClassName = '' }) => {
+const Page: FC<Props> = ({ title, children, __deprecated_grayBg: grayBg }) => {
   return (
     <>
       {title && (
@@ -24,14 +23,8 @@ const Page: FC<Props> = ({ title, children, __deprecated_grayBg: grayBg, mainCla
         </header>
       )}
 
-      <div
-        className={clsx(
-          'py-3 px-3 flex-grow',
-          grayBg && 'bg-gray-100',
-          mainClassName && mainClassName,
-        )}
-      >
-        <main className="max-w-screen-2xl mx-auto sm:px-6 md:px-24 lg:px-32">{children}</main>
+      <div className={clsx('py-3 px-3 flex-grow', grayBg && 'bg-gray-100')}>
+        <main className="max-w-screen-2xl mx-auto">{children}</main>
       </div>
     </>
   );

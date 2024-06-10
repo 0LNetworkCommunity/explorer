@@ -41,14 +41,15 @@ ENGINE = MergeTree
 ORDER BY "version";
 
 CREATE TABLE "event"  (
-	"version" UInt64,
-	"creation_number" UInt64,
-	"account_address" UInt256,
-	"sequence_number" UInt64,
-	"module_address" UInt256,
-	"module_name" String,
-	"struct_name" String,
-	"data" String
+  "version" UInt64,
+  "index" UInt64,
+  "creation_number" UInt64,
+  "account_address" UInt256,
+  "sequence_number" UInt64,
+  "module_address" UInt256,
+  "module_name" String,
+  "struct_name" String,
+  "data" String
 )
 ENGINE = MergeTree
 ORDER BY "version";
@@ -103,7 +104,7 @@ ENGINE = MergeTree
 PRIMARY KEY ("name");
 
 CREATE TABLE "ingested_versions"  (
-	`version` UInt64
+  `version` UInt64
 )
 ENGINE = MergeTree
 PRIMARY KEY ("version");
@@ -118,13 +119,13 @@ PRIMARY KEY ("version", "change_index")
 ORDER BY ("version", "change_index");
 
 CREATE TABLE "coin_balance"  (
-    "version" UInt64,
-    "address" UInt256,
-    "balance" UInt128,
-    "change_index" UInt64,
-    "coin_address" UInt256,
-    "coin_module" String,
-    "coin_name" String
+  "version" UInt64,
+  "address" UInt256,
+  "balance" UInt128,
+  "change_index" UInt64,
+  "coin_address" UInt256,
+  "coin_module" String,
+  "coin_name" String
 )
 ENGINE = MergeTree
 PRIMARY KEY (
@@ -213,67 +214,63 @@ CREATE TABLE "epoch_fee_maker_registry"  (
 )
 ENGINE = MergeTree
 PRIMARY KEY (
-    "version", "change_index"
+  "version", "change_index"
 )
 ORDER BY (
-    "version", "change_index"
+  "version", "change_index"
 );
 
 CREATE TABLE "slow_wallet_list"  (
-    "version" UInt64,
-    "change_index" UInt64,
-
-    "list_count" UInt64
+  "version" UInt64,
+  "change_index" UInt64,
+  "list_count" UInt64
 )
 ENGINE = MergeTree
 PRIMARY KEY (
-    "version", "change_index"
+  "version", "change_index"
 )
 ORDER BY (
-    "version", "change_index"
+  "version", "change_index"
 );
 
 CREATE TABLE "vdf_difficulty"  (
-    "version" UInt64,
-    "change_index" UInt64,
-
-    "difficulty" UInt64
+  "version" UInt64,
+  "change_index" UInt64,
+  "difficulty" UInt64
 )
 ENGINE = MergeTree
 PRIMARY KEY (
-    "version", "change_index"
+  "version", "change_index"
 )
 ORDER BY (
-    "version", "change_index"
+  "version", "change_index"
 );
 
 CREATE TABLE "consensus_reward"  (
-    "version" UInt64,
-    "change_index" UInt64,
-
-    "nominal_reward" UInt64,
-    "net_reward" UInt64,
-    "entry_fee" UInt64,
-    "clearing_bid" UInt64,
-    "median_win_bid" UInt64,
-    "median_history" Array(UInt64)
+  "version" UInt64,
+  "change_index" UInt64,
+  "nominal_reward" UInt64,
+  "net_reward" UInt64,
+  "entry_fee" UInt64,
+  "clearing_bid" UInt64,
+  "median_win_bid" UInt64,
+  "median_history" Array(UInt64)
 )
 ENGINE = MergeTree
 PRIMARY KEY (
-    "version", "change_index"
+  "version", "change_index"
 )
 ORDER BY (
-    "version", "change_index"
+  "version", "change_index"
 );
 
 CREATE TABLE "boundary_status"  (
-    "version" UInt64,
-    "change_index" UInt64,
-
-    "incoming_fees" UInt64,
-    "outgoing_nominal_reward_to_vals" UInt64,
-    "outgoing_total_reward" UInt64,
-    "system_fees_collected" UInt64
+  "version" UInt64,
+  "change_index" UInt64,
+  "incoming_fees" UInt64,
+  "outgoing_nominal_reward_to_vals" UInt64,
+  "outgoing_total_reward" UInt64,
+  "system_fees_collected" UInt64
 )
 ENGINE = MergeTree
 PRIMARY KEY (
@@ -300,37 +297,37 @@ ORDER BY (
 );
 
 CREATE TABLE "community_wallet"  (
-	"address" UInt256
+  "address" UInt256
 )
 ENGINE = MergeTree
 ORDER BY "address";
 
 CREATE TABLE "ol_swap_1h"  (
-    "timestamp" UInt64,
-    "volume" Decimal64(6),
-    "open" Decimal64(6),
-    "high" Decimal64(6),
-    "low" Decimal64(6),
-    "close" Decimal64(6)
+  "timestamp" UInt64,
+  "volume" Decimal64(6),
+  "open" Decimal64(6),
+  "high" Decimal64(6),
+  "low" Decimal64(6),
+  "close" Decimal64(6)
 )
 ENGINE = MergeTree
 ORDER BY "timestamp";
 
 CREATE TABLE "ancestry"  (
-	"address" UInt256,
-    "tree" Array(UInt256)
+  "address" UInt256,
+  "tree" Array(UInt256)
 )
 ENGINE = MergeTree
 ORDER BY "address";
 
 CREATE TABLE "multi_action"  (
-    "version" UInt64,
-    "change_index" UInt64,
-	"address" UInt256,
-    "tally_type_module_address" UInt256,
-    "tally_type_module_name" String,
-    "tally_type_struct_name" String,
-    "change" String
+  "version" UInt64,
+  "change_index" UInt64,
+  "address" UInt256,
+  "tally_type_module_address" UInt256,
+  "tally_type_module_name" String,
+  "tally_type_struct_name" String,
+  "change" String
 )
 ENGINE = MergeTree
 PRIMARY KEY (
@@ -343,7 +340,7 @@ ORDER BY (
 CREATE TABLE "multisig_account_owners"  (
     "version" UInt64,
     "change_index" UInt64,
-	"address" UInt256,
+  "address" UInt256,
     "owners" Array(UInt256)
 )
 ENGINE = MergeTree

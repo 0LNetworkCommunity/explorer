@@ -19,9 +19,9 @@ const TransferMovement: FC<Props> = ({ movement }) => {
   }, [transaction.arguments]);
 
   return (
-    <div>
+    <div className="flex flex-row">
       <AccountAddress address={`${transaction.sender.toString('hex').toUpperCase()}`} />
-      {' → '}
+      <span className="mx-3">{' → '}</span>
       <AccountAddress address={to} />
     </div>
   );

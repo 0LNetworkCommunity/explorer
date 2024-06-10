@@ -39,14 +39,15 @@ ENGINE = ReplicatedMergeTree
 ORDER BY "version";
 
 CREATE TABLE "event" ON CLUSTER "olfyi" (
-	"version" UInt64,
-	"creation_number" UInt64,
-	"account_address" UInt256,
-	"sequence_number" UInt64,
-	"module_address" UInt256,
-	"module_name" String,
-	"struct_name" String,
-	"data" String
+  "version" UInt64,
+  "index" UInt64,
+  "creation_number" UInt64,
+  "account_address" UInt256,
+  "sequence_number" UInt64,
+  "module_address" UInt256,
+  "module_name" String,
+  "struct_name" String,
+  "data" String
 )
 ENGINE = ReplicatedMergeTree
 ORDER BY "version";

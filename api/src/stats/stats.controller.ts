@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Query,
   Res,
   ServiceUnavailableException,
 } from "@nestjs/common";
@@ -23,18 +22,6 @@ export class StatsController {
     this.cacheEnabled = config.get<boolean>("cacheEnabled")!;
   }
 
-  @Get("/total-supply")
-  public async getTotalSupply(@Res() res: Response) {
-    const totalSupply = await this.statsService.getTotalSupply();
-    res.send({ totalSupply });
-  }
-
-  @Get("/circulating-supply")
-  public async getCirculatingSupply(@Res() res: Response) {
-    const circulatingSupply = await this.statsService.getCirculatingSupply();
-    res.send({ circulatingSupply });
-  }
-
   @Get()
   public async getStats(@Res() res: Response) {
     res.set("Content-Type", "application/json");
@@ -51,6 +38,18 @@ export class StatsController {
 
     const stats = await this.statsService.getStats();
     res.send(stats);
+  }
+
+  @Get("/total-supply")
+  public async getTotalSupply(@Res() res: Response) {
+    const totalSupply = await this.statsService.getTotalSupply();
+    res.send({ totalSupply });
+  }
+
+  @Get("/circulating-supply")
+  public async getCirculatingSupply(@Res() res: Response) {
+    const circulatingSupply = await this.statsService.getCirculatingSupply();
+    res.send({ circulatingSupply });
   }
 
   @Get("/accounts-stats")

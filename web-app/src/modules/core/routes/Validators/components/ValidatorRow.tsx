@@ -12,8 +12,7 @@ interface ValidatorRowProps {
   isActive: boolean;
 }
 
-const ValidatorRow: FC<ValidatorRowProps> = ({ validator, isActive = false }) => {
-  console.log(validator);
+const ValidatorRow: FC<ValidatorRowProps> = ({ validator, isActive }) => {
   return (
     <tr className={clsx('whitespace-nowrap text-sm text-[#141414] text-center')}>
       <td className="px-2 md:px-4 lg:px-6 py-4">

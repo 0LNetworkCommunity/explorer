@@ -161,6 +161,5 @@ export const useTotalTransactions = (): number | undefined => {
   `;
 
   const { data } = useQuery<{ userTransactionsCount: number }>(GET_USER_TRANSACTIONS);
-  console.log('>>> data', data);
   return data?.userTransactionsCount;
 };

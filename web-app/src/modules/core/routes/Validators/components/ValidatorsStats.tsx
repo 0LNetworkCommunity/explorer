@@ -1,7 +1,7 @@
 import { FC } from 'react';
-import { IValidator } from '../../../../interface/Validator.interface';
 import Money from '../../../../ui/Money';
 import StatsCard from '../../../../ui/StatsCard';
+import { IValidator } from '../../../../interface/Validator.interface';
 
 interface ValidatorsStatsProps {
   validators?: IValidator[];

@@ -112,3 +112,7 @@ export function getTransactionHash(
   );
   throw new Error("unsupported transaction payload type");
 }
+
+export function toBytea(buff: Uint8Array): string {
+  return `\\x${Buffer.from(buff).toString("hex")}`;
+}

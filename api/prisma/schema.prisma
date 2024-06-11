@@ -53,7 +53,7 @@ enum PendingTransactionStatus {
 }
 
 model PendingTransaction {
-  hash                    Bytes    @id
+  hash                    Bytes                    @id
   sender                  Bytes
   sequenceNumber          BigInt
   maxGasAmount            BigInt
@@ -67,5 +67,33 @@ model PendingTransaction {
   moduleName              String
   args                    Bytes[]
   typeArgs                String[]
-  status PendingTransactionStatus @default(UNKNOWN)
+  status                  PendingTransactionStatus @default(UNKNOWN)
+}
+
+model OsmosisMintEvent {
+  txHash Bytes
+  index  Int
+  amount BigInt
+  date   DateTime
+
+  @@id([txHash, index])
+}
+
+model OsmosisSwapEvent {
+  txHash Bytes
+  index  Int
+  date   DateTime
+  amount BigInt
+
+  @@id([txHash, index])
+}
+
+model OsmosisBurnEvent {
+  txHash          Bytes
+  index           Int
+  date            DateTime
+  amount          BigInt
+  burnFromAddress String
+
+  @@id([txHash, index])
 }

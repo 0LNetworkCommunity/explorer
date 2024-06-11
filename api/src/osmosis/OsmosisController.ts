@@ -17,7 +17,8 @@ export class OsmosisController {
 
   @Post("fetch-live")
   async triggerLiveFetch(): Promise<string> {
-    await this.osmosisLiveProcessor.triggerFetchLiveData();
+    // await this.osmosisLiveProcessor.triggerFetchLiveData();
+    await this.osmosisLiveProcessor.fetchAndStoreLiveData();
     return "Live data fetching triggered";
   }
 }

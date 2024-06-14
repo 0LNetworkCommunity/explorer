@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import PropTypes from 'prop-types';
+import { useState, FC } from 'react';
 
 import CopyIcon from '../Icons/CopyIcon';
 import CheckIcon from '../Icons/CheckIcon';
@@ -8,10 +7,10 @@ interface Props {
   text: string;
 }
 
-const CopyBtn = ({ text }: Props) => {
+const CopyBtn: FC<Props> = ({ text }) => {
   const [isCopied, setIsCopied] = useState(false);
 
-  const handleClick = (event: { preventDefault: () => void; stopPropagation: () => void }) => {
+  const onClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.preventDefault();
     event.stopPropagation();
 
@@ -29,14 +28,10 @@ const CopyBtn = ({ text }: Props) => {
   };
 
   return (
-    <button onClick={handleClick} className="relative flex items-center p-2 rounded">
+    <button onClick={onClick} className="relative flex items-center p-2 rounded">
       {isCopied ? <CheckIcon /> : <CopyIcon />}
     </button>
   );
-};
-
-CopyBtn.propTypes = {
-  text: PropTypes.string.isRequired,
 };
 
 export default CopyBtn;

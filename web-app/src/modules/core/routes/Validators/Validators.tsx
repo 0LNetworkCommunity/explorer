@@ -1,23 +1,22 @@
 import { FC } from 'react';
 import { gql, useQuery } from '@apollo/client';
-
 import Page from '../../../ui/Page';
 import ValidatorsTable from './components/ValidatorsTable';
 import ValidatorsStats from './components/ValidatorsStats';
-import { IValidator } from '../../../interface/Validator.interface';
 
 const GET_VALIDATORS = gql`
-  query GetValidators {
-    validators {
+  query Validators {
+    getValidators {
       inSet
       index
       address
       votingPower
-      account {
-        balance
-        slowWallet {
-          unlocked
-        }
+      balance
+      unlocked
+      grade {
+        compliant
+        failedBlocks
+        proposedBlocks
       }
       grade {
         compliant
@@ -25,6 +24,7 @@ const GET_VALIDATORS = gql`
         proposedBlocks
       }
       vouches {
+        address
         epoch
       }
       currentBid {
@@ -33,14 +33,15 @@ const GET_VALIDATORS = gql`
       }
       city
       country
+      auditQualification
     }
   }
 `;
 
 const Validators: FC = () => {
-  const { data, error } = useQuery<{
-    validators: IValidator[];
-  }>(GET_VALIDATORS);
+  const { data, error } = useQuery(GET_VALIDATORS, {
+    pollInterval: 30000, // Poll every 30 seconds
+  });
 
   if (error) {
     console.log('error', error);
@@ -57,8 +58,8 @@ const Validators: FC = () => {
         Validators
       </h1>
       <section className="my-2 flow-root">
-        <ValidatorsStats validators={data && data.validators} />
-        <ValidatorsTable validators={data && data.validators} />
+        <ValidatorsStats validators={data && data.getValidators} />
+        <ValidatorsTable validators={data && data.getValidators} />
       </section>
     </Page>
   );

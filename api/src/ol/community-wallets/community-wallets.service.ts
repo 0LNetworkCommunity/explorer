@@ -28,40 +28,32 @@ export class CommunityWalletsService implements ICommunityWalletsService {
       parseAddress(address).toString("hex").toUpperCase(),
     );
 
-    const res = addresses.map((address) => {
-      const addrBuff = parseAddress(address);
-      const addr = addrBuff.toString("hex").toUpperCase();
-      const info = communityWallets.get(addr);
+    const res = await Promise.all(
+      addresses.map(async (address) => {
+        const addrBuff = parseAddress(address);
+        const addr = addrBuff.toString("hex").toUpperCase();
+        const info = communityWallets.get(addr);
+        const balance = await this.olService.getAccountBalance(addrBuff);
 
-      return new GqlCommunityWallet({
-        address: addrBuff,
-        name: info?.name,
-        description: info?.description,
-      });
-    });
+        return {
+          address: addr,
+          name: info?.name,
+          description: info?.description,
+          balance: balance ? balance.toNumber() : 0,
+        };
+      }),
+    );
 
-    const groups = _.groupBy(res, (wallet) => {
-      if (wallet.name && wallet.description) {
-        return "nameAndDescription";
-      }
-      if (wallet.name) {
-        return "nameOnly";
-      }
-      if (wallet.description) {
-        return "descriptionOnly";
-      }
-      return "rest";
-    });
+    // Sort by balance descending
+    const sortedRes = _.sortBy(res, [(wallet) => -wallet.balance]);
 
-    const { nameAndDescription, nameOnly, descriptionOnly, rest } = groups;
-    const sorter = (wallet: GqlCommunityWallet) =>
-      wallet.address.toString("hex");
-
-    return [
-      ..._.sortBy(nameAndDescription, sorter),
-      ..._.sortBy(nameOnly, sorter),
-      ..._.sortBy(descriptionOnly, sorter),
-      ..._.sortBy(rest, sorter),
-    ];
+    // Add rank
+    return sortedRes.map(
+      (wallet, index) =>
+        new GqlCommunityWallet({
+          rank: index + 1,
+          ...wallet,
+        }),
+    );
   }
 }

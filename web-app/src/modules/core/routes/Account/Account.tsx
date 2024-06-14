@@ -85,7 +85,7 @@ const Account: FC<Props> = ({ accountAddress }) => {
     <Page
       __deprecated_grayBg
       title={
-        <div className="flex flex-row items-center">
+        <div className="flex flex-row items-center max-w-screen-2xl mx-auto">
           <AccountQRCode address={accountAddress} />
           <h1 className="ml-2 text-base font-semibold leading-6 text-gray-900 overflow-hidden text-ellipsis">
             {account.address}

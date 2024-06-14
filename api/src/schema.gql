@@ -12,6 +12,11 @@ type Module {
   functions: [String!]!
 }
 
+type SlowWallet {
+  transferred: Decimal!
+  unlocked: Decimal!
+}
+
 type GqlUserTransactionDeprecated {
   hash: String!
   version: Float!
@@ -35,6 +40,11 @@ type UserTransactionCollection {
   items: [GqlUserTransactionDeprecated!]!
 }
 
+type ValidatorCurrentBid {
+  currentBid: Float!
+  expirationEpoch: Float!
+}
+
 type ValidatorGrade {
   compliant: Boolean!
   proposedBlocks: Float!
@@ -44,29 +54,21 @@ type ValidatorGrade {
 type Validator {
   inSet: Boolean!
   index: BigInt!
-  address: Bytes!
-  networkAddresses: String
-  fullnodeAddresses: String
+  address: String!
   city: String
   country: String
   votingPower: BigInt!
-  failedProposals: BigInt!
-  successfulProposals: BigInt!
   grade: ValidatorGrade
-  account: Account!
-  vouches: [Vouch!]!
-  currentBid: ValidatorCurrentBid!
+  vouches: [Vouch!]
+  currentBid: ValidatorCurrentBid
+  balance: Float
+  unlocked: Float
+  auditQualification: [String!]
 }
 
 type Vouch {
-  epoch: BigInt!
-  address: Bytes!
-  inSet: Boolean!
-}
-
-type ValidatorCurrentBid {
-  currentBid: Float!
-  expirationEpoch: Float!
+  epoch: Float!
+  address: String!
 }
 
 type Account {
@@ -79,11 +81,6 @@ type Account {
 enum OrderDirection {
   ASC
   DESC
-}
-
-type SlowWallet {
-  transferred: Decimal!
-  unlocked: Decimal!
 }
 
 type PageInfo {
@@ -112,10 +109,25 @@ type PaginatedMovements {
   pageInfo: PageInfo!
 }
 
-type CommunityWallet {
+type CumulativeShare {
+  amount: Float!
+  percentage: Float!
+}
+
+type TopAccount {
+  rank: Int!
+  address: String!
+  publicName: String!
+  balance: Float!
+  cumulativeShare: CumulativeShare!
+}
+
+type GqlCommunityWallet {
+  rank: Float!
+  address: String!
   name: String
   description: String
-  address: Bytes!
+  balance: Float
 }
 
 type Transaction {
@@ -175,11 +187,13 @@ scalar BigInt
 scalar Decimal
 
 type Query {
+  userTransactionsCount: Int!
   userTransactions(limit: Int!, offset: Int!, order: String!): UserTransactionCollection!
   modules: [Module!]!
   account(address: Bytes!): Account
-  validators: [Validator!]!
-  communityWallets: [CommunityWallet!]!
+  getTopAccounts(limit: Float! = 100): [TopAccount!]!
+  getValidators: [Validator!]!
+  getCommunityWallets: [GqlCommunityWallet!]!
   walletTransactions(address: Bytes!): [Transaction!]!
   transaction(hash: Bytes!): Transaction!
   nodes: [Node!]

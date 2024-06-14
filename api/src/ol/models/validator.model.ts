@@ -1,6 +1,25 @@
 import { Field, ObjectType } from "@nestjs/graphql";
 import BN from "bn.js";
 
+@ObjectType("ValidatorCurrentBid")
+export class GqlValidatorCurrentBid {
+  public constructor(input: GqlValidatorCurrentBidInput) {
+    this.currentBid = input.currentBid;
+    this.expirationEpoch = input.expirationEpoch;
+  }
+
+  @Field(() => Number)
+  public currentBid: number;
+
+  @Field(() => Number)
+  public expirationEpoch: number;
+}
+
+interface GqlValidatorCurrentBidInput {
+  currentBid: number;
+  expirationEpoch: number;
+}
+
 interface GqlValidatorGradeInput {
   compliant: boolean;
   proposedBlocks: number;
@@ -25,30 +44,36 @@ export class GqlValidatorGrade {
   public failedBlocks: number;
 }
 
-interface GqlValidatorInput {
-  address: Buffer;
-  votingPower: BN;
-  grade: GqlValidatorGradeInput;
+interface ValidatorInput {
   inSet: boolean;
   index: BN;
-  networkAddresses?: string;
-  fullnodeAddresses?: string;
-  city?: string;
-  country?: string;
+  address: string;
+  balance?: number;
+  unlocked?: number;
+  votingPower: BN;
+  grade?: GqlValidatorGrade | null;
+  vouches: GqlVouch[];
+  currentBid: GqlValidatorCurrentBid;
+  city?: string | null;
+  country?: string | null;
+  auditQualification?: [string] | null;
 }
 
-@ObjectType("Validator")
-export class GqlValidator {
-  public constructor(input: GqlValidatorInput) {
-    this.address = input.address;
-    this.votingPower = input.votingPower;
-    this.grade = input.grade;
+@ObjectType()
+export class Validator {
+  public constructor(input: ValidatorInput) {
     this.inSet = input.inSet;
     this.index = input.index;
-    this.networkAddresses = input.networkAddresses;
-    this.fullnodeAddresses = input.fullnodeAddresses;
+    this.address = input.address;
+    this.balance = input.balance;
+    this.unlocked = input.unlocked;
+    this.votingPower = input.votingPower;
+    this.grade = input.grade;
+    this.vouches = input.vouches;
+    this.currentBid = input.currentBid;
     this.city = input.city;
     this.country = input.country;
+    this.auditQualification = input.auditQualification;
   }
 
   @Field(() => Boolean)
@@ -57,38 +82,40 @@ export class GqlValidator {
   @Field(() => BN)
   public index: BN;
 
-  @Field(() => Buffer)
-  public address: Buffer;
+  @Field(() => String)
+  public address: string;
 
   @Field(() => String, { nullable: true })
-  public networkAddresses?: string;
+  public city?: string | null;
 
   @Field(() => String, { nullable: true })
-  public fullnodeAddresses?: string;
-
-  @Field(() => String, { nullable: true })
-  public city?: string;
-
-  @Field(() => String, { nullable: true })
-  public country?: string;
+  public country?: string | null;
 
   @Field(() => BN)
   public votingPower: BN;
 
-  @Field(() => BN)
-  public failedProposals: BN;
-
-  @Field(() => BN)
-  public successfulProposals: BN;
-
   @Field(() => GqlValidatorGrade, { nullable: true })
-  public grade?: GqlValidatorGrade;
+  public grade?: GqlValidatorGrade | null;
+
+  @Field(() => [GqlVouch], { nullable: true })
+  public vouches?: GqlVouch[];
+
+  @Field(() => GqlValidatorCurrentBid, { nullable: true })
+  public currentBid?: GqlValidatorCurrentBid;
+
+  @Field(() => Number, { nullable: true })
+  public balance?: number;
+
+  @Field(() => Number, { nullable: true })
+  public unlocked?: number;
+
+  @Field(() => [String], { nullable: true })
+  public auditQualification?: [string] | null;
 }
 
 interface GqlVouchInput {
-  epoch: BN;
-  address: Buffer;
-  inSet: boolean;
+  epoch: number;
+  address: string;
 }
 
 @ObjectType("Vouch")
@@ -96,34 +123,11 @@ export class GqlVouch {
   public constructor(input: GqlVouchInput) {
     this.epoch = input.epoch;
     this.address = input.address;
-    this.inSet = input.inSet;
-  }
-
-  @Field(() => BN)
-  public epoch: BN;
-
-  @Field(() => Buffer)
-  public address: Buffer;
-
-  @Field(() => Boolean)
-  public inSet: boolean;
-}
-
-interface GqlValidatorCurrentBidInput {
-  currentBid: number;
-  expirationEpoch: number;
-}
-
-@ObjectType("ValidatorCurrentBid")
-export class GqlValidatorCurrentBid {
-  public constructor(input: GqlValidatorCurrentBidInput) {
-    this.currentBid = input.currentBid;
-    this.expirationEpoch = input.expirationEpoch;
   }
 
   @Field(() => Number)
-  public currentBid: number;
+  public epoch: number;
 
-  @Field(() => Number)
-  public expirationEpoch: number;
+  @Field(() => String)
+  public address: string;
 }

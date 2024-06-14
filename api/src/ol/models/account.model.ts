@@ -1,7 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
-@ObjectType('Account')
-export class GqlAccount {
+@ObjectType()
+export class Account {
   public constructor(address: Buffer) {
     this.address = address;
   }

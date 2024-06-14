@@ -3,7 +3,7 @@ import Transactions from './routes/Transactions';
 import Transaction from './routes/Transaction';
 import Home from './routes/Home';
 import Account from './routes/Account';
-// import Accounts from './routes/Accounts';
+import Accounts from './routes/Accounts';
 import AccountOverview from './routes/Account/Overview';
 import AccountTransactions from './routes/Account/UserTransactions';
 import AccountResources from './routes/Account/Resources';
@@ -14,7 +14,6 @@ import Validators from './routes/Validators';
 import Module from './routes/Account/Modules/Module';
 import Stats from './routes/Stats';
 import Postero from './routes/Postero';
-import CommunityWallets from './routes/CommunityWallets';
 
 const router = createBrowserRouter([
   {
@@ -65,10 +64,10 @@ const router = createBrowserRouter([
         path: '/blocks/:blockHeight',
         element: <Block />,
       },
-      // {
-      //   path: '/accounts',
-      //   element: <Accounts />,
-      // },
+      {
+        path: '/accounts',
+        element: <Accounts />,
+      },
       {
         path: '/validators',
         element: <Validators />,
@@ -76,10 +75,6 @@ const router = createBrowserRouter([
       {
         path: '/stats',
         element: <Stats />,
-      },
-      {
-        path: '/community-wallets',
-        element: <CommunityWallets />,
       },
       {
         path: '/postero',

@@ -3,14 +3,11 @@ export interface IValidator {
   inSet: boolean;
   index: number;
   votingPower: number;
-  account: {
-    balance: string;
-    slowWallet: {
-      unlocked: string;
-    } | null;
-  };
+  balance?: number;
+  unlocked?: number;
   vouches: {
     epoch: number;
+    address: string;
   }[];
   grade: {
     compliant: boolean;
@@ -27,4 +24,5 @@ export interface IValidator {
   } | null;
   city: string | null;
   country: string | null;
+  auditQualification: [string] | null;
 }

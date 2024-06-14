@@ -2,7 +2,13 @@ import { format as d3Format } from 'd3-format';
 import { FC, useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import useAptos from '../../../aptos';
-import { useLedgerInfo, useTotalSupply, useValidatorSet } from '../../../ol';
+import {
+  useLedgerInfo,
+  useTotalSupply,
+  useValidatorSet,
+  useAccountsStats,
+  useTotalTransactions,
+} from '../../../ol';
 import Countdown from '../../../ui/Countdown';
 import NodeMap from '../../../ui/NodeMap';
 
@@ -19,7 +25,7 @@ const Validators = () => {
           <div className="flex flex-col">
             <span className="text-lg font-extralight">Total Validators</span>
             <span className="text-xl font-medium">
-              {validatorSet ? validatorSet.active_validators.length : null}
+              {validatorSet?.active_validators.length}
             </span>
           </div>
 
@@ -44,6 +50,8 @@ const Stats: FC = () => {
 
   const totalSupply = useTotalSupply();
   const ledgerInfo = useLedgerInfo();
+  const accountsStats = useAccountsStats();
+  const totalTransactions = useTotalTransactions();
 
   useEffect(() => {
     let timeout: NodeJS.Timeout | undefined = undefined;
@@ -155,27 +163,25 @@ const Stats: FC = () => {
 
         {false && (
           <>
-            {/* @TODO: DUMMY DATA */}
             <div className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
               <span className="text-sm font-medium text-[#525252]">Transactions</span>
               <span
                 className={`text-2xl md:text-3xl tracking-tight text-[#141414] h-8 rounded ${
-                  !totalSupply ? 'animate-pulse bg-gray-300 text-2xl space-y-4' : ''
+                  !totalTransactions ? 'animate-pulse bg-gray-300 text-2xl space-y-4' : ''
                 }`}
               >
-                XXXX
+                {totalTransactions?.toLocaleString()}
               </span>
             </div>
 
-            {/* @TODO: DUMMY DATA */}
             <div className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
               <span className="text-sm font-medium text-[#525252]">Total Accounts</span>
               <span
                 className={`text-2xl md:text-3xl tracking-tight text-[#141414] h-8 rounded ${
-                  !totalSupply ? 'animate-pulse bg-gray-300 text-2xl space-y-4' : ''
+                  !accountsStats ? 'animate-pulse bg-gray-300 text-2xl space-y-4' : ''
                 }`}
               >
-                XXXX
+                {accountsStats?.totalAccounts?.toLocaleString()}
               </span>
             </div>
           </>

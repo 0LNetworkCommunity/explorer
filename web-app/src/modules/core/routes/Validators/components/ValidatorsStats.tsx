@@ -1,5 +1,4 @@
 import { FC } from 'react';
-
 import Money from '../../../../ui/Money';
 import StatsCard from '../../../../ui/StatsCard';
 import { IValidator } from '../../../../interface/Validator.interface';
@@ -11,10 +10,8 @@ interface ValidatorsStatsProps {
 const ValidatorsStats: FC<ValidatorsStatsProps> = ({ validators }) => {
   const validatorSet = validators && validators.filter((it) => it.inSet);
   const eligible = validators && validatorSet && validators.length - validatorSet.length;
-  const totalLibra =
-    validators && validators.reduce((acc, it) => acc + Number(it.account.balance), 0);
-  const liquidLibra =
-    validators && validators.reduce((acc, it) => acc + Number(it.account.slowWallet?.unlocked), 0);
+  const totalLibra = validators && validators.reduce((acc, it) => acc + Number(it.balance), 0);
+  const liquidLibra = validators && validators.reduce((acc, it) => acc + Number(it.unlocked), 0);
 
   return (
     <div className="grid grid-cols-2 gap-[4px] md:grid-cols-3 lg:grid-cols-4 pb-8">

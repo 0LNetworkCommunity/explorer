@@ -1,14 +1,14 @@
-import { Field, ObjectType } from '@nestjs/graphql';
-import { Decimal } from 'decimal.js';
+import { Field, ObjectType } from "@nestjs/graphql";
+import { Decimal } from "decimal.js";
 
-interface GqlSlowWalletInput {
+interface SlowWalletInput {
   transferred: Decimal;
   unlocked: Decimal;
 }
 
-@ObjectType('SlowWallet')
-export class GqlSlowWallet {
-  public constructor(input: GqlSlowWalletInput) {
+@ObjectType()
+export class SlowWallet {
+  public constructor(input: SlowWalletInput) {
     this.transferred = input.transferred;
     this.unlocked = input.unlocked;
   }

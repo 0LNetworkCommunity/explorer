@@ -7,6 +7,7 @@ import ChartComponent from './ChartComponent';
 import StatItem from './components/StatItem';
 import StatsContainer from './components/StatsContainer';
 import Page from '../../../ui/Page';
+import AccountAddress from '../../../ui/AccountAddress';
 
 const getData = async () => {
   const res = await fetch(`${config.apiHost}/stats`);
@@ -272,14 +273,7 @@ const Coinstats = () => {
                       ) => (
                         <tr key={index}>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            <a
-                              href={`https://0l.fyi/accounts/${account.address}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-500 hover:text-blue-700"
-                            >
-                              {account.address}
-                            </a>
+                            <AccountAddress address={account.address} />
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">
                             <Money>{account.unlockedBalance}</Money>

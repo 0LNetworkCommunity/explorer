@@ -5,7 +5,7 @@ import { Job, Queue } from "bullmq";
 
 import { StatsService } from "./stats.service.js";
 import { redisClient } from "../redis/redis.service.js";
-import { STATS_CACHE_KEY } from "./constants.js";
+import { STATS_CACHE_KEY, ACCOUNTS_STATS_CACHE_KEY } from "./constants.js";
 
 @Processor("stats")
 export class StatsProcessor extends WorkerHost implements OnModuleInit {
@@ -24,6 +24,11 @@ export class StatsProcessor extends WorkerHost implements OnModuleInit {
         every: 60 * 60 * 2 * 1_000, // 2 hours
       },
     });
+
+    // Delay the execution of the job by 5 seconds on startup
+    setTimeout(async () => {
+      await this.updateStats();
+    }, 5000);
   }
 
   public async process(job: Job<void, any, string>) {
@@ -40,5 +45,11 @@ export class StatsProcessor extends WorkerHost implements OnModuleInit {
   private async updateStats() {
     const stats = await this.statsService.getStats();
     await redisClient.set(STATS_CACHE_KEY, JSON.stringify(stats));
+
+    const accountsStats = await this.statsService.getAccountsStats();
+    await redisClient.set(
+      ACCOUNTS_STATS_CACHE_KEY,
+      JSON.stringify(accountsStats),
+    );
   }
 }

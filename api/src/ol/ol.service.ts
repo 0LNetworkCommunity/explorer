@@ -1,13 +1,16 @@
-import { AptosClient } from "aptos";
+import { ApiError, AptosClient } from "aptos";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import BN from "bn.js";
+import { Decimal } from "decimal.js";
 
 import { OlConfig } from "../config/config.interface.js";
 import {
+  CoinStoreResource,
   ConsensusReward,
   RawDonorVoiceRegistry,
   RawValidatorSet,
+  SlowWalletResource,
   ValidatorConfig,
   ValidatorGrade,
   ValidatorSet,
@@ -15,6 +18,7 @@ import {
 import { NetworkAddresses } from "./network-addresses.js";
 import { parseAddress } from "../utils.js";
 import { SupplyStats } from "./types.js";
+import { SlowWallet } from "./models/slow-wallet.model.js";
 
 @Injectable()
 export class OlService {
@@ -213,5 +217,46 @@ export class OlService {
     );
     const data = res.data as RawDonorVoiceRegistry;
     return data.list.map((it) => it.substring(2));
+  }
+
+  public async getAccountBalance(address: Uint8Array): Promise<Decimal | null> {
+    try {
+      const res = await this.aptosClient.getAccountResource(
+        `0x${Buffer.from(address).toString("hex")}`,
+        "0x1::coin::CoinStore<0x1::libra_coin::LibraCoin>",
+      );
+      const balance = new Decimal(
+        (res.data as CoinStoreResource).coin.value,
+      ).div(1e6);
+      return balance;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.errorCode === "resource_not_found") {
+          return null;
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async getSlowWallet(address: Uint8Array): Promise<SlowWallet | null> {
+    try {
+      const res = await this.aptosClient.getAccountResource(
+        `0x${Buffer.from(address).toString("hex")}`,
+        "0x1::slow_wallet::SlowWallet",
+      );
+      const slowWallet = res.data as SlowWalletResource;
+      return new SlowWallet({
+        unlocked: new Decimal(slowWallet.unlocked).div(1e6),
+        transferred: new Decimal(slowWallet.transferred).div(1e6),
+      });
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.errorCode === "resource_not_found") {
+          return null;
+        }
+      }
+      throw error;
+    }
   }
 }

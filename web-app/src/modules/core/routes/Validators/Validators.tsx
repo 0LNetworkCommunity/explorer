@@ -39,30 +39,9 @@ const GET_VALIDATORS = gql`
 `;
 
 const Validators: FC = () => {
-  const { data, error } = useQuery<{
-    getValidators: {
-      address: string;
-      inSet: boolean;
-      index: number;
-      votingPower: number;
-      balance: number;
-      unlocked: number;
-      vouches: {
-        epoch: number;
-        address: string;
-      }[];
-      grade: {
-        compliant: boolean;
-        failedBlocks: number;
-        proposedBlocks: number;
-      };
-      currentBid: {
-        currentBid: number;
-        expirationEpoch: number;
-      };
-      audit_qualification: [string] | null;
-    }[];
-  }>(GET_VALIDATORS);
+  const { data, error } = useQuery(GET_VALIDATORS, {
+    pollInterval: 30000, // Poll every 30 seconds
+  });
 
   if (error) {
     console.log('error', error);

@@ -95,3 +95,8 @@ export interface CoinStoreResource {
     };
   };
 }
+
+export interface SlowWalletResource {
+  transferred: string;
+  unlocked: string;
+}

@@ -12,6 +12,11 @@ type Module {
   functions: [String!]!
 }
 
+type SlowWallet {
+  transferred: Decimal!
+  unlocked: Decimal!
+}
+
 type GqlUserTransactionDeprecated {
   hash: String!
   version: Float!
@@ -33,11 +38,6 @@ type GqlUserTransactionDeprecated {
 type UserTransactionCollection {
   size: Float!
   items: [GqlUserTransactionDeprecated!]!
-}
-
-type SlowWallet {
-  transferred: Decimal!
-  unlocked: Decimal!
 }
 
 type ValidatorCurrentBid {
@@ -63,7 +63,7 @@ type Validator {
   currentBid: ValidatorCurrentBid
   balance: Float
   unlocked: Float
-  audit_qualification: [String!]
+  auditQualification: [String!]
 }
 
 type Vouch {
@@ -114,7 +114,7 @@ type CumulativeShare {
   percentage: Float!
 }
 
-type GqlTopAccount {
+type TopAccount {
   rank: Int!
   address: String!
   publicName: String!
@@ -191,7 +191,7 @@ type Query {
   userTransactions(limit: Int!, offset: Int!, order: String!): UserTransactionCollection!
   modules: [Module!]!
   account(address: Bytes!): Account
-  getTopAccounts(limit: Float! = 100): [GqlTopAccount!]!
+  getTopAccounts(limit: Float! = 100): [TopAccount!]!
   getValidators: [Validator!]!
   getCommunityWallets: [GqlCommunityWallet!]!
   walletTransactions(address: Bytes!): [Transaction!]!

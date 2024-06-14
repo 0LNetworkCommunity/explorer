@@ -33,7 +33,7 @@ const GET_VALIDATORS = gql`
       }
       city
       country
-      audit_qualification
+      auditQualification
     }
   }
 `;

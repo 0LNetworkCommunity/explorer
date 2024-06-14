@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import _ from "lodash";
 
 import { OlService } from "../ol.service.js";
-import { AccountsService } from "../accounts/accounts.service.js";
 import { GqlCommunityWallet } from "./community-wallet.model.js";
 import { parseAddress } from "../../utils.js";
 import { communityWallets } from "./community-wallets.js";
@@ -10,10 +9,7 @@ import { ICommunityWalletsService } from "./interfaces.js";
 
 @Injectable()
 export class CommunityWalletsService implements ICommunityWalletsService {
-  public constructor(
-    private readonly olService: OlService,
-    private readonly accountsService: AccountsService,
-  ) {}
+  public constructor(private readonly olService: OlService) {}
 
   public async getCommunityWallets(): Promise<GqlCommunityWallet[]> {
     const donorVoiceRegistry =
@@ -37,9 +33,7 @@ export class CommunityWalletsService implements ICommunityWalletsService {
         const addrBuff = parseAddress(address);
         const addr = addrBuff.toString("hex").toUpperCase();
         const info = communityWallets.get(addr);
-        const balance = await this.accountsService.getBalance({
-          address: addrBuff,
-        });
+        const balance = await this.olService.getAccountBalance(addrBuff);
 
         return {
           address: addr,

@@ -44,7 +44,7 @@ export class GqlValidatorGrade {
   public failedBlocks: number;
 }
 
-interface GqlValidatorInput {
+interface ValidatorInput {
   inSet: boolean;
   index: BN;
   address: string;
@@ -54,14 +54,14 @@ interface GqlValidatorInput {
   grade?: GqlValidatorGrade | null;
   vouches: GqlVouch[];
   currentBid: GqlValidatorCurrentBid;
-  city?: string;
-  country?: string;
-  audit_qualification?: [string] | null;
+  city?: string | null;
+  country?: string | null;
+  auditQualification?: [string] | null;
 }
 
-@ObjectType("Validator")
-export class GqlValidator {
-  public constructor(input: GqlValidatorInput) {
+@ObjectType()
+export class Validator {
+  public constructor(input: ValidatorInput) {
     this.inSet = input.inSet;
     this.index = input.index;
     this.address = input.address;
@@ -73,7 +73,7 @@ export class GqlValidator {
     this.currentBid = input.currentBid;
     this.city = input.city;
     this.country = input.country;
-    this.audit_qualification = input.audit_qualification;
+    this.auditQualification = input.auditQualification;
   }
 
   @Field(() => Boolean)
@@ -86,10 +86,10 @@ export class GqlValidator {
   public address: string;
 
   @Field(() => String, { nullable: true })
-  public city?: string;
+  public city?: string | null;
 
   @Field(() => String, { nullable: true })
-  public country?: string;
+  public country?: string | null;
 
   @Field(() => BN)
   public votingPower: BN;
@@ -110,7 +110,7 @@ export class GqlValidator {
   public unlocked?: number;
 
   @Field(() => [String], { nullable: true })
-  public audit_qualification?: [string] | null;
+  public auditQualification?: [string] | null;
 }
 
 interface GqlVouchInput {

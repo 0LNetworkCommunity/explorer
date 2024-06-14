@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
+
 import CopyIcon from '../Icons/CopyIcon';
 import CheckIcon from '../Icons/CheckIcon';
-import PropTypes from 'prop-types';
 
 interface Props {
   text: string;

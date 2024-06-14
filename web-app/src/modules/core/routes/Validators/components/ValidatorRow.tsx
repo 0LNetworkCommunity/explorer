@@ -9,10 +9,9 @@ import Vouches from './Vouches';
 
 interface ValidatorRowProps {
   validator: IValidator;
-  isActive: boolean;
 }
 
-const ValidatorRow: FC<ValidatorRowProps> = ({ validator, isActive }) => {
+const ValidatorRow: FC<ValidatorRowProps> = ({ validator }) => {
   return (
     <tr className={clsx('whitespace-nowrap text-sm text-[#141414] text-center')}>
       <td className="px-2 md:px-4 lg:px-6 py-4">
@@ -32,7 +31,7 @@ const ValidatorRow: FC<ValidatorRowProps> = ({ validator, isActive }) => {
         </td>
       ) : (
         <td className="px-2 md:px-4 lg:px-6 py-4 text-center">
-          {validator.audit_qualification?.toLocaleString()}
+          {validator.auditQualification?.toLocaleString()}
         </td>
       )}
       <td className="px-2 md:px-4 lg:px-6 py-4 text-center">

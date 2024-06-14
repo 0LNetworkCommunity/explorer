@@ -55,13 +55,14 @@ const PriceStats: FC = () => {
           <span className="text-sm font-normal pb-[1px]">LIBRA</span>
         </div>
         <div className="justify-end md:justify-normal flex gap-2">
-          <Link
-            to={OL_COINGECKO_URL}
+          <a
+            href={OL_COINGECKO_URL}
             className="text-base font-normal text-[#CD3B42] underline hover:text-red-700 transition-colors duration-150"
             target="_blank"
+            rel="noopener"
           >
             View on CoinGecko
-          </Link>
+          </a>
           <img src={CoingeckoLogo} alt="Coingecko logo" />
         </div>
       </div>

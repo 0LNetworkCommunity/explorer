@@ -1,11 +1,12 @@
 import { FC, useState } from 'react';
-import Modal from 'react-modal';
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
+import { XMarkIcon } from '@heroicons/react/24/outline';
+
 import AccountAddress from '../../../../ui/AccountAddress';
 
 interface Vouch {
   address: string;
   epoch: number;
-  index: number;
 }
 
 interface VouchesProps {
@@ -13,88 +14,90 @@ interface VouchesProps {
 }
 
 const Vouches: FC<VouchesProps> = ({ vouches }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  let sortedVouches = [...vouches].sort((a, b) => {
-    if (a.epoch === b.epoch) {
-      return a.address.localeCompare(b.address);
-    }
-    return a.epoch - b.epoch;
-  });
-  sortedVouches = sortedVouches.map((vouch, index) => ({
-    ...vouch,
-    index: index + 1,
-  }));
-  sortedVouches = sortedVouches.sort((a, b) => b.index - a.index);
+  const [open, setOpen] = useState(!true);
 
   return (
-    <div>
-      <span className="cursor-pointer" onClick={handleOpenModal}>
-        {vouches.length.toLocaleString()}
-      </span>
-      <Modal
-        isOpen={isModalOpen}
-        onRequestClose={handleCloseModal}
-        contentLabel="Vouches List"
-        className="max-w-lg mx-auto my-8 bg-white rounded-lg shadow-lg overflow-hidden p-4"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
-        style={{ width: '400px' }}
-      >
-        <div className="relative p-4">
-          <button
-            onClick={handleCloseModal}
-            className="absolute top-0 right-2 w-6 h-6 mt-4 bg-transparent border-none text-2xl leading-none cursor-pointer"
+    <>
+      <div>
+        <button type="button" onClick={() => setOpen(true)}>
+          {vouches.length.toLocaleString()}
+        </button>
+      </div>
+
+      <Transition show={open}>
+        <Dialog className="relative z-10" onClose={setOpen}>
+          <TransitionChild
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-            >
-              <path
-                d="M18 6L6 18M6 6L18 18"
-                stroke="#A3A3A3"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <h2 className="text-xl mb-4">Active Vouches</h2>
-          <div className="overflow-y-auto" style={{ maxHeight: '400px' }}>
-            <table className="min-w-full divide-y divide-gray-200 text-center">
-              <thead className="bg-[#FAFAFA]">
-                <tr className="text-center text-sm">
-                  <th className="px-2 py-2">#</th>
-                  <th className="px-2 py-2">Address</th>
-                  <th className="px-2 py-2">Epoch</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {sortedVouches.map((vouch) => (
-                  <tr key={vouch.index} className="text-sm text-[#141414] text-center">
-                    <td className="px-2 py-2">{vouch.index}</td>
-                    <td className="flex justify-center px-2 py-2 text-center">
-                      <AccountAddress address={vouch.address} />
-                    </td>
-                    <td className="px-2 py-2">{vouch.epoch}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" />
+          </TransitionChild>
+
+          <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+              <TransitionChild
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              >
+                <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                  <div className="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
+                    <button
+                      type="button"
+                      className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      onClick={() => setOpen(false)}
+                    >
+                      <span className="sr-only">Close</span>
+                      <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                    </button>
+                  </div>
+                  <div className="sm:flex sm:items-start">
+                    <div className="mt-3 w-full sm:ml-4 sm:mt-0 sm:text-left">
+                      <DialogTitle
+                        as="h3"
+                        className="text-base font-semibold leading-6 text-gray-900 mb-3"
+                      >
+                        Vouches
+                      </DialogTitle>
+
+                      <div className="overflow-y-auto min-w-full" style={{ maxHeight: '400px' }}>
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-[#FAFAFA]">
+                            <tr className="text-sm">
+                              <th className="px-2 py-2">#</th>
+                              <th className="px-2 py-2">Epoch</th>
+                              <th className="px-2 py-2">Address</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200 bg-white">
+                            {vouches.map((vouch, index) => (
+                              <tr key={index} className="text-sm text-[#141414] text-center">
+                                <td className="px-2 py-2">{index + 1}</td>
+                                <td className="px-2 py-2">{vouch.epoch}</td>
+                                <td className="px-2 py-2 text-center">
+                                  <AccountAddress address={vouch.address} />
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </DialogPanel>
+              </TransitionChild>
+            </div>
           </div>
-        </div>
-      </Modal>
-    </div>
+        </Dialog>
+      </Transition>
+    </>
   );
 };
 

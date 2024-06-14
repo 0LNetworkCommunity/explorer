@@ -1,4 +1,3 @@
-// src/pages/Accounts/components/AccountsStats.tsx
 import { FC, useEffect, useState } from 'react';
 import StatsCard from '../../../../ui/StatsCard';
 import { config } from '../../../../../config';
@@ -17,7 +16,6 @@ const AccountsStats: FC = () => {
       const res = await getData();
       setData(res);
     };
-
     load();
   }, []); // The empty dependency array ensures this runs only once after the initial render
 

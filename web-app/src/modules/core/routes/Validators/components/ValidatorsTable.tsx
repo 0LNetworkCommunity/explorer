@@ -90,12 +90,8 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
         }
         break;
       case 'audit':
-        value1 = a.audit_qualification
-          ? a.audit_qualification[a.audit_qualification.length - 1]
-          : '';
-        value2 = b.audit_qualification
-          ? b.audit_qualification[b.audit_qualification.length - 1]
-          : '';
+        value1 = a.auditQualification ? a.auditQualification[a.auditQualification.length - 1] : '';
+        value2 = b.auditQualification ? b.auditQualification[b.auditQualification.length - 1] : '';
         break;
       case 'vouches':
         value1 = a.vouches.length;
@@ -106,8 +102,8 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
         value2 = b.currentBid ? b.currentBid.currentBid : 0;
         break;
       case 'cumulativeShare':
-        value1 = Number(a.balance);
-        value2 = Number(b.balance);
+        value1 = a.cumulativeBalance?.percentage ?? 0;
+        value2 = b.cumulativeBalance?.percentage ?? 0;
         break;
       case 'location':
         value1 = a.country ? a.country + a.city : '';
@@ -202,11 +198,7 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
               <tbody className="divide-y divide-gray-200 bg-white">
                 {cumulativeValidators
                   ? cumulativeValidators.map((validator) => (
-                      <ValidatorRow
-                        key={validator.address}
-                        validator={validator}
-                        isActive={isActive}
-                      />
+                      <ValidatorRow key={validator.address} validator={validator} />
                     ))
                   : Array.from({ length: 10 }).map((_, index) => (
                       <ValidatorRowSkeleton key={index} isActive={isActive} />

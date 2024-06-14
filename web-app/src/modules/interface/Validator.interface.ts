@@ -24,5 +24,5 @@ export interface IValidator {
   } | null;
   city: string | null;
   country: string | null;
-  audit_qualification: [string] | null;
+  auditQualification: [string] | null;
 }

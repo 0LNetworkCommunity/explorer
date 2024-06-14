@@ -1,22 +1,20 @@
 import { Injectable } from "@nestjs/common";
-// src/validators/validators.service.ts
-import Bluebird, { all } from "bluebird";
+import Bluebird from "bluebird";
 import BN from "bn.js";
+
 import { OlService } from "../ol.service.js";
-import { AccountsService } from "../accounts/accounts.service.js";
 import { PrismaService } from "../../prisma/prisma.service.js";
-import { GqlValidator, GqlVouch } from "../models/validator.model.js";
+import { Validator, GqlVouch } from "../models/validator.model.js";
 import { parseAddress } from "../../utils.js";
 
 @Injectable()
 export class ValidatorsService {
   public constructor(
     private readonly olService: OlService,
-    private readonly accountsService: AccountsService,
     private readonly prisma: PrismaService,
   ) {}
 
-  public async getValidators(): Promise<GqlValidator[]> {
+  public async getValidators(): Promise<Validator[]> {
     const validatorSet = await this.olService.getValidatorSet();
     const nodes = await this.prisma.node.findMany({
       select: {
@@ -33,8 +31,8 @@ export class ValidatorsService {
           validator.config.networkAddresses &&
           validator.config.networkAddresses.split("/")[2];
         const node = nodes.find((node) => node["ip"] == valIp);
-        const city = node && node["city"] ? node["city"] : "";
-        const country = node && node["country"] ? node["country"] : "";
+        const city = node && node["city"] ? node["city"] : null;
+        const country = node && node["country"] ? node["country"] : null;
         const grade = await this.olService.getValidatorGrade(validator.addr);
 
         return {
@@ -44,63 +42,66 @@ export class ValidatorsService {
           index: validator.config.validatorIndex,
           networkAddresses: validator.config.networkAddresses,
           fullnodeAddresses: validator.config.fullnodeAddresses,
-          city: city,
-          country: country,
-          grade: grade,
-          audit_qualification: null,
+          city,
+          country,
+          grade,
+          auditQualification: null,
         };
       },
     );
 
-    let eligible = await this.olService.getEligibleValidators();
+    const eligible = await this.olService.getEligibleValidators();
     const eligibleCurrent = eligible.filter(
       (address) =>
         !currentValidators.find((it) => !it.address.compare(address)),
     );
 
-    const eligibleValidators = await Bluebird.map(
-      eligibleCurrent,
-      async (address) => {
+    const eligibleValidators = await Promise.all(
+      eligibleCurrent.map(async (address) => {
         return {
           address,
           votingPower: new BN(0),
           inSet: false,
           index: new BN(-1),
-          audit_qualification: await this.getAuditQualification(address),
+          auditQualification: await this.getAuditQualification(address),
           grade: null,
           city: null,
           country: null,
         };
-      },
+      }),
     );
 
     let allValidators = [...currentValidators, ...eligibleValidators];
-    return await Bluebird.map(allValidators, async (validator) => {
-      const balance = await this.accountsService.getBalance({
-        address: validator.address,
-      });
-      const slowWallet = await this.accountsService.getSlowWallet({
-        address: validator.address,
-      });
-      const unlocked = Number(slowWallet?.unlocked);
+    return await Promise.all(
+      allValidators.map(async (validator) => {
+        const balance = await this.olService.getAccountBalance(
+          validator.address,
+        );
+        const slowWallet = await this.olService.getSlowWallet(
+          validator.address,
+        );
+        const unlocked = Number(slowWallet?.unlocked);
 
-      const vouches = await this.getVouches(validator.address);
-      const currentBid = await this.olService.getCurrentBid(validator.address);
-      return new GqlValidator({
-        inSet: validator.inSet,
-        index: validator.index,
-        address: validator.address.toString("hex").toLocaleUpperCase(),
-        votingPower: validator.votingPower,
-        balance: Number(balance),
-        unlocked: unlocked,
-        grade: validator.grade ?? null,
-        vouches: vouches,
-        currentBid: currentBid,
-        city: validator.city || "",
-        country: validator.country || "",
-        audit_qualification: validator.audit_qualification ?? null,
-      });
-    });
+        const vouches = await this.getVouches(validator.address);
+        const currentBid = await this.olService.getCurrentBid(
+          validator.address,
+        );
+        return new Validator({
+          inSet: validator.inSet,
+          index: validator.index,
+          address: validator.address.toString("hex").toLocaleUpperCase(),
+          votingPower: validator.votingPower,
+          balance: Number(balance),
+          unlocked: unlocked,
+          grade: validator.grade,
+          vouches: vouches,
+          currentBid: currentBid,
+          city: validator.city,
+          country: validator.country,
+          auditQualification: validator.auditQualification,
+        });
+      }),
+    );
   }
   public async getAuditQualification(address: Buffer): Promise<[string]> {
     const auditQualification = await this.olService.aptosClient.view({

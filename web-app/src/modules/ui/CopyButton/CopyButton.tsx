@@ -1,13 +1,13 @@
 import { useState, FC } from 'react';
+import { CheckIcon } from '@heroicons/react/24/outline';
 
 import CopyIcon from '../Icons/CopyIcon';
-import CheckIcon from '../Icons/CheckIcon';
 
 interface Props {
   text: string;
 }
 
-const CopyBtn: FC<Props> = ({ text }) => {
+const CopyButton: FC<Props> = ({ text }) => {
   const [isCopied, setIsCopied] = useState(false);
 
   const onClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -20,7 +20,7 @@ const CopyBtn: FC<Props> = ({ text }) => {
         setIsCopied(true);
         setTimeout(() => {
           setIsCopied(false);
-        }, 2000);
+        }, 2_000);
       })
       .catch((err) => {
         console.error('Failed to copy text: ', err);
@@ -28,10 +28,10 @@ const CopyBtn: FC<Props> = ({ text }) => {
   };
 
   return (
-    <button onClick={onClick} className="relative flex items-center p-2 rounded">
-      {isCopied ? <CheckIcon /> : <CopyIcon />}
+    <button onClick={onClick} className="p-2 text-gray-400">
+      {isCopied ? <CheckIcon className="h-4 w-4" /> : <CopyIcon />}
     </button>
   );
 };
 
-export default CopyBtn;
+export default CopyButton;

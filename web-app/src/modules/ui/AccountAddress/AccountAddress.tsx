@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 
 import { normalizeHexString } from '../../../utils';
 import HexString from '../HexString';
-import AddressAvatar from '../AddressAvatar/AddressAvatar';
-import CopyBtn from '../CopyBtn/CopyBtn';
+import AddressAvatar from '../AddressAvatar';
+import CopyButton from '../CopyButton';
 
 interface Props {
   address: string;
@@ -14,7 +14,7 @@ const AccountAddress: FC<Props> = ({ address }) => {
   const normalizedAddress = normalizeHexString(address);
   return (
     <div className="flex items-center whitespace-nowrap">
-      <div className="mr-1.5">
+      <div className="mr-1.5 w-4 h-4">
         <AddressAvatar address={normalizedAddress} />
       </div>
       <Link
@@ -23,7 +23,7 @@ const AccountAddress: FC<Props> = ({ address }) => {
       >
         <HexString value={normalizedAddress} />
       </Link>
-      <CopyBtn text={normalizedAddress} />
+      <CopyButton text={normalizedAddress} />
     </div>
   );
 };

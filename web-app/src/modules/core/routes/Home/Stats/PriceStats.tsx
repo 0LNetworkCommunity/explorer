@@ -1,5 +1,4 @@
 import { FC } from 'react';
-import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 
 import Logo from '../../../../ui/Logo/Logo';

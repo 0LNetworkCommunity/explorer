@@ -25,7 +25,7 @@ const Validators = () => {
           <div className="flex flex-col">
             <span className="text-lg font-extralight">Total Validators</span>
             <span className="text-xl font-medium">
-              {validatorSet ? validatorSet.active_validators.length : null}
+              {validatorSet?.active_validators.length}
             </span>
           </div>
 
@@ -181,7 +181,7 @@ const Stats: FC = () => {
                   !accountsStats ? 'animate-pulse bg-gray-300 text-2xl space-y-4' : ''
                 }`}
               >
-                {accountsStats ? accountsStats.totalAccounts?.toLocaleString() : null}
+                {accountsStats?.totalAccounts?.toLocaleString()}
               </span>
             </div>
           </>

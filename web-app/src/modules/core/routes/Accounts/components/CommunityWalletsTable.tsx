@@ -1,9 +1,10 @@
 import { FC, useState } from 'react';
 import { gql, useQuery } from '@apollo/client';
-import { ICommunityWallet } from '../../../../interface/CommunityWallet.interface';
+
 import SortableTh from './SortableTh';
 import CommunityWalletRow from './CommunityWalletRow';
 import CommunityWalletRowSkeleton from './CommunityWalletRowSkeleton';
+import { ICommunityWallet } from '../../../../interface/CommunityWallets.interface';
 
 const GET_COMMUNITY_WALLETS = gql`
   query CommunityWallets {

@@ -30,7 +30,7 @@ const TopAccountsTable: FC<TopAccountsTableProps> = () => {
   const [sortColumn, setSortColumn] = useState<string>('rank');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
-  const { error, data } = useQuery(GET_TOP_ACCOUNTS);
+  const { data } = useQuery(GET_TOP_ACCOUNTS);
   const accounts: ITopAccount[] = data ? data.getTopAccounts : null;
 
   const handleSort = (column: string) => {

@@ -1,7 +1,7 @@
 import { FC } from 'react';
-import { ICommunityWallet } from '../../../../interface/CommunityWallet.interface';
 import AccountAddress from '../../../../ui/AccountAddress';
 import Money from '../../../../ui/Money';
+import { ICommunityWallet } from '../../../../interface/CommunityWallets.interface';
 
 interface CommunityWalletRowProps {
   wallet: ICommunityWallet;
@@ -17,7 +17,6 @@ const CommunityWalletRow: FC<CommunityWalletRowProps> = ({ wallet }) => {
       <td className="px-2 md:px-4 lg:px-6 py-4 text-left" style={{ minWidth: '142px' }}>
         <span
           className="block overflow-hidden"
-          style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2 }}
         >
           {wallet.name}
         </span>
@@ -25,7 +24,6 @@ const CommunityWalletRow: FC<CommunityWalletRowProps> = ({ wallet }) => {
       <td className="px-2 md:px-4 lg:px-6 py-4 text-left">
         <span
           className="block overflow-hidden text-ellipsis"
-          style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2 }}
         >
           {wallet.description}
         </span>

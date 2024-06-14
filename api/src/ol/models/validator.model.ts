@@ -51,11 +51,12 @@ interface GqlValidatorInput {
   balance?: number;
   unlocked?: number;
   votingPower: BN;
-  grade: GqlValidatorGrade;
+  grade?: GqlValidatorGrade | null;
   vouches: GqlVouch[];
   currentBid: GqlValidatorCurrentBid;
   city?: string;
   country?: string;
+  audit_qualification?: [string] | null;
 }
 
 @ObjectType("Validator")
@@ -72,6 +73,7 @@ export class GqlValidator {
     this.currentBid = input.currentBid;
     this.city = input.city;
     this.country = input.country;
+    this.audit_qualification = input.audit_qualification;
   }
 
   @Field(() => Boolean)
@@ -93,7 +95,7 @@ export class GqlValidator {
   public votingPower: BN;
 
   @Field(() => GqlValidatorGrade, { nullable: true })
-  public grade?: GqlValidatorGrade;
+  public grade?: GqlValidatorGrade | null;
 
   @Field(() => [GqlVouch], { nullable: true })
   public vouches?: GqlVouch[];
@@ -106,6 +108,9 @@ export class GqlValidator {
 
   @Field(() => Number, { nullable: true })
   public unlocked?: number;
+
+  @Field(() => [String], { nullable: true })
+  public audit_qualification?: [string] | null;
 }
 
 interface GqlVouchInput {

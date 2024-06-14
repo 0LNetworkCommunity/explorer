@@ -18,17 +18,23 @@ const ValidatorRow: FC<ValidatorRowProps> = ({ validator, isActive }) => {
       <td className="px-2 md:px-4 lg:px-6 py-4">
         <AccountAddress address={validator.address} />
       </td>
-      <td className="px-2 md:px-4 lg:px-6 py-4 text-center">
-        {validator.grade.compliant ? (
-          <CheckIcon className="w-5 h-5 text-green-500 inline" style={{ marginTop: '-3px' }} />
-        ) : (
-          <XMarkIcon className="w-5 h-5 text-red-500 inline" style={{ marginTop: '-3px' }} />
-        )}
-        <span className={validator.grade.failedBlocks > 0 ? 'text-red-500' : ''}>
-          {validator.grade.failedBlocks.toLocaleString()}
-        </span>{' '}
-        / {validator.grade.proposedBlocks.toLocaleString()}
-      </td>
+      {validator.inSet ? (
+        <td className="px-2 md:px-4 lg:px-6 py-4 text-center">
+          {validator.grade.compliant ? (
+            <CheckIcon className="w-5 h-5 text-green-500 inline" style={{ marginTop: '-3px' }} />
+          ) : (
+            <XMarkIcon className="w-5 h-5 text-red-500 inline" style={{ marginTop: '-3px' }} />
+          )}
+          <span className={validator.grade.failedBlocks > 0 ? 'text-red-500' : ''}>
+            {validator.grade.failedBlocks.toLocaleString()}
+          </span>{' '}
+          / {validator.grade.proposedBlocks.toLocaleString()}
+        </td>
+      ) : (
+        <td className="px-2 md:px-4 lg:px-6 py-4 text-center">
+          {validator.audit_qualification?.toLocaleString()}
+        </td>
+      )}
       <td className="px-2 md:px-4 lg:px-6 py-4 text-center">
         <Vouches vouches={validator.vouches} />
       </td>
@@ -40,7 +46,7 @@ const ValidatorRow: FC<ValidatorRowProps> = ({ validator, isActive }) => {
       <td className="px-2 md:px-4 lg:px-6 py-4 text-right">
         <Money>{Number(validator.balance)}</Money>
       </td>
-      {isActive && (
+      {validator.inSet && (
         <td className="px-2 md:px-4 lg:px-6 py-4">
           <ProgressBar
             percentage={validator.cumulativeBalance ? validator.cumulativeBalance.percentage : 0}
@@ -48,9 +54,11 @@ const ValidatorRow: FC<ValidatorRowProps> = ({ validator, isActive }) => {
           />
         </td>
       )}
-      <td className="px-2 md:px-4 lg:px-6 py-4 text-left">
-        {validator.city ? `${validator.city}, ${validator.country}` : 'Unknown'}
-      </td>
+      {validator.inSet && (
+        <td className="px-2 md:px-4 lg:px-6 py-4 text-left">
+          {validator.city ? `${validator.city}, ${validator.country}` : 'Unknown'}
+        </td>
+      )}
       {/*<td className="px-2 md:px-4 lg:px-6 py-4 text-right">
         {validator.account.slowWallet ? (
           <Money>{Number(validator.unlocked)}</Money>

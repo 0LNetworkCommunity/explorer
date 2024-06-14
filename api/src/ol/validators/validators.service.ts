@@ -35,6 +35,7 @@ export class ValidatorsService {
         const node = nodes.find((node) => node["ip"] == valIp);
         const city = node && node["city"] ? node["city"] : "";
         const country = node && node["country"] ? node["country"] : "";
+        const grade = await this.olService.getValidatorGrade(validator.addr);
 
         return {
           address: validator.addr,
@@ -45,26 +46,33 @@ export class ValidatorsService {
           fullnodeAddresses: validator.config.fullnodeAddresses,
           city: city,
           country: country,
+          grade: grade,
+          audit_qualification: null,
         };
       },
     );
 
     let eligible = await this.olService.getEligibleValidators();
-    const eligibleValidators = eligible
-      .filter(
-        (address) =>
-          !currentValidators.find((it) => !it.address.compare(address)),
-      )
-      .map((address) => {
+    const eligibleCurrent = eligible.filter(
+      (address) =>
+        !currentValidators.find((it) => !it.address.compare(address)),
+    );
+
+    const eligibleValidators = await Bluebird.map(
+      eligibleCurrent,
+      async (address) => {
         return {
           address,
           votingPower: new BN(0),
           inSet: false,
           index: new BN(-1),
+          audit_qualification: await this.getAuditQualification(address),
+          grade: null,
           city: null,
           country: null,
         };
-      });
+      },
+    );
 
     let allValidators = [...currentValidators, ...eligibleValidators];
     return await Bluebird.map(allValidators, async (validator) => {
@@ -75,7 +83,7 @@ export class ValidatorsService {
         address: validator.address,
       });
       const unlocked = Number(slowWallet?.unlocked);
-      const grade = await this.olService.getValidatorGrade(validator.address);
+
       const vouches = await this.getVouches(validator.address);
       const currentBid = await this.olService.getCurrentBid(validator.address);
       return new GqlValidator({
@@ -85,13 +93,22 @@ export class ValidatorsService {
         votingPower: validator.votingPower,
         balance: Number(balance),
         unlocked: unlocked,
-        grade: grade,
+        grade: validator.grade ?? null,
         vouches: vouches,
         currentBid: currentBid,
         city: validator.city || "",
         country: validator.country || "",
+        audit_qualification: validator.audit_qualification ?? null,
       });
     });
+  }
+  public async getAuditQualification(address: Buffer): Promise<[string]> {
+    const auditQualification = await this.olService.aptosClient.view({
+      function: "0x1::proof_of_fee::audit_qualification",
+      type_arguments: [],
+      arguments: [`0x${address.toString("hex")}`],
+    });
+    return auditQualification[0] as [string];
   }
 
   public async getVouches(address: Buffer): Promise<GqlVouch[]> {

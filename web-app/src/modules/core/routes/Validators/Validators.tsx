@@ -33,6 +33,7 @@ const GET_VALIDATORS = gql`
       }
       city
       country
+      audit_qualification
     }
   }
 `;
@@ -59,6 +60,7 @@ const Validators: FC = () => {
         currentBid: number;
         expirationEpoch: number;
       };
+      audit_qualification: [string] | null;
     }[];
   }>(GET_VALIDATORS);
 

@@ -63,6 +63,7 @@ type Validator {
   currentBid: ValidatorCurrentBid
   balance: Float
   unlocked: Float
+  audit_qualification: [String!]
 }
 
 type Vouch {

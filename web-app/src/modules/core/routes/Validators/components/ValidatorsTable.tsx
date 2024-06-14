@@ -89,6 +89,14 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
           value2 = b.grade.proposedBlocks - b.grade.failedBlocks;
         }
         break;
+      case 'audit':
+        value1 = a.audit_qualification
+          ? a.audit_qualification[a.audit_qualification.length - 1]
+          : '';
+        value2 = b.audit_qualification
+          ? b.audit_qualification[b.audit_qualification.length - 1]
+          : '';
+        break;
       case 'vouches':
         value1 = a.vouches.length;
         value2 = b.vouches.length;
@@ -149,20 +157,22 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
 
   const columns = [
     { key: 'address', label: 'Address', className: '' },
-    { key: 'grade', label: 'Grade', className: 'text-center' },
-    { key: 'vouches', label: 'Vouches', className: '' },
+    ...(activeValue === 'active'
+      ? [{ key: 'grade', label: 'Grade', className: 'text-center' }]
+      : [{ key: 'audit', label: 'Audit', className: 'text-center' }]),
+    { key: 'vouches', label: 'Vouches', className: 'text-center' },
     { key: 'currentBid', label: 'Bid (Exp. Epoch)', className: 'text-right' },
     { key: 'balance', label: 'Balance', className: 'text-right' },
-    ...(isActive
+    ...(activeValue === 'active'
       ? [
           {
             key: 'cumulativeShare',
             label: 'Cumulative Share (%)',
             className: 'text-left whitespace-nowrap',
           },
+          { key: 'location', label: 'Location', className: 'text-left' },
         ]
       : []),
-    { key: 'location', label: 'Location', className: 'text-left' },
     // { key: 'unlocked', label: 'Unlocked', className: 'text-right' },
   ];
 

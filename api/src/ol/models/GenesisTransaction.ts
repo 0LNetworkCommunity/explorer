@@ -15,7 +15,11 @@ export class GenesisTransaction implements AbstractTransaction {
   @Field(() => BN)
   public version: BN;
 
+  @Field(() => Buffer)
+  public hash: Uint8Array;
+
   public constructor(input: GenesisTransactionInput) {
     this.version = input.version;
+    this.hash = input.hash;
   }
 }

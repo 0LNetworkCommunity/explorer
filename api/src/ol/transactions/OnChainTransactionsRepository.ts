@@ -89,7 +89,11 @@ export class OnChainTransactionsRepository
     const blockMetadataTransactionRes =
       await this.clickhouseService.client.query({
         query: `
-          SELECT *
+          SELECT
+            "timestamp",
+            "version",
+            "epoch",
+            hex("hash") as "hash"
           FROM "block_metadata_transaction"
           WHERE
             "version" IN {versions:Array(UInt64)}
@@ -111,6 +115,7 @@ export class OnChainTransactionsRepository
             timestamp: new BN(blockMetadataTransaction.timestamp),
             version: new BN(blockMetadataTransaction.version),
             epoch: new BN(blockMetadataTransaction.epoch),
+            hash: Buffer.from(blockMetadataTransaction.hash, "hex"),
           }),
         ];
       }),
@@ -128,7 +133,12 @@ export class OnChainTransactionsRepository
 
     const scriptUserTransactionRes = await this.clickhouseService.client.query({
       query: `
-        SELECT *
+        SELECT
+          hex("sender") as "sender",
+          "timestamp",
+          "version",
+          "success",
+          hex("hash") as "hash"
         FROM "script"
         WHERE
           "version" IN {versions:Array(UInt64)}
@@ -146,9 +156,10 @@ export class OnChainTransactionsRepository
       scriptUserTransactionRows.map((scriptUserTransaction) => [
         scriptUserTransaction.version,
         new ScriptUserTransaction({
+          version: new BN(scriptUserTransaction.version),
+          hash: Buffer.from(scriptUserTransaction.hash, "hex"),
           sender: Buffer.from(scriptUserTransaction.sender, "hex"),
           timestamp: new BN(scriptUserTransaction.timestamp),
-          version: new BN(scriptUserTransaction.version),
           success: scriptUserTransaction.success,
         }),
       ]),
@@ -165,7 +176,8 @@ export class OnChainTransactionsRepository
     const genesisTransactionRes = await this.clickhouseService.client.query({
       query: `
         SELECT
-          "version"
+          "version",
+          hex("hash") as "hash"
         FROM genesis_transaction
         WHERE
           "version" IN {versions:Array(UInt64)}
@@ -184,6 +196,7 @@ export class OnChainTransactionsRepository
         genesisTransaction.version,
         new GenesisTransaction({
           version: new BN(genesisTransaction.version),
+          hash: Buffer.from(genesisTransaction.hash, "hex"),
         }),
       ]),
     );

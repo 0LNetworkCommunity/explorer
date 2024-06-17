@@ -16,13 +16,17 @@ export type BlockMetadataTransactionInput = AbstractTransactionInput & {
 })
 export class BlockMetadataTransaction implements AbstractTransaction {
   public constructor(input: BlockMetadataTransactionInput) {
-    this.timestamp = input.timestamp;
     this.version = input.version;
+    this.hash = input.hash;
+    this.timestamp = input.timestamp;
     this.epoch = input.epoch;
   }
 
   @Field(() => BN)
   public version: BN;
+
+  @Field(() => Buffer)
+  public hash: Uint8Array;
 
   @Field(() => BN)
   public epoch: BN;

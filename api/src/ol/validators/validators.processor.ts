@@ -22,9 +22,6 @@ export class ValidatorsProcessor extends WorkerHost {
         every: 30 * 1000, // 30 seconds
       },
     });
-
-    // Execute the job immediately on startup
-    await this.updateValidatorsCache();
   }
 
   public async process(job: Job<void, any, string>) {

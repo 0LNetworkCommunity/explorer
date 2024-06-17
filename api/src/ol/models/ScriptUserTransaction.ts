@@ -19,6 +19,9 @@ export class ScriptUserTransaction implements AbstractTransaction {
   @Field(() => BN)
   public version: BN;
 
+  @Field(() => Buffer)
+  public hash: Uint8Array;
+
   @Field(() => BN)
   public timestamp: BN;
 
@@ -29,9 +32,10 @@ export class ScriptUserTransaction implements AbstractTransaction {
   public sender: Buffer;
 
   public constructor(input: ScriptUserTransactionInput) {
+    this.version = input.version;
+    this.hash = input.hash;
     this.sender = input.sender;
     this.timestamp = input.timestamp;
-    this.version = input.version;
     this.success = input.success;
   }
 }

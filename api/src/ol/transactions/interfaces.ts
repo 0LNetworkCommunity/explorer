@@ -78,6 +78,7 @@ export interface IOnChainTransactionsRepository {
 
 export interface GenesisTransactionDbEntity {
   version: string;
+  hash: string;
 }
 
 export interface UserTransactionDbEntity {

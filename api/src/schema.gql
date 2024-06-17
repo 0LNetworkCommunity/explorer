@@ -4,6 +4,7 @@
 
 interface AbstractTransaction {
   version: BigInt!
+  hash: Bytes!
 }
 
 type Module {
@@ -157,12 +158,14 @@ type UserTransaction implements AbstractTransaction {
 
 type BlockMetadataTransaction implements AbstractTransaction {
   version: BigInt!
+  hash: Bytes!
   epoch: BigInt!
   timestamp: BigInt!
 }
 
 type ScriptUserTransaction implements AbstractTransaction {
   version: BigInt!
+  hash: Bytes!
   timestamp: BigInt!
   success: Boolean!
   sender: Bytes!
@@ -170,6 +173,7 @@ type ScriptUserTransaction implements AbstractTransaction {
 
 type GenesisTransaction implements AbstractTransaction {
   version: BigInt!
+  hash: Bytes!
 }
 
 type Node {

@@ -7,7 +7,6 @@ import {
 } from "./AbstractTransaction.js";
 
 export type UserTransactionInput = AbstractTransactionInput & {
-  hash: Uint8Array;
   sender: Buffer;
   success: boolean;
   moduleAddress: Buffer;

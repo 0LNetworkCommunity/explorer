@@ -23,9 +23,6 @@ export class AccountsProcessor extends WorkerHost implements OnModuleInit {
         every: 60 * 60 * 1_000, // 1 hour
       },
     });
-
-    // Execute the job immediately on startup
-    await this.updateAccountsCache();
   }
 
   public async process(job: Job<void, any, string>) {

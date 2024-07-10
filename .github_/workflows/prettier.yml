@@ -1,0 +1,48 @@
+name: Prettier Check
+
+on: [push, pull_request]
+
+jobs:
+  prettier-web-app:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies for web-app
+        run: |
+          cd web-app
+          npm install
+
+      - name: Run Prettier for web-app
+        run: |
+          cd web-app
+          npm run prettier-check
+
+  prettier-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies for api
+        run: |
+          cd api
+          npm install
+
+      - name: Run Prettier for api
+        run: |
+          cd api
+          npm run prettier-check

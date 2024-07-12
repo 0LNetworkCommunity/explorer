@@ -11,11 +11,11 @@ mod utils;
 use models::{
     AncestryCollection, BeneficiaryPolicyCollection, BlockMetadataTransactionCollection,
     BoundaryStatusCollection, BurnCounterCollection, BurnTrackerCollection, CoinBalanceCollection,
-    ConsensusRewardCollection, EpochFeeMakerRegistryCollection, EventCollection,
-    GenesisTransactionCollection, MultiActionCollection, MultisigAccountOwnersCollection,
-    ScriptCollection, SlowWalletCollection, SlowWalletListCollection,
-    StateCheckpointTransactionCollection, TotalSupplyCollection, TowerListCollection,
-    UserTransactionCollection, VdfDifficultyCollection,
+    ConsensusRewardCollection, DonorVoiceRegistryCollection, EpochFeeMakerRegistryCollection,
+    EventCollection, GenesisTransactionCollection, MultiActionCollection,
+    MultisigAccountOwnersCollection, ScriptCollection, SlowWalletCollection,
+    SlowWalletListCollection, StateCheckpointTransactionCollection, TotalSupplyCollection,
+    TowerListCollection, UserTransactionCollection, VdfDifficultyCollection,
 };
 use serde_json::Value;
 
@@ -80,6 +80,7 @@ fn process_changes(
     ancestry_collection: &mut AncestryCollection,
     multisig_account_owners_collection: &mut MultisigAccountOwnersCollection,
     multi_action_collection: &mut MultiActionCollection,
+    donor_voice_registry_collection: &mut DonorVoiceRegistryCollection,
 
     version: u64,
     changes: &Vec<WriteSetChange>,
@@ -133,8 +134,38 @@ fn process_changes(
                     }
                 }
 
+                // 0x1::donor_voice::Registry
+                if address == ROOT_ACCOUNT_ADDRESS.inner()
+                    && type_address == ROOT_ACCOUNT_ADDRESS.inner()
+                    && type_module == "donor_voice"
+                    && type_name == "Registry"
+                    && type_generic_type_params_len == 0
+                {
+                    let data = &change.data.data.0;
+                    let list = IdentifierWrapper::from_str("list").unwrap();
+
+                    let registry: Vec<_> = if let Some(Value::Array(value)) = data.get(&list) {
+                        value
+                            .iter()
+                            .filter_map(|v| {
+                                v.as_str().map(|s| {
+                                    utils::parse_addr(s)
+                                        .unwrap_or_else(|err| {
+                                            panic!("Failed to parse address: {}", err)
+                                        })
+                                        .0
+                                })
+                            })
+                            .collect()
+                    } else {
+                        panic!("No 'owners' array found in data");
+                    };
+
+                    donor_voice_registry_collection.push(version, change_index, registry);
+                }
+
                 // 0x1::pledge_accounts::BeneficiaryPolicy
-                if address == NULL_ADDRESS.inner()
+                if address == ROOT_ACCOUNT_ADDRESS.inner()
                     && type_address == ROOT_ACCOUNT_ADDRESS.inner()
                     && type_module == "pledge_accounts"
                     && type_name == "BeneficiaryPolicy"
@@ -623,6 +654,7 @@ async fn main() {
     let mut coin_balance_collection = CoinBalanceCollection::new();
     let mut multisig_account_owners_collection = MultisigAccountOwnersCollection::new();
     let mut multi_action_collection = MultiActionCollection::new();
+    let mut donor_voice_registry_collection = DonorVoiceRegistryCollection::new();
 
     let mut beneficiary_policy_collection = BeneficiaryPolicyCollection::new();
     let mut tower_list_collection = TowerListCollection::new();
@@ -680,6 +712,7 @@ async fn main() {
                         &mut ancestry_collection,
                         &mut multisig_account_owners_collection,
                         &mut multi_action_collection,
+                        &mut donor_voice_registry_collection,
                         info.version.into(),
                         &info.changes,
                     );
@@ -726,6 +759,7 @@ async fn main() {
                         &mut ancestry_collection,
                         &mut multisig_account_owners_collection,
                         &mut multi_action_collection,
+                        &mut donor_voice_registry_collection,
                         info.version.into(),
                         &info.changes,
                     );
@@ -755,6 +789,7 @@ async fn main() {
                         &mut ancestry_collection,
                         &mut multisig_account_owners_collection,
                         &mut multi_action_collection,
+                        &mut donor_voice_registry_collection,
                         info.version.into(),
                         &info.changes,
                     );
@@ -802,4 +837,6 @@ async fn main() {
     multisig_account_owners_collection
         .to_parquet(format!("{}/multisig_account_owners.parquet", &args.dest));
     multi_action_collection.to_parquet(format!("{}/multi_action.parquet", &args.dest));
+    donor_voice_registry_collection
+        .to_parquet(format!("{}/donor_voice_registry.parquet", &args.dest));
 }

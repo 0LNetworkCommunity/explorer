@@ -30,10 +30,7 @@ impl EventCollection {
         }
     }
 
-    pub fn push(
-        &mut self,
-        transaction: &Transaction
-    ) {
+    pub fn push(&mut self, transaction: &Transaction) {
         match transaction {
             Transaction::PendingTransaction(_) => {}
             Transaction::UserTransaction(user_transaction) => {
@@ -55,11 +52,7 @@ impl EventCollection {
         }
     }
 
-    fn push_events(
-        &mut self,
-        version: u64,
-        events: &Vec<Event>
-    ) {
+    fn push_events(&mut self, version: u64, events: &Vec<Event>) {
         for (index, event) in events.iter().enumerate() {
             self.index.push(index as u64);
             self.version.push(version);

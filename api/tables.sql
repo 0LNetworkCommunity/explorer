@@ -352,3 +352,16 @@ PRIMARY KEY (
 ORDER BY (
     "address", "version", "change_index"
 );
+
+CREATE TABLE "donor_voice_registry" ON CLUSTER "olfyi" (
+    "version" UInt64,
+    "change_index" UInt64,
+    "registry" Array(UInt256)
+)
+ENGINE = ReplicatedMergeTree
+PRIMARY KEY (
+    "version"
+)
+ORDER BY (
+    "version", "change_index"
+);

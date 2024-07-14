@@ -1,12 +1,12 @@
-import { FC } from "react";
-import { Types } from "aptos";
-import { CubeIcon } from "@heroicons/react/24/outline";
-import TimestampCell from "./TimestampCell";
-import SenderCell from "./SenderCell";
-import VersionCell from "./VersionCell";
+import { FC } from 'react';
+import { Types } from 'aptos';
+import { CubeIcon } from '@heroicons/react/24/outline';
+import TimestampCell from './TimestampCell';
+import SenderCell from './SenderCell';
+import VersionCell from './VersionCell';
 
 interface Props {
-  transaction: Types.BlockMetadataTransaction
+  transaction: Types.BlockMetadataTransaction;
 }
 
 const BlockMetadataTransactionRow: FC<Props> = ({ transaction }) => {

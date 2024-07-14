@@ -1,9 +1,9 @@
-import { Types } from "aptos";
-import { FC } from "react";
-import VersionCell from "./VersionCell";
-import { UserIcon } from "@heroicons/react/24/outline";
-import TimestampCell from "./TimestampCell";
-import SenderCell from "./SenderCell";
+import { Types } from 'aptos';
+import { FC } from 'react';
+import VersionCell from './VersionCell';
+import { UserIcon } from '@heroicons/react/24/outline';
+import TimestampCell from './TimestampCell';
+import SenderCell from './SenderCell';
 
 interface Props {
   transaction: Types.UserTransaction;

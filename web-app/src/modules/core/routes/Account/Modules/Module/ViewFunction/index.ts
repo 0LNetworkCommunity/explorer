@@ -1,1 +1,1 @@
-export { default } from "./ViewFunction";
+export { default } from './ViewFunction';

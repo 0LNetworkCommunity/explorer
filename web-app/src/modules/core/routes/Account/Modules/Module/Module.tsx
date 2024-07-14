@@ -1,13 +1,13 @@
-import { FC, useEffect, useState } from "react";
-import { Outlet, useParams } from "react-router-dom";
-import { Types } from "aptos";
-import clsx from "clsx";
-import ViewFunction from "./ViewFunction";
+import { FC, useEffect, useState } from 'react';
+import { Outlet, useParams } from 'react-router-dom';
+import { Types } from 'aptos';
+import clsx from 'clsx';
+import ViewFunction from './ViewFunction';
 
-import useAptos from "../../../../../aptos";
-import DetailsTable from "../../../../../ui/DetailsTable";
-import Code from "../../../../../ui/Code/Code";
-import ExecFunction from "./ExecFunction";
+import useAptos from '../../../../../aptos';
+import DetailsTable from '../../../../../ui/DetailsTable';
+import Code from '../../../../../ui/Code/Code';
+import ExecFunction from './ExecFunction';
 
 const Module: FC = () => {
   const { accountAddress, moduleName } = useParams();
@@ -16,10 +16,7 @@ const Module: FC = () => {
 
   useEffect(() => {
     const load = async () => {
-      const module = await aptos.getAccountModule(
-        `0x${accountAddress!}`,
-        moduleName!
-      );
+      const module = await aptos.getAccountModule(`0x${accountAddress!}`, moduleName!);
       setModule(module);
     };
     load();
@@ -40,9 +37,7 @@ const Module: FC = () => {
 
     return (
       <div className="flex flex-col w-full px-4 py-3">
-        <h1
-          className={clsx("text-3xl font-bold tracking-tight text-slate-900 pb-2")}
-        >
+        <h1 className={clsx('text-3xl font-bold tracking-tight text-slate-900 pb-2')}>
           {moduleName}
         </h1>
 
@@ -58,7 +53,7 @@ const Module: FC = () => {
                 </div>
                 <ViewFunction module={module} func={func} />
               </li>
-            ) : localStorage.getItem("postero_enabled") === "true" ? (
+            ) : localStorage.getItem('postero_enabled') === 'true' ? (
               <li
                 key={func.name}
                 className="overflow-hidden bg-white px-3 py-2 shadow sm:rounded-md"

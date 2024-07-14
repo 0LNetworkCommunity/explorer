@@ -1,11 +1,11 @@
-import { FC, PropsWithChildren, createRef, useEffect } from "react";
-import Prism from "prismjs";
-import "prismjs/themes/prism-solarizedlight.min.css";
+import { FC, PropsWithChildren, createRef, useEffect } from 'react';
+import Prism from 'prismjs';
+import 'prismjs/themes/prism-solarizedlight.min.css';
 
 type Props = PropsWithChildren<{
   plugins?: string[];
   lang: string;
-}>
+}>;
 
 const Code: FC<Props> = ({ plugins = [], lang, children }) => {
   const codeEl = createRef<HTMLElement>();
@@ -16,10 +16,10 @@ const Code: FC<Props> = ({ plugins = [], lang, children }) => {
     }
 
     Prism.highlightElement(codeEl.current);
-  }, [plugins.join(" "), lang, children]);
+  }, [plugins.join(' '), lang, children]);
 
   return (
-    <pre className={plugins.join(" ")}>
+    <pre className={plugins.join(' ')}>
       <code ref={codeEl} className={`language-${lang}`}>
         {children}
       </code>

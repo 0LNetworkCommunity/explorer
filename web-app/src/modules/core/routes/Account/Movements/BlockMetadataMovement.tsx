@@ -8,9 +8,7 @@ interface Props {
 const BlockMetadataMovement: FC<Props> = ({ movement }) => {
   const transaction = movement.transaction as BlockMetadataTransaction;
 
-  return (
-    <div className='text-slate-500'>{`Epoch #${transaction.epoch}`}</div>
-  );
+  return <div className="text-slate-500">{`Epoch #${transaction.epoch}`}</div>;
 };
 
 export default BlockMetadataMovement;

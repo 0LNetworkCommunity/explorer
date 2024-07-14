@@ -1,5 +1,5 @@
-import { FC } from "react";
-import AccountAddress from "../AccountAddress";
+import { FC } from 'react';
+import AccountAddress from '../AccountAddress';
 
 interface Props {
   sender: string;

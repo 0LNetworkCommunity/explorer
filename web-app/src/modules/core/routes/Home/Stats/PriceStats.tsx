@@ -6,7 +6,6 @@ import { OL_COINGECKO_URL } from '../../../../../contants';
 import CoingeckoLogo from '../../../../assets/images/coingecko.png';
 
 const PriceStats: FC = () => {
-
   const dev = location.search.includes('dev=true');
 
   const priceIsIncreasing = true;

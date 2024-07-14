@@ -1,9 +1,9 @@
-import { FC, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Types } from "aptos";
+import { FC, useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { Types } from 'aptos';
 
-import useAptos from "../../../../aptos";
-import TransactionTable from "../../../../ui/TransactionsTable";
+import useAptos from '../../../../aptos';
+import TransactionTable from '../../../../ui/TransactionsTable';
 
 const Transactions: FC = () => {
   const { accountAddress } = useParams();

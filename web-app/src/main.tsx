@@ -9,8 +9,8 @@ import App from './modules/core/App';
 
 import './index.css';
 
-const VITE_POSTHOG_KEY = "phc_hPZOabiIQet1rsxRGAELYmKy8eByxgklujcj3rTz4cd";
-const VITE_POSTHOG_HOST = "https://eu.posthog.com";
+const VITE_POSTHOG_KEY = 'phc_hPZOabiIQet1rsxRGAELYmKy8eByxgklujcj3rTz4cd';
+const VITE_POSTHOG_HOST = 'https://eu.posthog.com';
 
 const PostHogProviderWrapper = ({ children }: PropsWithChildren) => {
   if (window.location.host === '0l.fyi') {

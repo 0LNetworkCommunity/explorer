@@ -1,1 +1,1 @@
-export { default } from "./HexString";
+export { default } from './HexString';

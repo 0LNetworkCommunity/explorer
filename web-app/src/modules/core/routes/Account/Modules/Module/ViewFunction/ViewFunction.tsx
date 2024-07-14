@@ -1,8 +1,8 @@
-import { Types } from "aptos";
-import clsx from "clsx";
-import { FC, useEffect, useState } from "react";
-import useAptos from "../../../../../../aptos";
-import Code from "../../../../../../ui/Code/Code";
+import { Types } from 'aptos';
+import clsx from 'clsx';
+import { FC, useEffect, useState } from 'react';
+import useAptos from '../../../../../../aptos';
+import Code from '../../../../../../ui/Code/Code';
 
 interface Props {
   module: Types.MoveModuleBytecode;
@@ -16,7 +16,7 @@ const ViewFunction: FC<Props> = ({ module, func }) => {
   const [result, setResult] = useState<string>();
 
   useEffect(() => {
-    setArgs(new Array(func.params.length).fill(""));
+    setArgs(new Array(func.params.length).fill(''));
   }, [func.params.length]);
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -35,9 +35,7 @@ const ViewFunction: FC<Props> = ({ module, func }) => {
       <form className="divide-y divide-gray-200 space-y-3" onSubmit={onSubmit}>
         {func.generic_type_params.length > 0 && (
           <div className="py-2">
-            <h3 className="text-sm text-slate-600">
-              Generic params
-            </h3>
+            <h3 className="text-sm text-slate-600">Generic params</h3>
 
             <div className="p-2">
               {func.generic_type_params.map((_, index) => (
@@ -49,10 +47,10 @@ const ViewFunction: FC<Props> = ({ module, func }) => {
                     <input
                       type="text"
                       className={clsx(
-                        "px-2",
-                        "block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm",
-                        "ring-1 ring-inset ring-gray-300 placeholder:text-gray-400",
-                        "focus:ring-2 focus:ring-inset focus:ring-indigo-600"
+                        'px-2',
+                        'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm',
+                        'ring-1 ring-inset ring-gray-300 placeholder:text-gray-400',
+                        'focus:ring-2 focus:ring-inset focus:ring-indigo-600',
                       )}
                       value={genericParams[index]}
                       onChange={(event) => {
@@ -67,16 +65,12 @@ const ViewFunction: FC<Props> = ({ module, func }) => {
                 </div>
               ))}
             </div>
-            
-
           </div>
         )}
 
         {func.params.length > 0 && (
           <div className="py-2">
-            <h3 className="text-sm text-slate-600">
-              Params
-            </h3>
+            <h3 className="text-sm text-slate-600">Params</h3>
 
             <div className="p-2">
               {func.params.map((param, index) => {
@@ -89,10 +83,10 @@ const ViewFunction: FC<Props> = ({ module, func }) => {
                       <input
                         type="text"
                         className={clsx(
-                          "px-2",
-                          "block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm",
-                          "ring-1 ring-inset ring-gray-300 placeholder:text-gray-400",
-                          "focus:ring-2 focus:ring-inset focus:ring-indigo-600"
+                          'px-2',
+                          'block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm',
+                          'ring-1 ring-inset ring-gray-300 placeholder:text-gray-400',
+                          'focus:ring-2 focus:ring-inset focus:ring-indigo-600',
                         )}
                         value={args[index]}
                         onChange={(event) => {
@@ -114,13 +108,13 @@ const ViewFunction: FC<Props> = ({ module, func }) => {
         <button
           type="submit"
           className={clsx(
-            "rounded bg-primary-600",
-            "px-2 py-1",
-            "text-sm font-semibold text-white",
-            "shadow-sm",
-            "hover:bg-primary-500",
-            "focus-visible:outline focus-visible:outline-2",
-            "focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+            'rounded bg-primary-600',
+            'px-2 py-1',
+            'text-sm font-semibold text-white',
+            'shadow-sm',
+            'hover:bg-primary-500',
+            'focus-visible:outline focus-visible:outline-2',
+            'focus-visible:outline-offset-2 focus-visible:outline-primary-600',
           )}
         >
           Read
@@ -128,9 +122,7 @@ const ViewFunction: FC<Props> = ({ module, func }) => {
       </form>
       {result && (
         <div className="py-3">
-          <h3 className="text-base font-medium text-slate-900">
-            Result
-          </h3>
+          <h3 className="text-base font-medium text-slate-900">Result</h3>
           <Code lang="js">{result}</Code>
         </div>
       )}

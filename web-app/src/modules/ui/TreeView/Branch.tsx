@@ -1,6 +1,6 @@
-import { FC, useState } from "react";
-import TreeItem from "./TreeItem";
-import Tree from "./Tree";
+import { FC, useState } from 'react';
+import TreeItem from './TreeItem';
+import Tree from './Tree';
 
 interface Props {
   name: string;
@@ -25,7 +25,7 @@ const Branch: FC<Props> = ({ name, tree, parents, onClick }) => {
           if (hasChildren) {
             setCollapsed(!collapsed);
           }
-          onClick([...parents, name].join("::"));
+          onClick([...parents, name].join('::'));
         }}
       />
       {hasChildren && !collapsed && (

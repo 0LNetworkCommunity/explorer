@@ -1,1 +1,1 @@
-export { default } from "./UserTransactionsTable";
+export { default } from './UserTransactionsTable';

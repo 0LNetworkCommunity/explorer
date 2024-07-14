@@ -1,1 +1,1 @@
-export { default } from "./ExecFunction";
+export { default } from './ExecFunction';

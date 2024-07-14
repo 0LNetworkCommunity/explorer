@@ -1,9 +1,9 @@
-import { FC, useEffect, useState } from "react";
-import clsx from "clsx";
-import axios from "axios";
-import ReactECharts from "echarts-for-react";
+import { FC, useEffect, useState } from 'react';
+import clsx from 'clsx';
+import axios from 'axios';
+import ReactECharts from 'echarts-for-react';
 
-import { config } from "../../../../config";
+import { config } from '../../../../config';
 
 interface Props {
   address: string;
@@ -15,10 +15,10 @@ const HistoricalBalance: FC<Props> = ({ address }) => {
   useEffect(() => {
     const load = async () => {
       const res = await axios<{
-        timestamp: number[],
-        balance: number[],
-        unlocked: number[],
-        locked: number[],
+        timestamp: number[];
+        balance: number[];
+        unlocked: number[];
+        locked: number[];
       }>({
         url: `${config.dataApiHost}/historical-balance/${address}`,
       });
@@ -108,15 +108,12 @@ const HistoricalBalance: FC<Props> = ({ address }) => {
       {options && (
         <div
           className={clsx(
-            "w-full rounded-md shadow overflow-hidden h-[500px]",
-            "ring-1 ring-black ring-opacity-5",
-            "bg-white"
+            'w-full rounded-md shadow overflow-hidden h-[500px]',
+            'ring-1 ring-black ring-opacity-5',
+            'bg-white',
           )}
         >
-          <ReactECharts
-            option={options}
-            style={{ height: "100%", width: "100%" }}
-          />
+          <ReactECharts option={options} style={{ height: '100%', width: '100%' }} />
         </div>
       )}
     </>

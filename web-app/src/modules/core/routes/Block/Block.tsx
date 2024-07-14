@@ -1,13 +1,13 @@
-import { FC, useEffect, useState } from "react";
-import { Types } from "aptos";
-import { format } from "date-fns";
+import { FC, useEffect, useState } from 'react';
+import { Types } from 'aptos';
+import { format } from 'date-fns';
 
-import Page from "../../../ui/Page";
-import useAptos from "../../../aptos";
-import { Link, useParams } from "react-router-dom";
-import DetailsTable from "../../../ui/DetailsTable";
-import DetailRow from "../../../ui/DetailsTable/DetailRow";
-import TransactionsTable from "../../../ui/TransactionsTable";
+import Page from '../../../ui/Page';
+import useAptos from '../../../aptos';
+import { Link, useParams } from 'react-router-dom';
+import DetailsTable from '../../../ui/DetailsTable';
+import DetailRow from '../../../ui/DetailsTable/DetailRow';
+import TransactionsTable from '../../../ui/TransactionsTable';
 
 const Block: FC = () => {
   const { blockHeight } = useParams();
@@ -39,7 +39,7 @@ const Block: FC = () => {
                 <span title={block.block_timestamp}>
                   {format(
                     new Date(parseInt(block.block_timestamp, 10) / 1_000),
-                    "dd/MM/yyyy hh:mm:ss"
+                    'dd/MM/yyyy hh:mm:ss',
                   )}
                 </span>
               }

@@ -1,7 +1,6 @@
-import { FC } from "react";
-import { Outlet } from "react-router-dom";
-import ModulesIndex from "./ModulesIndex";
-
+import { FC } from 'react';
+import { Outlet } from 'react-router-dom';
+import ModulesIndex from './ModulesIndex';
 
 const Modules: FC = () => {
   return (

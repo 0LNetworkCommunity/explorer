@@ -1,8 +1,8 @@
-import { FC } from "react";
-import { format } from "date-fns";
+import { FC } from 'react';
+import { format } from 'date-fns';
 
 interface Props {
-  timestamp: string
+  timestamp: string;
 }
 
 const TimestampCell: FC<Props> = ({ timestamp }) => {

@@ -3,12 +3,12 @@
   const eventListeners: any[] = [];
 
   window.addEventListener(
-    "message",
+    'message',
     (event) => {
       if (event.data.__postero_disconnect__) {
         for (const promise of promises.values()) {
           try {
-            promise.reject(new Error("connection lost"));
+            promise.reject(new Error('connection lost'));
           } catch (err) {
             console.error(err);
           }
@@ -37,7 +37,7 @@
         }
       }
     },
-    false
+    false,
   );
 
   let rpcId = 0;
@@ -49,7 +49,7 @@
 
       window.postMessage({
         __postero__: {
-          jsonrpc: "2.0",
+          jsonrpc: '2.0',
           method,
           params,
           id: `${id}`,
@@ -61,23 +61,23 @@
   };
 
   function disconnect() {
-    return rpcCall("disconnect");
+    return rpcCall('disconnect');
   }
 
   function connect() {
-    return rpcCall("connect", [window.location.toString()]);
+    return rpcCall('connect', [window.location.toString()]);
   }
 
   function signMessage(payload: any) {
-    return rpcCall("signMessage", [payload]);
+    return rpcCall('signMessage', [payload]);
   }
 
   function signTransaction(payload: any) {
-    return rpcCall("sign_transaction", [payload]);
+    return rpcCall('sign_transaction', [payload]);
   }
 
   function signAndSubmitTransaction(payload: any) {
-    return rpcCall("sign_and_submit_transaction", [payload]);
+    return rpcCall('sign_and_submit_transaction', [payload]);
   }
 
   function onEvent(eventListener: any) {
@@ -90,7 +90,7 @@
     };
   }
 
-  rpcCall("__init__", [window.location.toString()]);
+  rpcCall('__init__', [window.location.toString()]);
 
   const win = window as any;
   win.postero = {

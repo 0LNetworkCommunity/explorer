@@ -1,1 +1,1 @@
-export { default } from "./ModulesIndex";
+export { default } from './ModulesIndex';

@@ -1,1 +1,1 @@
-export { default } from "./AppFrame";
+export { default } from './AppFrame';

@@ -1,1 +1,1 @@
-export { default } from "./Validators";
+export { default } from './Validators';

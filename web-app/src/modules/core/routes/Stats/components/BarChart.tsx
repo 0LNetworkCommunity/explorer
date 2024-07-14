@@ -1,5 +1,5 @@
-import { FC } from "react";
-import ReactECharts from "echarts-for-react";
+import { FC } from 'react';
+import ReactECharts from 'echarts-for-react';
 
 interface Props {
   data: {
@@ -13,19 +13,19 @@ const BarChart: FC<Props> = ({ data, title }) => {
   const option = {
     animation: false,
     tooltip: {
-      trigger: "axis",
+      trigger: 'axis',
       axisPointer: {
-        type: "shadow",
+        type: 'shadow',
       },
     },
     grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "3%",
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
       containLabel: true,
     },
     xAxis: {
-      type: "category",
+      type: 'category',
       data: data.map((item: { timestamp: number }) => {
         const date = new Date(item.timestamp * 1000);
         const isoString = date.toISOString();
@@ -36,15 +36,15 @@ const BarChart: FC<Props> = ({ data, title }) => {
       },
     },
     yAxis: {
-      type: "value",
+      type: 'value',
     },
     series: [
       {
         data: data.map((item) => item.value),
-        type: "bar",
-        barWidth: "60%", // Adjust the bar width as needed
+        type: 'bar',
+        barWidth: '60%', // Adjust the bar width as needed
         itemStyle: {
-          color: "#E8595C", // Bar color
+          color: '#E8595C', // Bar color
         },
       },
     ],

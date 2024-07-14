@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC } from 'react';
 
 const Postero: FC = () => {
   return (
@@ -6,8 +6,8 @@ const Postero: FC = () => {
       <button
         type="button"
         onClick={() => {
-          localStorage.setItem("postero_enabled", "true");
-          alert("Good! Just refresh this page now.");
+          localStorage.setItem('postero_enabled', 'true');
+          alert('Good! Just refresh this page now.');
         }}
       >
         Enable Postero

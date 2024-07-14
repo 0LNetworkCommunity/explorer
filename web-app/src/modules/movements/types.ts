@@ -159,6 +159,6 @@ export class Movement {
 }
 
 export enum OrderDirection {
-  ASC = "ASC",
-  DESC = "DESC",
+  ASC = 'ASC',
+  DESC = 'DESC',
 }

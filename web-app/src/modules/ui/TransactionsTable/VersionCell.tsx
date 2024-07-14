@@ -1,8 +1,8 @@
-import { FC } from "react";
-import { Link } from "react-router-dom";
+import { FC } from 'react';
+import { Link } from 'react-router-dom';
 
 interface Props {
-  version: string
+  version: string;
 }
 
 const VersionCell: FC<Props> = ({ version }) => {

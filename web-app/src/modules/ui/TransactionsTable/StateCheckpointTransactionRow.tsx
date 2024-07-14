@@ -1,8 +1,8 @@
-import { FC } from "react";
-import { Types } from "aptos";
-import { CheckIcon } from "@heroicons/react/24/outline";
-import TimestampCell from "./TimestampCell";
-import VersionCell from "./VersionCell";
+import { FC } from 'react';
+import { Types } from 'aptos';
+import { CheckIcon } from '@heroicons/react/24/outline';
+import TimestampCell from './TimestampCell';
+import VersionCell from './VersionCell';
 
 interface Props {
   transaction: Types.StateCheckpointTransaction;

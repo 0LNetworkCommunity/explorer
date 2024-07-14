@@ -1,1 +1,1 @@
-export { default } from "./Postero";
+export { default } from './Postero';

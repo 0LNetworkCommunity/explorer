@@ -1,4 +1,4 @@
-import { Buffer } from "buffer";
+import { Buffer } from 'buffer';
 import type {
   AccountInfo,
   AdapterPlugin,
@@ -6,19 +6,19 @@ import type {
   SignMessagePayload,
   SignMessageResponse,
   WalletName,
-} from "@aptos-labs/wallet-adapter-core";
-import { Network, Types, TxnBuilderTypes, BCS } from "aptos";
-import "./postero";
+} from '@aptos-labs/wallet-adapter-core';
+import { Network, Types, TxnBuilderTypes, BCS } from 'aptos';
+import './postero';
 
-import goose from "./goose";
+import goose from './goose';
 
-export const PosteroWalletName = "Postero" as WalletName<"Postero">;
+export const PosteroWalletName = 'Postero' as WalletName<'Postero'>;
 
 const { EntryFunction } = TxnBuilderTypes;
 
 interface SelectWalletEvent {
-  jsonrpc: "2.0";
-  method: "select_wallet";
+  jsonrpc: '2.0';
+  method: 'select_wallet';
   params: [string, string];
 }
 
@@ -45,7 +45,7 @@ interface TransactionOptions {
 export class PosteroWallet implements AdapterPlugin {
   public readonly name = PosteroWalletName;
 
-  public readonly url = "https://0l.fyi";
+  public readonly url = 'https://0l.fyi';
 
   public readonly icon = goose;
 
@@ -57,7 +57,7 @@ export class PosteroWallet implements AdapterPlugin {
 
   private onEvent = (event: JSONRPCEvent) => {
     switch (event.method) {
-      case "select_wallet": {
+      case 'select_wallet': {
         const [address, publicKey] = event.params;
         console.log([address, publicKey]);
 
@@ -89,7 +89,7 @@ export class PosteroWallet implements AdapterPlugin {
   public async network(): Promise<NetworkInfo> {
     return {
       name: Network.MAINNET,
-      chainId: "1",
+      chainId: '1',
       url: undefined, // string;
     };
   }
@@ -98,42 +98,39 @@ export class PosteroWallet implements AdapterPlugin {
     transaction: Types.TransactionPayload,
     // options?: any
   ): Promise<{ hash: Types.HexEncodedBytes }> {
-    if (transaction.type === "entry_function_payload") {
+    if (transaction.type === 'entry_function_payload') {
       const entryFunctionPayload = transaction as Types.EntryFunctionPayload;
-      const [moduleAddress, moduleName, ...rest] =
-        entryFunctionPayload.function.split("::");
-      const moduleFunction = rest.join("::");
+      const [moduleAddress, moduleName, ...rest] = entryFunctionPayload.function.split('::');
+      const moduleFunction = rest.join('::');
 
       const entryFunc = EntryFunction.natural(
         `${moduleAddress}::${moduleName}`,
         moduleFunction,
         [],
-        entryFunctionPayload.arguments
+        entryFunctionPayload.arguments,
       );
       const serializer = new BCS.Serializer();
       entryFunc.serialize(serializer);
       const value = serializer.getBytes();
 
       const res = await this.provider.signAndSubmitTransaction({
-        type: "entry_function_payload",
-        payload: Buffer.from(value).toString("base64"),
+        type: 'entry_function_payload',
+        payload: Buffer.from(value).toString('base64'),
       });
       console.log(res);
     }
 
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 
-  public async signMessage(
-    message: SignMessagePayload
-  ): Promise<SignMessageResponse> {
-    console.log("signMessage", message);
-    throw new Error("Method not implemented.");
+  public async signMessage(message: SignMessagePayload): Promise<SignMessageResponse> {
+    console.log('signMessage', message);
+    throw new Error('Method not implemented.');
   }
 
   public async signTransaction(
     transaction: Types.TransactionPayload,
-    options?: TransactionOptions
+    options?: TransactionOptions,
   ): Promise<Uint8Array | null> {
     console.log(transaction, options);
 
@@ -156,7 +153,7 @@ export class PosteroWallet implements AdapterPlugin {
   }
 
   public async onNetworkChange(callback: any): Promise<void> {
-    console.log("onNetworkChange", callback);
+    console.log('onNetworkChange', callback);
   }
 
   public async onAccountChange(callback: AccountChangeListener): Promise<any> {

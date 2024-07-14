@@ -6,9 +6,7 @@ interface Props {
 }
 
 const GenesisMovement: FC<Props> = () => {
-  return (
-    <div className="text-slate-500">Genesis</div>
-  );
+  return <div className="text-slate-500">Genesis</div>;
 };
 
 export default GenesisMovement;

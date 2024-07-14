@@ -15,18 +15,10 @@ const CommunityWalletRow: FC<CommunityWalletRowProps> = ({ wallet }) => {
         <AccountAddress address={wallet.address} />
       </td>
       <td className="px-2 md:px-4 lg:px-6 py-4 text-left" style={{ minWidth: '142px' }}>
-        <span
-          className="block overflow-hidden"
-        >
-          {wallet.name}
-        </span>
+        <span className="block overflow-hidden">{wallet.name}</span>
       </td>
       <td className="px-2 md:px-4 lg:px-6 py-4 text-left">
-        <span
-          className="block overflow-hidden text-ellipsis"
-        >
-          {wallet.description}
-        </span>
+        <span className="block overflow-hidden text-ellipsis">{wallet.description}</span>
       </td>
       <td className="px-2 md:px-4 lg:px-6 py-4 text-right">
         <Money>{wallet.balance}</Money>

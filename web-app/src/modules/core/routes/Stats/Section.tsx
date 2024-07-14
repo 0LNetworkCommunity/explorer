@@ -30,9 +30,7 @@ const Section: FC<Props> = ({ title, data }) => {
   return (
     <div className="">
       {title && (
-        <h2 className="mt-3 mb-5 text-xl font-semibold leading-6 text-gray-900">
-          {title}
-        </h2>
+        <h2 className="mt-3 mb-5 text-xl font-semibold leading-6 text-gray-900">{title}</h2>
       )}
       {data.kpis && (
         <div className="grid grid-cols-1 gap-x-8 gap-y-16 text-center lg:grid-cols-2">

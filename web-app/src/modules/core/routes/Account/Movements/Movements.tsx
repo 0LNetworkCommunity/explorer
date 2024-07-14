@@ -22,7 +22,7 @@ const Movements: FC<Props> = ({ address }) => {
   return (
     <div>
       <div className="overflow-hidden bg-white shadow sm:rounded-md">
-        <ul role="list" className={clsx("divide-y divide-gray-200", loading && "opacity-0")}>
+        <ul role="list" className={clsx('divide-y divide-gray-200', loading && 'opacity-0')}>
           {movements &&
             movements.map((movement) => (
               <li key={movement.version.toString()}>
@@ -81,7 +81,3 @@ const Movements: FC<Props> = ({ address }) => {
 };
 
 export default Movements;
-
-
-
-

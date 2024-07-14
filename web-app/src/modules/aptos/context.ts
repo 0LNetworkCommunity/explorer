@@ -1,5 +1,5 @@
-import { createContext } from "react";
-import { AptosClient } from "aptos";
+import { createContext } from 'react';
+import { AptosClient } from 'aptos';
 
 const aptoContext = createContext<AptosClient>(null as never);
 

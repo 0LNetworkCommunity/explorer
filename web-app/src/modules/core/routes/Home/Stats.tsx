@@ -24,9 +24,7 @@ const Validators = () => {
         <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
           <div className="flex flex-col">
             <span className="text-lg font-extralight">Total Validators</span>
-            <span className="text-xl font-medium">
-              {validatorSet?.active_validators.length}
-            </span>
+            <span className="text-xl font-medium">{validatorSet?.active_validators.length}</span>
           </div>
 
           {/* <div className="flex flex-col">

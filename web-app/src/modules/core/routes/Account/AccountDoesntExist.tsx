@@ -23,8 +23,9 @@ const AccountDoesntExist: FC<Props> = ({ address }) => {
           This may be because the account was recently created and our system is still updating.
           <br />
           <br />
-          <span className='text-sm font-medium text-red-800 text-xl'>
-            Please avoid sending tokens to this address, as there's a possibility of funds being lost.
+          <span className="text-sm font-medium text-red-800 text-xl">
+            Please avoid sending tokens to this address, as there's a possibility of funds being
+            lost.
           </span>
         </p>
       </div>

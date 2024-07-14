@@ -1,6 +1,6 @@
-import { FC } from "react";
-import ReactECharts from "echarts-for-react";
-import ChartContainer from "./ChartContainer";
+import { FC } from 'react';
+import ReactECharts from 'echarts-for-react';
+import ChartContainer from './ChartContainer';
 
 interface Props {
   title: string;
@@ -14,11 +14,11 @@ const LineAndBarChart: FC<Props> = ({ data, title }) => {
   const option = {
     animation: false,
     tooltip: {
-      trigger: "axis",
+      trigger: 'axis',
       axisPointer: {
-        type: "cross",
+        type: 'cross',
         label: {
-          backgroundColor: "#6a7985",
+          backgroundColor: '#6a7985',
         },
       },
       formatter: (params: { axisValueLabel: string; data: number }[]) => {
@@ -28,13 +28,13 @@ const LineAndBarChart: FC<Props> = ({ data, title }) => {
       },
     },
     grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "3%",
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
       containLabel: true,
     },
     xAxis: {
-      type: "category",
+      type: 'category',
       boundaryGap: true,
       data: data.map((item: { timestamp: number }) => {
         const date = new Date(item.timestamp * 1000);
@@ -51,7 +51,7 @@ const LineAndBarChart: FC<Props> = ({ data, title }) => {
       },
     },
     yAxis: {
-      type: "value",
+      type: 'value',
       axisLine: {
         lineStyle: {
           // color: '#E8595C'
@@ -66,13 +66,13 @@ const LineAndBarChart: FC<Props> = ({ data, title }) => {
     series: [
       {
         data: data.map((item) => item.value),
-        type: "line",
+        type: 'line',
         smooth: true,
-        symbol: "circle",
+        symbol: 'circle',
         symbolSize: 8,
         itemStyle: {
-          color: "#1e90ff",
-          borderColor: "#fff",
+          color: '#1e90ff',
+          borderColor: '#fff',
           borderWidth: 2,
         },
         lineStyle: {
@@ -81,10 +81,10 @@ const LineAndBarChart: FC<Props> = ({ data, title }) => {
       },
       {
         data: data.map((item) => item.value),
-        type: "bar",
-        barWidth: "60%",
+        type: 'bar',
+        barWidth: '60%',
         itemStyle: {
-          color: "#E8595C",
+          color: '#E8595C',
         },
       },
     ],

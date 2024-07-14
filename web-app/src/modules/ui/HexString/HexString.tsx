@@ -1,5 +1,5 @@
-import { FC } from "react";
-import { normalizeHexString } from "../../../utils";
+import { FC } from 'react';
+import { normalizeHexString } from '../../../utils';
 
 const HexString: FC<{ value: string }> = ({ value }) => {
   const normalizedValue = normalizeHexString(value);

@@ -1,19 +1,10 @@
 import { gql } from '@apollo/client';
 
 export const GET_MOVEMENTS = gql`
-  query GetAccountMovements(
-    $address: Bytes!,
-    $order: OrderDirection,
-    $first: Int,
-    $after: String,
-  ) {
+  query GetAccountMovements($address: Bytes!, $order: OrderDirection, $first: Int, $after: String) {
     account(address: $address) {
       balance
-      movements(
-        order: $order,
-        after: $after,
-        first: $first,
-      ) {
+      movements(order: $order, after: $after, first: $first) {
         totalCount
         pageInfo {
           prevCursor

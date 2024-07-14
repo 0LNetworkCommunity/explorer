@@ -1,6 +1,6 @@
-import { FC } from "react";
-import ReactECharts from "echarts-for-react";
-import * as echarts from "echarts";
+import { FC } from 'react';
+import ReactECharts from 'echarts-for-react';
+import * as echarts from 'echarts';
 
 interface Props {
   categories: string[];
@@ -14,14 +14,14 @@ interface Props {
 }
 
 const colorPalette = [
-  "#E8595C",
-  "#188BE9",
-  "#002FA7",
-  "#80DED9",
-  "#F0F7FE",
-  "#FC8452",
-  "#9A60B4",
-  "#EA7CCC",
+  '#E8595C',
+  '#188BE9',
+  '#002FA7',
+  '#80DED9',
+  '#F0F7FE',
+  '#FC8452',
+  '#9A60B4',
+  '#EA7CCC',
 ];
 
 const transformDataForSeries = (
@@ -32,7 +32,7 @@ const transformDataForSeries = (
       value: number;
     }[]
   >,
-  categories: string[]
+  categories: string[],
 ) => {
   return categories.map((category, index) => {
     const baseColor = colorPalette[index % colorPalette.length];
@@ -41,8 +41,8 @@ const transformDataForSeries = (
 
     return {
       name: category,
-      type: "line",
-      stack: "Total",
+      type: 'line',
+      stack: 'Total',
       smooth: true,
       lineStyle: { width: 0 },
       showSymbol: false,
@@ -67,37 +67,37 @@ const StackedAreaChart: FC<Props> = ({ data, categories }) => {
 
   const option = {
     animation: false,
-    color: ["#80FFA5", "#00DDFF", "#37A2FF", "#FF0087", "#FFBF00"],
+    color: ['#80FFA5', '#00DDFF', '#37A2FF', '#FF0087', '#FFBF00'],
     title: {
-      text: "Daily Transacted Volume",
-      left: "center",
+      text: 'Daily Transacted Volume',
+      left: 'center',
       textStyle: {
         fontSize: 16,
       },
     },
     tooltip: {
-      trigger: "axis",
+      trigger: 'axis',
       axisPointer: {
-        type: "cross",
+        type: 'cross',
         label: {
-          backgroundColor: "#6a7985",
+          backgroundColor: '#6a7985',
         },
       },
     },
     grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "3%",
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
       containLabel: true,
     },
     xAxis: {
-      type: "category",
+      type: 'category',
       boundaryGap: false,
       data: xAxisData,
     },
     series: seriesData,
     yAxis: {
-      type: "value",
+      type: 'value',
     },
   };
 

@@ -459,8 +459,8 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     );
     const latestVersion = new BN(await this.getLedgerVersion());
     for (
-      let i = lastBatchIngestedVersion
-        ? lastBatchIngestedVersion.add(ONE)
+      let i = fromVersion
+        ? fromVersion.add(ONE)
         : ZERO;
       i.lt(latestVersion);
       i = i.add(new BN(ONE))

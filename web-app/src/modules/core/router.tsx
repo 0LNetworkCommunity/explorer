@@ -14,6 +14,7 @@ import Validators from './routes/Validators';
 import Module from './routes/Account/Modules/Module';
 import Stats from './routes/Stats';
 import Postero from './routes/Postero';
+import { TVL } from './routes/TVL';
 
 const router = createBrowserRouter([
   {
@@ -79,6 +80,10 @@ const router = createBrowserRouter([
       {
         path: '/postero',
         element: <Postero />,
+      },
+      {
+        path: '/tvl',
+        element: <TVL />,
       },
     ],
   },

@@ -1,15 +1,14 @@
-import { Query, Resolver } from "@nestjs/graphql";
+import { Query, Resolver } from '@nestjs/graphql';
 
-import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
-import { GqlModule } from "./models/modules.model.js";
+import { ClickhouseService } from '../clickhouse/clickhouse.service.js';
+import { GqlModule } from './models/modules.model.js';
 
 @Resolver()
 export class ModulesResolver {
   public constructor(private readonly clickhouseService: ClickhouseService) {}
 
   @Query(() => [GqlModule])
-  async modules(
-  ): Promise<GqlModule[]> {
+  async modules(): Promise<GqlModule[]> {
     const accountsModules = new Map<string, Map<string, string[]>>();
 
     const rows = await this.clickhouseService.client
@@ -26,7 +25,7 @@ export class ModulesResolver {
           	"module_name",
           	"function_name"
         `,
-        format: "JSONEachRow",
+        format: 'JSONEachRow',
       })
       .then((res) =>
         res.json<{
@@ -42,9 +41,9 @@ export class ModulesResolver {
           functionName: row.function_name,
         })),
       );
-    
+
     for (const row of rows) {
-      let accountModules = accountsModules.get(row.moduleAddress)
+      let accountModules = accountsModules.get(row.moduleAddress);
       if (!accountModules) {
         accountModules = new Map();
         accountsModules.set(row.moduleAddress, accountModules);

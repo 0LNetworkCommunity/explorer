@@ -1,10 +1,10 @@
-import { InjectQueue, Processor, WorkerHost } from "@nestjs/bullmq";
-import { OnModuleInit } from "@nestjs/common";
-import { Job, Queue } from "bullmq";
-import axios from "axios";
-import { stringify as csvStringify  } from 'csv-stringify/sync';
-import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
-import Bluebird from "bluebird";
+import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
+import { OnModuleInit } from '@nestjs/common';
+import { Job, Queue } from 'bullmq';
+import axios from 'axios';
+import { stringify as csvStringify } from 'csv-stringify/sync';
+import { ClickhouseService } from '../clickhouse/clickhouse.service.js';
+import Bluebird from 'bluebird';
 
 interface ChartData {
   date: number;
@@ -15,12 +15,12 @@ interface ChartData {
   volume: number;
 }
 
-@Processor("ol-swap")
+@Processor('ol-swap')
 export class OlSwapProcessor extends WorkerHost implements OnModuleInit {
   public constructor(
     private readonly clickhouseService: ClickhouseService,
 
-    @InjectQueue("ol-swap")
+    @InjectQueue('ol-swap')
     private readonly olVersionQueue: Queue,
   ) {
     super();
@@ -28,7 +28,7 @@ export class OlSwapProcessor extends WorkerHost implements OnModuleInit {
 
   public async process(job: Job<any, any, string>): Promise<any> {
     switch (job.name) {
-      case "getHistory":
+      case 'getHistory':
         try {
           await Promise.race([
             this.getHistory(),
@@ -46,7 +46,7 @@ export class OlSwapProcessor extends WorkerHost implements OnModuleInit {
   }
 
   public async onModuleInit() {
-    await this.olVersionQueue.add("getHistory", undefined, {
+    await this.olVersionQueue.add('getHistory', undefined, {
       repeat: {
         every: 30 * 60 * 1_000, // 30 minutes
       },
@@ -56,7 +56,7 @@ export class OlSwapProcessor extends WorkerHost implements OnModuleInit {
 
   private async getHistory() {
     const res = await axios<ChartData[]>({
-      url: "https://api.0lswap.com/orders/getChartData?interval=1h&market=OLUSDT",
+      url: 'https://api.0lswap.com/orders/getChartData?interval=1h&market=OLUSDT',
       signal: AbortSignal.timeout(5 * 60 * 1_000), // 5 minutes
     });
     await this.insertHistory(res.data);
@@ -64,14 +64,7 @@ export class OlSwapProcessor extends WorkerHost implements OnModuleInit {
 
   private async insertHistory(data: ChartData[]) {
     const payload = csvStringify(
-      data.map((it) => [
-        it.date,
-        it.volume,
-        it.open,
-        it.high,
-        it.low,
-        it.close,
-      ]),
+      data.map((it) => [it.date, it.volume, it.open, it.high, it.low, it.close]),
     );
 
     await this.clickhouseService.client.command({

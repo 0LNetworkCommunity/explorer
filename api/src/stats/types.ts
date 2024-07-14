@@ -21,7 +21,7 @@ export type BinRange = { name: string; value: number };
 export type WalletBalance = { address: string; balance: number };
 export type LockedBalance = { address: string; lockedBalance: number };
 export type BalanceItem = { balance: number };
-export type RelativeValue = { nominal: number; percentage: number }
+export type RelativeValue = { nominal: number; percentage: number };
 
 export interface Stats {
   slowWalletsCountOverTime: TimestampValue[];
@@ -38,9 +38,11 @@ export interface Stats {
     accountsLocked: BinRange[];
     avgTotalVestingTime: BinRange[];
   };
-  topAccounts: Array<{address: string;
+  topAccounts: Array<{
+    address: string;
     unlockedBalance: number;
-    percentOfCirculating: number;}>
+    percentOfCirculating: number;
+  }>;
   circulatingSupply: RelativeValue;
   totalBurned: RelativeValue;
   communityWalletsBalance: RelativeValue;

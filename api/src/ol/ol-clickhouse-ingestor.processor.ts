@@ -1,27 +1,24 @@
-import pathUtil from "node:path";
-import fs from "node:fs";
-import { execFile as execFileNative } from "node:child_process";
-import util from "node:util";
-import { Readable } from "node:stream";
+import pathUtil from 'node:path';
+import fs from 'node:fs';
+import { execFile as execFileNative } from 'node:child_process';
+import util from 'node:util';
+import { Readable } from 'node:stream';
 
-import { InjectQueue, Processor, WorkerHost } from "@nestjs/bullmq";
-import _ from "lodash";
-import { OnModuleInit } from "@nestjs/common";
-import { Job, Queue } from "bullmq";
+import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
+import _ from 'lodash';
+import { OnModuleInit } from '@nestjs/common';
+import { Job, Queue } from 'bullmq';
 
-import { S3Service } from "../s3/s3.service.js";
-import { cleanUp, createTmpDir } from "../utils.js";
-import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
+import { S3Service } from '../s3/s3.service.js';
+import { cleanUp, createTmpDir } from '../utils.js';
+import { ClickhouseService } from '../clickhouse/clickhouse.service.js';
 
 const execFile = util.promisify(execFileNative);
 
-@Processor("ol-clickhouse-ingestor")
-export class OlClickhouseIngestorProcessor
-  extends WorkerHost
-  implements OnModuleInit
-{
+@Processor('ol-clickhouse-ingestor')
+export class OlClickhouseIngestorProcessor extends WorkerHost implements OnModuleInit {
   public constructor(
-    @InjectQueue("ol-clickhouse-ingestor")
+    @InjectQueue('ol-clickhouse-ingestor')
     private readonly olClickhouseIngestor: Queue,
 
     private readonly s3Service: S3Service,
@@ -43,11 +40,11 @@ export class OlClickhouseIngestorProcessor
 
     return new Promise<string>((resolve, reject) => {
       const file = fs.createWriteStream(dest);
-      file.on("close", () => {
+      file.on('close', () => {
         resolve(dest);
       });
 
-      file.on("error", (err) => {
+      file.on('error', (err) => {
         console.error(err);
         reject(err);
       });
@@ -57,7 +54,7 @@ export class OlClickhouseIngestorProcessor
   }
 
   public async onModuleInit() {
-    await this.olClickhouseIngestor.add("getMissingFiles", undefined, {
+    await this.olClickhouseIngestor.add('getMissingFiles', undefined, {
       repeat: {
         every: 30 * 60 * 1_000, // 30 minutes
       },
@@ -66,11 +63,11 @@ export class OlClickhouseIngestorProcessor
 
   public async process(job: Job<any, any, string>) {
     switch (job.name) {
-      case "getMissingFiles":
+      case 'getMissingFiles':
         await this.getMissingFiles();
         break;
 
-      case "ingest":
+      case 'ingest':
         await this.ingest(job.data.file);
         break;
 
@@ -82,7 +79,7 @@ export class OlClickhouseIngestorProcessor
   private async getIngestedFiles(): Promise<string[]> {
     const resultSet = await this.clickhouseService.client.query({
       query: 'SELECT * FROM "ingested_files"',
-      format: "JSONEachRow",
+      format: 'JSONEachRow',
     });
     const dataset = await resultSet.json<{ name: string }>();
     return _.uniq(dataset.map((it) => it.name));
@@ -90,13 +87,13 @@ export class OlClickhouseIngestorProcessor
 
   private async getMissingFiles() {
     const ingestedFile = await this.getIngestedFiles();
-    const parquetFiles = await this.s3Service.listFiles("parquets/");
+    const parquetFiles = await this.s3Service.listFiles('parquets/');
 
     const missingFiles = _.difference(parquetFiles, ingestedFile);
 
     await this.olClickhouseIngestor.addBulk(
       missingFiles.map((file) => ({
-        name: "ingest",
+        name: 'ingest',
         data: {
           file,
         },
@@ -115,17 +112,15 @@ export class OlClickhouseIngestorProcessor
     const files = await fs.promises.readdir(archiveDir);
 
     for (const file of files) {
-      if (file.endsWith(".parquet")) {
-        await this.clickhouseService.insertParquetFile(
-          pathUtil.join(archiveDir, file),
-        );
+      if (file.endsWith('.parquet')) {
+        await this.clickhouseService.insertParquetFile(pathUtil.join(archiveDir, file));
       }
     }
 
     await this.clickhouseService.client.insert({
-      table: "ingested_files",
+      table: 'ingested_files',
       values: [{ name: file }],
-      format: "JSONEachRow",
+      format: 'JSONEachRow',
     });
 
     await cleanUp(archiveDir);
@@ -135,6 +130,6 @@ export class OlClickhouseIngestorProcessor
     const filename = pathUtil.basename(filepath);
     const dirnname = pathUtil.dirname(filepath);
 
-    await execFile("tar", ["xf", filename], { cwd: dirnname });
+    await execFile('tar', ['xf', filename], { cwd: dirnname });
   }
 }

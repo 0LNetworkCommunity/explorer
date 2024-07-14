@@ -1,19 +1,12 @@
-import {
-  Args,
-  Parent,
-  Query,
-  ResolveField,
-  Resolver,
-  Int,
-} from "@nestjs/graphql";
-import { Decimal } from "decimal.js";
+import { Args, Parent, Query, ResolveField, Resolver, Int } from '@nestjs/graphql';
+import { Decimal } from 'decimal.js';
 
-import { OlService } from "./ol.service.js";
-import { Account } from "./models/account.model.js";
-import { SlowWallet } from "./models/slow-wallet.model.js";
-import { OrderDirection } from "./models/Paginated.js";
-import { PaginatedMovements } from "./models/PaginatedMovements.js";
-import { MovementsService } from "./movements/movements.service.js";
+import { OlService } from './ol.service.js';
+import { Account } from './models/account.model.js';
+import { SlowWallet } from './models/slow-wallet.model.js';
+import { OrderDirection } from './models/Paginated.js';
+import { PaginatedMovements } from './models/PaginatedMovements.js';
+import { MovementsService } from './movements/movements.service.js';
 
 @Resolver(Account)
 export class AccountResolver {
@@ -24,7 +17,7 @@ export class AccountResolver {
 
   @Query(() => Account, { nullable: true })
   public async account(
-    @Args({ name: "address", type: () => Buffer }) address: Buffer,
+    @Args({ name: 'address', type: () => Buffer }) address: Buffer,
   ): Promise<Account | null> {
     const accountExists = await this.olService.accountExists(address);
     if (accountExists) {
@@ -39,9 +32,7 @@ export class AccountResolver {
   }
 
   @ResolveField(() => SlowWallet, { nullable: true })
-  public async slowWallet(
-    @Parent() account: Account,
-  ): Promise<SlowWallet | null> {
+  public async slowWallet(@Parent() account: Account): Promise<SlowWallet | null> {
     return this.olService.getSlowWallet(account.address);
   }
 
@@ -50,31 +41,26 @@ export class AccountResolver {
     @Parent() account: Account,
 
     @Args({
-      name: "first",
+      name: 'first',
       type: () => Int,
       defaultValue: 10,
     })
     first: number,
 
     @Args({
-      name: "after",
+      name: 'after',
       type: () => String,
       nullable: true,
     })
     after: string | undefined,
 
     @Args({
-      name: "order",
+      name: 'order',
       type: () => OrderDirection,
       defaultValue: OrderDirection.ASC,
     })
     order: OrderDirection,
   ): Promise<PaginatedMovements> {
-    return this.movementsService.getPaginatedMovements(
-      account.address,
-      first,
-      after,
-      order,
-    );
+    return this.movementsService.getPaginatedMovements(account.address, first, after, order);
   }
 }

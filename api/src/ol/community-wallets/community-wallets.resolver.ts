@@ -1,12 +1,12 @@
-import { Query, Resolver } from "@nestjs/graphql";
-import _ from "lodash";
-import { Inject } from "@nestjs/common";
-import { redisClient } from "../../redis/redis.service.js";
-import { GqlCommunityWallet } from "./community-wallet.model.js";
-import { ICommunityWalletsService } from "./interfaces.js";
-import { Types } from "../../types.js";
-import { ServiceUnavailableException } from "@nestjs/common";
-import { COMMUNITY_WALLETS_CACHE_KEY } from "../constants.js";
+import { Query, Resolver } from '@nestjs/graphql';
+import _ from 'lodash';
+import { Inject } from '@nestjs/common';
+import { redisClient } from '../../redis/redis.service.js';
+import { GqlCommunityWallet } from './community-wallet.model.js';
+import { ICommunityWalletsService } from './interfaces.js';
+import { Types } from '../../types.js';
+import { ServiceUnavailableException } from '@nestjs/common';
+import { COMMUNITY_WALLETS_CACHE_KEY } from '../constants.js';
 
 @Resolver()
 export class CommunityWalletsResolver {
@@ -16,7 +16,7 @@ export class CommunityWalletsResolver {
     @Inject(Types.ICommunityWalletsService)
     private readonly communityWalletsService: ICommunityWalletsService,
   ) {
-    this.cacheEnabled = process.env.CACHE_ENABLED === "true"; // Check if cache is enabled
+    this.cacheEnabled = process.env.CACHE_ENABLED === 'true'; // Check if cache is enabled
   }
 
   @Query(() => [GqlCommunityWallet])
@@ -27,7 +27,7 @@ export class CommunityWalletsResolver {
       if (cachedWallets) {
         return JSON.parse(cachedWallets);
       }
-      throw new ServiceUnavailableException("Cache not ready");
+      throw new ServiceUnavailableException('Cache not ready');
     }
 
     // If cache is not enabled, fetch data from service

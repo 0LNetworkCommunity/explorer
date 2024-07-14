@@ -1,10 +1,7 @@
-import { Field, ObjectType } from "@nestjs/graphql";
-import BN from "bn.js";
+import { Field, ObjectType } from '@nestjs/graphql';
+import BN from 'bn.js';
 
-import {
-  AbstractTransactionInput,
-  AbstractTransaction,
-} from "./AbstractTransaction.js";
+import { AbstractTransactionInput, AbstractTransaction } from './AbstractTransaction.js';
 
 export type ScriptUserTransactionInput = AbstractTransactionInput & {
   sender: Buffer;
@@ -12,7 +9,7 @@ export type ScriptUserTransactionInput = AbstractTransactionInput & {
   timestamp: BN;
 };
 
-@ObjectType("ScriptUserTransaction", {
+@ObjectType('ScriptUserTransaction', {
   implements: () => [AbstractTransaction],
 })
 export class ScriptUserTransaction implements AbstractTransaction {

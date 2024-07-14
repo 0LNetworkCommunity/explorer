@@ -1,7 +1,7 @@
-import { Field, ObjectType } from "@nestjs/graphql";
-import BN from "bn.js";
+import { Field, ObjectType } from '@nestjs/graphql';
+import BN from 'bn.js';
 
-@ObjectType("ValidatorCurrentBid")
+@ObjectType('ValidatorCurrentBid')
 export class GqlValidatorCurrentBid {
   public constructor(input: GqlValidatorCurrentBidInput) {
     this.currentBid = input.currentBid;
@@ -26,7 +26,7 @@ interface GqlValidatorGradeInput {
   failedBlocks: number;
 }
 
-@ObjectType("ValidatorGrade")
+@ObjectType('ValidatorGrade')
 export class GqlValidatorGrade {
   public constructor(input: GqlValidatorGradeInput) {
     this.compliant = input.compliant;
@@ -118,7 +118,7 @@ interface GqlVouchInput {
   address: string;
 }
 
-@ObjectType("Vouch")
+@ObjectType('Vouch')
 export class GqlVouch {
   public constructor(input: GqlVouchInput) {
     this.epoch = input.epoch;

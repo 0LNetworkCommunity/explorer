@@ -1,4 +1,4 @@
-import { Field, ObjectType } from "@nestjs/graphql";
+import { Field, ObjectType } from '@nestjs/graphql';
 
 interface GqlUserTransactionInput {
   hash: string;
@@ -18,7 +18,7 @@ interface GqlUserTransactionInput {
   timestamp: number;
 }
 
-@ObjectType("GqlUserTransactionDeprecated")
+@ObjectType('GqlUserTransactionDeprecated')
 export class GqlUserTransactionDeprecated {
   public constructor(input: GqlUserTransactionInput) {
     this.hash = input.hash;
@@ -84,7 +84,7 @@ export class GqlUserTransactionDeprecated {
   public timestamp: number;
 }
 
-@ObjectType("UserTransactionCollection")
+@ObjectType('UserTransactionCollection')
 export class GqlUserTransactionCollection {
   public constructor(size: number, items: GqlUserTransactionDeprecated[]) {
     this.size = size;

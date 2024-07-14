@@ -17,15 +17,15 @@ export class AppService implements OnModuleInit {
     const addr = server.address();
 
     if (addr && typeof addr !== 'string') {
-        let host: string;
-        if (addr.family === 'IPv6') {
-            host = `[${addr.address}]:${addr.port}`;
-        } else {
-            host = `${addr.address}:${addr.port}`;
-        }
+      let host: string;
+      if (addr.family === 'IPv6') {
+        host = `[${addr.address}]:${addr.port}`;
+      } else {
+        host = `${addr.address}:${addr.port}`;
+      }
 
-        const uri = `http://${host}`;
-        this.logger.log(`Serving at ${uri}"`);
+      const uri = `http://${host}`;
+      this.logger.log(`Serving at ${uri}"`);
     }
   }
 }

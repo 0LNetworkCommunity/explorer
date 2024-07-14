@@ -1,6 +1,6 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import axios from "axios";
+import { Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
 
 import {
   Stats,
@@ -11,12 +11,12 @@ import {
   BinRange,
   BalanceItem,
   SupplyStats,
-} from "./types.js";
-import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
-import { OlService } from "../ol/ol.service.js";
-import { ICommunityWalletsService } from "../ol/community-wallets/interfaces.js";
-import { Types } from "../types.js";
-import _ from "lodash";
+} from './types.js';
+import { ClickhouseService } from '../clickhouse/clickhouse.service.js';
+import { OlService } from '../ol/ol.service.js';
+import { ICommunityWalletsService } from '../ol/community-wallets/interfaces.js';
+import { Types } from '../types.js';
+import _ from 'lodash';
 
 @Injectable()
 export class StatsService {
@@ -31,7 +31,7 @@ export class StatsService {
 
     config: ConfigService,
   ) {
-    this.dataApiHost = config.get("dataApiHost")!;
+    this.dataApiHost = config.get('dataApiHost')!;
   }
 
   public async getCirculatingSupply(): Promise<number> {
@@ -45,91 +45,77 @@ export class StatsService {
   }
 
   public async getStats(): Promise<Stats> {
-    console.time("getSupplyStats");
+    console.time('getSupplyStats');
     const supplyStats = await this.olService.getSupplyStats();
-    console.timeEnd("getSupplyStats");
+    console.timeEnd('getSupplyStats');
 
-    console.time("getTotalSupply");
+    console.time('getTotalSupply');
     const totalSupply: number = supplyStats.totalSupply;
-    console.timeEnd("getTotalSupply");
+    console.timeEnd('getTotalSupply');
 
-    console.time("getSlowWalletsCountOverTime");
+    console.time('getSlowWalletsCountOverTime');
     const slowWalletsCountOverTime = await this.getSlowWalletsCountOverTime();
-    console.timeEnd("getSlowWalletsCountOverTime");
+    console.timeEnd('getSlowWalletsCountOverTime');
 
-    console.time("getBurnsOverTime");
+    console.time('getBurnsOverTime');
     const burnOverTime = await this.getBurnsOverTime();
-    console.timeEnd("getBurnsOverTime");
+    console.timeEnd('getBurnsOverTime');
 
-    console.time("getAccountsOnChainOverTime");
+    console.time('getAccountsOnChainOverTime');
     const accountsOnChainOverTime = await this.getAccountsOnChainOverTime();
-    console.timeEnd("getAccountsOnChainOverTime");
+    console.timeEnd('getAccountsOnChainOverTime');
 
-    console.time("getSupplyAndCapital");
+    console.time('getSupplyAndCapital');
     const supplyAndCapital = await this.getSupplyAndCapital(supplyStats);
-    console.timeEnd("getSupplyAndCapital");
+    console.timeEnd('getSupplyAndCapital');
 
-    console.time("getCommunityWalletsBalanceBreakdown");
-    const communityWalletsBalanceBreakdown =
-      await this.getCommunityWalletsBalanceBreakdown();
-    console.timeEnd("getCommunityWalletsBalanceBreakdown");
+    console.time('getCommunityWalletsBalanceBreakdown');
+    const communityWalletsBalanceBreakdown = await this.getCommunityWalletsBalanceBreakdown();
+    console.timeEnd('getCommunityWalletsBalanceBreakdown');
 
-    console.time("getLastEpochTotalUnlockedAmount");
-    const lastEpochTotalUnlockedAmount =
-      await this.getLastEpochTotalUnlockedAmount();
-    console.timeEnd("getLastEpochTotalUnlockedAmount");
+    console.time('getLastEpochTotalUnlockedAmount');
+    const lastEpochTotalUnlockedAmount = await this.getLastEpochTotalUnlockedAmount();
+    console.timeEnd('getLastEpochTotalUnlockedAmount');
 
-    console.time("getPOFValues");
+    console.time('getPOFValues');
     const pofValues = await this.getPOFValues(); // Empty table?
-    console.timeEnd("getPOFValues");
+    console.timeEnd('getPOFValues');
 
-    console.time("getLiquidSupplyConcentration");
+    console.time('getLiquidSupplyConcentration');
     const liquidSupplyConcentration = await this.getLiquidSupplyConcentration();
-    console.timeEnd("getLiquidSupplyConcentration");
+    console.timeEnd('getLiquidSupplyConcentration');
 
-    console.time("calculateLiquidityConcentrationLocked");
-    const lockedSupplyConcentration =
-      await this.calculateLiquidityConcentrationLocked();
-    console.timeEnd("calculateLiquidityConcentrationLocked");
+    console.time('calculateLiquidityConcentrationLocked');
+    const lockedSupplyConcentration = await this.calculateLiquidityConcentrationLocked();
+    console.timeEnd('calculateLiquidityConcentrationLocked');
 
-    console.time("getTopUnlockedBalanceWallets");
-    const topAccounts = await this.getTopUnlockedBalanceWallets(
-      100,
-      supplyStats.circulatingSupply,
-    );
-    console.timeEnd("getTopUnlockedBalanceWallets");
+    console.time('getTopUnlockedBalanceWallets');
+    const topAccounts = await this.getTopUnlockedBalanceWallets(100, supplyStats.circulatingSupply);
+    console.timeEnd('getTopUnlockedBalanceWallets');
 
     // calculate KPIS
     // circulating
     const circulatingSupply = {
       nominal: parseFloat(supplyStats.circulatingSupply.toFixed(3)),
-      percentage: parseFloat(
-        ((supplyStats.circulatingSupply / totalSupply) * 100).toFixed(3),
-      ),
+      percentage: parseFloat(((supplyStats.circulatingSupply / totalSupply) * 100).toFixed(3)),
     };
 
     // CW
     const communityWalletsBalance = {
       nominal: parseFloat(supplyStats.cwSupply.toFixed(3)),
-      percentage: parseFloat(
-        ((supplyStats.cwSupply / totalSupply) * 100).toFixed(3),
-      ),
+      percentage: parseFloat(((supplyStats.cwSupply / totalSupply) * 100).toFixed(3)),
     };
 
     // Locked
     const currentLockedOnSlowWallets = {
       nominal: parseFloat(supplyStats.slowLockedSupply.toFixed(3)),
-      percentage: parseFloat(
-        ((supplyStats.slowLockedSupply / totalSupply) * 100).toFixed(3),
-      ),
+      percentage: parseFloat(((supplyStats.slowLockedSupply / totalSupply) * 100).toFixed(3)),
     };
 
     // Validators escrow
     const infrastructureEscrow = {
       nominal: parseFloat(supplyStats.infraEscrowSupply.toFixed(3)),
-      percentage: parseFloat(
-        ((supplyStats.infraEscrowSupply / totalSupply) * 100).toFixed(3),
-      ),
+      percentage: parseFloat(((supplyStats.infraEscrowSupply / totalSupply) * 100).toFixed(3)),
     };
 
     const totalBurned = {
@@ -138,14 +124,9 @@ export class StatsService {
     };
 
     const lastEpochReward = {
-      nominal:
-        pofValues.nominalRewardOverTime[
-          pofValues.nominalRewardOverTime.length - 1
-        ].value,
+      nominal: pofValues.nominalRewardOverTime[pofValues.nominalRewardOverTime.length - 1].value,
       percentage:
-        (pofValues.nominalRewardOverTime[
-          pofValues.nominalRewardOverTime.length - 1
-        ].value /
+        (pofValues.nominalRewardOverTime[pofValues.nominalRewardOverTime.length - 1].value /
           totalSupply) *
         100,
     };
@@ -172,8 +153,7 @@ export class StatsService {
       circulatingSupply,
       totalBurned,
       communityWalletsBalance,
-      currentSlowWalletsCount:
-        slowWalletsCountOverTime[slowWalletsCountOverTime.length - 1].value,
+      currentSlowWalletsCount: slowWalletsCountOverTime[slowWalletsCountOverTime.length - 1].value,
       currentLockedOnSlowWallets,
       lastEpochTotalUnlockedAmount: {
         nominal: lastEpochTotalUnlockedAmount,
@@ -181,8 +161,7 @@ export class StatsService {
       },
       lastEpochReward,
       currentClearingBid:
-        pofValues.clearingBidOverTime[pofValues.clearingBidOverTime.length - 1]
-          .value / 10,
+        pofValues.clearingBidOverTime[pofValues.clearingBidOverTime.length - 1].value / 10,
       infrastructureEscrow,
       lockedCoins,
     };
@@ -233,7 +212,7 @@ export class StatsService {
       query_params: {
         addresses,
       },
-      format: "JSONEachRow",
+      format: 'JSONEachRow',
     });
     const rows = await resultSet.json<{
       balance: number;
@@ -247,55 +226,55 @@ export class StatsService {
     // List of addresses and their names
     const addressNames = [
       {
-        address: "FBE8DA53C92CEEEB40D8967EC033A0FB",
-        name: "Community development",
+        address: 'FBE8DA53C92CEEEB40D8967EC033A0FB',
+        name: 'Community development',
       },
       {
-        address: "2640CD6D652AC94DC5F0963DCC00BCC7",
-        name: "Engineering Fund, tool-scrubbers-guild",
+        address: '2640CD6D652AC94DC5F0963DCC00BCC7',
+        name: 'Engineering Fund, tool-scrubbers-guild',
       },
       {
-        address: "C906F67F626683B77145D1F20C1A753B",
-        name: "The Iqlusion Engineering Program",
+        address: 'C906F67F626683B77145D1F20C1A753B',
+        name: 'The Iqlusion Engineering Program',
       },
       {
-        address: "3A6C51A0B786D644590E8A21591FA8E2",
-        name: "FTW: Ongoing Full-Time Workers Program",
+        address: '3A6C51A0B786D644590E8A21591FA8E2',
+        name: 'FTW: Ongoing Full-Time Workers Program',
       },
-      { address: "BCA50D10041FA111D1B44181A264A599", name: "A Good List" },
-      { address: "2B0E8325DEA5BE93D856CFDE2D0CBA12", name: "Tip Jar" },
+      { address: 'BCA50D10041FA111D1B44181A264A599', name: 'A Good List' },
+      { address: '2B0E8325DEA5BE93D856CFDE2D0CBA12', name: 'Tip Jar' },
       {
-        address: "19E966BFA4B32CE9B7E23721B37B96D2",
-        name: "Social Infrastructure Program",
-      },
-      {
-        address: "B31BD7796BC113013A2BF6C3953305FD",
-        name: "Danish Red Cross Humanitarian Fund",
+        address: '19E966BFA4B32CE9B7E23721B37B96D2',
+        name: 'Social Infrastructure Program',
       },
       {
-        address: "BC25F79FEF8A981BE4636AC1A2D6F587",
-        name: "Application Studio",
-      },
-      { address: "2057BCFB0189B7FD0ABA7244BA271661", name: "Moonshot Program" },
-      {
-        address: "F605FE7F787551EEA808EE9ACDB98897",
-        name: "Human Rewards Program",
+        address: 'B31BD7796BC113013A2BF6C3953305FD',
+        name: 'Danish Red Cross Humanitarian Fund',
       },
       {
-        address: "C19C06A592911ED31C4100E9FB63AD7B",
-        name: "RxC Research and Experimentation",
+        address: 'BC25F79FEF8A981BE4636AC1A2D6F587',
+        name: 'Application Studio',
+      },
+      { address: '2057BCFB0189B7FD0ABA7244BA271661', name: 'Moonshot Program' },
+      {
+        address: 'F605FE7F787551EEA808EE9ACDB98897',
+        name: 'Human Rewards Program',
       },
       {
-        address: "1367B68C86CB27FA7215D9F75A26EB8F",
-        name: "University of Toronto MSRG",
+        address: 'C19C06A592911ED31C4100E9FB63AD7B',
+        name: 'RxC Research and Experimentation',
       },
       {
-        address: "BB6926434D1497A559E4F0487F79434F",
-        name: "Deep Technology Innovation Program",
+        address: '1367B68C86CB27FA7215D9F75A26EB8F',
+        name: 'University of Toronto MSRG',
       },
       {
-        address: "87DC2E497AC6EDAB21511333A421E5A5",
-        name: "Working Group Key Roles",
+        address: 'BB6926434D1497A559E4F0487F79434F',
+        name: 'Deep Technology Innovation Program',
+      },
+      {
+        address: '87DC2E497AC6EDAB21511333A421E5A5',
+        name: 'Working Group Key Roles',
       },
     ];
 
@@ -335,7 +314,7 @@ export class StatsService {
 
       const resultSet = await this.clickhouseService.client.query({
         query: query,
-        format: "JSONEachRow",
+        format: 'JSONEachRow',
       });
 
       const rows = await resultSet.json<{
@@ -355,10 +334,10 @@ export class StatsService {
 
       // Clean and parse the rows
       const cleanedRows = rows.map((row) => ({
-        version: parseInt(String(row.version).replace("\n", ""), 10),
-        nominalReward: parseFloat(String(row.nominalReward).replace("\n", "")),
-        netReward: parseFloat(String(row.netReward).replace("\n", "")),
-        clearingBid: parseFloat(String(row.clearingBid).replace("\n", "")),
+        version: parseInt(String(row.version).replace('\n', ''), 10),
+        nominalReward: parseFloat(String(row.nominalReward).replace('\n', '')),
+        netReward: parseFloat(String(row.netReward).replace('\n', '')),
+        clearingBid: parseFloat(String(row.clearingBid).replace('\n', '')),
       }));
 
       // Extract versions and convert them to timestamps
@@ -375,9 +354,7 @@ export class StatsService {
 
       // Helper to convert version to timestamp
       const convertVersionToTimestamp = (version: number) => {
-        const timestampEntry = allTimestampMappings.find(
-          (entry) => entry.version === version,
-        );
+        const timestampEntry = allTimestampMappings.find((entry) => entry.version === version);
         return timestampEntry ? Math.floor(timestampEntry.timestamp) : 0;
       };
 
@@ -403,7 +380,7 @@ export class StatsService {
         netRewardOverTime,
       };
     } catch (error) {
-      console.error("Error in getPOFValues:", error);
+      console.error('Error in getPOFValues:', error);
       throw error;
     }
   }
@@ -420,7 +397,7 @@ export class StatsService {
 
       const resultSet = await this.clickhouseService.client.query({
         query: query,
-        format: "JSONEachRow",
+        format: 'JSONEachRow',
       });
 
       const rows = await resultSet.json<{
@@ -438,9 +415,7 @@ export class StatsService {
 
       const burnsOverTime = rows.map((row) => {
         const version = parseInt(row.version, 10);
-        const timestampEntry = timestampsMap.find(
-          (entry) => entry.version === version,
-        );
+        const timestampEntry = timestampsMap.find((entry) => entry.version === version);
         const timestamp = timestampEntry ? timestampEntry.timestamp : 0;
 
         return {
@@ -449,7 +424,7 @@ export class StatsService {
         };
       });
 
-      const baseTimestamp = new Date("2023-11-28T00:00:00Z").getTime() / 1000;
+      const baseTimestamp = new Date('2023-11-28T00:00:00Z').getTime() / 1000;
       if (burnsOverTime[0].timestamp == 0) {
         burnsOverTime[0].timestamp = baseTimestamp;
       }
@@ -459,7 +434,7 @@ export class StatsService {
         value: item.value,
       }));
     } catch (error) {
-      console.error("Error in getBurnsOverTime:", error);
+      console.error('Error in getBurnsOverTime:', error);
       throw error;
     }
   }
@@ -485,20 +460,17 @@ export class StatsService {
 
       const resultSet = await this.clickhouseService.client.query({
         query: query,
-        format: "JSONEachRow",
+        format: 'JSONEachRow',
       });
 
       const rows = await resultSet.json<{ locked_balance: number }>();
 
       // Sum the locked Amount
-      const totalLockedAmount = rows.reduce(
-        (acc, row) => acc + row.locked_balance,
-        0,
-      );
+      const totalLockedAmount = rows.reduce((acc, row) => acc + row.locked_balance, 0);
 
       return totalLockedAmount;
     } catch (error) {
-      console.error("Error in getSlowWalletsUnlockedAmount:", error);
+      console.error('Error in getSlowWalletsUnlockedAmount:', error);
       throw error;
     }
   }
@@ -516,7 +488,7 @@ export class StatsService {
 
       const slowWalletResultSet = await this.clickhouseService.client.query({
         query: slowWalletQuery,
-        format: "JSONEachRow",
+        format: 'JSONEachRow',
       });
 
       const slowWalletRows = await slowWalletResultSet.json<{
@@ -536,7 +508,7 @@ export class StatsService {
       const balanceResults: { address: string; latest_balance: number }[] = [];
 
       for (const chunk of addressChunks) {
-        const formattedAddresses = chunk.map((addr) => `'${addr}'`).join(",");
+        const formattedAddresses = chunk.map((addr) => `'${addr}'`).join(',');
         const balanceQuery = `
           SELECT
             hex(address) AS address,
@@ -548,7 +520,7 @@ export class StatsService {
 
         const balanceResultSet = await this.clickhouseService.client.query({
           query: balanceQuery,
-          format: "JSONEachRow",
+          format: 'JSONEachRow',
         });
 
         const balanceRows = await balanceResultSet.json<{
@@ -559,9 +531,7 @@ export class StatsService {
       }
 
       // Create a map of address to latest balance
-      const balanceMap = new Map(
-        balanceResults.map((row) => [row.address, row.latest_balance]),
-      );
+      const balanceMap = new Map(balanceResults.map((row) => [row.address, row.latest_balance]));
 
       // Combine data from both queries
       const lockedBalances = slowWalletRows.map((row) => {
@@ -585,7 +555,7 @@ export class StatsService {
       const totalUnlockedAmount = count * 35000;
       return totalUnlockedAmount;
     } catch (error) {
-      console.error("Error in getLastEpochTotalUnlockedAmount:", error);
+      console.error('Error in getLastEpochTotalUnlockedAmount:', error);
       throw error;
     }
   }
@@ -603,7 +573,7 @@ export class StatsService {
   private async mapVersionsToTimestamps(
     versions: number[],
   ): Promise<{ version: number; timestamp: number }[]> {
-    const versionsString = versions.join(", ");
+    const versionsString = versions.join(', ');
     const query = `
       WITH
 
@@ -677,7 +647,7 @@ export class StatsService {
     const resultSet = await this.clickhouseService.client.query({
       query,
       query_params: { versions },
-      format: "JSONEachRow",
+      format: 'JSONEachRow',
     });
 
     const rows = await resultSet.json<{
@@ -701,7 +671,7 @@ export class StatsService {
               FROM "slow_wallet_list"
               ORDER BY "version" ASC
             `,
-        format: "JSONEachRow",
+        format: 'JSONEachRow',
       });
       const rows = await resultSet.json<{
         version: string;
@@ -709,7 +679,7 @@ export class StatsService {
       }>();
 
       if (!rows.length) {
-        console.warn("No data found for slow wallets over time.");
+        console.warn('No data found for slow wallets over time.');
         return [];
       }
 
@@ -719,9 +689,7 @@ export class StatsService {
 
       const slowWalletsOverTime = rows.map((row) => {
         const version = parseInt(row.version, 10);
-        const timestampEntry = timestampsMap.find(
-          (entry) => entry.version === version,
-        );
+        const timestampEntry = timestampsMap.find((entry) => entry.version === version);
         const timestamp = timestampEntry ? timestampEntry.timestamp : 0;
 
         return {
@@ -730,7 +698,7 @@ export class StatsService {
         };
       });
 
-      const baseTimestamp = new Date("2023-11-28T00:00:00Z").getTime() / 1000;
+      const baseTimestamp = new Date('2023-11-28T00:00:00Z').getTime() / 1000;
       if (slowWalletsOverTime[0].timestamp == 0) {
         slowWalletsOverTime[0].timestamp = baseTimestamp;
       }
@@ -742,7 +710,7 @@ export class StatsService {
 
       return result;
     } catch (error) {
-      console.error("Error in getSlowWalletsCountOverTime:", error);
+      console.error('Error in getSlowWalletsCountOverTime:', error);
       throw error;
     }
   }
@@ -760,7 +728,7 @@ export class StatsService {
 
       const resultSet = await this.clickhouseService.client.query({
         query: query,
-        format: "JSONEachRow",
+        format: 'JSONEachRow',
       });
 
       const rows = await resultSet.json<{
@@ -781,17 +749,12 @@ export class StatsService {
 
       // Process each chunk concurrently
       const allTimestampMappings = (
-        await Promise.all(
-          versionChunks.map((chunk) => this.mapVersionsToTimestamps(chunk)),
-        )
+        await Promise.all(versionChunks.map((chunk) => this.mapVersionsToTimestamps(chunk)))
       ).flat();
 
       // Use a Map for faster version-to-timestamp lookup
       const versionToTimestampMap = new Map<number, number>(
-        allTimestampMappings.map(({ version, timestamp }) => [
-          version,
-          timestamp,
-        ]),
+        allTimestampMappings.map(({ version, timestamp }) => [version, timestamp]),
       );
 
       // Initialize the result array and a count for accounts with timestamp > 0
@@ -833,7 +796,7 @@ export class StatsService {
 
       return accountsOverTime;
     } catch (error) {
-      console.error("Error in getAccountsOnChainOverTime:", error);
+      console.error('Error in getAccountsOnChainOverTime:', error);
       throw error;
     }
   }
@@ -868,7 +831,7 @@ export class StatsService {
 
       const resultSet = await this.clickhouseService.client.query({
         query: query,
-        format: "JSONEachRow",
+        format: 'JSONEachRow',
       });
 
       const rows = await resultSet.json<{
@@ -888,16 +851,11 @@ export class StatsService {
       const chunkSize = 1000;
       const versionChunks = this.chunkArray<number>(versions, chunkSize);
       const allTimestampMappings = (
-        await Promise.all(
-          versionChunks.map((chunk) => this.mapVersionsToTimestamps(chunk)),
-        )
+        await Promise.all(versionChunks.map((chunk) => this.mapVersionsToTimestamps(chunk)))
       ).flat();
 
       const versionToTimestampMap = new Map<number, number>(
-        allTimestampMappings.map(({ version, timestamp }) => [
-          version,
-          timestamp,
-        ]),
+        allTimestampMappings.map(({ version, timestamp }) => [version, timestamp]),
       );
 
       const now = Math.floor(Date.now() / 1000);
@@ -930,7 +888,7 @@ export class StatsService {
         last90Days: seenAddressesLast90Days.size,
       };
     } catch (error) {
-      console.error("Error in getActiveAddressesCount:", error);
+      console.error('Error in getActiveAddressesCount:', error);
       throw error;
     }
   }
@@ -945,7 +903,7 @@ export class StatsService {
 
       const resultSet = await this.clickhouseService.client.query({
         query: query,
-        format: "JSONEachRow",
+        format: 'JSONEachRow',
       });
 
       const rows = await resultSet.json<{ unique_accounts: number }[]>();
@@ -953,11 +911,11 @@ export class StatsService {
       if (rows.length === 0) {
         return 0;
       }
-      const uniqueAccountsCount = Number(rows[0]["unique_accounts"]);
+      const uniqueAccountsCount = Number(rows[0]['unique_accounts']);
 
       return uniqueAccountsCount;
     } catch (error) {
-      console.error("Error in getTotalUniqueAccounts:", error);
+      console.error('Error in getTotalUniqueAccounts:', error);
       throw error;
     }
   }
@@ -976,20 +934,20 @@ export class StatsService {
     try {
       // Organize the values into the specified structure
       const supplyAllocation = [
-        { name: "Community Wallets", value: communityWalletsBalances },
-        { name: "Locked", value: slowLocked },
-        { name: "Infrastructure escrow", value: infraEscrowBalance },
-        { name: "Circulating", value: circulating },
+        { name: 'Community Wallets', value: communityWalletsBalances },
+        { name: 'Locked', value: slowLocked },
+        { name: 'Infrastructure escrow', value: infraEscrowBalance },
+        { name: 'Circulating', value: circulating },
       ];
 
       const individualsCapital = [
-        { name: "Locked", value: slowLocked },
-        { name: "Circulating", value: circulating },
+        { name: 'Locked', value: slowLocked },
+        { name: 'Circulating', value: circulating },
       ];
 
       const communityCapital = [
-        { name: "Community Wallets", value: communityWalletsBalances },
-        { name: "Infrastructure escrow", value: infraEscrowBalance },
+        { name: 'Community Wallets', value: communityWalletsBalances },
+        { name: 'Infrastructure escrow', value: infraEscrowBalance },
       ];
 
       return {
@@ -998,7 +956,7 @@ export class StatsService {
         communityCapital,
       };
     } catch (error) {
-      console.error("Error in getSupplyAndCapital:", error);
+      console.error('Error in getSupplyAndCapital:', error);
       throw error;
     }
   }
@@ -1009,8 +967,7 @@ export class StatsService {
     // Fetch community wallets to exclude
     const communityWallets = await this.olService.getCommunityWallets();
     // Fetch slow wallets' unlocked balances
-    const slowWalletsUnlockedBalances =
-      await this.getSlowWalletsUnlockedBalances();
+    const slowWalletsUnlockedBalances = await this.getSlowWalletsUnlockedBalances();
     // Fetch all other wallets' balances, excluding community wallets and including adjustments for slow wallets
     const allWalletsBalances = await this.getAllWalletsBalances(
       communityWallets,
@@ -1039,7 +996,7 @@ export class StatsService {
 
       const resultSet = await this.clickhouseService.client.query({
         query: query,
-        format: "JSONEachRow",
+        format: 'JSONEachRow',
       });
 
       const rows = await resultSet.json<{
@@ -1058,24 +1015,16 @@ export class StatsService {
       const versionChunks = this.chunkArray<number>(versions, chunkSize);
 
       const allTimestampMappings = (
-        await Promise.all(
-          versionChunks.map((chunk) => this.mapVersionsToTimestamps(chunk)),
-        )
+        await Promise.all(versionChunks.map((chunk) => this.mapVersionsToTimestamps(chunk)))
       ).flat();
 
       // Use a Map for faster version-to-timestamp lookup
       const versionToTimestampMap = new Map<number, number>(
-        allTimestampMappings.map(({ version, timestamp }) => [
-          version,
-          timestamp,
-        ]),
+        allTimestampMappings.map(({ version, timestamp }) => [version, timestamp]),
       );
 
       // Create a map of address to latest balance and timestamp
-      const addressBalanceMap = new Map<
-        string,
-        { latest_balance: number; timestamp: number }
-      >();
+      const addressBalanceMap = new Map<string, { latest_balance: number; timestamp: number }>();
       rows.forEach((row) => {
         const version = row.latest_version;
         const timestamp = versionToTimestampMap.get(version) ?? 0;
@@ -1096,7 +1045,7 @@ export class StatsService {
 
       const slowWalletResultSet = await this.clickhouseService.client.query({
         query: slowWalletQuery,
-        format: "JSONEachRow",
+        format: 'JSONEachRow',
       });
 
       const slowWalletRows = await slowWalletResultSet.json<{
@@ -1110,10 +1059,7 @@ export class StatsService {
         if (addressData) {
           return {
             address: row.address,
-            unlockedBalance: Math.min(
-              row.unlocked_balance,
-              addressData.latest_balance,
-            ),
+            unlockedBalance: Math.min(row.unlocked_balance, addressData.latest_balance),
           };
         } else {
           return {
@@ -1129,7 +1075,7 @@ export class StatsService {
         unlockedBalance: Math.max(0, row.unlockedBalance),
       }));
     } catch (error) {
-      console.error("Error in getSlowWalletsUnlockedBalances:", error);
+      console.error('Error in getSlowWalletsUnlockedBalances:', error);
       throw error;
     }
   }
@@ -1144,9 +1090,7 @@ export class StatsService {
       }
 
       // Convert community wallets to a Set for easy lookup
-      const communityAddresses = new Set(
-        communityWallets.map((wallet) => wallet.toUpperCase()),
-      );
+      const communityAddresses = new Set(communityWallets.map((wallet) => wallet.toUpperCase()));
 
       // Convert slow wallets to a map for easy access
       const slowWalletsMap = new Map(
@@ -1169,7 +1113,7 @@ export class StatsService {
 
       const resultSet = await this.clickhouseService.client.query({
         query: query,
-        format: "JSONEachRow",
+        format: 'JSONEachRow',
       });
 
       const rows = await resultSet.json<{
@@ -1203,16 +1147,14 @@ export class StatsService {
       });
 
       // Convert the map to an array
-      const result = Array.from(addressBalanceMap.entries()).map(
-        ([address, balance]) => ({
-          address,
-          balance,
-        }),
-      );
+      const result = Array.from(addressBalanceMap.entries()).map(([address, balance]) => ({
+        address,
+        balance,
+      }));
 
       return result;
     } catch (error) {
-      console.error("Error in getAllWalletsBalances:", error);
+      console.error('Error in getAllWalletsBalances:', error);
       throw error;
     }
   }
@@ -1233,8 +1175,7 @@ export class StatsService {
     balances.forEach((item) => {
       const binIndex = ranges.findIndex(
         (range) =>
-          item.balance >= range.min &&
-          (item.balance <= range.max || range.max === Infinity),
+          item.balance >= range.min && (item.balance <= range.max || range.max === Infinity),
       );
       if (binIndex !== -1) {
         bins[binIndex].value += 1;
@@ -1270,10 +1211,8 @@ export class StatsService {
   // Main method to calculate liquidity concentration for locked balances
   private async calculateLiquidityConcentrationLocked(): Promise<any> {
     const lockedBalances = await this.getLockedBalancesForSlowWallets();
-    const accountsLocked =
-      this.calculateLockedBalancesConcentration(lockedBalances);
-    const avgTotalVestingTime =
-      this.calculateAvgTotalVestingTime(accountsLocked);
+    const accountsLocked = this.calculateLockedBalancesConcentration(lockedBalances);
+    const avgTotalVestingTime = this.calculateAvgTotalVestingTime(accountsLocked);
     return {
       accountsLocked,
       avgTotalVestingTime,
@@ -1284,16 +1223,14 @@ export class StatsService {
     try {
       const slowWalletAddresses = await this.getSlowWalletAddresses();
 
-      const walletsBalances =
-        await this.getWalletsBalances(slowWalletAddresses);
+      const walletsBalances = await this.getWalletsBalances(slowWalletAddresses);
 
       const unlockedBalances = await this.getSlowWalletsUnlockedBalances();
 
       const lockedBalances = walletsBalances
         .map((wallet) => {
           const unlockedAmount =
-            unlockedBalances.find((u) => u.address === wallet.address)
-              ?.unlockedBalance || 0;
+            unlockedBalances.find((u) => u.address === wallet.address)?.unlockedBalance || 0;
           const lockedBalanceCalculation = wallet.balance - unlockedAmount;
 
           return {
@@ -1305,7 +1242,7 @@ export class StatsService {
 
       return lockedBalances;
     } catch (error) {
-      console.error("Error in getLockedBalancesForSlowWallets:", error);
+      console.error('Error in getLockedBalancesForSlowWallets:', error);
       throw error;
     }
   }
@@ -1319,7 +1256,7 @@ export class StatsService {
 
       const resultSet = await this.clickhouseService.client.query({
         query: query,
-        format: "JSONEachRow",
+        format: 'JSONEachRow',
       });
 
       const rows = await resultSet.json<{ address: string }>();
@@ -1328,14 +1265,12 @@ export class StatsService {
 
       return addresses;
     } catch (error) {
-      console.error("Error in getSlowWalletAddresses:", error);
+      console.error('Error in getSlowWalletAddresses:', error);
       throw error;
     }
   }
 
-  private calculateLockedBalancesConcentration(
-    lockedBalances: LockedBalance[],
-  ): BinRange[] {
+  private calculateLockedBalancesConcentration(lockedBalances: LockedBalance[]): BinRange[] {
     const balanceItems: BalanceItem[] = lockedBalances.map((wallet) => ({
       balance: wallet.lockedBalance,
     }));
@@ -1357,12 +1292,12 @@ export class StatsService {
     return bins.map((bin) => {
       // Extract the lower and upper bounds from the bin name
       let lower, upper;
-      if (bin.name.includes("and above")) {
+      if (bin.name.includes('and above')) {
         // For "and above" case, extract the lower bound and use it as both lower and upper for simplicity
-        lower = Number(bin.name.split(" ")[0]);
+        lower = Number(bin.name.split(' ')[0]);
         upper = lower; // This simplification might need adjustment based on actual data distribution
       } else {
-        [lower, upper] = bin.name.split(" - ").map(Number);
+        [lower, upper] = bin.name.split(' - ').map(Number);
       }
 
       const middleValue = (lower + (upper || lower)) / 2;
@@ -1379,9 +1314,7 @@ export class StatsService {
   private async getTopUnlockedBalanceWallets(
     limit: number,
     circulatingSupply: number,
-  ): Promise<
-    { address: string; unlockedBalance: number; percentOfCirculating: number }[]
-  > {
+  ): Promise<{ address: string; unlockedBalance: number; percentOfCirculating: number }[]> {
     try {
       function toHexString(decimalString: string): string {
         return BigInt(decimalString).toString(16).toUpperCase();
@@ -1392,11 +1325,8 @@ export class StatsService {
       }
 
       // Get the list of community wallets
-      const communityWallets =
-        await this.communityWalletsService.getCommunityWallets();
-      const communityAddresses = new Set(
-        communityWallets.map((wallet) => wallet.address),
-      );
+      const communityWallets = await this.communityWalletsService.getCommunityWallets();
+      const communityAddresses = new Set(communityWallets.map((wallet) => wallet.address));
 
       // Query to get the latest balances and versions from coin_balance
       const coinBalanceQuery = `
@@ -1410,7 +1340,7 @@ export class StatsService {
 
       const coinBalanceResultSet = await this.clickhouseService.client.query({
         query: coinBalanceQuery,
-        format: "JSONEachRow",
+        format: 'JSONEachRow',
       });
 
       const coinBalanceRows: Array<{
@@ -1442,7 +1372,7 @@ export class StatsService {
 
       const slowWalletResultSet = await this.clickhouseService.client.query({
         query: slowWalletQuery,
-        format: "JSONEachRow",
+        format: 'JSONEachRow',
       });
 
       const slowWalletRows: Array<{
@@ -1462,19 +1392,17 @@ export class StatsService {
       });
 
       // Convert the map to an array and calculate percentOfCirculating
-      const result = Array.from(addressBalanceMap.entries()).map(
-        ([address, unlockedBalance]) => ({
-          address,
-          unlockedBalance,
-          percentOfCirculating: (unlockedBalance / circulatingSupply) * 100,
-        }),
-      );
+      const result = Array.from(addressBalanceMap.entries()).map(([address, unlockedBalance]) => ({
+        address,
+        unlockedBalance,
+        percentOfCirculating: (unlockedBalance / circulatingSupply) * 100,
+      }));
 
       // Sort by unlockedBalance and take the top N
       result.sort((a, b) => b.unlockedBalance - a.unlockedBalance);
       return result.slice(0, limit);
     } catch (error) {
-      console.error("Error in getTopUnlockedBalanceWallets:", error);
+      console.error('Error in getTopUnlockedBalanceWallets:', error);
       throw error;
     }
   }

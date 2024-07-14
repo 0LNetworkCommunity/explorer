@@ -1,10 +1,10 @@
-import { Args, Int, Query, Resolver } from "@nestjs/graphql";
+import { Args, Int, Query, Resolver } from '@nestjs/graphql';
 
 import {
   GqlUserTransactionDeprecated,
   GqlUserTransactionCollection,
-} from "./models/transaction.model.js";
-import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
+} from './models/transaction.model.js';
+import { ClickhouseService } from '../clickhouse/clickhouse.service.js';
 
 @Resolver()
 export class UserTransactionsResolver {
@@ -15,36 +15,36 @@ export class UserTransactionsResolver {
     const result = await this.clickhouseService.client
       .query({
         query: 'SELECT COUNT(*) as "total" FROM user_transaction',
-        format: "JSONEachRow",
+        format: 'JSONEachRow',
       })
       .then((res) => res.json<{ total: string }[]>());
 
     // Verifica se o resultado está definido e se contém o campo 'total'
     if (result && result.length > 0) {
-      const total = Number(result[0]["total"]);
+      const total = Number(result[0]['total']);
       return total;
     }
 
     // Caso não haja resultado, retorna 0 ou lança um erro apropriado
-    throw new Error("Failed to fetch user transactions count");
+    throw new Error('Failed to fetch user transactions count');
   }
 
   @Query(() => GqlUserTransactionCollection)
   async userTransactions(
-    @Args({ name: "limit", type: () => Int })
+    @Args({ name: 'limit', type: () => Int })
     limit: number,
 
-    @Args({ name: "offset", type: () => Int })
+    @Args({ name: 'offset', type: () => Int })
     offset: number,
 
-    @Args({ name: "order", type: () => String })
+    @Args({ name: 'order', type: () => String })
     order: string,
   ): Promise<GqlUserTransactionCollection> {
     const [total, items] = await Promise.all([
       this.clickhouseService.client
         .query({
           query: 'SELECT COUNT(*) as "total" FROM user_transaction',
-          format: "JSONEachRow",
+          format: 'JSONEachRow',
         })
         .then((res) => res.json<{ total: string }>())
         .then((rows) => parseInt(rows[0].total, 10)),
@@ -71,10 +71,10 @@ export class UserTransactionsResolver {
               "function_name",
               "timestamp"
             FROM "user_transaction"
-            ORDER BY "version" ${order === "ASC" ? "ASC" : "DESC"}
+            ORDER BY "version" ${order === 'ASC' ? 'ASC' : 'DESC'}
             LIMIT {limit:Int32} OFFSET {offset:Int32}
           `,
-          format: "JSONEachRow",
+          format: 'JSONEachRow',
           query_params: {
             limit,
             offset,

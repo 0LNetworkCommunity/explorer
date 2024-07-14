@@ -1,16 +1,16 @@
-import { Args, Mutation, Resolver, Query, Subscription } from "@nestjs/graphql";
-import { Inject } from "@nestjs/common";
-import { Repeater } from "@repeaterjs/repeater";
-import { ConfigService } from "@nestjs/config";
+import { Args, Mutation, Resolver, Query, Subscription } from '@nestjs/graphql';
+import { Inject } from '@nestjs/common';
+import { Repeater } from '@repeaterjs/repeater';
+import { ConfigService } from '@nestjs/config';
 
-import { Types } from "../../types.js";
-import { ITransaction, ITransactionsService } from "./interfaces.js";
-import { Transaction } from "./Transaction.js";
-import { NatsService } from "../../nats/nats.service.js";
-import { deserializeSignedTransaction, getTransactionHash, parseHexString } from "../../utils.js";
-import { OlConfig } from "../../config/config.interface.js";
-import axios from "axios";
-import { GraphQLError } from "graphql";
+import { Types } from '../../types.js';
+import { ITransaction, ITransactionsService } from './interfaces.js';
+import { Transaction } from './Transaction.js';
+import { NatsService } from '../../nats/nats.service.js';
+import { deserializeSignedTransaction, getTransactionHash, parseHexString } from '../../utils.js';
+import { OlConfig } from '../../config/config.interface.js';
+import axios from 'axios';
+import { GraphQLError } from 'graphql';
 
 @Resolver()
 export class TransactionsResolver {
@@ -24,21 +24,21 @@ export class TransactionsResolver {
 
     configService: ConfigService,
   ) {
-    const config = configService.get<OlConfig>("ol")!;
+    const config = configService.get<OlConfig>('ol')!;
     this.providerHost = config.provider;
   }
 
-  @Query(() => [Transaction], { name: "walletTransactions" })
+  @Query(() => [Transaction], { name: 'walletTransactions' })
   public async getWalletTransactions(
-    @Args("address", { type: () => Buffer })
+    @Args('address', { type: () => Buffer })
     address: Uint8Array,
   ): Promise<ITransaction[]> {
     return this.transactionsService.getWalletTransactions(address);
   }
 
-  @Query(() => Transaction, { name: "transaction" })
+  @Query(() => Transaction, { name: 'transaction' })
   public async getTransaction(
-    @Args("hash", { type: () => Buffer })
+    @Args('hash', { type: () => Buffer })
     hash: Uint8Array,
   ): Promise<ITransaction> {
     return this.transactionsService.getTransactionByHash(hash);
@@ -46,7 +46,7 @@ export class TransactionsResolver {
 
   @Mutation(() => Transaction)
   public async newTransaction(
-    @Args("signedTransaction", { type: () => Buffer })
+    @Args('signedTransaction', { type: () => Buffer })
     signedTransaction: Buffer,
   ) {
     const tx = deserializeSignedTransaction(signedTransaction);
@@ -54,17 +54,20 @@ export class TransactionsResolver {
 
     const txHash = Buffer.from(getTransactionHash(tx));
 
-    const res = await axios<{
-      hash: string;
-    } | {
-      error_code: string;
-      message: string;
-      vm_error_code: number;
-    }>({
-      method: "POST",
+    const res = await axios<
+      | {
+          hash: string;
+        }
+      | {
+          error_code: string;
+          message: string;
+          vm_error_code: number;
+        }
+    >({
+      method: 'POST',
       url: `${this.providerHost}/v1/transactions`,
       headers: {
-        "content-type": "application/x.diem.signed_transaction+bcs",
+        'content-type': 'application/x.diem.signed_transaction+bcs',
       },
       data: signedTransaction,
       signal: AbortSignal.timeout(1 * 60 * 1_000), // 1 minutes
@@ -77,11 +80,11 @@ export class TransactionsResolver {
         const resHash = Buffer.from(parseHexString(body.hash));
         if (!txHash.equals(resHash)) {
           throw new GraphQLError(
-            `transaction hash retrieved is different than the one provided provided=${txHash.toString("hex")} returned=${Buffer.from(resHash).toString("hex")}`,
+            `transaction hash retrieved is different than the one provided provided=${txHash.toString('hex')} returned=${Buffer.from(resHash).toString('hex')}`,
           );
         }
         return this.transactionsService.getTransactionByHash(txHash);
-      };
+      }
 
       case 400: {
         const body = res.data as {
@@ -89,21 +92,17 @@ export class TransactionsResolver {
           message: string;
           vm_error_code: number;
         };
-        throw new GraphQLError(
-          body.message,
-        );
-      };
+        throw new GraphQLError(body.message);
+      }
 
       default:
-        throw new GraphQLError(
-          `Error from rpc node. status = ${res.status}`
-        );
+        throw new GraphQLError(`Error from rpc node. status = ${res.status}`);
     }
   }
 
   @Subscription((returns) => Transaction)
   public async walletTransaction(
-    @Args({ name: "address", type: () => Buffer })
+    @Args({ name: 'address', type: () => Buffer })
     address: Buffer,
   ) {
     return new Repeater(async (push, stop) => {
@@ -115,10 +114,9 @@ export class TransactionsResolver {
               stop(err);
             } else {
               const { hash } = msg.json<{ hash: string }>();
-              const transaction =
-                await this.transactionsService.getTransactionByHash(
-                  Buffer.from(hash, "hex"),
-                );
+              const transaction = await this.transactionsService.getTransactionByHash(
+                Buffer.from(hash, 'hex'),
+              );
 
               push({
                 walletTransaction: transaction,

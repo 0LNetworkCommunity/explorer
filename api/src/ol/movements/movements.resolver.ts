@@ -1,7 +1,7 @@
-import { Args, Resolver, Subscription } from "@nestjs/graphql";
-import { Repeater } from "@repeaterjs/repeater";
+import { Args, Resolver, Subscription } from '@nestjs/graphql';
+import { Repeater } from '@repeaterjs/repeater';
 
-import { NatsService } from "../../nats/nats.service.js";
+import { NatsService } from '../../nats/nats.service.js';
 
 @Resolver()
 export class MovementsResolver {
@@ -9,7 +9,7 @@ export class MovementsResolver {
 
   @Subscription((returns) => String)
   public async walletMovement(
-    @Args({ name: "address", type: () => Buffer })
+    @Args({ name: 'address', type: () => Buffer })
     address: Buffer,
   ) {
     return new Repeater(async (push, stop) => {

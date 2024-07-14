@@ -1,11 +1,7 @@
-import {
-  Injectable,
-  OnApplicationShutdown,
-  OnModuleInit,
-} from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import nats, { JetStreamClient, NatsConnection } from "nats";
-import { NatsConfig } from "../config/config.interface.js";
+import { Injectable, OnApplicationShutdown, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import nats, { JetStreamClient, NatsConnection } from 'nats';
+import { NatsConfig } from '../config/config.interface.js';
 
 @Injectable()
 export class NatsService implements OnModuleInit, OnApplicationShutdown {
@@ -16,7 +12,7 @@ export class NatsService implements OnModuleInit, OnApplicationShutdown {
   private servers: string;
 
   public constructor(config: ConfigService) {
-    const natsConfig = config.get<NatsConfig>("nats")!;
+    const natsConfig = config.get<NatsConfig>('nats')!;
     this.servers = natsConfig?.servers;
   }
 
@@ -44,7 +40,7 @@ export class NatsService implements OnModuleInit, OnApplicationShutdown {
       throw new Error(`invalid address length ${address.length}`);
     }
 
-    return `wallet.${Buffer.from(address32).toString("hex").toUpperCase()}.transaction`;
+    return `wallet.${Buffer.from(address32).toString('hex').toUpperCase()}.transaction`;
   }
 
   public getWalletMovementChannel(address: Uint8Array): string {
@@ -57,6 +53,6 @@ export class NatsService implements OnModuleInit, OnApplicationShutdown {
       throw new Error(`invalid address length ${address.length}`);
     }
 
-    return `wallet.${Buffer.from(address32).toString("hex").toUpperCase()}.movement`;
+    return `wallet.${Buffer.from(address32).toString('hex').toUpperCase()}.movement`;
   }
 }

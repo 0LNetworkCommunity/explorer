@@ -1,8 +1,8 @@
-import { Field, ObjectType } from "@nestjs/graphql";
-import BN from "bn.js";
-import { Decimal } from "decimal.js";
+import { Field, ObjectType } from '@nestjs/graphql';
+import BN from 'bn.js';
+import { Decimal } from 'decimal.js';
 
-import { AbstractTransaction } from "./AbstractTransaction.js";
+import { AbstractTransaction } from './AbstractTransaction.js';
 
 export interface MovementInput {
   amount: Decimal;
@@ -15,7 +15,7 @@ export interface MovementInput {
   transaction: AbstractTransaction;
 }
 
-@ObjectType("Movement")
+@ObjectType('Movement')
 export class Movement {
   public constructor(input: MovementInput) {
     this.balance = input.balance;

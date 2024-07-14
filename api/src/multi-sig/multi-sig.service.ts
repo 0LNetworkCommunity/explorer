@@ -1,5 +1,5 @@
-import { Injectable, OnModuleInit } from "@nestjs/common";
-import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { ClickhouseService } from '../clickhouse/clickhouse.service.js';
 
 @Injectable()
 export class MultiSigService implements OnModuleInit {

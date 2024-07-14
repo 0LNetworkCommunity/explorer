@@ -1,6 +1,6 @@
-import { Module } from "@nestjs/common";
-import { ClickhouseModule } from "../clickhouse/clickhouse.module.js";
-import { MultiSigService } from "./multi-sig.service.js";
+import { Module } from '@nestjs/common';
+import { ClickhouseModule } from '../clickhouse/clickhouse.module.js';
+import { MultiSigService } from './multi-sig.service.js';
 
 @Module({
   imports: [ClickhouseModule],

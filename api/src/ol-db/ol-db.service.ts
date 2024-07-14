@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import BN from 'bn.js';
-import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
+import { ClickhouseService } from '../clickhouse/clickhouse.service.js';
 
 @Injectable()
 export class OlDbService {
@@ -26,7 +26,7 @@ export class OlDbService {
         ORDER BY "version" DESC
         LIMIT 1
       `,
-      format: "JSON",
+      format: 'JSON',
     });
     const res = await resultSet.json<{ version: string }>();
 
@@ -42,10 +42,10 @@ export class OlDbService {
       query: `
         SELECT DISTINCT "version"
         FROM "ingested_versions"
-        ${after !== undefined ? `WHERE "version" > ${after.toString()}` : ""}
+        ${after !== undefined ? `WHERE "version" > ${after.toString()}` : ''}
         ORDER BY "version"
       `,
-      format: "JSON",
+      format: 'JSON',
     });
     const res = await resultSet.json<{ version: string }>();
     return res.data.map((it) => new BN(it.version));

@@ -1,5 +1,5 @@
-import { Types } from "aptos";
-import BN from "bn.js";
+import { Types } from 'aptos';
+import BN from 'bn.js';
 
 export type NotPendingTransaction =
   | Types.UserTransaction

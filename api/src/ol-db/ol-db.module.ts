@@ -1,6 +1,6 @@
-import { Module } from "@nestjs/common";
-import { ClickhouseModule } from "../clickhouse/clickhouse.module.js";
-import { OlDbService } from "./ol-db.service.js";
+import { Module } from '@nestjs/common';
+import { ClickhouseModule } from '../clickhouse/clickhouse.module.js';
+import { OlDbService } from './ol-db.service.js';
 
 @Module({
   imports: [ClickhouseModule],

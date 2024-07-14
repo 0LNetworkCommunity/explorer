@@ -1,5 +1,5 @@
-import fs from "node:fs";
-import Bluebird from "bluebird";
+import fs from 'node:fs';
+import Bluebird from 'bluebird';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -10,7 +10,7 @@ import {
   PutObjectCommandOutput,
   S3Client,
   StorageClass,
-} from "@aws-sdk/client-s3";
+} from '@aws-sdk/client-s3';
 import { S3Config } from '../config/config.interface.js';
 
 @Injectable()
@@ -22,7 +22,7 @@ export class S3Service {
   private readonly storageClass: string;
 
   public constructor(configService: ConfigService) {
-    const config = configService.get<S3Config>("s3")!;
+    const config = configService.get<S3Config>('s3')!;
 
     this.client = new S3Client({
       region: config.region,
@@ -40,7 +40,7 @@ export class S3Service {
   public upload(path: string, dest: string): Promise<PutObjectCommandOutput> {
     return Bluebird.race([
       Bluebird.delay(10 * 60 * 1_000).then(() => {
-        throw new Error("upload timeout");
+        throw new Error('upload timeout');
       }),
       this.client.send(
         new PutObjectCommand({

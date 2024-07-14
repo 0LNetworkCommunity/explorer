@@ -1,14 +1,14 @@
-import { InjectQueue, Processor, WorkerHost } from "@nestjs/bullmq";
-import _ from "lodash";
-import { OnModuleInit } from "@nestjs/common";
-import { Job, Queue } from "bullmq";
+import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
+import _ from 'lodash';
+import { OnModuleInit } from '@nestjs/common';
+import { Job, Queue } from 'bullmq';
 
-import { NodeWatcherService } from "./node-watcher.service.js";
+import { NodeWatcherService } from './node-watcher.service.js';
 
-@Processor("node-watcher")
+@Processor('node-watcher')
 export class NodeWatcherProcessor extends WorkerHost implements OnModuleInit {
   public constructor(
-    @InjectQueue("node-watcher")
+    @InjectQueue('node-watcher')
     private readonly nodeWatcherQueue: Queue,
     private readonly nodeWatcherService: NodeWatcherService,
   ) {
@@ -16,7 +16,7 @@ export class NodeWatcherProcessor extends WorkerHost implements OnModuleInit {
   }
 
   public async onModuleInit() {
-    await this.nodeWatcherQueue.add("updateValidators", undefined, {
+    await this.nodeWatcherQueue.add('updateValidators', undefined, {
       removeOnComplete: {
         age: 60 * 60,
       },
@@ -28,7 +28,7 @@ export class NodeWatcherProcessor extends WorkerHost implements OnModuleInit {
       },
     });
 
-    await this.nodeWatcherQueue.add("checkNodes", undefined, {
+    await this.nodeWatcherQueue.add('checkNodes', undefined, {
       removeOnComplete: {
         age: 10,
       },
@@ -52,10 +52,10 @@ export class NodeWatcherProcessor extends WorkerHost implements OnModuleInit {
 
   public async process(job: Job<any, any, string>) {
     switch (job.name) {
-      case "updateValidators":
+      case 'updateValidators':
         await this.updateValidators();
         break;
-      case "checkNodes":
+      case 'checkNodes':
         await this.checkNodes();
         break;
 

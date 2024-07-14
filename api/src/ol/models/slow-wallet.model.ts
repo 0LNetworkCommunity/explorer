@@ -1,5 +1,5 @@
-import { Field, ObjectType } from "@nestjs/graphql";
-import { Decimal } from "decimal.js";
+import { Field, ObjectType } from '@nestjs/graphql';
+import { Decimal } from 'decimal.js';
 
 interface SlowWalletInput {
   transferred: Decimal;

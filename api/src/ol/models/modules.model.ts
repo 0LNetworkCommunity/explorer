@@ -1,4 +1,4 @@
-import { Field, ObjectType } from "@nestjs/graphql";
+import { Field, ObjectType } from '@nestjs/graphql';
 
 interface GqlModuleInput {
   address: string;
@@ -6,7 +6,7 @@ interface GqlModuleInput {
   functions: string[];
 }
 
-@ObjectType("Module")
+@ObjectType('Module')
 export class GqlModule {
   public constructor(input: GqlModuleInput) {
     this.address = input.address;

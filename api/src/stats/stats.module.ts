@@ -1,13 +1,13 @@
-import { Module } from "@nestjs/common";
-import { BullModule } from "@nestjs/bullmq";
+import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bullmq';
 
-import { StatsService } from "./stats.service.js";
-import { StatsController } from "./stats.controller.js";
-import { ClickhouseModule } from "../clickhouse/clickhouse.module.js";
-import { OlModule } from "../ol/ol.module.js";
-import { redisClient } from "../redis/redis.service.js";
-import loadConfig from "../config/config.js";
-import { StatsProcessor } from "./stats.processor.js";
+import { StatsService } from './stats.service.js';
+import { StatsController } from './stats.controller.js';
+import { ClickhouseModule } from '../clickhouse/clickhouse.module.js';
+import { OlModule } from '../ol/ol.module.js';
+import { redisClient } from '../redis/redis.service.js';
+import loadConfig from '../config/config.js';
+import { StatsProcessor } from './stats.processor.js';
 
 const config = loadConfig();
 
@@ -17,7 +17,7 @@ const config = loadConfig();
     OlModule,
 
     BullModule.registerQueue({
-      name: "stats",
+      name: 'stats',
       connection: redisClient,
     }),
   ],

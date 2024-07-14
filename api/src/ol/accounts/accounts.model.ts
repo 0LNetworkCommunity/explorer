@@ -1,4 +1,4 @@
-import { Field, ObjectType, Int, Float } from "@nestjs/graphql";
+import { Field, ObjectType, Int, Float } from '@nestjs/graphql';
 
 export interface CumulativeShareInput {
   amount: number;

@@ -1,5 +1,5 @@
-import { Controller, Get, Param } from "@nestjs/common";
-import { ClickhouseService } from "../clickhouse/clickhouse.service.js";
+import { Controller, Get, Param } from '@nestjs/common';
+import { ClickhouseService } from '../clickhouse/clickhouse.service.js';
 
 // Version 0's timestamp is calculated by dedubting the intervation between epoch 2 and 3 to epoch 2's timestamp.
 //
@@ -17,8 +17,8 @@ const V0_TIMESTAMP = 1701203279;
 export class OlController {
   public constructor(private readonly clickhouseService: ClickhouseService) {}
 
-  @Get("/historical-balance/:address")
-  public async historicalBalance(@Param("address") address: string) {
+  @Get('/historical-balance/:address')
+  public async historicalBalance(@Param('address') address: string) {
     const query = `
       SELECT
         tupleElement("entry", 2) / 1e6 AS "value",
@@ -47,7 +47,7 @@ export class OlController {
 
     const resultSet = await this.clickhouseService.client.query({
       query,
-      format: "JSONEachRow",
+      format: 'JSONEachRow',
     });
 
     const serie = await resultSet.json<{
@@ -58,7 +58,7 @@ export class OlController {
     for (let i = 0; i < serie.length; ++i) {
       const it = serie[i];
       if (it.time === 0) {
-        it.time = V0_TIMESTAMP
+        it.time = V0_TIMESTAMP;
       } else {
         break;
       }

@@ -1,12 +1,12 @@
-import { Field, InterfaceType } from "@nestjs/graphql";
-import BN from "bn.js";
+import { Field, InterfaceType } from '@nestjs/graphql';
+import BN from 'bn.js';
 
 export interface AbstractTransactionInput {
   version: BN;
   hash: Uint8Array;
 }
 
-@InterfaceType("AbstractTransaction")
+@InterfaceType('AbstractTransaction')
 export abstract class AbstractTransaction {
   @Field(() => BN)
   version: BN;

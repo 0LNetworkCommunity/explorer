@@ -1,16 +1,16 @@
-import os from "node:os";
-import path, { basename } from "node:path";
-import util from "node:util";
-import { execFile as execFileNative } from "node:child_process";
-import { writeFile, mkdir, mkdtemp } from "node:fs/promises";
-import { InjectQueue, Processor, WorkerHost } from "@nestjs/bullmq";
-import { OnModuleInit } from "@nestjs/common";
-import { Job, Queue } from "bullmq";
+import os from 'node:os';
+import path, { basename } from 'node:path';
+import util from 'node:util';
+import { execFile as execFileNative } from 'node:child_process';
+import { writeFile, mkdir, mkdtemp } from 'node:fs/promises';
+import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
+import { OnModuleInit } from '@nestjs/common';
+import { Job, Queue } from 'bullmq';
 
-import { OlService } from "./ol.service.js";
-import { cleanUp } from "../utils.js";
-import { S3Service } from "../s3/s3.service.js";
-import { NotPendingTransaction } from "./types.js";
+import { OlService } from './ol.service.js';
+import { cleanUp } from '../utils.js';
+import { S3Service } from '../s3/s3.service.js';
+import { NotPendingTransaction } from './types.js';
 
 const execFile = util.promisify(execFileNative);
 
@@ -18,11 +18,8 @@ export interface VersionBatchJobData {
   index: number;
 }
 
-@Processor("ol-version-batch")
-export class OlVersionBatchProcessor
-  extends WorkerHost
-  implements OnModuleInit
-{
+@Processor('ol-version-batch')
+export class OlVersionBatchProcessor extends WorkerHost implements OnModuleInit {
   public static TRANSACTIONS_PER_REQUEST = 100;
 
   public static BATCH_SIZE = 100;
@@ -30,10 +27,8 @@ export class OlVersionBatchProcessor
   public static isLastVersionOfBatch(version: number): boolean {
     return (
       version %
-        (OlVersionBatchProcessor.TRANSACTIONS_PER_REQUEST *
-          OlVersionBatchProcessor.BATCH_SIZE) ===
-      (OlVersionBatchProcessor.TRANSACTIONS_PER_REQUEST - 1) *
-        OlVersionBatchProcessor.BATCH_SIZE
+        (OlVersionBatchProcessor.TRANSACTIONS_PER_REQUEST * OlVersionBatchProcessor.BATCH_SIZE) ===
+      (OlVersionBatchProcessor.TRANSACTIONS_PER_REQUEST - 1) * OlVersionBatchProcessor.BATCH_SIZE
     );
   }
 
@@ -48,9 +43,7 @@ export class OlVersionBatchProcessor
     );
   }
 
-  private static getMinMax(
-    transactions: NotPendingTransaction[],
-  ): [number, number] | null {
+  private static getMinMax(transactions: NotPendingTransaction[]): [number, number] | null {
     const { length } = transactions;
     if (!length) {
       return null;
@@ -75,13 +68,10 @@ export class OlVersionBatchProcessor
 
   private static getIndexDir(index: number): string {
     const from =
-      index *
-      OlVersionBatchProcessor.BATCH_SIZE *
-      OlVersionBatchProcessor.TRANSACTIONS_PER_REQUEST;
+      index * OlVersionBatchProcessor.BATCH_SIZE * OlVersionBatchProcessor.TRANSACTIONS_PER_REQUEST;
     const to =
       from +
-      (OlVersionBatchProcessor.TRANSACTIONS_PER_REQUEST - 1) *
-        OlVersionBatchProcessor.BATCH_SIZE;
+      (OlVersionBatchProcessor.TRANSACTIONS_PER_REQUEST - 1) * OlVersionBatchProcessor.BATCH_SIZE;
     return `${from}-${to}`;
   }
 
@@ -89,34 +79,30 @@ export class OlVersionBatchProcessor
     private readonly s3Service: S3Service,
     private readonly olService: OlService,
 
-    @InjectQueue("ol-version-batch")
+    @InjectQueue('ol-version-batch')
     private readonly olVersionBatchQueue: Queue,
   ) {
     super();
   }
 
   public async onModuleInit() {
-    await this.olVersionBatchQueue.add(
-      "getMissingBatchTransactions",
-      undefined,
-      {
-        repeat: {
-          every: 30 * 60 * 1_000, // 30 minutes
-        },
+    await this.olVersionBatchQueue.add('getMissingBatchTransactions', undefined, {
+      repeat: {
+        every: 30 * 60 * 1_000, // 30 minutes
       },
-    );
+    });
   }
 
   public async process(job: Job<VersionBatchJobData, any, string>) {
     switch (job.name) {
-      case "batch":
+      case 'batch':
         {
           const { index } = job.data;
           await this.processVersionBatch(job, index);
         }
         break;
 
-      case "getMissingBatchTransactions":
+      case 'getMissingBatchTransactions':
         await this.getMissingBatchTransactions();
         break;
 
@@ -125,36 +111,25 @@ export class OlVersionBatchProcessor
     }
   }
 
-  public async processVersionBatch(
-    job: Job<VersionBatchJobData, any, string>,
-    index: number,
-  ) {
+  public async processVersionBatch(job: Job<VersionBatchJobData, any, string>, index: number) {
     const archivePath = await this.fetchTransactions(job, index);
     const dest = `transactions/${path.basename(archivePath)}`;
 
     job.log(`uploading ${dest}`);
-    await this.s3Service.upload(
-      archivePath,
-      `transactions/${basename(archivePath)}`,
-    );
+    await this.s3Service.upload(archivePath, `transactions/${basename(archivePath)}`);
     job.log(`uploaded ${dest}`);
 
     await cleanUp(path.dirname(archivePath));
     await job.updateProgress(100);
   }
 
-  private async fetchTransactions(
-    job: Job<VersionBatchJobData, any, string>,
-    index: number,
-  ) {
+  private async fetchTransactions(job: Job<VersionBatchJobData, any, string>, index: number) {
     const batchMinMax = [-1, -1];
 
     const from =
-      index *
-      OlVersionBatchProcessor.BATCH_SIZE *
-      OlVersionBatchProcessor.TRANSACTIONS_PER_REQUEST;
+      index * OlVersionBatchProcessor.BATCH_SIZE * OlVersionBatchProcessor.TRANSACTIONS_PER_REQUEST;
     const indexDir = OlVersionBatchProcessor.getIndexDir(index);
-    const tmpDir = await mkdtemp(path.join(os.tmpdir(), "transactions-batch-"));
+    const tmpDir = await mkdtemp(path.join(os.tmpdir(), 'transactions-batch-'));
     const destDir = path.join(tmpDir, indexDir);
     await mkdir(destDir, { recursive: true });
 
@@ -166,18 +141,16 @@ export class OlVersionBatchProcessor
         limit: OlVersionBatchProcessor.TRANSACTIONS_PER_REQUEST,
       });
       const notPendingTransactions = transactions.filter(
-        (tx) => tx.type !== "pending_transaction",
+        (tx) => tx.type !== 'pending_transaction',
       ) as NotPendingTransaction[];
 
-      if (
-        transactions.length !== OlVersionBatchProcessor.TRANSACTIONS_PER_REQUEST
-      ) {
-        throw new Error("missing transactions");
+      if (transactions.length !== OlVersionBatchProcessor.TRANSACTIONS_PER_REQUEST) {
+        throw new Error('missing transactions');
       }
 
       const minMax = OlVersionBatchProcessor.getMinMax(notPendingTransactions);
       if (minMax === null) {
-        throw new Error("unable to determine min/max");
+        throw new Error('unable to determine min/max');
       }
 
       const [min, max] = minMax;
@@ -188,10 +161,7 @@ export class OlVersionBatchProcessor
         batchMinMax[1] = max;
       }
 
-      await writeFile(
-        path.join(destDir, `${min}-${max}.json`),
-        JSON.stringify(transactions),
-      );
+      await writeFile(path.join(destDir, `${min}-${max}.json`), JSON.stringify(transactions));
 
       await job.updateProgress((i * 90) / OlVersionBatchProcessor.BATCH_SIZE);
     }
@@ -205,7 +175,7 @@ export class OlVersionBatchProcessor
   }
 
   private async compress(src: string, dst: string) {
-    await execFile("tar", ["czf", dst, "."], { cwd: src });
+    await execFile('tar', ['czf', dst, '.'], { cwd: src });
   }
 
   private async getMissingBatchTransactions() {
@@ -231,7 +201,7 @@ export class OlVersionBatchProcessor
     if (indexes.length) {
       await this.olVersionBatchQueue.addBulk(
         indexes.map((index) => ({
-          name: "batch",
+          name: 'batch',
           data: {
             index: index,
           },

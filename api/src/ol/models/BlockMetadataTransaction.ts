@@ -1,17 +1,14 @@
-import { Field, ObjectType } from "@nestjs/graphql";
-import BN from "bn.js";
+import { Field, ObjectType } from '@nestjs/graphql';
+import BN from 'bn.js';
 
-import {
-  AbstractTransactionInput,
-  AbstractTransaction,
-} from "./AbstractTransaction.js";
+import { AbstractTransactionInput, AbstractTransaction } from './AbstractTransaction.js';
 
 export type BlockMetadataTransactionInput = AbstractTransactionInput & {
   epoch: BN;
   timestamp: BN;
 };
 
-@ObjectType("BlockMetadataTransaction", {
+@ObjectType('BlockMetadataTransaction', {
   implements: () => [AbstractTransaction],
 })
 export class BlockMetadataTransaction implements AbstractTransaction {

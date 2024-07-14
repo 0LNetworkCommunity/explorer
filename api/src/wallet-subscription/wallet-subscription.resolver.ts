@@ -1,13 +1,13 @@
-import { Args, Mutation, Resolver, registerEnumType } from "@nestjs/graphql";
-import { PrismaService } from "../prisma/prisma.service.js";
-import { GraphQLError } from "graphql";
+import { Args, Mutation, Resolver, registerEnumType } from '@nestjs/graphql';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { GraphQLError } from 'graphql';
 
 export enum DeviceType {
-  IOS = "IOS",
-  ANDROID = "ANDROID",
+  IOS = 'IOS',
+  ANDROID = 'ANDROID',
 }
 
-registerEnumType(DeviceType, { name: "DeviceType" });
+registerEnumType(DeviceType, { name: 'DeviceType' });
 
 @Resolver()
 export class WalletSubscriptionResolver {
@@ -15,20 +15,20 @@ export class WalletSubscriptionResolver {
 
   @Mutation(() => Boolean)
   async walletSubscribe(
-    @Args("walletAddress")
+    @Args('walletAddress')
     walletAddress: Buffer,
 
-    @Args("deviceToken")
+    @Args('deviceToken')
     deviceToken: string,
 
     @Args({
-      name: "deviceType",
+      name: 'deviceType',
       type: () => DeviceType,
     })
     deviceType: DeviceType,
   ): Promise<boolean> {
     if (walletAddress.length !== 16 && walletAddress.length !== 32) {
-      throw new GraphQLError("Invalid walletAddress length. Must be 16 or 32.");
+      throw new GraphQLError('Invalid walletAddress length. Must be 16 or 32.');
     }
 
     const res = await this.prisma.$queryRaw<[{ id: string }]>`

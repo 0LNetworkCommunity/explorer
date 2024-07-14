@@ -1,10 +1,10 @@
-import { ConfigService } from "@nestjs/config";
-import { Query, Resolver } from "@nestjs/graphql";
+import { ConfigService } from '@nestjs/config';
+import { Query, Resolver } from '@nestjs/graphql';
 
-import { ValidatorsService } from "./validators.service.js";
-import { Validator } from "../models/validator.model.js";
-import { redisClient } from "../../redis/redis.service.js";
-import { VALIDATORS_CACHE_KEY } from "../constants.js";
+import { ValidatorsService } from './validators.service.js';
+import { Validator } from '../models/validator.model.js';
+import { redisClient } from '../../redis/redis.service.js';
+import { VALIDATORS_CACHE_KEY } from '../constants.js';
 
 @Resolver(() => Validator)
 export class ValidatorsResolver {
@@ -14,7 +14,7 @@ export class ValidatorsResolver {
     private readonly validatorsService: ValidatorsService,
     config: ConfigService,
   ) {
-    this.cacheEnabled = config.get<boolean>("cacheEnabled")!;
+    this.cacheEnabled = config.get<boolean>('cacheEnabled')!;
   }
 
   @Query(() => [Validator])

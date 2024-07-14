@@ -1,18 +1,18 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import * as d3 from "d3-array";
-import axios from "axios";
-import BN from "bn.js";
-import { Decimal } from "decimal.js";
+import { Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import * as d3 from 'd3-array';
+import axios from 'axios';
+import BN from 'bn.js';
+import { Decimal } from 'decimal.js';
 
-import { NatsService } from "../../nats/nats.service.js";
-import { OlConfig } from "../../config/config.interface.js";
-import { Movement } from "../models/Movement.js";
-import { OrderDirection, PageInfo } from "../models/Paginated.js";
-import { PaginatedMovements } from "../models/PaginatedMovements.js";
-import { IOnChainTransactionsRepository } from "../transactions/interfaces.js";
-import { Types } from "../../types.js";
-import { OlService } from "../ol.service.js";
+import { NatsService } from '../../nats/nats.service.js';
+import { OlConfig } from '../../config/config.interface.js';
+import { Movement } from '../models/Movement.js';
+import { OrderDirection, PageInfo } from '../models/Paginated.js';
+import { PaginatedMovements } from '../models/PaginatedMovements.js';
+import { IOnChainTransactionsRepository } from '../transactions/interfaces.js';
+import { Types } from '../../types.js';
+import { OlService } from '../ol.service.js';
 
 @Injectable()
 export class MovementsService {
@@ -26,7 +26,7 @@ export class MovementsService {
     @Inject(Types.IOnChainTransactionsRepository)
     private readonly onChainTransactionsRepository: IOnChainTransactionsRepository,
   ) {
-    const olConfig = configService.get<OlConfig>("ol")!;
+    const olConfig = configService.get<OlConfig>('ol')!;
     this.dataApiHost = olConfig.dataApiHost;
   }
 
@@ -43,7 +43,7 @@ export class MovementsService {
       return new PaginatedMovements(0, new PageInfo(false), []);
     }
     const lastestStableVersion = lastestStableVersionBn.toNumber();
-    const accountAddress = bAccountAddress.toString("hex").toUpperCase();
+    const accountAddress = bAccountAddress.toString('hex').toUpperCase();
 
     // Retrieve all the wallets movements from the data api
     const historicalData = await axios<{
@@ -53,7 +53,7 @@ export class MovementsService {
       unlocked: number[];
       locked: number[];
     }>({
-      method: "GET",
+      method: 'GET',
       url: `${this.dataApiHost}/historical-balance/${accountAddress}`,
     });
 
@@ -62,8 +62,7 @@ export class MovementsService {
        * @todo
        * move this to the data api
        */
-      const { timestamp, version, balance, unlocked, locked } =
-        historicalData.data;
+      const { timestamp, version, balance, unlocked, locked } = historicalData.data;
       let len = timestamp.length;
 
       if (len > 1) {
@@ -87,9 +86,7 @@ export class MovementsService {
       }
     }
 
-    const allVersions = historicalData.data.version.filter(
-      (v) => v <= lastestStableVersion,
-    );
+    const allVersions = historicalData.data.version.filter((v) => v <= lastestStableVersion);
     const allVersionsLength = allVersions.length;
     if (!allVersionsLength) {
       return new PaginatedMovements(0, new PageInfo(false), []);
@@ -102,10 +99,7 @@ export class MovementsService {
     switch (order) {
       case OrderDirection.ASC:
         {
-          startIndex =
-            after === undefined
-              ? 0
-              : d3.bisectRight(allVersions, parseInt(after, 10));
+          startIndex = after === undefined ? 0 : d3.bisectRight(allVersions, parseInt(after, 10));
           endIndex = Math.min(allVersionsLength, startIndex + first);
 
           prevIndex = startIndex - first - 1;
@@ -139,18 +133,10 @@ export class MovementsService {
       scriptUserTransactions,
       genesisTransactions,
     ] = await Promise.all([
-      this.onChainTransactionsRepository.getUserTransactionsByVersions(
-        versions,
-      ),
-      this.onChainTransactionsRepository.getBlockMetadataTransactionsByVersions(
-        versions,
-      ),
-      this.onChainTransactionsRepository.getScriptUserTransactionsByVersions(
-        versions,
-      ),
-      this.onChainTransactionsRepository.getGenesisTransactionsByVersions(
-        versions,
-      ),
+      this.onChainTransactionsRepository.getUserTransactionsByVersions(versions),
+      this.onChainTransactionsRepository.getBlockMetadataTransactionsByVersions(versions),
+      this.onChainTransactionsRepository.getScriptUserTransactionsByVersions(versions),
+      this.onChainTransactionsRepository.getGenesisTransactionsByVersions(versions),
     ]);
 
     const movements = versions.map((version, index) => {
@@ -163,15 +149,9 @@ export class MovementsService {
 
       const pos = startIndex + index;
 
-      const unlockedBalance = new Decimal(
-        historicalData.data.unlocked[index + startIndex],
-      );
-      const lockedBalance = new Decimal(
-        historicalData.data.locked[index + startIndex],
-      );
-      const balance = new Decimal(
-        historicalData.data.balance[index + startIndex],
-      );
+      const unlockedBalance = new Decimal(historicalData.data.unlocked[index + startIndex]);
+      const lockedBalance = new Decimal(historicalData.data.locked[index + startIndex]);
+      const balance = new Decimal(historicalData.data.balance[index + startIndex]);
 
       let unlockedAmount = unlockedBalance;
       let lockedAmount = lockedBalance;
@@ -179,12 +159,8 @@ export class MovementsService {
 
       if (pos > 0) {
         const prevBalance = new Decimal(historicalData.data.balance[pos - 1]);
-        const prevLockedBalance = new Decimal(
-          historicalData.data.locked[pos - 1],
-        );
-        const prevUnlockedBalance = new Decimal(
-          historicalData.data.unlocked[pos - 1],
-        );
+        const prevLockedBalance = new Decimal(historicalData.data.locked[pos - 1]);
+        const prevUnlockedBalance = new Decimal(historicalData.data.unlocked[pos - 1]);
 
         amount = amount.minus(prevBalance);
         lockedAmount = lockedAmount.minus(prevLockedBalance);

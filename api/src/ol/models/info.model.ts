@@ -1,12 +1,12 @@
-import { Field, ObjectType } from "@nestjs/graphql";
-import BN from "bn.js";
+import { Field, ObjectType } from '@nestjs/graphql';
+import BN from 'bn.js';
 
 interface InfoArgs {
   latestStableVersion: BN | null;
   latestStableTimestamp: BN | null;
 }
 
-@ObjectType("Info")
+@ObjectType('Info')
 export class Info {
   @Field(() => BN, { nullable: true })
   public latestStableVersion: BN | null;

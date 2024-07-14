@@ -1,10 +1,10 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { PendingTransactionStatus, Prisma } from "@prisma/client";
+import { Inject, Injectable } from '@nestjs/common';
+import { PendingTransactionStatus, Prisma } from '@prisma/client';
 import {
   SignedTransaction,
   TransactionPayloadEntryFunction,
   TransactionAuthenticatorEd25519,
-} from "@aptos-labs/ts-sdk";
+} from '@aptos-labs/ts-sdk';
 
 import {
   IOnChainTransactionsRepository,
@@ -12,11 +12,11 @@ import {
   ITransactionsFactory,
   ITransactionsRepository,
   TransactionArgs,
-} from "./interfaces.js";
-import { PrismaService } from "../../prisma/prisma.service.js";
-import { Types } from "../../types.js";
-import { getTransactionHash } from "../../utils.js";
-import { UserTransaction } from "../models/UserTransaction.js";
+} from './interfaces.js';
+import { PrismaService } from '../../prisma/prisma.service.js';
+import { Types } from '../../types.js';
+import { getTransactionHash } from '../../utils.js';
+import { UserTransaction } from '../models/UserTransaction.js';
 
 @Injectable()
 export class TransactionsRepository implements ITransactionsRepository {
@@ -30,26 +30,18 @@ export class TransactionsRepository implements ITransactionsRepository {
     private readonly onChainTransactionsRepository: IOnChainTransactionsRepository,
   ) {}
 
-  public async newTransaction(
-    signedTransaction: SignedTransaction,
-  ): Promise<boolean> {
-    if (
-      signedTransaction.raw_txn.payload instanceof
-      TransactionPayloadEntryFunction
-    ) {
+  public async newTransaction(signedTransaction: SignedTransaction): Promise<boolean> {
+    if (signedTransaction.raw_txn.payload instanceof TransactionPayloadEntryFunction) {
       const txHash = getTransactionHash(signedTransaction);
 
-      if (
-        signedTransaction.authenticator instanceof
-        TransactionAuthenticatorEd25519
-      ) {
+      if (signedTransaction.authenticator instanceof TransactionAuthenticatorEd25519) {
         const entryFunctionPayload = signedTransaction.raw_txn.payload;
 
         const { entryFunction } = entryFunctionPayload;
         entryFunction.function_name.identifier;
 
         const toBytea = (input: Uint8Array) => {
-          return `\\x${Buffer.from(input).toString("hex")}`;
+          return `\\x${Buffer.from(input).toString('hex')}`;
         };
 
         const affectedRows = await this.prisma.$queryRaw<{ hash: Buffer }[]>`
@@ -73,9 +65,7 @@ export class TransactionsRepository implements ITransactionsRepository {
             ${entryFunction.module_name.address.data},
             ${entryFunction.module_name.name.identifier},
             ${Prisma.raw(
-              `'{${entryFunction.args
-                .map((arg) => toBytea(arg.bcsToBytes()))
-                .join(",")}}'`,
+              `'{${entryFunction.args.map((arg) => toBytea(arg.bcsToBytes())).join(',')}}'`,
             )},
             ${[]}
           )
@@ -87,16 +77,14 @@ export class TransactionsRepository implements ITransactionsRepository {
         }
         return false;
       } else {
-        throw new Error("unsupported transaction authenticator");
+        throw new Error('unsupported transaction authenticator');
       }
     }
 
-    throw new Error("unsupported transaction payload type");
+    throw new Error('unsupported transaction payload type');
   }
 
-  public async getWalletTransactions(
-    address: Uint8Array,
-  ): Promise<ITransaction[]> {
+  public async getWalletTransactions(address: Uint8Array): Promise<ITransaction[]> {
     const rows = await this.prisma.pendingTransaction.findMany({
       where: {
         sender: Buffer.from(address),
@@ -129,12 +117,11 @@ export class TransactionsRepository implements ITransactionsRepository {
         status: transaction.status,
       };
     } else {
-      const onChainTransactions =
-        await this.onChainTransactionsRepository.getTransactionsByHashes([
-          hash,
-        ]);
+      const onChainTransactions = await this.onChainTransactionsRepository.getTransactionsByHashes([
+        hash,
+      ]);
       const onChainTransaction = onChainTransactions.get(
-        Buffer.from(hash).toString("hex").toUpperCase(),
+        Buffer.from(hash).toString('hex').toUpperCase(),
       );
       if (onChainTransaction) {
         if (onChainTransaction instanceof UserTransaction) {
@@ -148,7 +135,7 @@ export class TransactionsRepository implements ITransactionsRepository {
     }
 
     if (!args) {
-      throw new Error("transaction not found");
+      throw new Error('transaction not found');
     }
 
     return this.transactionsFactory.createTransaction(args);
@@ -168,7 +155,7 @@ export class TransactionsRepository implements ITransactionsRepository {
       },
       take: limit,
       orderBy: {
-        expirationTimestampSecs: "asc",
+        expirationTimestampSecs: 'asc',
       },
     });
     return transactions.map((tx) => tx.hash);
@@ -184,7 +171,7 @@ export class TransactionsRepository implements ITransactionsRepository {
         UPDATE "PendingTransaction"
         SET "status" = (${to})::"PendingTransactionStatus"
         WHERE
-          "hash" = ${Prisma.raw(`'\\x${Buffer.from(hash).toString("hex")}'`)}
+          "hash" = ${Prisma.raw(`'\\x${Buffer.from(hash).toString('hex')}'`)}
         AND
           "status" = (${from})::"PendingTransactionStatus"
         RETURNING "hash"
@@ -196,7 +183,7 @@ export class TransactionsRepository implements ITransactionsRepository {
       UPDATE "PendingTransaction"
       SET "status" = (${to})::"PendingTransactionStatus"
       WHERE
-        "hash" = ${Prisma.raw(`'\\x${Buffer.from(hash).toString("hex")}'`)}
+        "hash" = ${Prisma.raw(`'\\x${Buffer.from(hash).toString('hex')}'`)}
       AND
         "status" != (${to})::"PendingTransactionStatus"
       RETURNING "hash"

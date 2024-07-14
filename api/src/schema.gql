@@ -186,13 +186,19 @@ type Node {
   longitude: Float!
 }
 
-"""Buffer"""
+"""
+Buffer
+"""
 scalar Bytes
 
-"""BigInt"""
+"""
+BigInt
+"""
 scalar BigInt
 
-"""Decimal"""
+"""
+Decimal
+"""
 scalar Decimal
 
 type Query {

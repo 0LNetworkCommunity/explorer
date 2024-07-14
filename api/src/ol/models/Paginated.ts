@@ -1,12 +1,12 @@
-import { ObjectType, Field, registerEnumType } from "@nestjs/graphql";
-import { Type } from "@nestjs/common";
+import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
+import { Type } from '@nestjs/common';
 
 export enum OrderDirection {
-  ASC = "ASC",
-  DESC = "DESC",
+  ASC = 'ASC',
+  DESC = 'DESC',
 }
 
-registerEnumType(OrderDirection, { name: "OrderDirection" });
+registerEnumType(OrderDirection, { name: 'OrderDirection' });
 
 export interface IEdgeType<T> {
   cursor: string;
@@ -19,7 +19,7 @@ export interface IPaginatedType<T> {
   pageInfo: PageInfo;
 }
 
-@ObjectType("PageInfo")
+@ObjectType('PageInfo')
 export class PageInfo {
   @Field((type) => String, { nullable: true })
   public readonly prevCursor?: string;
@@ -67,9 +67,7 @@ export function Paginated<T>(classRef: Type<T>): Type<IPaginatedType<T>> {
     ) {
       this.totalCount = totalCount;
       this.pageInfo = pageInfo;
-      this.edges = nodes.map(
-        (node) => new EdgeType(cursorExtractor(node), node),
-      );
+      this.edges = nodes.map((node) => new EdgeType(cursorExtractor(node), node));
     }
   }
   return PaginatedType as Type<IPaginatedType<T>>;

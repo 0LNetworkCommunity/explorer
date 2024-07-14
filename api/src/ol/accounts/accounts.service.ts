@@ -1,8 +1,8 @@
-import { Injectable } from "@nestjs/common";
-import { ClickhouseService } from "../../clickhouse/clickhouse.service.js";
-import { OlService } from "../ol.service.js";
-import { communityWallets } from "../community-wallets/community-wallets.js";
-import { CumulativeShare, TopAccount } from "./accounts.model.js";
+import { Injectable } from '@nestjs/common';
+import { ClickhouseService } from '../../clickhouse/clickhouse.service.js';
+import { OlService } from '../ol.service.js';
+import { communityWallets } from '../community-wallets/community-wallets.js';
+import { CumulativeShare, TopAccount } from './accounts.model.js';
 
 @Injectable()
 export class AccountsService {
@@ -35,7 +35,7 @@ export class AccountsService {
 
       const resultSet = await this.clickhouseService.client.query({
         query: query,
-        format: "JSONEachRow",
+        format: 'JSONEachRow',
       });
 
       const rows: Array<{
@@ -48,7 +48,7 @@ export class AccountsService {
       let cumulativeBalanceAmount = 0;
       const accountsWithCumulative = rows.map((account) => {
         const name = communityWallets.get(account.address)?.name;
-        account.publicName = name ?? "";
+        account.publicName = name ?? '';
         cumulativeBalanceAmount += account.balance;
         const cumulativeShare = new CumulativeShare({
           amount: cumulativeBalanceAmount,
@@ -62,7 +62,7 @@ export class AccountsService {
 
       return accountsWithCumulative;
     } catch (error) {
-      console.error("Error in getTopBalanceAccounts:", error);
+      console.error('Error in getTopBalanceAccounts:', error);
       throw error;
     }
   }

@@ -1,13 +1,13 @@
-import { Scalar, CustomScalar } from "@nestjs/graphql";
-import { Kind, ValueNode } from "graphql";
-import BN from "bn.js";
+import { Scalar, CustomScalar } from '@nestjs/graphql';
+import { Kind, ValueNode } from 'graphql';
+import BN from 'bn.js';
 
-@Scalar("BigInt", (type) => BN)
+@Scalar('BigInt', (type) => BN)
 export class BigIntScalar implements CustomScalar<string, BN> {
-  public readonly description = "BigInt";
+  public readonly description = 'BigInt';
 
   private static INVALID_BIGINT_REPRESENTATION =
-    "Invalid bigint literal representation. Must be base 10 number";
+    'Invalid bigint literal representation. Must be base 10 number';
 
   private static checkLiteral(value: string) {
     if (/^[0-9]*$/i.test(value) === false) {

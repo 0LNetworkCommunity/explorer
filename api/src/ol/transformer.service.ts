@@ -1,35 +1,30 @@
-import os from "node:os";
-import pathUtil from "node:path";
-import fs from "node:fs";
-import { spawn } from "node:child_process";
+import os from 'node:os';
+import pathUtil from 'node:path';
+import fs from 'node:fs';
+import { spawn } from 'node:child_process';
 import process from 'node:process';
 
-import { Injectable } from "@nestjs/common";
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class TransformerService {
   public async transform(txFiles: string[]): Promise<string> {
-    const dest = await fs.promises.mkdtemp(
-      pathUtil.join(os.tmpdir(), "transfromer-"),
-    );
+    const dest = await fs.promises.mkdtemp(pathUtil.join(os.tmpdir(), 'transfromer-'));
 
     await new Promise<void>((resolve, reject) => {
       const bin =
-        process.env.NODE_ENV === "production"
-          ? "/usr/local/bin/transformer"
-          : pathUtil.join(
-              process.cwd(),
-              "transformer/target/debug/transformer",
-            );
+        process.env.NODE_ENV === 'production'
+          ? '/usr/local/bin/transformer'
+          : pathUtil.join(process.cwd(), 'transformer/target/debug/transformer');
 
       const proc = spawn(bin, [...txFiles, dest], {
-        stdio: "inherit",
+        stdio: 'inherit',
       });
 
       // proc.stderr.pipe(process.stderr, { end: false });
       // proc.stdout.pipe(process.stdout, { end: false });
 
-      proc.on("close", (code) => {
+      proc.on('close', (code) => {
         if (code === 0) {
           resolve();
         } else {

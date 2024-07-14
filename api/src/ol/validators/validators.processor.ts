@@ -1,15 +1,15 @@
 // src/validators/validators.processor.ts
-import { Processor, WorkerHost } from "@nestjs/bullmq";
-import { InjectQueue } from "@nestjs/bullmq";
-import { Queue, Job } from "bullmq";
-import { redisClient } from "../../redis/redis.service.js";
-import { ValidatorsService } from "./validators.service.js";
-import { VALIDATORS_CACHE_KEY } from "../constants.js";
+import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue, Job } from 'bullmq';
+import { redisClient } from '../../redis/redis.service.js';
+import { ValidatorsService } from './validators.service.js';
+import { VALIDATORS_CACHE_KEY } from '../constants.js';
 
-@Processor("validators")
+@Processor('validators')
 export class ValidatorsProcessor extends WorkerHost {
   public constructor(
-    @InjectQueue("validators")
+    @InjectQueue('validators')
     private readonly validatorsQueue: Queue,
     private readonly validatorsService: ValidatorsService,
   ) {
@@ -17,7 +17,7 @@ export class ValidatorsProcessor extends WorkerHost {
   }
 
   public async onModuleInit() {
-    await this.validatorsQueue.add("updateValidatorsCache", undefined, {
+    await this.validatorsQueue.add('updateValidatorsCache', undefined, {
       repeat: {
         every: 30 * 1000, // 30 seconds
       },
@@ -26,7 +26,7 @@ export class ValidatorsProcessor extends WorkerHost {
 
   public async process(job: Job<void, any, string>) {
     switch (job.name) {
-      case "updateValidatorsCache":
+      case 'updateValidatorsCache':
         await this.updateValidatorsCache();
         break;
 

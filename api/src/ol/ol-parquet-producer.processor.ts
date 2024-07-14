@@ -5,7 +5,7 @@ import { execFile as execFileNative } from 'node:child_process';
 import util from 'node:util';
 import { Readable } from 'node:stream';
 
-import Bluebird from "bluebird";
+import Bluebird from 'bluebird';
 import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
 import _ from 'lodash';
 import { OnModuleInit } from '@nestjs/common';
@@ -19,10 +19,7 @@ const execFile = util.promisify(execFileNative);
 const PARQUETS_DIR = 'parquets';
 
 @Processor('ol-parquet-producer')
-export class OlParquetProducerProcessor
-  extends WorkerHost
-  implements OnModuleInit
-{
+export class OlParquetProducerProcessor extends WorkerHost implements OnModuleInit {
   public constructor(
     @InjectQueue('ol-parquet-producer')
     private readonly olParquetProducerQueue: Queue,
@@ -54,7 +51,7 @@ export class OlParquetProducerProcessor
 
           // 20m timeout to avoid blocking the queue
           Bluebird.delay(20 * 60 * 1_000).then(() => {
-            throw new Error("timeout");
+            throw new Error('timeout');
           }),
         ]);
         break;
@@ -73,9 +70,7 @@ export class OlParquetProducerProcessor
       (it) => it.split('/')[0],
     );
 
-    const missing = _.difference(json, parquets).map((it) =>
-      parseInt(it.split('-')[0], 10),
-    );
+    const missing = _.difference(json, parquets).map((it) => parseInt(it.split('-')[0], 10));
 
     if (missing.length) {
       await this.olParquetProducerQueue.addBulk(
@@ -112,20 +107,12 @@ export class OlParquetProducerProcessor
     const parquetDir = await this.transformerService.transform(transactionsFiles);
 
     let files = await fs.promises.readdir(parquetDir);
-    files = files.filter(
-      (it) => it.substring(it.length - '.parquet'.length) === '.parquet',
-    );
+    files = files.filter((it) => it.substring(it.length - '.parquet'.length) === '.parquet');
 
     job.log(`compressing (${start}-${end}tar.gz) ...`);
-    await execFile(
-      `tar`,
-      [
-        'czf',
-        `${start}-${end}.tar.gz`,
-        ...files,
-      ],
-      { cwd: parquetDir },
-    );
+    await execFile(`tar`, ['czf', `${start}-${end}.tar.gz`, ...files], {
+      cwd: parquetDir,
+    });
 
     job.log('uploading');
     await this.s3Service.upload(
@@ -139,9 +126,7 @@ export class OlParquetProducerProcessor
   private async download(key: string): Promise<string> {
     const res = await this.s3Service.download(key);
 
-    const tmpDir = await fs.promises.mkdtemp(
-      pathUtil.join(os.tmpdir(), 'parquet-producer-'),
-    );
+    const tmpDir = await fs.promises.mkdtemp(pathUtil.join(os.tmpdir(), 'parquet-producer-'));
     const dest = pathUtil.join(tmpDir, pathUtil.basename(key));
 
     return new Promise<string>((resolve, reject) => {

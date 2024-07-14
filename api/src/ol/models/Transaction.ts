@@ -1,9 +1,9 @@
-import { createUnionType } from "@nestjs/graphql";
+import { createUnionType } from '@nestjs/graphql';
 
-import { BlockMetadataTransaction } from "./BlockMetadataTransaction.js";
-import { GenesisTransaction } from "./GenesisTransaction.js";
-import { UserTransaction } from "./UserTransaction.js";
-import { ScriptUserTransaction } from "./ScriptUserTransaction.js";
+import { BlockMetadataTransaction } from './BlockMetadataTransaction.js';
+import { GenesisTransaction } from './GenesisTransaction.js';
+import { UserTransaction } from './UserTransaction.js';
+import { ScriptUserTransaction } from './ScriptUserTransaction.js';
 
 export type AbstractTransaction =
   | GenesisTransaction
@@ -12,12 +12,7 @@ export type AbstractTransaction =
   | ScriptUserTransaction;
 
 export const GqlTransaction = createUnionType({
-  name: "ChainTransaction",
+  name: 'ChainTransaction',
   types: () =>
-    [
-      GenesisTransaction,
-      BlockMetadataTransaction,
-      UserTransaction,
-      ScriptUserTransaction,
-    ] as const,
+    [GenesisTransaction, BlockMetadataTransaction, UserTransaction, ScriptUserTransaction] as const,
 });

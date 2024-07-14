@@ -1,5 +1,5 @@
-import { Injectable } from "@nestjs/common";
-import BN from "bn.js";
+import { Injectable } from '@nestjs/common';
+import BN from 'bn.js';
 
 import {
   BlockMetadataTransactionDbEntity,
@@ -7,18 +7,16 @@ import {
   IOnChainTransactionsRepository,
   ScriptUserTransactionDbEntity,
   UserTransactionDbEntity,
-} from "./interfaces.js";
-import { ClickhouseService } from "../../clickhouse/clickhouse.service.js";
-import { UserTransaction } from "../models/UserTransaction.js";
-import { BlockMetadataTransaction } from "../models/BlockMetadataTransaction.js";
-import { ScriptUserTransaction } from "../models/ScriptUserTransaction.js";
-import { GenesisTransaction } from "../models/GenesisTransaction.js";
-import { AbstractTransaction } from "../models/Transaction.js";
+} from './interfaces.js';
+import { ClickhouseService } from '../../clickhouse/clickhouse.service.js';
+import { UserTransaction } from '../models/UserTransaction.js';
+import { BlockMetadataTransaction } from '../models/BlockMetadataTransaction.js';
+import { ScriptUserTransaction } from '../models/ScriptUserTransaction.js';
+import { GenesisTransaction } from '../models/GenesisTransaction.js';
+import { AbstractTransaction } from '../models/Transaction.js';
 
 @Injectable()
-export class OnChainTransactionsRepository
-  implements IOnChainTransactionsRepository
-{
+export class OnChainTransactionsRepository implements IOnChainTransactionsRepository {
   public constructor(private readonly clickhouseService: ClickhouseService) {}
 
   public async getTransactionsByHashes(
@@ -54,21 +52,20 @@ export class OnChainTransactionsRepository
       query_params: {
         versions,
       },
-      format: "JSONEachRow",
+      format: 'JSONEachRow',
     });
-    const userTransactionRows =
-      await resUserTransaction.json<UserTransactionDbEntity>();
+    const userTransactionRows = await resUserTransaction.json<UserTransactionDbEntity>();
 
     const userTransactions = new Map(
       userTransactionRows.map((userTransaction) => [
         userTransaction.version,
         new UserTransaction({
-          hash: Buffer.from(userTransaction.hash, "hex"),
-          sender: Buffer.from(userTransaction.sender, "hex"),
+          hash: Buffer.from(userTransaction.hash, 'hex'),
+          sender: Buffer.from(userTransaction.sender, 'hex'),
           timestamp: new BN(userTransaction.timestamp),
           version: new BN(userTransaction.version),
           success: userTransaction.success,
-          moduleAddress: Buffer.from(userTransaction.module_address, "hex"),
+          moduleAddress: Buffer.from(userTransaction.module_address, 'hex'),
           moduleName: userTransaction.module_name,
           functionName: userTransaction.function_name,
           arguments: userTransaction.arguments,
@@ -86,9 +83,8 @@ export class OnChainTransactionsRepository
       return new Map();
     }
 
-    const blockMetadataTransactionRes =
-      await this.clickhouseService.client.query({
-        query: `
+    const blockMetadataTransactionRes = await this.clickhouseService.client.query({
+      query: `
           SELECT
             "timestamp",
             "version",
@@ -98,11 +94,11 @@ export class OnChainTransactionsRepository
           WHERE
             "version" IN {versions:Array(UInt64)}
         `,
-        query_params: {
-          versions,
-        },
-        format: "JSONEachRow",
-      });
+      query_params: {
+        versions,
+      },
+      format: 'JSONEachRow',
+    });
 
     const blockMetadataTransactionRows =
       await blockMetadataTransactionRes.json<BlockMetadataTransactionDbEntity>();
@@ -115,7 +111,7 @@ export class OnChainTransactionsRepository
             timestamp: new BN(blockMetadataTransaction.timestamp),
             version: new BN(blockMetadataTransaction.version),
             epoch: new BN(blockMetadataTransaction.epoch),
-            hash: Buffer.from(blockMetadataTransaction.hash, "hex"),
+            hash: Buffer.from(blockMetadataTransaction.hash, 'hex'),
           }),
         ];
       }),
@@ -146,7 +142,7 @@ export class OnChainTransactionsRepository
       query_params: {
         versions,
       },
-      format: "JSONEachRow",
+      format: 'JSONEachRow',
     });
 
     const scriptUserTransactionRows =
@@ -157,8 +153,8 @@ export class OnChainTransactionsRepository
         scriptUserTransaction.version,
         new ScriptUserTransaction({
           version: new BN(scriptUserTransaction.version),
-          hash: Buffer.from(scriptUserTransaction.hash, "hex"),
-          sender: Buffer.from(scriptUserTransaction.sender, "hex"),
+          hash: Buffer.from(scriptUserTransaction.hash, 'hex'),
+          sender: Buffer.from(scriptUserTransaction.sender, 'hex'),
           timestamp: new BN(scriptUserTransaction.timestamp),
           success: scriptUserTransaction.success,
         }),
@@ -185,18 +181,17 @@ export class OnChainTransactionsRepository
       query_params: {
         versions,
       },
-      format: "JSONEachRow",
+      format: 'JSONEachRow',
     });
 
-    const genesisTransactionRows =
-      await genesisTransactionRes.json<GenesisTransactionDbEntity>();
+    const genesisTransactionRows = await genesisTransactionRes.json<GenesisTransactionDbEntity>();
 
     return new Map(
       genesisTransactionRows.map((genesisTransaction) => [
         genesisTransaction.version,
         new GenesisTransaction({
           version: new BN(genesisTransaction.version),
-          hash: Buffer.from(genesisTransaction.hash, "hex"),
+          hash: Buffer.from(genesisTransaction.hash, 'hex'),
         }),
       ]),
     );
@@ -239,24 +234,23 @@ export class OnChainTransactionsRepository
           "user_transaction"."hash" = "hashes"."hash"
       `,
       query_params: {
-        hashes: hashes.map((hash) => Buffer.from(hash).toString("hex")),
+        hashes: hashes.map((hash) => Buffer.from(hash).toString('hex')),
       },
-      format: "JSONEachRow",
+      format: 'JSONEachRow',
     });
 
-    const userTransactionRows =
-      await resUserTransaction.json<UserTransactionDbEntity>();
+    const userTransactionRows = await resUserTransaction.json<UserTransactionDbEntity>();
 
     const userTransactions = new Map(
       userTransactionRows.map((userTransaction) => [
-        Buffer.from(userTransaction.hash, "hex").toString("hex").toUpperCase(),
+        Buffer.from(userTransaction.hash, 'hex').toString('hex').toUpperCase(),
         new UserTransaction({
-          hash: Buffer.from(userTransaction.hash, "hex"),
-          sender: Buffer.from(userTransaction.sender, "hex"),
+          hash: Buffer.from(userTransaction.hash, 'hex'),
+          sender: Buffer.from(userTransaction.sender, 'hex'),
           timestamp: new BN(userTransaction.timestamp),
           version: new BN(userTransaction.version),
           success: userTransaction.success,
-          moduleAddress: Buffer.from(userTransaction.module_address, "hex"),
+          moduleAddress: Buffer.from(userTransaction.module_address, 'hex'),
           moduleName: userTransaction.module_name,
           functionName: userTransaction.function_name,
           arguments: userTransaction.arguments,
@@ -313,7 +307,7 @@ export class OnChainTransactionsRepository
         SELECT MAX("timestamp") AS "timestamp"
         FROM "txs"
       `,
-      format: "JSONEachRow",
+      format: 'JSONEachRow',
       query_params: {
         version: version.toString(10),
       },

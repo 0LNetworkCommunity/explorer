@@ -1,10 +1,10 @@
-import { Scalar, CustomScalar } from "@nestjs/graphql";
-import { Kind, ValueNode } from "graphql";
-import { Decimal } from "decimal.js";
+import { Scalar, CustomScalar } from '@nestjs/graphql';
+import { Kind, ValueNode } from 'graphql';
+import { Decimal } from 'decimal.js';
 
-@Scalar("Decimal", (type) => Decimal)
+@Scalar('Decimal', (type) => Decimal)
 export class DecimalScalar implements CustomScalar<string, Decimal> {
-  public readonly description = "Decimal";
+  public readonly description = 'Decimal';
 
   public parseValue(value: string): Decimal {
     return new Decimal(value);
@@ -18,6 +18,6 @@ export class DecimalScalar implements CustomScalar<string, Decimal> {
     if (ast.kind === Kind.STRING) {
       return new Decimal(ast.value);
     }
-    throw new Error("Unable to parse Decimal. Literal must be a string.");
+    throw new Error('Unable to parse Decimal. Literal must be a string.');
   }
 }

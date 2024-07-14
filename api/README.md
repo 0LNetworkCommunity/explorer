@@ -34,7 +34,6 @@ Before you begin, ensure you have met the following requirements:
 - npm or yarn
 - Redis
 
-
 ## Installation
 
 First, install the project dependencies:
@@ -42,11 +41,12 @@ First, install the project dependencies:
 ```bash
 $ npm install
 ```
-Then, install [Redis](https://redis.io/docs/install/install-redis/) on your machine. 
+
+Then, install [Redis](https://redis.io/docs/install/install-redis/) on your machine.
 
 After installing Redis, start the Redis server:
 
-```bash 
+```bash
 $ brew services start redis
 ```
 

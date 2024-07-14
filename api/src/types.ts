@@ -1,9 +1,8 @@
-
 export enum Types {
-  ITransactionsRepository = "ITransactionsRepository",
-  ITransactionsService = "ITransactionsService",
-  ITransactionsFactory = "ITransactionsFactory",
-  ITransaction = "ITransaction",
-  IOnChainTransactionsRepository = "IOnChainTransactionsRepository",
-  ICommunityWalletsService = "ICommunityWalletsService",
+  ITransactionsRepository = 'ITransactionsRepository',
+  ITransactionsService = 'ITransactionsService',
+  ITransactionsFactory = 'ITransactionsFactory',
+  ITransaction = 'ITransaction',
+  IOnChainTransactionsRepository = 'IOnChainTransactionsRepository',
+  ICommunityWalletsService = 'ICommunityWalletsService',
 }

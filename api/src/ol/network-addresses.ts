@@ -1,4 +1,4 @@
-import { BCS } from "aptos";
+import { BCS } from 'aptos';
 
 const PUBLIC_KEY_SIZE = 32;
 
@@ -29,14 +29,13 @@ class Ip6Protocol implements INetworkProtocol {
   }
 
   public toString(): string {
-    const ip = Array.from(this.ip).map((it) =>  it.toString(16));
+    const ip = Array.from(this.ip).map((it) => it.toString(16));
     return `/ip6/${ip.join(':')}`;
   }
 }
 
 class DnsProtocol implements INetworkProtocol {
-  public constructor(public readonly name: string) {
-  }
+  public constructor(public readonly name: string) {}
 
   public toString(): string {
     return `/dns/${this.name}`;
@@ -45,7 +44,7 @@ class DnsProtocol implements INetworkProtocol {
 
 class TcpProtocol implements INetworkProtocol {
   public constructor(public readonly port: number) {
-    if (port < 0 || port > 0xFFFF) {
+    if (port < 0 || port > 0xffff) {
       throw new Error('invalid port');
     }
   }
@@ -70,7 +69,7 @@ class NoiseIKProtocol implements INetworkProtocol {
 
 class HandshakeProtocol implements INetworkProtocol {
   public constructor(public readonly version: number) {
-    if (version < 0 || version > 0xFF) {
+    if (version < 0 || version > 0xff) {
       throw new Error('invalid length');
     }
   }
@@ -93,25 +92,29 @@ type ProtocolDeserializer = (deserializer: BCS.Deserializer) => NetworkProtocol;
 export class NetworkAddresses {
   private static protocolDeserializers: ProtocolDeserializer[] = [
     function ip4(deserializer: BCS.Deserializer): Ip4Protocol {
-      return new Ip4Protocol(new Uint8Array([
-        deserializer.deserializeU8(),
-        deserializer.deserializeU8(),
-        deserializer.deserializeU8(),
-        deserializer.deserializeU8(),
-      ]));
+      return new Ip4Protocol(
+        new Uint8Array([
+          deserializer.deserializeU8(),
+          deserializer.deserializeU8(),
+          deserializer.deserializeU8(),
+          deserializer.deserializeU8(),
+        ]),
+      );
     },
 
     function ip6(deserializer: BCS.Deserializer): Ip6Protocol {
-      return new Ip6Protocol(new Uint16Array([
-        deserializer.deserializeU16(),
-        deserializer.deserializeU16(),
-        deserializer.deserializeU16(),
-        deserializer.deserializeU16(),
-        deserializer.deserializeU16(),
-        deserializer.deserializeU16(),
-        deserializer.deserializeU16(),
-        deserializer.deserializeU16(),
-      ]));
+      return new Ip6Protocol(
+        new Uint16Array([
+          deserializer.deserializeU16(),
+          deserializer.deserializeU16(),
+          deserializer.deserializeU16(),
+          deserializer.deserializeU16(),
+          deserializer.deserializeU16(),
+          deserializer.deserializeU16(),
+          deserializer.deserializeU16(),
+          deserializer.deserializeU16(),
+        ]),
+      );
     },
 
     function dns(deserializer: BCS.Deserializer) {

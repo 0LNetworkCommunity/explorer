@@ -1,31 +1,31 @@
-import os from "node:os";
-import pathUtil from "node:path";
-import fs from "node:fs";
+import os from 'node:os';
+import pathUtil from 'node:path';
+import fs from 'node:fs';
 
-import _ from "lodash";
-import { InjectQueue, Processor, WorkerHost } from "@nestjs/bullmq";
-import { Inject, OnModuleInit } from "@nestjs/common";
-import { Job, Queue } from "bullmq";
-import BN from "bn.js";
-import axios from "axios";
-import Bluebird from "bluebird";
-import { Types as AptosTypes } from "aptos";
-import { JSONCodec } from "nats";
-import { ConfigService } from "@nestjs/config";
-import qs from "qs";
-import { PendingTransactionStatus } from "@prisma/client";
+import _ from 'lodash';
+import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
+import { Inject, OnModuleInit } from '@nestjs/common';
+import { Job, Queue } from 'bullmq';
+import BN from 'bn.js';
+import axios from 'axios';
+import Bluebird from 'bluebird';
+import { Types as AptosTypes } from 'aptos';
+import { JSONCodec } from 'nats';
+import { ConfigService } from '@nestjs/config';
+import qs from 'qs';
+import { PendingTransactionStatus } from '@prisma/client';
 
-import { OlDbService } from "../ol-db/ol-db.service.js";
-import { ClickhouseQueryResponse, ClickhouseService } from "../clickhouse/clickhouse.service.js";
-import { TransformerService } from "./transformer.service.js";
-import { NotPendingTransaction } from "./types.js";
-import { OlConfig } from "../config/config.interface.js";
-import { WalletSubscriptionService } from "../wallet-subscription/wallet-subscription.service.js";
-import { NatsService } from "../nats/nats.service.js";
-import { bnBisect, parseHexString } from "../utils.js";
-import { ITransactionsService } from "./transactions/interfaces.js";
-import { Types } from "../types.js";
-import { OlService } from "./ol.service.js";
+import { OlDbService } from '../ol-db/ol-db.service.js';
+import { ClickhouseQueryResponse, ClickhouseService } from '../clickhouse/clickhouse.service.js';
+import { TransformerService } from './transformer.service.js';
+import { NotPendingTransaction } from './types.js';
+import { OlConfig } from '../config/config.interface.js';
+import { WalletSubscriptionService } from '../wallet-subscription/wallet-subscription.service.js';
+import { NatsService } from '../nats/nats.service.js';
+import { bnBisect, parseHexString } from '../utils.js';
+import { ITransactionsService } from './transactions/interfaces.js';
+import { Types } from '../types.js';
+import { OlService } from './ol.service.js';
 
 const ZERO = new BN(0);
 const ONE = new BN(1);
@@ -46,14 +46,14 @@ export interface VersionJobData {
   version: string;
 }
 
-@Processor("ol-version")
+@Processor('ol-version')
 export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   private static jsonCodec = JSONCodec();
 
   private readonly providerHost: string;
 
   public constructor(
-    @InjectQueue("ol-version")
+    @InjectQueue('ol-version')
     private readonly olVersionQueue: Queue,
 
     configService: ConfigService,
@@ -75,12 +75,12 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   ) {
     super();
 
-    const config = configService.get<OlConfig>("ol")!;
+    const config = configService.get<OlConfig>('ol')!;
     this.providerHost = config.provider;
   }
 
   public async onModuleInit() {
-    await this.olVersionQueue.add("getMissingVersions", undefined, {
+    await this.olVersionQueue.add('getMissingVersions', undefined, {
       repeat: {
         every: 5 * 1_000, // 5 seconds
       },
@@ -90,7 +90,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       },
     });
 
-    await this.olVersionQueue.add("fetchLatestVersion", undefined, {
+    await this.olVersionQueue.add('fetchLatestVersion', undefined, {
       repeat: {
         every: 5 * 1_000, // 5 seconds
       },
@@ -100,7 +100,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       },
     });
 
-    await this.olVersionQueue.add("updateLatestStableVersion", undefined, {
+    await this.olVersionQueue.add('updateLatestStableVersion', undefined, {
       repeat: {
         every: 5 * 1_000, // 5 seconds
       },
@@ -113,7 +113,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
 
   public async process(job: Job<VersionJobData, any, string>) {
     switch (job.name) {
-      case "getMissingVersions":
+      case 'getMissingVersions':
         try {
           await Promise.race([
             this.getMissingVersions(),
@@ -125,11 +125,11 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
         }
         break;
 
-      case "version":
+      case 'version':
         await this.processVersion(job.data.version);
         break;
 
-      case "fetchLatestVersion":
+      case 'fetchLatestVersion':
         try {
           await Promise.race([
             this.fetchLatestVersion(),
@@ -141,7 +141,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
         }
         break;
 
-      case "updateLatestStableVersion":
+      case 'updateLatestStableVersion':
         try {
           await Promise.race([
             this.updateLatestStableVersion(),
@@ -160,9 +160,9 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
 
   private async updateLatestStableVersion(): Promise<void> {
     const js = this.natsService.jetstream;
-    const kv = await js.views.kv("ol");
-    const entry = await kv.get("ledger.latestVersion");
-    let ledgerLatestVersion = new BN(entry?.string() ?? "0");
+    const kv = await js.views.kv('ol');
+    const entry = await kv.get('ledger.latestVersion');
+    let ledgerLatestVersion = new BN(entry?.string() ?? '0');
 
     while (true) {
       const start = ledgerLatestVersion;
@@ -221,12 +221,11 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
           start: start.toString(10),
           end: end.toString(10),
         },
-        format: "JSONColumnsWithMetadata",
+        format: 'JSONColumnsWithMetadata',
       });
-      const rows =
-        (await resultSet.json()) as unknown as ClickhouseQueryResponse<{
-          version?: string[];
-        }>;
+      const rows = (await resultSet.json()) as unknown as ClickhouseQueryResponse<{
+        version?: string[];
+      }>;
 
       const versions = rows.data.version;
       if (!versions) {
@@ -238,20 +237,20 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
         if (index === -1) {
           if (!i.isZero()) {
             const last = i.sub(ONE);
-            await kv.put("ledger.latestVersion", last.toString());
+            await kv.put('ledger.latestVersion', last.toString());
           }
           return;
         }
       }
 
-      await kv.put("ledger.latestVersion", end.toString());
+      await kv.put('ledger.latestVersion', end.toString());
       ledgerLatestVersion = end.clone();
     }
   }
 
   private async processVersion(version: string) {
     const res = await axios({
-      method: "GET",
+      method: 'GET',
       url: `${this.providerHost}/v1/transactions?${qs.stringify({
         start: version,
         limit: 1,
@@ -268,13 +267,13 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
 
   private async addVersionJob(version: bigint) {
     await this.olVersionQueue.add(
-      "version",
+      'version',
       { version: version.toString(10) },
       {
         jobId: `__version__${version}`,
         attempts: 3,
         backoff: {
-          type: "exponential",
+          type: 'exponential',
           delay: 500,
         },
         removeOnComplete: {
@@ -297,20 +296,15 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   private async ingestTransaction(transaction: AptosTypes.Transaction) {
-    if (transaction.type === "pending_transaction") {
+    if (transaction.type === 'pending_transaction') {
       return;
     }
 
-    const dest = await fs.promises.mkdtemp(
-      pathUtil.join(os.tmpdir(), "ol-version-"),
-    );
+    const dest = await fs.promises.mkdtemp(pathUtil.join(os.tmpdir(), 'ol-version-'));
     await fs.promises.mkdir(dest, { recursive: true });
 
     const transactionsFile = `${dest}/transactions.json`;
-    await fs.promises.writeFile(
-      `${dest}/transactions.json`,
-      JSON.stringify([transaction]),
-    );
+    await fs.promises.writeFile(`${dest}/transactions.json`, JSON.stringify([transaction]));
 
     const notPendingTransaction = transaction as NotPendingTransaction;
 
@@ -331,14 +325,10 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       return;
     }
 
-    const parquetDest = await this.transformerService.transform([
-      transactionsFile,
-    ]);
+    const parquetDest = await this.transformerService.transform([transactionsFile]);
     const files = await fs.promises.readdir(parquetDest);
     for (const file of files) {
-      await this.clickhouseService.insertParquetFile(
-        pathUtil.join(parquetDest, file),
-      );
+      await this.clickhouseService.insertParquetFile(pathUtil.join(parquetDest, file));
     }
 
     await fs.promises.rm(parquetDest, { recursive: true, force: true });
@@ -354,31 +344,27 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       },
     });
 
-    await this.walletSubscriptionService.releaseVersion(
-      notPendingTransaction.version,
-    );
+    await this.walletSubscriptionService.releaseVersion(notPendingTransaction.version);
     await this.publishChanges(notPendingTransaction.version);
 
-    if (transaction.type === "user_transaction") {
+    if (transaction.type === 'user_transaction') {
       const userTransaction = transaction as AptosTypes.UserTransaction;
 
       const txHash = parseHexString(userTransaction.hash);
       const transactionUpdated = await this.transactionsService.updateTransactionStatus(
-          txHash,
-          undefined,
-          PendingTransactionStatus.ON_CHAIN,
-        );
+        txHash,
+        undefined,
+        PendingTransactionStatus.ON_CHAIN,
+      );
 
       // `updateTransactionStatus` returns false if no pending transaction was found. We need to explicitly trigger
       // the transaction event in that case.
 
       if (!transactionUpdated) {
         this.natsService.nc.publish(
-          this.natsService.getWalletTransactionChannel(
-            parseHexString(userTransaction.sender),
-          ),
+          this.natsService.getWalletTransactionChannel(parseHexString(userTransaction.sender)),
           OlVersionProcessor.jsonCodec.encode({
-            hash: Buffer.from(txHash).toString("hex").toUpperCase(),
+            hash: Buffer.from(txHash).toString('hex').toUpperCase(),
           }),
         );
       }
@@ -404,7 +390,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       query_params: {
         version,
       },
-      format: "JSONColumnsWithMetadata",
+      format: 'JSONColumnsWithMetadata',
     });
 
     const rows = (await result.json()) as unknown as ClickhouseQueryResponse<{
@@ -416,7 +402,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
 
     for (const address of rows.data.address) {
       this.natsService.nc.publish(
-        this.natsService.getWalletMovementChannel(Buffer.from(address, "hex")),
+        this.natsService.getWalletMovementChannel(Buffer.from(address, 'hex')),
         OlVersionProcessor.jsonCodec.encode({
           version,
         }),
@@ -426,7 +412,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
 
   private async getLedgerVersion(): Promise<string> {
     const res = await axios({
-      method: "GET",
+      method: 'GET',
       url: `${this.providerHost}/v1`,
       signal: AbortSignal.timeout(5 * 60 * 1_000), // 5 minutes
     });
@@ -435,8 +421,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   }
 
   private async getMissingVersions() {
-    const lastBatchIngestedVersion =
-      await this.olDbService.getLastBatchIngestedVersion();
+    const lastBatchIngestedVersion = await this.olDbService.getLastBatchIngestedVersion();
     const latestStableVersion = await this.olService.getLatestStableVersion();
 
     let fromVersion: BN | undefined;
@@ -454,14 +439,10 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       }
     }
 
-    const ingestedVersions = await this.olDbService.getIngestedVersions(
-      fromVersion
-    );
+    const ingestedVersions = await this.olDbService.getIngestedVersions(fromVersion);
     const latestVersion = new BN(await this.getLedgerVersion());
     for (
-      let i = fromVersion
-        ? fromVersion.add(ONE)
-        : ZERO;
+      let i = fromVersion ? fromVersion.add(ONE) : ZERO;
       i.lt(latestVersion);
       i = i.add(new BN(ONE))
     ) {

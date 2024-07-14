@@ -90,10 +90,13 @@ const HistoricalBalance: FC<Props> = ({ address }) => {
         dataZoom: [
           {
             type: 'inside',
-            start: 94,
+            start: 0,
             end: 100,
           },
-          {},
+          {
+            start: 0,
+            end: 100,
+          },
         ],
       });
     };

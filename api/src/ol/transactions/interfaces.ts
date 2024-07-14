@@ -1,3 +1,4 @@
+import BN from "bn.js";
 import { PendingTransactionStatus } from "@prisma/client";
 import { SignedTransaction } from "@aptos-labs/ts-sdk";
 
@@ -74,6 +75,8 @@ export interface IOnChainTransactionsRepository {
   getGenesisTransactionsByVersions(
     versions: number[],
   ): Promise<Map<string, GenesisTransaction>>;
+
+  getTransactionTimestamp(version: BN): Promise<BN | null>;
 }
 
 export interface GenesisTransactionDbEntity {

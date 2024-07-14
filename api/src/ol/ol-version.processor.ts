@@ -25,6 +25,7 @@ import { NatsService } from "../nats/nats.service.js";
 import { bnBisect, parseHexString } from "../utils.js";
 import { ITransactionsService } from "./transactions/interfaces.js";
 import { Types } from "../types.js";
+import { OlService } from "./ol.service.js";
 
 const ZERO = new BN(0);
 const ONE = new BN(1);
@@ -61,6 +62,8 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
 
     private readonly olDbService: OlDbService,
 
+    private readonly olService: OlService,
+
     private readonly clickhouseService: ClickhouseService,
 
     private readonly natsService: NatsService,
@@ -79,28 +82,31 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   public async onModuleInit() {
     await this.olVersionQueue.add("getMissingVersions", undefined, {
       repeat: {
-        every: 8 * 60 * 60 * 1_000, // 8 hours
+        every: 5 * 1_000, // 5 seconds
       },
       removeOnComplete: true,
+      removeOnFail: {
+        age: 5 * 60 * 1_000,
+      },
     });
 
     await this.olVersionQueue.add("fetchLatestVersion", undefined, {
       repeat: {
-        every: 30 * 1_000, // 30 seconds
+        every: 5 * 1_000, // 5 seconds
       },
       removeOnComplete: true,
       removeOnFail: {
-        age: 24 * 60 * 60,
+        age: 5 * 60 * 1_000,
       },
     });
 
-    await this.olVersionQueue.add("updateLastestStableVersion", undefined, {
+    await this.olVersionQueue.add("updateLatestStableVersion", undefined, {
       repeat: {
-        every: 30 * 1_000, // 30 seconds
+        every: 5 * 1_000, // 5 seconds
       },
       removeOnComplete: true,
       removeOnFail: {
-        age: 24 * 60 * 60,
+        age: 5 * 60 * 1_000,
       },
     });
   }
@@ -135,10 +141,10 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
         }
         break;
 
-      case "updateLastestStableVersion":
+      case "updateLatestStableVersion":
         try {
           await Promise.race([
-            this.updateLastestStableVersion(),
+            this.updateLatestStableVersion(),
             // 1m timeout to avoid blocking the queue
             Bluebird.delay(1 * 60 * 1_000),
           ]);
@@ -152,7 +158,7 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
     }
   }
 
-  private async updateLastestStableVersion(): Promise<void> {
+  private async updateLatestStableVersion(): Promise<void> {
     const js = this.natsService.jetstream;
     const kv = await js.views.kv("ol");
     const entry = await kv.get("ledger.latestVersion");
@@ -266,12 +272,16 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       { version: version.toString(10) },
       {
         jobId: `__version__${version}`,
-        attempts: 10,
+        attempts: 3,
         backoff: {
-          type: "fixed",
+          type: "exponential",
+          delay: 500,
         },
         removeOnComplete: {
           age: 3600, // keep up to 1 hour
+        },
+        removeOnFail: {
+          age: 5 * 60 * 1000, // 5 minutes
         },
       },
     );
@@ -427,9 +437,25 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
   private async getMissingVersions() {
     const lastBatchIngestedVersion =
       await this.olDbService.getLastBatchIngestedVersion();
+    const latestStableVersion = await this.olService.getLatestStableVersion();
+
+    let fromVersion: BN | undefined;
+    if (lastBatchIngestedVersion) {
+      fromVersion = lastBatchIngestedVersion;
+    }
+
+    if (latestStableVersion) {
+      if (lastBatchIngestedVersion) {
+        if (latestStableVersion.gt(lastBatchIngestedVersion)) {
+          fromVersion = latestStableVersion;
+        }
+      } else {
+        fromVersion = latestStableVersion;
+      }
+    }
 
     const ingestedVersions = await this.olDbService.getIngestedVersions(
-      lastBatchIngestedVersion ?? undefined,
+      fromVersion
     );
     const latestVersion = new BN(await this.getLedgerVersion());
     for (

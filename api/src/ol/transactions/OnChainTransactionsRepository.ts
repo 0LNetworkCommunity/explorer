@@ -266,4 +266,64 @@ export class OnChainTransactionsRepository
 
     return userTransactions;
   }
+
+  public async getTransactionTimestamp(version: BN): Promise<BN | null> {
+    const res = await this.clickhouseService.client.query({
+      query: `
+        WITH "txs" AS (
+          (
+            SELECT "timestamp"
+            FROM "user_transaction"
+            WHERE "version" = {version:UInt64}
+            ORDER BY "version" DESC
+            LIMIT 1
+          )
+
+          UNION ALL
+
+          (
+            SELECT "timestamp"
+            FROM "block_metadata_transaction"
+            WHERE "version" = {version:UInt64}
+            ORDER BY "version" DESC
+            LIMIT 1
+          )
+
+          UNION ALL
+
+          (
+            SELECT "timestamp"
+            FROM "state_checkpoint_transaction"
+            WHERE "version" = {version:UInt64}
+            ORDER BY "version" DESC
+            LIMIT 1
+          )
+
+          UNION ALL
+
+          (
+            SELECT "timestamp"
+            FROM "script"
+            WHERE "version" = {version:UInt64}
+            ORDER BY "version" DESC
+            LIMIT 1
+          )
+        )
+
+        SELECT MAX("timestamp") AS "timestamp"
+        FROM "txs"
+      `,
+      format: "JSONEachRow",
+      query_params: {
+        version: version.toString(10),
+      },
+    });
+    const rows = await res.json<{ timestamp: string }>();
+
+    if (rows.length) {
+      return new BN(rows[0].timestamp);
+    }
+
+    return null;
+  }
 }

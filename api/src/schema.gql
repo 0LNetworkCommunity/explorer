@@ -176,6 +176,11 @@ type GenesisTransaction implements AbstractTransaction {
   hash: Bytes!
 }
 
+type Info {
+  latestStableVersion: BigInt
+  latestStableTimestamp: BigInt
+}
+
 type Node {
   latitude: Float!
   longitude: Float!
@@ -194,6 +199,7 @@ type Query {
   userTransactionsCount: Int!
   userTransactions(limit: Int!, offset: Int!, order: String!): UserTransactionCollection!
   modules: [Module!]!
+  info: Info!
   account(address: Bytes!): Account
   getTopAccounts(limit: Float! = 100): [TopAccount!]!
   getValidators: [Validator!]!

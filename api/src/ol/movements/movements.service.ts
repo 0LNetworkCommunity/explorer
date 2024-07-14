@@ -12,13 +12,15 @@ import { OrderDirection, PageInfo } from "../models/Paginated.js";
 import { PaginatedMovements } from "../models/PaginatedMovements.js";
 import { IOnChainTransactionsRepository } from "../transactions/interfaces.js";
 import { Types } from "../../types.js";
+import { OlService } from "../ol.service.js";
 
 @Injectable()
 export class MovementsService {
   private dataApiHost: string;
 
   public constructor(
-    private readonly natsService: NatsService,
+    private readonly olService: OlService,
+
     configService: ConfigService,
 
     @Inject(Types.IOnChainTransactionsRepository)
@@ -36,7 +38,7 @@ export class MovementsService {
     after: string | undefined,
     order: OrderDirection,
   ): Promise<PaginatedMovements> {
-    const lastestStableVersionBn = await this.getLastestStableVersion();
+    const lastestStableVersionBn = await this.olService.getLatestStableVersion();
     if (!lastestStableVersionBn) {
       return new PaginatedMovements(0, new PageInfo(false), []);
     }
@@ -222,15 +224,5 @@ export class MovementsService {
           movements,
         );
     }
-  }
-
-  private async getLastestStableVersion(): Promise<null | BN> {
-    const js = this.natsService.jetstream;
-    const kv = await js.views.kv("ol");
-    const entry = await kv.get("ledger.latestVersion");
-    if (!entry) {
-      return null;
-    }
-    return new BN(entry.string());
   }
 }

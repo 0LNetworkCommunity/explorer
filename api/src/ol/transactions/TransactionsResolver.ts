@@ -10,6 +10,7 @@ import { NatsService } from "../../nats/nats.service.js";
 import { deserializeSignedTransaction, getTransactionHash, parseHexString } from "../../utils.js";
 import { OlConfig } from "../../config/config.interface.js";
 import axios from "axios";
+import { GraphQLError } from "graphql";
 
 @Resolver()
 export class TransactionsResolver {
@@ -53,38 +54,51 @@ export class TransactionsResolver {
 
     const txHash = Buffer.from(getTransactionHash(tx));
 
-    let resHash: Buffer | undefined;
+    const res = await axios<{
+      hash: string;
+    } | {
+      error_code: string;
+      message: string;
+      vm_error_code: number;
+    }>({
+      method: "POST",
+      url: `${this.providerHost}/v1/transactions`,
+      headers: {
+        "content-type": "application/x.diem.signed_transaction+bcs",
+      },
+      data: signedTransaction,
+      signal: AbortSignal.timeout(1 * 60 * 1_000), // 1 minutes
+      validateStatus: () => true,
+    });
 
-    try {
-      const res = await axios<{
-        hash: string;
-      }>({
-        method: "POST",
-        url: `${this.providerHost}/v1/transactions`,
-        headers: {
-          "content-type": "application/x.diem.signed_transaction+bcs",
-        },
-        data: signedTransaction,
-        signal: AbortSignal.timeout(1 * 60 * 1_000), // 1 minutes
-      });
-      if (res.status === 202) {
-        resHash = Buffer.from(parseHexString(res.data.hash));
-      } else {
-        console.log(res.status);
-      }
-    } catch (error) {
-      console.error(error);
-    }
+    switch (res.status) {
+      case 202: {
+        const body = res.data as { hash: string };
+        const resHash = Buffer.from(parseHexString(body.hash));
+        if (!txHash.equals(resHash)) {
+          throw new GraphQLError(
+            `transaction hash retrieved is different than the one provided provided=${txHash.toString("hex")} returned=${Buffer.from(resHash).toString("hex")}`,
+          );
+        }
+        return this.transactionsService.getTransactionByHash(txHash);
+      };
 
-    if (resHash) {
-      if (!txHash.equals(resHash)) {
-        throw new Error(
-          `transaction hash retrieved is different than the one provided provided=${txHash.toString("hex")} returned=${Buffer.from(resHash).toString("hex")}`,
+      case 400: {
+        const body = res.data as {
+          error_code: string;
+          message: string;
+          vm_error_code: number;
+        };
+        throw new GraphQLError(
+          body.message,
         );
-      }
-    }
+      };
 
-    return this.transactionsService.getTransactionByHash(txHash);
+      default:
+        throw new GraphQLError(
+          `Error from rpc node. status = ${res.status}`
+        );
+    }
   }
 
   @Subscription((returns) => Transaction)

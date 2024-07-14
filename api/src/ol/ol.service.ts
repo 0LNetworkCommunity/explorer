@@ -19,12 +19,16 @@ import { NetworkAddresses } from "./network-addresses.js";
 import { parseAddress } from "../utils.js";
 import { SupplyStats } from "./types.js";
 import { SlowWallet } from "./models/slow-wallet.model.js";
+import { NatsService } from "../nats/nats.service.js";
 
 @Injectable()
 export class OlService {
   public readonly aptosClient: AptosClient;
 
-  public constructor(configService: ConfigService) {
+  public constructor(
+    private readonly natsService: NatsService,
+    configService: ConfigService
+  ) {
     const config = configService.get<OlConfig>("ol")!;
     this.aptosClient = new AptosClient(config.provider);
   }
@@ -258,5 +262,15 @@ export class OlService {
       }
       throw error;
     }
+  }
+
+  public async getLatestStableVersion(): Promise<null | BN> {
+    const js = this.natsService.jetstream;
+    const kv = await js.views.kv("ol");
+    const entry = await kv.get("ledger.latestVersion");
+    if (!entry) {
+      return null;
+    }
+    return new BN(entry.string());
   }
 }

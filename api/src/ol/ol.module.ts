@@ -50,6 +50,7 @@ import { TransactionsService } from "./transactions/TransactionsService.js";
 import { Transaction } from "./transactions/Transaction.js";
 import { OnChainTransactionsRepository } from "./transactions/OnChainTransactionsRepository.js";
 import { ExpiredTransactionsProcessor } from "./transactions/ExpiredTransactionsProcessor.js";
+import { InfoResolver } from "./info.resolver.js";
 
 const roles = process.env.ROLES!.split(",");
 
@@ -124,6 +125,7 @@ for (const role of roles) {
     UserTransactionsResolver,
     ModulesResolver,
     MovementsResolver,
+    InfoResolver,
 
     AccountResolver,
     AccountsResolver,

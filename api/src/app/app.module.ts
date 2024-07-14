@@ -19,6 +19,8 @@ import { MultiSigModule } from "../multi-sig/multi-sig.module.js";
 import { OsmosisModule } from "../osmosis/OsmosisModule.js";
 
 // Test purposes
+// import { OsmosisModule } from "../clickhouse/bridged-networks/osmosis/OsmosisModule.js";
+import { BaseModule } from "../base/BaseModule.js";
 
 @Module({
   imports: [
@@ -50,7 +52,8 @@ import { OsmosisModule } from "../osmosis/OsmosisModule.js";
     OlSwapModule,
     NodeWatcherModule,
     MultiSigModule,
-    OsmosisModule,
+    // OsmosisModule,
+    BaseModule,
   ],
   controllers: [],
   providers: [AppService],

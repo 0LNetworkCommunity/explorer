@@ -12,13 +12,12 @@ export class OsmosisController {
   @Post("fetch-historical")
   async triggerHistoricalFetch(): Promise<string> {
     await this.osmosisHistoricalProcessor.triggerFetchHistoricalData();
-    return "Historical data fetching triggered";
+    return "Osmosis Historical data fetching triggered";
   }
 
   @Post("fetch-live")
   async triggerLiveFetch(): Promise<string> {
-    // await this.osmosisLiveProcessor.triggerFetchLiveData();
-    await this.osmosisLiveProcessor.fetchAndStoreLiveData();
-    return "Live data fetching triggered";
+    await this.osmosisLiveProcessor.triggerFetchLiveData();
+    return "Osmosis Live data fetching triggered";
   }
 }

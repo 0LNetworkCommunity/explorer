@@ -271,16 +271,16 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
       { version: version.toString(10) },
       {
         jobId: `__version__${version}`,
-        attempts: 3,
+        attempts: 15,
         backoff: {
-          type: 'exponential',
-          delay: 500,
+          type: 'fixed',
+          delay: 5 * 1_000, // 5 seconds
         },
         removeOnComplete: {
           age: 3600, // keep up to 1 hour
         },
         removeOnFail: {
-          age: 5 * 60 * 1000, // 5 minutes
+          age: 60 * 1000, // 1 minute
         },
       },
     );

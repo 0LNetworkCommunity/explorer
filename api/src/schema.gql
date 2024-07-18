@@ -154,6 +154,7 @@ type UserTransaction implements AbstractTransaction {
   moduleName: String!
   functionName: String!
   arguments: String!
+  gasUsed: BigInt!
 }
 
 type BlockMetadataTransaction implements AbstractTransaction {
@@ -186,19 +187,13 @@ type Node {
   longitude: Float!
 }
 
-"""
-Buffer
-"""
+"""Buffer"""
 scalar Bytes
 
-"""
-BigInt
-"""
+"""BigInt"""
 scalar BigInt
 
-"""
-Decimal
-"""
+"""Decimal"""
 scalar Decimal
 
 type Query {

@@ -76,7 +76,7 @@ export interface UserTransactionDbEntity {
   hash: string;
   sender: string;
   version: string;
-  // gas_used: string;
+  gas_used: string;
   success: boolean;
   // vm_status: string;
   // sequence_number: string;

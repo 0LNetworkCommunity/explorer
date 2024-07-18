@@ -44,7 +44,8 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
           hex("module_address") as "module_address",
           "module_name",
           "function_name",
-          "arguments"
+          "arguments",
+          "gas_used"
         FROM "user_transaction"
         WHERE
           "version" IN {versions:Array(UInt64)}
@@ -64,6 +65,7 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
           sender: Buffer.from(userTransaction.sender, 'hex'),
           timestamp: new BN(userTransaction.timestamp),
           version: new BN(userTransaction.version),
+          gasUsed: new BN(userTransaction.gas_used),
           success: userTransaction.success,
           moduleAddress: Buffer.from(userTransaction.module_address, 'hex'),
           moduleName: userTransaction.module_name,
@@ -226,7 +228,8 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
           hex("module_address") as "module_address",
           "module_name",
           "function_name",
-          "arguments"
+          "arguments",
+          "gas_used"
         FROM "hashes"
         INNER JOIN
           "user_transaction"
@@ -254,6 +257,7 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
           moduleName: userTransaction.module_name,
           functionName: userTransaction.function_name,
           arguments: userTransaction.arguments,
+          gasUsed: new BN(userTransaction.gas_used),
         }),
       ]),
     );

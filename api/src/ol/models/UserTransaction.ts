@@ -11,6 +11,7 @@ export type UserTransactionInput = AbstractTransactionInput & {
   functionName: string;
   arguments: string;
   timestamp: BN;
+  gasUsed: BN;
 };
 
 @ObjectType('UserTransaction', {
@@ -44,11 +45,15 @@ export class UserTransaction implements AbstractTransaction {
   @Field(() => String)
   public arguments: string;
 
+  @Field(() => BN)
+  public gasUsed: BN;
+
   public constructor(input: UserTransactionInput) {
     this.hash = input.hash;
     this.sender = input.sender;
     this.timestamp = input.timestamp;
     this.version = input.version;
+    this.gasUsed = input.gasUsed;
     this.success = input.success;
     this.moduleAddress = input.moduleAddress;
     this.moduleName = input.moduleName;

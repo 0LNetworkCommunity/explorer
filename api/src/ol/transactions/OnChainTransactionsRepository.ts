@@ -45,7 +45,8 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
           "module_name",
           "function_name",
           "arguments",
-          "gas_used"
+          "gas_used",
+          "gas_unit_price"
         FROM "user_transaction"
         WHERE
           "version" IN {versions:Array(UInt64)}
@@ -66,6 +67,7 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
           timestamp: new BN(userTransaction.timestamp),
           version: new BN(userTransaction.version),
           gasUsed: new BN(userTransaction.gas_used),
+          gasUnitPrice: new BN(userTransaction.gas_unit_price),
           success: userTransaction.success,
           moduleAddress: Buffer.from(userTransaction.module_address, 'hex'),
           moduleName: userTransaction.module_name,
@@ -229,7 +231,8 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
           "module_name",
           "function_name",
           "arguments",
-          "gas_used"
+          "gas_used",
+          "gas_unit_price"
         FROM "hashes"
         INNER JOIN
           "user_transaction"
@@ -258,6 +261,7 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
           functionName: userTransaction.function_name,
           arguments: userTransaction.arguments,
           gasUsed: new BN(userTransaction.gas_used),
+          gasUnitPrice: new BN(userTransaction.gas_unit_price),
         }),
       ]),
     );

@@ -155,6 +155,7 @@ type UserTransaction implements AbstractTransaction {
   functionName: String!
   arguments: String!
   gasUsed: BigInt!
+  gasUnitPrice: BigInt!
 }
 
 type BlockMetadataTransaction implements AbstractTransaction {

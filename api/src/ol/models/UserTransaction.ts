@@ -12,6 +12,7 @@ export type UserTransactionInput = AbstractTransactionInput & {
   arguments: string;
   timestamp: BN;
   gasUsed: BN;
+  gasUnitPrice: BN;
 };
 
 @ObjectType('UserTransaction', {
@@ -48,12 +49,16 @@ export class UserTransaction implements AbstractTransaction {
   @Field(() => BN)
   public gasUsed: BN;
 
+  @Field(() => BN)
+  public gasUnitPrice: BN;
+
   public constructor(input: UserTransactionInput) {
     this.hash = input.hash;
     this.sender = input.sender;
     this.timestamp = input.timestamp;
     this.version = input.version;
     this.gasUsed = input.gasUsed;
+    this.gasUnitPrice = input.gasUnitPrice;
     this.success = input.success;
     this.moduleAddress = input.moduleAddress;
     this.moduleName = input.moduleName;

@@ -205,9 +205,35 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
                     ))}
               </tbody>
             </table>
+            {activeValue === 'inactive' && <AuditLegend />}
           </div>
         </div>
       </div>
+    </div>
+  );
+};
+
+const AuditLegend: FC = () => {
+  const legendItems = [
+    { code: 11, description: 'Validator is not configured' },
+    { code: 12, description: 'Not a slow wallet' },
+    { code: 13, description: 'Validator is jailed' },
+    { code: 14, description: 'No enough vouches' },
+    { code: 15, description: 'Bid is zero' },
+    { code: 16, description: 'Bid has expired' },
+    { code: 17, description: 'Not enough coin balance' },
+  ];
+
+  return (
+    <div className="mt-4 p-4 bg-[#F5F5F5] text-[#525252] rounded-md">
+      <h2 className="text-lg font-bold mb-2">Audit Legend</h2>
+      <ul className="list-disc pl-5 space-y-1">
+        {legendItems.map((item) => (
+          <li key={item.code}>
+            <strong>{item.code}:</strong> {item.description}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

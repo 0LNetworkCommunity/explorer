@@ -41,6 +41,18 @@ type UserTransactionCollection {
   items: [GqlUserTransactionDeprecated!]!
 }
 
+type Voucher {
+  address: String!
+  epoch: Float!
+}
+
+type Vouches {
+  valid: Float!
+  total: Float!
+  compliant: Boolean!
+  vouchers: [Voucher!]!
+}
+
 type ValidatorCurrentBid {
   currentBid: Float!
   expirationEpoch: Float!
@@ -60,16 +72,11 @@ type Validator {
   country: String
   votingPower: BigInt!
   grade: ValidatorGrade
-  vouches: [Vouch!]
+  vouches: Vouches
   currentBid: ValidatorCurrentBid
   balance: Float
   unlocked: Float
   auditQualification: [String!]
-}
-
-type Vouch {
-  epoch: Float!
-  address: String!
 }
 
 type Account {

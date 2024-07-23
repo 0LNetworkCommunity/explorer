@@ -18,14 +18,14 @@ const GET_VALIDATORS = gql`
         failedBlocks
         proposedBlocks
       }
-      grade {
-        compliant
-        failedBlocks
-        proposedBlocks
-      }
       vouches {
-        address
-        epoch
+        compliant
+        valid
+        total
+        vouchers {
+          address
+          epoch
+        }
       }
       currentBid {
         currentBid

@@ -1,3 +1,13 @@
+interface Vouches {
+  valid: number;
+  total: number;
+  compliant: boolean;
+  vouchers: {
+    address: string;
+    epoch: number;
+  }[];
+}
+
 export interface IValidator {
   address: string;
   inSet: boolean;
@@ -5,10 +15,7 @@ export interface IValidator {
   votingPower: number;
   balance?: number;
   unlocked?: number;
-  vouches: {
-    epoch: number;
-    address: string;
-  }[];
+  vouches: Vouches;
   grade: {
     compliant: boolean;
     failedBlocks: number;

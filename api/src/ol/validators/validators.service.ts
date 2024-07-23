@@ -4,7 +4,7 @@ import BN from 'bn.js';
 
 import { OlService } from '../ol.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import { Validator, GqlVouch } from '../models/validator.model.js';
+import { Validator, Vouches, Voucher } from '../models/validator.model.js';
 import { parseAddress } from '../../utils.js';
 
 @Injectable()
@@ -76,7 +76,8 @@ export class ValidatorsService {
         const slowWallet = await this.olService.getSlowWallet(validator.address);
         const unlocked = Number(slowWallet?.unlocked);
 
-        const vouches = await this.getVouches(validator.address);
+        let vouches = await this.getVouches(validator.address);
+
         const currentBid = await this.olService.getCurrentBid(validator.address);
         return new Validator({
           inSet: validator.inSet,
@@ -104,41 +105,40 @@ export class ValidatorsService {
     return auditQualification[0] as [string];
   }
 
-  public async getVouches(address: Buffer): Promise<GqlVouch[]> {
-    const allVouchesRes = await this.olService.aptosClient.getAccountResource(
+  public async getVouches(address: Buffer): Promise<Vouches> {
+    const allVouchersRes = await this.olService.aptosClient.getAccountResource(
       `0x${address.toString('hex')}`,
       '0x1::vouch::MyVouches',
     );
 
-    const validVouchesRes = await this.olService.aptosClient.view({
-      function: '0x1::vouch::true_friends',
-      type_arguments: [],
-      arguments: [`0x${address.toString('hex')}`],
-    });
-
-    const allVouches = allVouchesRes.data as {
+    const allVouchers = allVouchersRes.data as {
       epoch_vouched: string[];
       my_buddies: string[];
     };
 
-    const all = allVouches.my_buddies.map((address, index) => {
+    const all = allVouchers.my_buddies.map((address, index) => {
       return {
         address: parseAddress(address).toString('hex').toLocaleUpperCase(),
-        epoch: Number(allVouches.epoch_vouched[index]),
+        epoch: Number(allVouchers.epoch_vouched[index]),
       };
     });
 
-    let validVouches = validVouchesRes[0] as string[];
-    validVouches = validVouches.map((address) =>
-      parseAddress(address).toString('hex').toLocaleUpperCase(),
-    );
-    const activeVouches = all.filter((vouch) => validVouches.includes(vouch.address));
+    const validVouchersRes = await this.olService.aptosClient.view({
+      function: '0x1::proof_of_fee::get_valid_vouchers_in_set',
+      type_arguments: [],
+      arguments: [`0x${address.toString('hex')}`],
+    });
 
-    return activeVouches.map((vouch) => {
-      return new GqlVouch({
-        address: parseAddress(vouch.address).toString('hex').toLocaleUpperCase(),
-        epoch: Number(vouch.epoch),
-      });
+    return new Vouches({
+      compliant: validVouchersRes[0] as boolean,
+      valid: Number(validVouchersRes[1]),
+      total: all.length,
+      vouchers: all.map((vouch) => {
+        return new Voucher({
+          address: parseAddress(vouch.address).toString('hex').toLocaleUpperCase(),
+          epoch: Number(vouch.epoch),
+        });
+      }),
     });
   }
 }

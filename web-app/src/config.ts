@@ -22,7 +22,7 @@ const configMap = new Map<string, Config>([
     },
   ],
   [
-    'localhost',
+    '127.0.0.1',
     {
       apiHost: API_HOST,
       dataApiHost: VITE_DATA_API_HOST,

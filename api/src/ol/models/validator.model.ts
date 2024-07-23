@@ -1,6 +1,54 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import BN from 'bn.js';
 
+export interface IVoucherInput {
+  address: string;
+  epoch: number;
+}
+
+@ObjectType('Voucher')
+export class Voucher {
+  public constructor(input: IVoucherInput) {
+    this.address = input.address;
+    this.epoch = input.epoch;
+  }
+
+  @Field(() => String)
+  public address: string;
+
+  @Field(() => Number)
+  public epoch: number;
+}
+
+interface IVouchesInput {
+  valid: number;
+  total: number;
+  compliant: boolean;
+  vouchers: Voucher[];
+}
+
+@ObjectType('Vouches')
+export class Vouches {
+  public constructor(input: IVouchesInput) {
+    this.valid = input.valid;
+    this.total = input.total;
+    this.compliant = input.compliant;
+    this.vouchers = input.vouchers;
+  }
+
+  @Field(() => Number)
+  public valid: number;
+
+  @Field(() => Number)
+  public total: number;
+
+  @Field(() => Boolean)
+  public compliant: boolean;
+
+  @Field(() => [Voucher])
+  public vouchers: Voucher[];
+}
+
 @ObjectType('ValidatorCurrentBid')
 export class GqlValidatorCurrentBid {
   public constructor(input: GqlValidatorCurrentBidInput) {
@@ -52,7 +100,7 @@ interface ValidatorInput {
   unlocked?: number;
   votingPower: BN;
   grade?: GqlValidatorGrade | null;
-  vouches: GqlVouch[];
+  vouches: Vouches;
   currentBid: GqlValidatorCurrentBid;
   city?: string | null;
   country?: string | null;
@@ -97,8 +145,8 @@ export class Validator {
   @Field(() => GqlValidatorGrade, { nullable: true })
   public grade?: GqlValidatorGrade | null;
 
-  @Field(() => [GqlVouch], { nullable: true })
-  public vouches?: GqlVouch[];
+  @Field(() => Vouches, { nullable: true })
+  public vouches?: Vouches;
 
   @Field(() => GqlValidatorCurrentBid, { nullable: true })
   public currentBid?: GqlValidatorCurrentBid;
@@ -111,23 +159,4 @@ export class Validator {
 
   @Field(() => [String], { nullable: true })
   public auditQualification?: [string] | null;
-}
-
-interface GqlVouchInput {
-  epoch: number;
-  address: string;
-}
-
-@ObjectType('Vouch')
-export class GqlVouch {
-  public constructor(input: GqlVouchInput) {
-    this.epoch = input.epoch;
-    this.address = input.address;
-  }
-
-  @Field(() => Number)
-  public epoch: number;
-
-  @Field(() => String)
-  public address: string;
 }

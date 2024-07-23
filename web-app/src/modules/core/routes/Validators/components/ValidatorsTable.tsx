@@ -94,8 +94,8 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
         value2 = b.auditQualification ? b.auditQualification[b.auditQualification.length - 1] : '';
         break;
       case 'vouches':
-        value1 = a.vouches.length;
-        value2 = b.vouches.length;
+        value1 = a.vouches.valid;
+        value2 = b.vouches.valid;
         break;
       case 'currentBid':
         value1 = a.currentBid ? a.currentBid.currentBid : 0;

@@ -1,26 +1,43 @@
 import { FC, useState } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 import AccountAddress from '../../../../ui/AccountAddress';
 
-interface Vouch {
-  address: string;
-  epoch: number;
+interface Vouches {
+  compliant: boolean;
+  valid: number;
+  total: number;
+  vouchers: {
+    address: string;
+    epoch: number;
+  }[];
 }
 
 interface VouchesProps {
-  vouches: Vouch[];
+  vouches: Vouches;
 }
 
 const Vouches: FC<VouchesProps> = ({ vouches }) => {
   const [open, setOpen] = useState(!true);
 
+  const sortedVouchers = vouches.vouchers.slice().sort((a, b) => {
+    if (a.epoch === b.epoch) {
+      return a.address.localeCompare(b.address);
+    }
+    return b.epoch - a.epoch;
+  });
+
   return (
     <>
       <div>
         <button type="button" onClick={() => setOpen(true)}>
-          {vouches.length.toLocaleString()}
+          {vouches.compliant ? (
+            <CheckIcon className="w-5 h-5 text-green-500 inline" style={{ marginTop: '-3px' }} />
+          ) : (
+            <XMarkIcon className="w-5 h-5 text-red-500 inline" style={{ marginTop: '-3px' }} />
+          )}
+          {vouches.valid} / {vouches.total}
         </button>
       </div>
 
@@ -77,7 +94,7 @@ const Vouches: FC<VouchesProps> = ({ vouches }) => {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-200 bg-white">
-                            {vouches.map((vouch, index) => (
+                            {sortedVouchers.map((vouch, index) => (
                               <tr key={index} className="text-sm text-[#141414] text-center">
                                 <td className="px-2 py-2">{index + 1}</td>
                                 <td className="px-2 py-2">{vouch.epoch}</td>

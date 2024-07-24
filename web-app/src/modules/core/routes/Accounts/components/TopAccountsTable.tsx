@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import { gql, useQuery } from '@apollo/client';
 import { ITopAccount } from '../../../../interface/TopAccount.interface';
-import SortableTh from './SortableTh';
+import SortableTh from '../../../../ui/Table/SortableTh';
 import TopAccountRow from './TopAccountRow';
 import TopAccountRowSkeleton from './TopAccountRowSkeleton';
 

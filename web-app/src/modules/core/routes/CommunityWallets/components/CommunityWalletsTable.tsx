@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import { gql, useQuery } from '@apollo/client';
 
-import SortableTh from './SortableTh';
+import SortableTh from '../../../../ui/Table/SortableTh';
 import CommunityWalletRow from './CommunityWalletRow';
 import CommunityWalletRowSkeleton from './CommunityWalletRowSkeleton';
 import { ICommunityWallet } from '../../../../interface/CommunityWallets.interface';

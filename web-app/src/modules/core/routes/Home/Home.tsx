@@ -1,12 +1,10 @@
 import { gql, useQuery } from '@apollo/client';
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRightIcon } from '@heroicons/react/20/solid';
 
 import Page from '../../../ui/Page/Page';
 import TransactionsTable from '../../../ui/UserTransactionsTable';
 import Stats from './Stats';
-import { OL_DISCORD_URL } from '../../../../contants';
 
 const GET_USER_TRANSACTIONS = gql`
   query GetUserTransactions {

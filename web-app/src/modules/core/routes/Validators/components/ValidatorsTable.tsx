@@ -218,7 +218,7 @@ const AuditLegend: FC = () => {
     { code: 11, description: 'Validator is not configured' },
     { code: 12, description: 'Not a slow wallet' },
     { code: 13, description: 'Validator is jailed' },
-    { code: 14, description: 'No enough vouches' },
+    { code: 14, description: 'Not enough vouches' },
     { code: 15, description: 'Bid is zero' },
     { code: 16, description: 'Bid has expired' },
     { code: 17, description: 'Not enough coin balance' },

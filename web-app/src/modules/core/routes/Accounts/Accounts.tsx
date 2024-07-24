@@ -3,14 +3,13 @@ import Page from '../../../ui/Page';
 import AccountsStats from './components/AccountsStats';
 import ToggleButton from '../../../ui/ToggleButton';
 import TopAccountsTable from './components/TopAccountsTable';
-import CommunityWalletsTable from './components/CommunityWalletsTable';
 
 const Accounts: FC = () => {
   const [activeView, setActiveView] = useState<string>('topAccounts');
 
   const toggleOptions = [
-    { label: 'Top Accounts', value: 'topAccounts' },
-    { label: 'Community Wallets', value: 'communityWallets' },
+    { label: 'Top Balances', value: 'topAccounts' },
+    // { label: 'Top Liquidity', value: 'topLiquidity' },
   ];
 
   return (
@@ -22,7 +21,7 @@ const Accounts: FC = () => {
         <AccountsStats />
         <div className="py-8">
           <ToggleButton options={toggleOptions} activeValue={activeView} onToggle={setActiveView} />
-          {activeView === 'topAccounts' ? <TopAccountsTable /> : <CommunityWalletsTable />}
+          {activeView === 'topAccounts' ? <TopAccountsTable /> : null}
         </div>
       </section>
     </Page>

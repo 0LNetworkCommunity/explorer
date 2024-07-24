@@ -12,8 +12,9 @@ import Logo from '../../Logo/Logo';
 const navigation = [
   { name: 'Home', to: '/' },
   { name: 'Transactions', to: '/transactions' },
-  { name: 'Accounts', to: '/accounts' },
   { name: 'Validators', to: '/validators' },
+  { name: 'Community Wallets', to: '/community-wallets' },
+  { name: 'Accounts', to: '/accounts' },
   { name: 'Stats', to: '/stats' },
 ];
 

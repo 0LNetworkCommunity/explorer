@@ -130,12 +130,45 @@ type TopAccount {
   cumulativeShare: CumulativeShare!
 }
 
-type GqlCommunityWallet {
+type CommunityWallet {
   rank: Float!
   address: String!
   name: String
   description: String
-  balance: Float
+  balance: Float!
+}
+
+type CommunityWalletStats {
+  totalBalance: Float!
+  totalPaid: Float!
+  totalPending: Float!
+  totalVetoed: Float!
+}
+
+type Payment {
+  deadline: String!
+  payee: String!
+  value: Float!
+  description: String!
+  status: String!
+}
+
+type CommunityWalletPayments {
+  address: String!
+  name: String
+  paid: [Payment!]!
+  pending: [Payment!]!
+  vetoed: [Payment!]!
+}
+
+type CommunityWalletDetails {
+  address: String!
+  name: String
+  isMultiAction: Boolean!
+  threshold: [Float!]
+  totalPaid: Float!
+  balance: Float!
+  payees: Float!
 }
 
 type Transaction {
@@ -212,7 +245,10 @@ type Query {
   account(address: Bytes!): Account
   getTopAccounts(limit: Float! = 100): [TopAccount!]!
   getValidators: [Validator!]!
-  getCommunityWallets: [GqlCommunityWallet!]!
+  getCommunityWallets: [CommunityWallet!]!
+  getCommunityWalletsStats: CommunityWalletStats!
+  getCommunityWalletsPayments: [CommunityWalletPayments!]!
+  getCommunityWalletsDetails: [CommunityWalletDetails!]!
   walletTransactions(address: Bytes!): [Transaction!]!
   transaction(hash: Bytes!): Transaction!
   nodes: [Node!]

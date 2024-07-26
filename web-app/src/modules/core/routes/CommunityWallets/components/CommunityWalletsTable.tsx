@@ -1,28 +1,19 @@
-import { FC, useState } from 'react';
-import { gql, useQuery } from '@apollo/client';
-
+import { FC, useState, useEffect } from 'react';
 import SortableTh from '../../../../ui/Table/SortableTh';
 import CommunityWalletRow from './CommunityWalletRow';
 import CommunityWalletRowSkeleton from './CommunityWalletRowSkeleton';
 import { ICommunityWallet } from '../../../../interface/CommunityWallets.interface';
 
-const GET_COMMUNITY_WALLETS = gql`
-  query CommunityWallets {
-    getCommunityWallets {
-      rank
-      address
-      name
-      balance
-      description
-    }
-  }
-`;
 type SortOrder = 'asc' | 'desc';
 
-const CommunityWalletsTable: FC = () => {
-  const { data, loading } = useQuery(GET_COMMUNITY_WALLETS);
+const CommunityWalletsTable: FC<{ wallets: ICommunityWallet[] }> = ({ wallets }) => {
   const [sortColumn, setSortColumn] = useState<string>('rank');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [sortedWallets, setSortedWallets] = useState<ICommunityWallet[]>([]);
+
+  useEffect(() => {
+    setSortedWallets(getSortedWallets(wallets));
+  }, [wallets, sortColumn, sortOrder]);
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -31,10 +22,11 @@ const CommunityWalletsTable: FC = () => {
       setSortColumn(column);
       setSortOrder('asc');
     }
+    setSortedWallets(getSortedWallets(wallets));
   };
 
   const getSortedWallets = (wallets: ICommunityWallet[]) => {
-    const sortedWallets = [...wallets].sort((a, b) => {
+    const sortableWallets = [...wallets].sort((a, b) => {
       const [aValue, bValue] = getValue(a, b, sortColumn);
 
       if (aValue === bValue) {
@@ -45,10 +37,10 @@ const CommunityWalletsTable: FC = () => {
     });
 
     if (sortOrder === 'asc') {
-      sortedWallets.reverse();
+      sortableWallets.reverse();
     }
 
-    return sortedWallets;
+    return sortableWallets;
   };
 
   const getValue = (a: ICommunityWallet, b: ICommunityWallet, column: string): [any, any] => {
@@ -92,8 +84,6 @@ const CommunityWalletsTable: FC = () => {
     { key: 'balance', label: 'Balance', className: 'text-right' },
   ];
 
-  const wallets = data?.getCommunityWallets ? getSortedWallets(data.getCommunityWallets) : [];
-
   return (
     <div className="pb-8">
       <div className="overflow-x-auto">
@@ -117,8 +107,8 @@ const CommunityWalletsTable: FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {!loading
-                  ? wallets.map((wallet) => (
+                {sortedWallets.length > 0
+                  ? sortedWallets.map((wallet) => (
                       <CommunityWalletRow key={wallet.address} wallet={wallet} />
                     ))
                   : Array.from({ length: 10 }).map((_, index) => (

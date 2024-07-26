@@ -38,7 +38,7 @@ const ValidatorRow: FC<ValidatorRowProps> = ({ validator }) => {
         <Vouches vouches={validator.vouches} />
       </td>
       <td className="px-2 md:px-4 lg:px-6 py-4 text-right">
-        {`${validator.currentBid && validator.currentBid.currentBid.toLocaleString()} (${
+        {`${validator.currentBid && formatPercentage(validator.currentBid.currentBid)} (${
           validator.currentBid && validator.currentBid.expirationEpoch.toLocaleString()
         })`}
       </td>
@@ -69,4 +69,7 @@ const ValidatorRow: FC<ValidatorRowProps> = ({ validator }) => {
   );
 };
 
+function formatPercentage(value: number) {
+  return (value / 1000).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 1 });
+}
 export default ValidatorRow;

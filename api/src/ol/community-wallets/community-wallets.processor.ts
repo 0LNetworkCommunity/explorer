@@ -21,20 +21,20 @@ export class CommunityWalletsProcessor extends WorkerHost implements OnModuleIni
   }
 
   public async onModuleInit() {
-    await this.communityWalletsQueue.add('updateCommunityWalletsCache', undefined, {
+    await this.communityWalletsQueue.add('updateCommunityWalletsCaches', undefined, {
       repeat: {
         every: 60 * 60 * 1_000, // 1 hour
       },
     });
 
     // Execute the job immediately on startup
-    await this.updateCommunityWalletsCache();
+    await this.updateCommunityWalletsCaches();
   }
 
   public async process(job: Job<void, any, string>) {
     switch (job.name) {
       case 'updateCommunityWalletsCache':
-        await this.updateCommunityWalletsCache();
+        await this.updateCommunityWalletsCaches();
         break;
 
       default:
@@ -42,8 +42,7 @@ export class CommunityWalletsProcessor extends WorkerHost implements OnModuleIni
     }
   }
 
-  private async updateCommunityWalletsCache() {
-    const wallets = await this.communityWalletsService.getCommunityWallets();
-    await redisClient.set(COMMUNITY_WALLETS_CACHE_KEY, JSON.stringify(wallets));
+  private async updateCommunityWalletsCaches() {
+    await this.communityWalletsService.updateAllCaches();
   }
 }

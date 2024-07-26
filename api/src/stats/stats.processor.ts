@@ -26,9 +26,9 @@ export class StatsProcessor extends WorkerHost implements OnModuleInit {
     });
 
     // Delay the execution of the job by 5 seconds on startup
-    setTimeout(async () => {
+    /*setTimeout(async () => {
       await this.updateStats();
-    }, 5000);
+    }, 5000);*/
   }
 
   public async process(job: Job<void, any, string>) {

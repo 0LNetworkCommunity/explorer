@@ -139,9 +139,9 @@ export class CommunityWalletsService implements ICommunityWalletsService {
     let totalVetoed = 0;
     let totalPending = 0;
 
-    const currentEpoch = await this.olService.aptosClient
+    const currentEpoch: number = await this.olService.aptosClient
       .getLedgerInfo()
-      .then((info) => info.epoch);
+      .then((info) => Number(info.epoch));
 
     await Promise.all(
       wallets.map(async (wallet) => {
@@ -152,7 +152,7 @@ export class CommunityWalletsService implements ICommunityWalletsService {
         });
 
         resource.data['scheduled'].forEach((payment) => {
-          if (payment.deadline < currentEpoch) {
+          if (payment.deadline > currentEpoch) {
             totalPending += Number(payment['tx']['value']);
           }
         });

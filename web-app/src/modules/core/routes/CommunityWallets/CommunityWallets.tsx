@@ -3,8 +3,8 @@ import Page from '../../../ui/Page';
 import ToggleButton from '../../../ui/ToggleButton';
 import CommunityWalletsStats from './components/CommunityWalletsStats';
 import CommunityWalletsTable from './components/CommunityWalletsTable';
-import PaymentsTable from './components/PaymentsTable';
 import DetailsTable from './components/DetailsTable';
+import Transactions from './components/Transactions';
 import { useQuery } from '@apollo/client';
 import {
   GET_COMMUNITY_WALLETS,
@@ -27,9 +27,7 @@ const CommunityWallets: FC = () => {
   const toggleOptions = [
     { label: 'Wallets', value: 'wallets' },
     { label: 'Details', value: 'details' },
-    { label: 'Paid', value: 'paid' },
-    { label: 'Pending', value: 'pending' },
-    { label: 'Vetoed', value: 'vetoed' },
+    { label: 'Transactions', value: 'transactions' },
   ];
 
   return (
@@ -45,17 +43,11 @@ const CommunityWallets: FC = () => {
             <div style={{ display: activeView === 'wallets' ? 'block' : 'none' }}>
               <CommunityWalletsTable wallets={communityWallets} />
             </div>
-            <div style={{ display: activeView === 'paid' ? 'block' : 'none' }}>
-              <PaymentsTable payments={payments} status="paid" />
-            </div>
-            <div style={{ display: activeView === 'pending' ? 'block' : 'none' }}>
-              <PaymentsTable payments={payments} status="pending" />
-            </div>
-            <div style={{ display: activeView === 'vetoed' ? 'block' : 'none' }}>
-              <PaymentsTable payments={payments} status="vetoed" />
-            </div>
             <div style={{ display: activeView === 'details' ? 'block' : 'none' }}>
               <DetailsTable details={details} />
+            </div>
+            <div style={{ display: activeView === 'transactions' ? 'block' : 'none' }}>
+              <Transactions payments={payments} />
             </div>
           </>
         </div>

@@ -107,13 +107,17 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({ payments, status }) => {
   };
 
   if (filteredPayments.length === 0) {
-    return <p>No payments found at the moment.</p>;
+    return (
+      <div className="py-2">
+        <p className="ml-4">No {status} payments found at the moment.</p>
+      </div>
+    );
   }
 
   const columns = [
     { key: 'address', label: 'Address', className: 'text-left' },
     { key: 'name', label: 'Name', className: 'text-left' },
-    { key: 'deadline', label: 'Deadline', className: 'text-left' },
+    { key: 'deadline', label: 'Deadline', className: 'text-center' },
     { key: 'payee', label: 'Payee', className: 'text-left' },
     { key: 'description', label: 'Description', className: 'text-left' },
     { key: 'value', label: 'Amount', className: 'text-right' },
@@ -143,15 +147,12 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({ payments, status }) => {
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
                 {sortedPayments.map((payment, index) => (
-                  <tr
-                    key={index}
-                    className={`border-b ${(index + 1) % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
-                  >
+                  <tr key={index} className={`border-b text-sm text-[#141414]`}>
                     <td className="py-2 px-4">
                       <AccountAddress address={payment.address} />
                     </td>
                     <td className="py-2 px-4">{payment.name}</td>
-                    <td className="py-2 px-4">{payment.deadline}</td>
+                    <td className="py-2 px-4 text-center">{payment.deadline}</td>
                     <td className="py-2 px-4">
                       <AccountAddress address={payment.payee} />
                     </td>

@@ -5,7 +5,11 @@ import { Job, Queue } from 'bullmq';
 
 import { StatsService } from './stats.service.js';
 import { redisClient } from '../redis/redis.service.js';
-import { STATS_CACHE_KEY, ACCOUNTS_STATS_CACHE_KEY } from './constants.js';
+import {
+  STATS_CACHE_KEY,
+  ACCOUNTS_STATS_CACHE_KEY,
+  TOP_LIQUID_ACCOUNTS_CACHE_KEY,
+} from './constants.js';
 
 @Processor('stats')
 export class StatsProcessor extends WorkerHost implements OnModuleInit {
@@ -26,27 +30,19 @@ export class StatsProcessor extends WorkerHost implements OnModuleInit {
     });
 
     // Delay the execution of the job by 5 seconds on startup
-    /*setTimeout(async () => {
-      await this.updateStats();
-    }, 5000);*/
+    setTimeout(async () => {
+      await this.statsService.updateCache();
+    }, 5000);
   }
 
   public async process(job: Job<void, any, string>) {
     switch (job.name) {
       case 'updateStats':
-        await this.updateStats();
+        await this.statsService.updateCache();
         break;
 
       default:
         throw new Error(`invalid job name ${job.name}`);
     }
-  }
-
-  private async updateStats() {
-    const stats = await this.statsService.getStats();
-    await redisClient.set(STATS_CACHE_KEY, JSON.stringify(stats));
-
-    const accountsStats = await this.statsService.getAccountsStats();
-    await redisClient.set(ACCOUNTS_STATS_CACHE_KEY, JSON.stringify(accountsStats));
   }
 }

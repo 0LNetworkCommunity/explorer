@@ -25,7 +25,7 @@ export class StatsController {
     if (this.cacheEnabled) {
       const cachedStats = await redisClient.get(STATS_CACHE_KEY);
       if (cachedStats) {
-        res.send(cachedStats);
+        res.send(JSON.parse(cachedStats));
         return;
       }
       throw new ServiceUnavailableException('Cache not ready');
@@ -55,7 +55,7 @@ export class StatsController {
     if (this.cacheEnabled) {
       const cachedStats = await redisClient.get(ACCOUNTS_STATS_CACHE_KEY);
       if (cachedStats) {
-        res.send(cachedStats);
+        res.send(JSON.parse(cachedStats));
         return;
       }
       throw new ServiceUnavailableException('Cache not ready');

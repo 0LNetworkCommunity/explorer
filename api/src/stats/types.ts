@@ -38,11 +38,6 @@ export interface Stats {
     accountsLocked: BinRange[];
     avgTotalVestingTime: BinRange[];
   };
-  topAccounts: Array<{
-    address: string;
-    unlockedBalance: number;
-    percentOfCirculating: number;
-  }>;
   circulatingSupply: RelativeValue;
   totalBurned: RelativeValue;
   communityWalletsBalance: RelativeValue;

@@ -228,6 +228,14 @@ type Node {
   longitude: Float!
 }
 
+type TopLiquidAccount {
+  rank: Float!
+  address: String!
+  unlocked: Float!
+  balance: Float!
+  liquidShare: Float!
+}
+
 """Buffer"""
 scalar Bytes
 
@@ -252,6 +260,7 @@ type Query {
   walletTransactions(address: Bytes!): [Transaction!]!
   transaction(hash: Bytes!): Transaction!
   nodes: [Node!]
+  getTopLiquidAccounts: [TopLiquidAccount!]!
 }
 
 type Mutation {

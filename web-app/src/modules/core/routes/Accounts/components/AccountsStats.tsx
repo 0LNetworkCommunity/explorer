@@ -4,6 +4,15 @@ import axios from 'axios';
 import StatsCard from '../../../../ui/StatsCard';
 import { config } from '../../../../../config';
 
+interface IAccountsStats {
+  totalAccounts: number;
+  activeAddressesCount: {
+    lastDay: number;
+    last30Days: number;
+    last90Days: number;
+  };
+}
+
 const getData = async () => {
   const res = await axios({
     url: `${config.apiHost}/stats/accounts-stats`,
@@ -12,7 +21,7 @@ const getData = async () => {
 };
 
 const AccountsStats: FC = () => {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<IAccountsStats | null>(null);
 
   useEffect(() => {
     getData().then(setData);

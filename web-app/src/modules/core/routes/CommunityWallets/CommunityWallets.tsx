@@ -22,8 +22,6 @@ const CommunityWallets: FC = () => {
   const payments = paymentsRes?.getCommunityWalletsPayments || [];
   const details = detailsRes?.getCommunityWalletsDetails || [];
 
-  console.log(payments);
-
   const toggleOptions = [
     { label: 'Wallets', value: 'wallets' },
     { label: 'Details', value: 'details' },

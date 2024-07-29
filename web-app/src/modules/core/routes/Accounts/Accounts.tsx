@@ -3,13 +3,14 @@ import Page from '../../../ui/Page';
 import AccountsStats from './components/AccountsStats';
 import ToggleButton from '../../../ui/ToggleButton';
 import TopAccountsTable from './components/TopAccountsTable';
+import TopLiquidAccountsTable from './components/TopLiquidAccountsTable';
 
 const Accounts: FC = () => {
-  const [activeView, setActiveView] = useState<string>('topAccounts');
+  const [activeView, setActiveView] = useState<string>('topBalances');
 
   const toggleOptions = [
-    { label: 'Top Balances', value: 'topAccounts' },
-    // { label: 'Top Liquidity', value: 'topLiquidity' },
+    { label: 'Top Balances', value: 'topBalances' },
+    { label: 'Top Liquidity', value: 'topLiquidity' },
   ];
 
   return (
@@ -21,7 +22,8 @@ const Accounts: FC = () => {
         <AccountsStats />
         <div className="py-8">
           <ToggleButton options={toggleOptions} activeValue={activeView} onToggle={setActiveView} />
-          {activeView === 'topAccounts' ? <TopAccountsTable /> : null}
+          {activeView === 'topBalances' ? <TopAccountsTable /> : null}
+          {activeView === 'topLiquidity' ? <TopLiquidAccountsTable /> : null}
         </div>
       </section>
     </Page>

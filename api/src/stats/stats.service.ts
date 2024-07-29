@@ -1,5 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { redisClient } from '../redis/redis.service.js';
+import {
+  ACCOUNTS_STATS_CACHE_KEY,
+  STATS_CACHE_KEY,
+  TOP_LIQUID_ACCOUNTS_CACHE_KEY,
+} from './constants.js';
 import axios from 'axios';
 
 import {
@@ -17,10 +23,12 @@ import { OlService } from '../ol/ol.service.js';
 import { ICommunityWalletsService } from '../ol/community-wallets/interfaces.js';
 import { Types } from '../types.js';
 import _ from 'lodash';
+import { TopLiquidAccount } from './stats.model.js';
 
 @Injectable()
 export class StatsService {
   private readonly dataApiHost: string;
+  private readonly cacheEnabled: boolean;
 
   public constructor(
     private readonly clickhouseService: ClickhouseService,
@@ -32,8 +40,17 @@ export class StatsService {
     config: ConfigService,
   ) {
     this.dataApiHost = config.get('dataApiHost')!;
+
+    this.cacheEnabled = process.env.CACHE_ENABLED === 'true';
   }
 
+  private async setCache<T>(key: string, data: T): Promise<void> {
+    try {
+      await redisClient.set(key, JSON.stringify(data));
+    } catch (error) {
+      console.error(`Error setting data to cache for key ${key}:`, error);
+    }
+  }
   public async getCirculatingSupply(): Promise<number> {
     const supplyStats = await this.olService.getSupplyStats();
     return Number(supplyStats.circulatingSupply.toFixed(3));
@@ -89,10 +106,6 @@ export class StatsService {
     const lockedSupplyConcentration = await this.calculateLiquidityConcentrationLocked();
     console.timeEnd('calculateLiquidityConcentrationLocked');
 
-    console.time('getTopUnlockedBalanceWallets');
-    const topAccounts = await this.getTopUnlockedBalanceWallets(100, supplyStats.circulatingSupply);
-    console.timeEnd('getTopUnlockedBalanceWallets');
-
     // calculate KPIS
     // circulating
     const circulatingSupply = {
@@ -147,7 +160,6 @@ export class StatsService {
       clearingBidoverTime: pofValues.clearingBidOverTime, // net rewards? also available on the pofValues object
       liquidSupplyConcentration: liquidSupplyConcentration,
       lockedSupplyConcentration: lockedSupplyConcentration,
-      topAccounts,
 
       // kpis
       circulatingSupply,
@@ -1311,10 +1323,30 @@ export class StatsService {
     });
   }
 
-  private async getTopUnlockedBalanceWallets(
-    limit: number,
-    circulatingSupply: number,
-  ): Promise<{ address: string; unlockedBalance: number; percentOfCirculating: number }[]> {
+  public async getTopUnlockedBalanceWallets(): Promise<TopLiquidAccount[]> {
+    // Check if caching is enabled and the query is not present
+    if (this.cacheEnabled) {
+      const cachedStats = await redisClient.get(TOP_LIQUID_ACCOUNTS_CACHE_KEY);
+      if (cachedStats) {
+        return JSON.parse(cachedStats);
+      }
+    }
+
+    // Query and cache the result
+    const topLiquidAccounts = await this.queryTopLiquidAccounts();
+    if (this.cacheEnabled) {
+      await this.setCache(TOP_LIQUID_ACCOUNTS_CACHE_KEY, topLiquidAccounts);
+    }
+
+    return topLiquidAccounts;
+  }
+
+  // Query to get the top unlocked balance accounts
+  private async queryTopLiquidAccounts(): Promise<TopLiquidAccount[]> {
+    console.time('queryTopLiquidAccounts');
+    const limit = 100;
+    const circulatingSupply = await this.getCirculatingSupply();
+
     try {
       function toHexString(decimalString: string): string {
         return BigInt(decimalString).toString(16).toUpperCase();
@@ -1400,10 +1432,32 @@ export class StatsService {
 
       // Sort by unlockedBalance and take the top N
       result.sort((a, b) => b.unlockedBalance - a.unlockedBalance);
-      return result.slice(0, limit);
+      let ret = result.slice(0, limit).map(
+        (item, index) =>
+          new TopLiquidAccount({
+            rank: index + 1,
+            address: item.address,
+            unlocked: item.unlockedBalance,
+            balance: item.unlockedBalance,
+            liquidShare: item.percentOfCirculating,
+          }),
+      );
+      console.timeEnd('queryTopLiquidAccounts');
+      return ret;
     } catch (error) {
       console.error('Error in getTopUnlockedBalanceWallets:', error);
       throw error;
     }
+  }
+
+  public async updateCache(): Promise<void> {
+    const stats = await this.getStats();
+    this.setCache(STATS_CACHE_KEY, JSON.stringify(stats));
+
+    const accountsStats = await this.getAccountsStats();
+    this.setCache(ACCOUNTS_STATS_CACHE_KEY, JSON.stringify(accountsStats));
+
+    const topLiquidAccounts = await this.queryTopLiquidAccounts();
+    this.setCache(TOP_LIQUID_ACCOUNTS_CACHE_KEY, topLiquidAccounts);
   }
 }

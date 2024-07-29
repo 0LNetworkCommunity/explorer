@@ -4,9 +4,10 @@ import Money from '../../../../ui/Money';
 interface ProgressBarProps {
   percentage: number;
   amount: number;
+  precision?: number;
 }
 
-const ProgressBar: React.FC<ProgressBarProps> = ({ percentage, amount }) => {
+const ProgressBar: React.FC<ProgressBarProps> = ({ percentage, amount, precision = 0 }) => {
   const [showHint, setShowHint] = React.useState(false);
 
   return (
@@ -23,7 +24,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ percentage, amount }) => {
           </span>
         )}
       </div>
-      <span style={{ width: '35px', textAlign: 'right' }}>{Math.floor(percentage)}%</span>
+      <span style={{ width: '35px', textAlign: 'right' }}>{percentage.toFixed(precision)}%</span>
     </div>
   );
 };

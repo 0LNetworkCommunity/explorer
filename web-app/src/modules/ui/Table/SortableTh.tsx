@@ -21,7 +21,7 @@ const SortableTh: FC<SortableThProps> = ({
   return (
     <th
       scope="col"
-      className={`flex-inline text-xs cursor-pointer font-medium py-3 px-6 text-[#525252] whitespace-nowrap ${className}`}
+      className={`flex-inline text-xs cursor-pointer font-medium py-3 px-2 md:px-4 lg:px-6 text-[#525252] whitespace-nowrap ${className}`}
       onClick={() => onSort(column)}
     >
       {children}

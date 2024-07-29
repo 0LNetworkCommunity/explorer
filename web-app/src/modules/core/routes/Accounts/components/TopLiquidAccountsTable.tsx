@@ -16,6 +16,7 @@ const GET_TOP_LIQUID_ACCOUNTS = gql`
     getTopLiquidAccounts {
       rank
       address
+      name
       unlocked
       liquidShare
     }
@@ -56,9 +57,13 @@ const TopLiquidAccountsTable: React.FC<TopLiquidAccountsTableProps> = () => {
     return sortedAccounts;
   };
 
-  const getValue = (a: ITopLiquidAccount, b: ITopLiquidAccount, column: string): [any, any] => {
-    let value1: any;
-    let value2: any;
+  const getValue = (
+    a: ITopLiquidAccount,
+    b: ITopLiquidAccount,
+    column: string,
+  ): [string | number, string | number] => {
+    let value1: string | number;
+    let value2: string | number;
 
     switch (column) {
       case 'rank':
@@ -68,6 +73,10 @@ const TopLiquidAccountsTable: React.FC<TopLiquidAccountsTableProps> = () => {
       case 'address':
         value1 = a.address;
         value2 = b.address;
+        break;
+      case 'name':
+        value1 = a.name || '';
+        value2 = b.name || '';
         break;
       case 'unlocked':
         value1 = a.unlocked;
@@ -94,6 +103,7 @@ const TopLiquidAccountsTable: React.FC<TopLiquidAccountsTableProps> = () => {
   const columns = [
     { key: 'rank', label: 'Rank', className: 'text-center' },
     { key: 'address', label: 'Address', className: '' },
+    { key: 'name', label: 'Public Name', className: 'text-left' },
     { key: 'unlocked', label: 'Unlocked', className: 'text-right' },
     { key: 'liquidShare', label: '% Of Circulating Supply', className: 'text-right' },
   ];

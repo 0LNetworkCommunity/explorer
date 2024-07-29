@@ -24,6 +24,7 @@ import { ICommunityWalletsService } from '../ol/community-wallets/interfaces.js'
 import { Types } from '../types.js';
 import _ from 'lodash';
 import { TopLiquidAccount } from './stats.model.js';
+import { publicWallets } from './public-wallets.js';
 
 @Injectable()
 export class StatsService {
@@ -1437,6 +1438,7 @@ export class StatsService {
           new TopLiquidAccount({
             rank: index + 1,
             address: item.address,
+            name: publicWallets.get(item.address)?.name,
             unlocked: item.unlockedBalance,
             balance: item.unlockedBalance,
             liquidShare: item.percentOfCirculating,

@@ -3,6 +3,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 export interface TopLiquidAccountInput {
   rank: number;
   address: string;
+  name?: string;
   unlocked: number;
   balance: number;
   liquidShare: number;
@@ -16,6 +17,9 @@ export class TopLiquidAccount {
   @Field(() => String)
   public address: string;
 
+  @Field(() => String, { nullable: true })
+  public name?: string;
+
   @Field(() => Number)
   public unlocked: number;
 
@@ -28,6 +32,7 @@ export class TopLiquidAccount {
   public constructor(input: TopLiquidAccountInput) {
     this.rank = input.rank;
     this.address = input.address;
+    this.name = input.name;
     this.unlocked = input.unlocked;
     this.balance = input.balance;
     this.liquidShare = input.liquidShare;

@@ -122,15 +122,15 @@ export class CommunityWalletsService implements ICommunityWalletsService {
   private async queryCommunityWalletsStats(): Promise<CommunityWalletStats> {
     const wallets = await this.queryCommunityWallets();
     const sumBalance = wallets.reduce((acc, wallet) => acc + wallet.balance, 0);
-    const totalBalance = Number(sumBalance.toFixed(0));
+    const totalBalance = Math.floor(sumBalance);
 
     const { totalPaid, totalVetoed, totalPending } = await this.queryPayments(wallets);
 
     return new CommunityWalletStats({
       totalBalance,
-      totalPaid: Number((totalPaid / 1000000).toFixed(0)),
-      totalPending: Number((totalPending / 1000000).toFixed(0)),
-      totalVetoed: Number((totalVetoed / 1000000).toFixed(0)),
+      totalPaid: formatCoin(totalPaid),
+      totalPending: formatCoin(totalPending),
+      totalVetoed: formatCoin(totalVetoed),
     });
   }
 
@@ -166,7 +166,7 @@ export class CommunityWalletsService implements ICommunityWalletsService {
     return { totalPaid, totalVetoed, totalPending };
   }
 
-  async queryTransactions(address: string) {
+  private async queryTransactions(address: string) {
     const resource = await this.olService.aptosClient.getAccountResource(
       '0x' + address,
       '0x1::donor_voice_txs::TxSchedule',
@@ -195,56 +195,57 @@ export class CommunityWalletsService implements ICommunityWalletsService {
     const wallets = await this.queryCommunityWallets();
     const currentEpoch = await this.olService.aptosClient
       .getLedgerInfo()
-      .then((info) => info.epoch);
+      .then((info) => Number(info.epoch));
 
-    return await Promise.all(
+    const processPayments = (
+      payments: any[],
+      status: string,
+      currentEpoch: number,
+    ): {
+      deadline: string;
+      payee: string;
+      value: number;
+      description: string;
+      status: string;
+    }[] => {
+      return payments
+        .filter((payment) => status !== 'pending' || payment.deadline < currentEpoch)
+        .map((payment) => ({
+          deadline: String(payment.deadline),
+          payee: String(payment.tx.payee),
+          value: formatCoin(payment.tx.value),
+          description: hexToAscii(payment.tx.description),
+          status,
+        }));
+    };
+
+    return Promise.all(
       wallets.map(async (wallet) => {
-        let payments: CommunityWalletPayments = {
-          address: wallet.address,
-          name: wallet.name,
-          paid: [],
-          pending: [],
-          vetoed: [],
-        };
+        try {
+          const resource = await this.olService.aptosClient.getAccountResource(
+            '0x' + wallet.address,
+            '0x1::donor_voice_txs::TxSchedule',
+          );
 
-        const resource = await this.olService.aptosClient.getAccountResource(
-          '0x' + wallet.address,
-          '0x1::donor_voice_txs::TxSchedule',
-        );
+          const payments: CommunityWalletPayments = {
+            address: wallet.address,
+            name: wallet.name,
+            paid: processPayments(resource.data['paid'], 'paid', currentEpoch),
+            pending: processPayments(resource.data['scheduled'], 'pending', currentEpoch),
+            vetoed: processPayments(resource.data['veto'], 'vetoed', currentEpoch),
+          };
 
-        resource.data['paid'].forEach((payment) => {
-          payments.paid.push({
-            deadline: String(payment.deadline),
-            payee: String(payment.tx.payee),
-            value: Number((payment.tx.value / 1000000).toFixed(0)),
-            description: hexToAscii(payment.tx.description),
-            status: 'paid',
-          });
-        });
-
-        resource.data['scheduled'].forEach((payment) => {
-          if (payment.deadline < currentEpoch) {
-            payments.pending.push({
-              deadline: payment.deadline,
-              payee: String(payment.tx.payee),
-              value: Number((payment.tx.value / 1000000).toFixed(0)),
-              description: hexToAscii(payment.tx.description),
-              status: 'pending',
-            });
-          }
-        });
-
-        resource.data['veto'].forEach((payment) => {
-          payments.vetoed.push({
-            deadline: payment.deadline,
-            payee: String(payment.tx.payee),
-            value: Number((payment.tx.value / 1000000).toFixed(0)),
-            description: hexToAscii(payment.tx.description),
-            status: 'vetoed',
-          });
-        });
-
-        return payments;
+          return payments;
+        } catch (error) {
+          console.error(`Error processing payments for wallet ${wallet.address}:`, error);
+          return {
+            address: wallet.address,
+            name: wallet.name,
+            paid: [],
+            pending: [],
+            vetoed: [],
+          } as CommunityWalletPayments;
+        }
       }),
     );
   }
@@ -280,7 +281,7 @@ export class CommunityWalletsService implements ICommunityWalletsService {
           payees.add(payment.tx.payee);
           totalPaid += Number(payment['tx']['value']);
         });
-        totalPaid = Math.floor(totalPaid / 1000000);
+        totalPaid = formatCoin(totalPaid);
 
         return {
           address: wallet.address,
@@ -344,4 +345,8 @@ function hexToAscii(hex: string): string {
   const asciiStr = hexPairs.map((hexPair) => String.fromCharCode(parseInt(hexPair, 16))).join('');
 
   return asciiStr;
+}
+
+function formatCoin(value: number): number {
+  return Math.floor(value / 1000000);
 }

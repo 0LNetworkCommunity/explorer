@@ -9,6 +9,9 @@ const TopLiquidAccountRowSkeleton: FC = () => {
       <td className="px-2 md:px-4 lg:px-6 py-4 text-left">
         <div className="animate-pulse bg-gray-300 h-4 w-28"></div>
       </td>
+      <td className="px-2 md:px-4 lg:px-6 py-4 text-left">
+        <div className="animate-pulse bg-gray-300 h-4 w-28"></div>
+      </td>
       <td className="px-2 md:px-4 lg:px-6 py-4 text-right">
         <div className="animate-pulse bg-gray-300 h-4 w-32"></div>
       </td>

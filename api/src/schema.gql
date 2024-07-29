@@ -231,6 +231,7 @@ type Node {
 type TopLiquidAccount {
   rank: Float!
   address: String!
+  name: String
   unlocked: Float!
   balance: Float!
   liquidShare: Float!

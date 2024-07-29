@@ -209,7 +209,7 @@ export class CommunityWalletsService implements ICommunityWalletsService {
       status: string;
     }[] => {
       return payments
-        .filter((payment) => status !== 'pending' || payment.deadline < currentEpoch)
+        .filter((payment) => status !== 'pending' || payment.deadline > currentEpoch)
         .map((payment) => ({
           deadline: String(payment.deadline),
           payee: String(payment.tx.payee),

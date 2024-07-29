@@ -23,8 +23,18 @@ const Validators = () => {
         </NavLink>
         <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
           <div className="flex flex-col">
-            <span className="text-lg font-extralight">Total Validators</span>
-            <span className="text-xl font-medium">{validatorSet?.active_validators.length}</span>
+            {validatorSet ? (
+              <span className="text-xl font-extralight">
+                {validatorSet.active_validators.length + ' Active'}
+              </span>
+            ) : (
+              <span
+                className="text-xl font-extralight animate-pulse bg-gray-300 rounded space-y-4"
+                style={{ width: 'fit-content', color: 'transparent' }}
+              >
+                XX Active
+              </span>
+            )}
           </div>
 
           {/* <div className="flex flex-col">
@@ -58,6 +68,7 @@ const Stats: FC = () => {
 
       const blockResource = await aptos.getAccountResource('0x1', '0x1::block::BlockResource');
       const epochIntervalMs = parseInt((blockResource.data as any).epoch_interval, 10) / 1_000;
+      console.log('epochIntervalMs', epochIntervalMs);
 
       const events = await aptos.getEventsByEventHandle(
         '0x1',

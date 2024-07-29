@@ -15,6 +15,7 @@ const TopLiquidAccountRow: FC<TopLiquidAccountRowProps> = ({ account }) => {
       <td className="px-2 md:px-4 lg:px-6 py-4 text-left">
         <AccountAddress address={account.address} />
       </td>
+      <td className="px-2 md:px-4 lg:px-6 py-4 text-left">{account.name}</td>
       <td className="px-2 md:px-4 lg:px-6 py-4 text-right">
         <Money>{account.unlocked}</Money>
       </td>

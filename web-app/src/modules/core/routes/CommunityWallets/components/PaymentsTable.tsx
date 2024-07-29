@@ -148,16 +148,16 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({ payments, status }) => {
               <tbody className="divide-y divide-gray-200 bg-white">
                 {sortedPayments.map((payment, index) => (
                   <tr key={index} className={`border-b text-sm text-[#141414]`}>
-                    <td className="py-2 px-4">
+                    <td className="py-2 px-2 md:px-4 lg:px-6">
                       <AccountAddress address={payment.address} />
                     </td>
-                    <td className="py-2 px-4">{payment.name}</td>
-                    <td className="py-2 px-4 text-center">{payment.deadline}</td>
-                    <td className="py-2 px-4">
+                    <td className="py-2 px-2 md:px-4 lg:px-6">{payment.name}</td>
+                    <td className="py-2 px-2 md:px-4 lg:px-6 text-center">{payment.deadline}</td>
+                    <td className="py-2 px-2 md:px-4 lg:px-6">
                       <AccountAddress address={payment.payee} />
                     </td>
-                    <td className="py-2 px-4">{payment.description}</td>
-                    <td className="py-2 px-4 text-right">
+                    <td className="py-2 px-2 md:px-4 lg:px-6">{payment.description}</td>
+                    <td className="py-2 px-2 md:px-4 lg:px-6 text-right">
                       <LibraAmount>{new Decimal(payment.value)}</LibraAmount>{' '}
                     </td>
                   </tr>

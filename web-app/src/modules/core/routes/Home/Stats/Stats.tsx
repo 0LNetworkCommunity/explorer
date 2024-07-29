@@ -1,16 +1,16 @@
 import { format as d3Format } from 'd3-format';
 import { FC, useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import useAptos from '../../../aptos';
+import useAptos from '../../../../aptos';
 import {
   useLedgerInfo,
   useTotalSupply,
   useValidatorSet,
   useAccountsStats,
   useTotalTransactions,
-} from '../../../ol';
-import Countdown from '../../../ui/Countdown';
-import NodeMap from '../../../ui/NodeMap';
+} from '../../../../ol';
+import Countdown from '../../../../ui/Countdown';
+import NodeMap from '../../../../ui/NodeMap';
 
 const Validators = () => {
   const validatorSet = useValidatorSet();

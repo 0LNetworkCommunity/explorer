@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 import Page from '../../../ui/Page/Page';
 import TransactionsTable from '../../../ui/UserTransactionsTable';
-import Stats from './Stats';
+import Stats from './Stats/Stats';
 
 const GET_USER_TRANSACTIONS = gql`
   query GetUserTransactions {

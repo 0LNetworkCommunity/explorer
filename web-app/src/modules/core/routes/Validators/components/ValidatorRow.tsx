@@ -58,13 +58,6 @@ const ValidatorRow: FC<ValidatorRowProps> = ({ validator }) => {
           {validator.city ? `${validator.city}, ${validator.country}` : 'Unknown'}
         </td>
       )}
-      {/*<td className="px-2 md:px-4 lg:px-6 py-4 text-right">
-        {validator.account.slowWallet ? (
-          <Money>{Number(validator.unlocked)}</Money>
-        ) : (
-          ''
-        )}
-      </td>*/}
     </tr>
   );
 };

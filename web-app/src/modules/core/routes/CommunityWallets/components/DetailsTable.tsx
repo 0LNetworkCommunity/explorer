@@ -105,7 +105,7 @@ const DetailsTable: React.FC<{ details: ICommunityWalletDetails[] }> = ({ detail
   };
 
   const columns = [
-    { key: 'address', label: 'Address', className: 'text-center' },
+    { key: 'address', label: 'Address', className: 'text-left' },
     { key: 'name', label: 'Name', className: '' },
     { key: 'isMultiAction', label: 'Multisign', className: 'text-center' },
     { key: 'threshold', label: 'Threshold', className: 'text-center' },
@@ -115,7 +115,7 @@ const DetailsTable: React.FC<{ details: ICommunityWalletDetails[] }> = ({ detail
   ];
 
   return (
-    <div className="overflow-x-auto relative">
+    <div className="overflow-x-auto relative pt-2">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-[#FAFAFA]">
           <tr className="text-left text-sm">
@@ -136,10 +136,7 @@ const DetailsTable: React.FC<{ details: ICommunityWalletDetails[] }> = ({ detail
         <tbody>
           {sortedDetails.length > 0 ? (
             sortedDetails.map((wallet, index) => (
-              <tr
-                key={index}
-                className={`border-b ${(index + 1) % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
-              >
+              <tr key={index} className={`border-b text-sm text-[#141414]`}>
                 <td className="py-2 px-4 text-center">
                   <AccountAddress address={wallet.address} />
                 </td>

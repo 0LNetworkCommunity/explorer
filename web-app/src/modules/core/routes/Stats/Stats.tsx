@@ -42,7 +42,7 @@ const Coinstats = () => {
       {!data && loading && <div>loading...</div>}
 
       {data && (
-        <>
+        <div className="pb-8">
           <div>
             <h3 className="text-base font-semibold text-gray-900">Supply</h3>
 
@@ -232,7 +232,7 @@ const Coinstats = () => {
               </div>
             </dl>
           </div>
-        </>
+        </div>
       )}
     </Page>
   );

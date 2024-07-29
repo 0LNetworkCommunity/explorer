@@ -108,4 +108,5 @@ export const communityWallets = new Map<string, CommunityWalletInfo>([
   ],
   ['2640CD6D652AC94DC5F0963DCC00BCC7', { name: 'Engineering Fund, tool-scrubbers-guild' }],
   ['FBE8DA53C92CEEEB40D8967EC033A0FB', { name: 'Community development' }],
+  ['851A3BAF866951B36A3FE0DA92BA38FC', { name: 'Hustle CW' }],
 ]);

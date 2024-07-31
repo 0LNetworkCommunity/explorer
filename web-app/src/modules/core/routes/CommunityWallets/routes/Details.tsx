@@ -48,7 +48,7 @@ const columns = [
 
 const Details = () => {
   const [sortColumn, setSortColumn] = useState<string>('isMultiAction');
-  const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.Asc);
+  const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.Desc);
   const [sortedDetails, setSortedDetails] = useState<ICommunityWalletDetails[]>([]);
   const { data } = useQuery<{
     getCommunityWalletsDetails: ICommunityWalletDetails[];

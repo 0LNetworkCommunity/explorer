@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { gql, useQuery } from '@apollo/client';
-import SortableTh from '../../../../ui/Table/SortableTh';
+
+import { SortableTh, SortOrder } from '../../../../ui/Table';
 import TopLiquidAccountRow from './TopLiquidAccountRow';
 import TopLiquidAccountRowSkeleton from './TopLiquidAccountRowSkeleton';
 import { ITopLiquidAccount } from '../../../../interface/TopLiquidAccount.interface';
 
 interface TopLiquidAccountsTableProps {
   accounts?: ITopLiquidAccount[];
-}
-
-type SortOrder = 'asc' | 'desc';
+} 
 
 const GET_TOP_LIQUID_ACCOUNTS = gql`
   query TopLiquidAccounts {
@@ -25,17 +24,17 @@ const GET_TOP_LIQUID_ACCOUNTS = gql`
 
 const TopLiquidAccountsTable: React.FC<TopLiquidAccountsTableProps> = () => {
   const [sortColumn, setSortColumn] = useState<string>('rank');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.Desc);
 
   const { data } = useQuery(GET_TOP_LIQUID_ACCOUNTS);
   const accounts: ITopLiquidAccount[] = data ? data.getTopLiquidAccounts : null;
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+      setSortOrder(sortOrder === SortOrder.Asc ? SortOrder.Desc : SortOrder.Asc);
     } else {
       setSortColumn(column);
-      setSortOrder('asc');
+      setSortOrder(SortOrder.Asc);
     }
   };
 
@@ -50,7 +49,7 @@ const TopLiquidAccountsTable: React.FC<TopLiquidAccountsTableProps> = () => {
       return aValue < bValue ? -1 : 1;
     });
 
-    if (sortOrder === 'asc') {
+    if (sortOrder === SortOrder.Asc) {
       sortedAccounts.reverse();
     }
 

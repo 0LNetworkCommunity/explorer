@@ -1,27 +1,20 @@
-import { FC, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import _ from 'lodash';
 import { gql, useQuery } from '@apollo/client';
 
-import { ITopAccount } from '../../../../interface/TopAccount.interface';
 import { SortableTh, SortOrder } from '../../../../ui/Table';
-import TopAccountRow from './TopAccountRow';
-import TopAccountRowSkeleton from './TopAccountRowSkeleton';
+import CommunityWalletRow from '../components/CommunityWalletRow';
+import CommunityWalletRowSkeleton from '../components/CommunityWalletRowSkeleton';
+import { ICommunityWallet } from '../../../../interface/CommunityWallets.interface';
 
-interface TopAccountsTableProps {
-  accounts?: ITopAccount[];
-}
-
-const GET_TOP_ACCOUNTS = gql`
-  query Accounts {
-    getTopAccounts {
+const GET_COMMUNITY_WALLETS = gql`
+  query GetCommunityWallets {
+    getCommunityWallets {
       rank
       address
-      publicName
+      name
       balance
-      cumulativeShare {
-        amount
-        percentage
-      }
+      description
     }
   }
 `;
@@ -29,26 +22,26 @@ const GET_TOP_ACCOUNTS = gql`
 const columns = [
   { key: 'rank', label: 'Rank', className: 'text-center' },
   { key: 'address', label: 'Address', className: '' },
-  { key: 'publicName', label: 'Public Name', className: 'text-left' },
+  { key: 'name', label: 'Name', className: 'text-left' },
+  { key: 'description', label: 'Description', className: 'text-left' },
   { key: 'balance', label: 'Balance', className: 'text-right' },
-  { key: 'cumulativeShare', label: 'Cumulative Share (%)', className: 'text-right' },
 ];
 
-const TopAccountsTable: FC<TopAccountsTableProps> = () => {
-  const [sortColumn, setSortColumn] = useState('rank');
-  const [sortOrder, setSortOrder] = useState(SortOrder.Desc);
-  const [sortedAccounts, setSortedAccounts] = useState<ITopAccount[]>([]);
+const CommunityWallets = () => {
+  const [sortColumn, setSortColumn] = useState<string>('balance');
+  const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.Desc);
+  const [sortedWallets, setSortedWallets] = useState<ICommunityWallet[]>([]);
 
-  const { data } = useQuery(GET_TOP_ACCOUNTS);
-  const accounts: ITopAccount[] = data ? data.getTopAccounts : null;
+  const { data } = useQuery<{ getCommunityWallets: ICommunityWallet[] }>(GET_COMMUNITY_WALLETS);
+  const wallets = data?.getCommunityWallets;
 
   useEffect(() => {
-    const sortedAccounts = _.sortBy(accounts, sortColumn);
+    const sortedWallets = _.sortBy(wallets ?? [], sortColumn);
     if (sortOrder === SortOrder.Desc) {
-      sortedAccounts.reverse();
+      sortedWallets.reverse();
     }
-    setSortedAccounts(sortedAccounts);
-  }, [accounts, sortColumn, sortOrder]);
+    setSortedWallets(sortedWallets);
+  }, [wallets, sortColumn, sortOrder]);
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -82,11 +75,13 @@ const TopAccountsTable: FC<TopAccountsTableProps> = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {sortedAccounts.length
-                  ? sortedAccounts.map((account) => (
-                      <TopAccountRow key={account.address} account={account} />
+                {sortedWallets.length > 0
+                  ? sortedWallets.map((wallet) => (
+                      <CommunityWalletRow key={wallet.address} wallet={wallet} />
                     ))
-                  : new Array(10).fill(0).map((_, index) => <TopAccountRowSkeleton key={index} />)}
+                  : new Array(10)
+                      .fill(0)
+                      .map((_, index) => <CommunityWalletRowSkeleton key={index} />)}
               </tbody>
             </table>
           </div>
@@ -96,4 +91,4 @@ const TopAccountsTable: FC<TopAccountsTableProps> = () => {
   );
 };
 
-export default TopAccountsTable;
+export default CommunityWallets;

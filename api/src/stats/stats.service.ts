@@ -41,8 +41,7 @@ export class StatsService {
     config: ConfigService,
   ) {
     this.dataApiHost = config.get('dataApiHost')!;
-
-    this.cacheEnabled = process.env.CACHE_ENABLED === 'true';
+    this.cacheEnabled = config.get<boolean>('cacheEnabled')!;
   }
 
   private async setCache<T>(key: string, data: T): Promise<void> {
@@ -63,49 +62,17 @@ export class StatsService {
   }
 
   public async getStats(): Promise<Stats> {
-    console.time('getSupplyStats');
     const supplyStats = await this.olService.getSupplyStats();
-    console.timeEnd('getSupplyStats');
-
-    console.time('getTotalSupply');
     const totalSupply: number = supplyStats.totalSupply;
-    console.timeEnd('getTotalSupply');
-
-    console.time('getSlowWalletsCountOverTime');
     const slowWalletsCountOverTime = await this.getSlowWalletsCountOverTime();
-    console.timeEnd('getSlowWalletsCountOverTime');
-
-    console.time('getBurnsOverTime');
     const burnOverTime = await this.getBurnsOverTime();
-    console.timeEnd('getBurnsOverTime');
-
-    console.time('getAccountsOnChainOverTime');
     const accountsOnChainOverTime = await this.getAccountsOnChainOverTime();
-    console.timeEnd('getAccountsOnChainOverTime');
-
-    console.time('getSupplyAndCapital');
     const supplyAndCapital = await this.getSupplyAndCapital(supplyStats);
-    console.timeEnd('getSupplyAndCapital');
-
-    console.time('getCommunityWalletsBalanceBreakdown');
     const communityWalletsBalanceBreakdown = await this.getCommunityWalletsBalanceBreakdown();
-    console.timeEnd('getCommunityWalletsBalanceBreakdown');
-
-    console.time('getLastEpochTotalUnlockedAmount');
     const lastEpochTotalUnlockedAmount = await this.getLastEpochTotalUnlockedAmount();
-    console.timeEnd('getLastEpochTotalUnlockedAmount');
-
-    console.time('getPOFValues');
     const pofValues = await this.getPOFValues(); // Empty table?
-    console.timeEnd('getPOFValues');
-
-    console.time('getLiquidSupplyConcentration');
     const liquidSupplyConcentration = await this.getLiquidSupplyConcentration();
-    console.timeEnd('getLiquidSupplyConcentration');
-
-    console.time('calculateLiquidityConcentrationLocked');
     const lockedSupplyConcentration = await this.calculateLiquidityConcentrationLocked();
-    console.timeEnd('calculateLiquidityConcentrationLocked');
 
     // calculate KPIS
     // circulating
@@ -452,42 +419,6 @@ export class StatsService {
     }
   }
 
-  private async getSlowWalletsUnlockedAmount(): Promise<number> {
-    try {
-      const query = `
-        SELECT
-          hex(SW.address) AS address,
-        (latest_balance - max(SW.unlocked)) / 1e6 AS locked_balance
-        FROM
-          slow_wallet SW
-        JOIN
-          (SELECT
-            address,
-            argMax(balance, timestamp) as latest_balance
-          FROM coin_balance
-          WHERE coin_module = 'libra_coin'
-          GROUP BY address) AS CB
-        ON SW.address = CB.address
-        GROUP BY SW.address, latest_balance
-      `;
-
-      const resultSet = await this.clickhouseService.client.query({
-        query: query,
-        format: 'JSONEachRow',
-      });
-
-      const rows = await resultSet.json<{ locked_balance: number }>();
-
-      // Sum the locked Amount
-      const totalLockedAmount = rows.reduce((acc, row) => acc + row.locked_balance, 0);
-
-      return totalLockedAmount;
-    } catch (error) {
-      console.error('Error in getSlowWalletsUnlockedAmount:', error);
-      throw error;
-    }
-  }
-
   private async getLastEpochTotalUnlockedAmount(): Promise<number> {
     try {
       // Query the slow_wallet table to get the addresses and unlocked balances
@@ -551,7 +482,6 @@ export class StatsService {
         const latest_balance = balanceMap.get(row.address) ?? 0;
         const unlocked_balance = row.unlocked_balance;
         const locked_balance = latest_balance - unlocked_balance;
-        // console.log(`Address: ${row.address}, Latest Balance: ${latest_balance}, Unlocked Balance: ${unlocked_balance}, Locked Balance: ${locked_balance}`);
         return {
           address: row.address,
           locked_balance,
@@ -1344,7 +1274,6 @@ export class StatsService {
 
   // Query to get the top unlocked balance accounts
   private async queryTopLiquidAccounts(): Promise<TopLiquidAccount[]> {
-    console.time('queryTopLiquidAccounts');
     const limit = 100;
     const circulatingSupply = await this.getCirculatingSupply();
 
@@ -1444,7 +1373,6 @@ export class StatsService {
             liquidShare: item.percentOfCirculating,
           }),
       );
-      console.timeEnd('queryTopLiquidAccounts');
       return ret;
     } catch (error) {
       console.error('Error in getTopUnlockedBalanceWallets:', error);

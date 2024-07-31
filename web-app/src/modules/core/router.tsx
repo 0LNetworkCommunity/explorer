@@ -16,6 +16,10 @@ import Module from './routes/Account/Modules/Module';
 import Stats from './routes/Stats';
 import Postero from './routes/Postero';
 
+import CommunityWalletsIndex from './routes/CommunityWallets/routes/CommunityWallets';
+import CommunityWalletsTransactions from './routes/CommunityWallets/routes/Transactions';
+import CommunityWalletsDetails from './routes/CommunityWallets/routes/Details';
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -76,6 +80,20 @@ const router = createBrowserRouter([
       {
         path: '/community-wallets',
         element: <CommunityWallets />,
+        children: [
+          {
+            index: true,
+            element: <CommunityWalletsIndex />,
+          },
+          {
+            path: 'details',
+            element: <CommunityWalletsDetails />,
+          },
+          {
+            path: 'transactions',
+            element: <CommunityWalletsTransactions />,
+          },
+        ],
       },
       {
         path: '/stats',

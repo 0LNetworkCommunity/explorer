@@ -1,16 +1,17 @@
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/20/solid';
+import { SortOrder } from './types';
 
 interface SortableThProps {
   column: string;
   sortColumn: string;
-  sortOrder: 'asc' | 'desc';
+  sortOrder: SortOrder;
   onSort: (column: string) => void;
   className?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-const SortableTh: FC<SortableThProps> = ({
+export const SortableTh: FC<SortableThProps> = ({
   column,
   sortColumn,
   sortOrder,
@@ -26,7 +27,7 @@ const SortableTh: FC<SortableThProps> = ({
     >
       {children}
       {sortColumn === column &&
-        (sortOrder === 'asc' ? (
+        (sortOrder === SortOrder.Asc ? (
           <ArrowUpIcon className="w-4 h-4 inline" />
         ) : (
           <ArrowDownIcon className="w-4 h-4 inline" />
@@ -34,5 +35,3 @@ const SortableTh: FC<SortableThProps> = ({
     </th>
   );
 };
-
-export default SortableTh;

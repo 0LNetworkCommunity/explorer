@@ -2,11 +2,9 @@ import _ from 'lodash';
 import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, OnModuleInit } from '@nestjs/common';
 import { Job, Queue } from 'bullmq';
-import { ICommunityWalletsService } from './interfaces.js';
-import { redisClient } from '../../redis/redis.service.js';
-import { Types } from '../../types.js';
 
-import { COMMUNITY_WALLETS_CACHE_KEY } from '../constants.js';
+import { ICommunityWalletsService } from './interfaces.js';
+import { Types } from '../../types.js';
 
 @Processor('community-wallets')
 export class CommunityWalletsProcessor extends WorkerHost implements OnModuleInit {
@@ -21,11 +19,15 @@ export class CommunityWalletsProcessor extends WorkerHost implements OnModuleIni
   }
 
   public async onModuleInit() {
-    await this.communityWalletsQueue.add('updateCommunityWalletsCaches', undefined, {
-      repeat: {
-        every: 60 * 60 * 1_000, // 1 hour
-      },
-    });
+    await this.communityWalletsQueue.add(
+      'updateCommunityWalletsCaches',
+      undefined,
+      {
+        repeat: {
+          every: 60 * 60 * 1_000, // 1 hour
+        },
+      }
+    );
 
     // Execute the job immediately on startup
     await this.updateCommunityWalletsCaches();

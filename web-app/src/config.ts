@@ -1,10 +1,15 @@
 const API_HOST: string = import.meta.env.VITE_API_HOST;
-const VITE_DATA_API_HOST: string = import.meta.env.VITE_DATA_API_HOST;
+const DATA_API_HOST: string = import.meta.env.VITE_DATA_API_HOST;
 
 export interface Config {
   apiHost: string;
   dataApiHost: string;
 }
+
+const localhost = {
+  apiHost: API_HOST,
+  dataApiHost: DATA_API_HOST,
+};
 
 const configMap = new Map<string, Config>([
   [
@@ -23,10 +28,11 @@ const configMap = new Map<string, Config>([
   ],
   [
     '127.0.0.1',
-    {
-      apiHost: API_HOST,
-      dataApiHost: VITE_DATA_API_HOST,
-    },
+    localhost
+  ],
+  [
+    'localhost',
+    localhost
   ],
 ]);
 

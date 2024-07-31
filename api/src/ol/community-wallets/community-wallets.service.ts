@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
+import { ConfigService } from '@nestjs/config';
+
 import { redisClient } from '../../redis/redis.service.js';
 import { OlService } from '../ol.service.js';
 import {
@@ -8,7 +10,7 @@ import {
   CommunityWalletPayments,
   CommunityWalletDetails,
 } from './community-wallet.model.js';
-import { parseAddress } from '../../utils.js';
+import { parseAddress, parseHexString } from '../../utils.js';
 import { communityWallets } from './community-wallets.js';
 import { ICommunityWalletsService } from './interfaces.js';
 import {
@@ -18,32 +20,31 @@ import {
   COMMUNITY_WALLETS_DETAILS_CACHE_KEY,
 } from '../constants.js';
 
+function formatCoin(value: number): number {
+  return Math.floor(value / 1e6);
+}
+
 @Injectable()
 export class CommunityWalletsService implements ICommunityWalletsService {
   private readonly cacheEnabled: boolean;
 
-  public constructor(private readonly olService: OlService) {
-    this.cacheEnabled = process.env.CACHE_ENABLED === 'true';
+  public constructor(
+    private readonly olService: OlService,
+    config: ConfigService,
+  ) {
+    this.cacheEnabled = config.get<boolean>('cacheEnabled')!;
   }
 
   private async getFromCache<T>(key: string): Promise<T | null> {
-    try {
-      const cachedData = await redisClient.get(key);
-      if (cachedData) {
-        return JSON.parse(cachedData) as T;
-      }
-    } catch (error) {
-      console.error(`Error getting data from cache for key ${key}:`, error);
+    const cachedData = await redisClient.get(key);
+    if (cachedData) {
+      return JSON.parse(cachedData) as T;
     }
     return null;
   }
 
   private async setCache<T>(key: string, data: T): Promise<void> {
-    try {
-      await redisClient.set(key, JSON.stringify(data));
-    } catch (error) {
-      console.error(`Error setting data to cache for key ${key}:`, error);
-    }
+    await redisClient.set(key, JSON.stringify(data));
   }
 
   public async getCommunityWallets(): Promise<CommunityWallet[]> {
@@ -211,10 +212,10 @@ export class CommunityWalletsService implements ICommunityWalletsService {
       return payments
         .filter((payment) => status !== 'pending' || payment.deadline > currentEpoch)
         .map((payment) => ({
-          deadline: String(payment.deadline),
-          payee: String(payment.tx.payee),
+          deadline: payment.deadline,
+          payee: payment.tx.payee,
           value: formatCoin(payment.tx.value),
-          description: hexToAscii(payment.tx.description),
+          description: Buffer.from(parseHexString(payment.tx.description)).toString('utf-8'),
           status,
         }));
     };
@@ -332,21 +333,4 @@ export class CommunityWalletsService implements ICommunityWalletsService {
     const details = await this.queryCommunityWalletsDetails();
     await this.setCache(COMMUNITY_WALLETS_DETAILS_CACHE_KEY, details);
   }
-}
-
-function hexToAscii(hex: string): string {
-  // Remove the "0x" prefix if it exists
-  hex = hex.startsWith('0x') ? hex.slice(2) : hex;
-
-  // Split the hex string into pairs of characters
-  const hexPairs = hex.match(/.{1,2}/g) || [];
-
-  // Convert each pair of hex characters to an ASCII character
-  const asciiStr = hexPairs.map((hexPair) => String.fromCharCode(parseInt(hexPair, 16))).join('');
-
-  return asciiStr;
-}
-
-function formatCoin(value: number): number {
-  return Math.floor(value / 1000000);
 }

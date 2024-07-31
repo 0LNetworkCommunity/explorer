@@ -68,7 +68,6 @@ const Stats: FC = () => {
 
       const blockResource = await aptos.getAccountResource('0x1', '0x1::block::BlockResource');
       const epochIntervalMs = parseInt((blockResource.data as any).epoch_interval, 10) / 1_000;
-      console.log('epochIntervalMs', epochIntervalMs);
 
       const events = await aptos.getEventsByEventHandle(
         '0x1',

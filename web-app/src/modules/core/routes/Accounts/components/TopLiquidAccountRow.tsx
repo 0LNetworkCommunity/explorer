@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { ITopLiquidAccount } from '../../../../interface/TopLiquidAccount.interface';
 import AccountAddress from '../../../../ui/AccountAddress';
 import Money from '../../../../ui/Money';

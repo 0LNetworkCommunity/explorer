@@ -1,15 +1,14 @@
-// src/ui/StatsCard.tsx
 import { FC, ReactNode } from 'react';
 
 interface StatsCardProps {
   title: string;
-  value: string | number | null;
+  value: string | number | null | undefined;
   children?: ReactNode;
   loading?: boolean;
 }
 
 const StatsCard: FC<StatsCardProps> = ({ title, value, children, loading = false }) => {
-  const isLoading = loading || value === null;
+  const isLoading = loading || value === null || value === undefined;
 
   return (
     <div className="flex flex-col bg-[#F5F5F5] p-5 gap-2">

@@ -1,33 +1,11 @@
-import { FC, useState } from 'react';
+import { FC } from 'react';
+import { NavLink, Outlet } from 'react-router-dom';
+import clsx from 'clsx';
+
 import Page from '../../../ui/Page';
-import ToggleButton from '../../../ui/ToggleButton';
 import CommunityWalletsStats from './components/CommunityWalletsStats';
-import CommunityWalletsTable from './components/CommunityWalletsTable';
-import DetailsTable from './components/DetailsTable';
-import Transactions from './components/Transactions';
-import { useQuery } from '@apollo/client';
-import {
-  GET_COMMUNITY_WALLETS,
-  GET_COMMUNITY_WALLETS_PAYMENTS,
-  GET_COMMUNITY_WALLETS_DETAILS,
-} from './queries';
 
 const CommunityWallets: FC = () => {
-  const [activeView, setActiveView] = useState<string>('wallets');
-  const { data: communityWalletsRes } = useQuery(GET_COMMUNITY_WALLETS);
-  const { data: paymentsRes } = useQuery(GET_COMMUNITY_WALLETS_PAYMENTS);
-  const { data: detailsRes } = useQuery(GET_COMMUNITY_WALLETS_DETAILS);
-
-  const communityWallets = communityWalletsRes?.getCommunityWallets || [];
-  const payments = paymentsRes?.getCommunityWalletsPayments || [];
-  const details = detailsRes?.getCommunityWalletsDetails || [];
-
-  const toggleOptions = [
-    { label: 'Wallets', value: 'wallets' },
-    { label: 'Details', value: 'details' },
-    { label: 'Transactions', value: 'transactions' },
-  ];
-
   return (
     <Page>
       <h1 className="font-space-grotesk text-3xl md:text-4xl font-medium leading-[44px] tracking-[-0.02em] text-left mt-6 mb-6">
@@ -36,18 +14,50 @@ const CommunityWallets: FC = () => {
       <section className="my-2 flow-root">
         <CommunityWalletsStats />
         <div className="py-8">
-          <ToggleButton options={toggleOptions} activeValue={activeView} onToggle={setActiveView} />
-          <>
-            <div style={{ display: activeView === 'wallets' ? 'block' : 'none' }}>
-              <CommunityWalletsTable wallets={communityWallets} />
-            </div>
-            <div style={{ display: activeView === 'details' ? 'block' : 'none' }}>
-              <DetailsTable details={details} />
-            </div>
-            <div style={{ display: activeView === 'transactions' ? 'block' : 'none' }}>
-              <Transactions payments={payments} />
-            </div>
-          </>
+          <ul className="inline-flex border border-[#D6D6D6] rounded-md overflow-hidden shadow-sm mb-6 divide-x">
+            <li>
+              <NavLink
+                to="/community-wallets"
+                end
+                className={({ isActive }) =>
+                  clsx(
+                    'block px-4 py-2',
+                    isActive ? 'bg-[var(--Colors-Background-bg-active,#FAFAFA)]' : 'bg-white',
+                  )
+                }
+              >
+                Wallets
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/community-wallets/details"
+                className={({ isActive }) =>
+                  clsx(
+                    'block px-4 py-2',
+                    isActive ? 'bg-[var(--Colors-Background-bg-active,#FAFAFA)]' : 'bg-white',
+                  )
+                }
+              >
+                Details
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/community-wallets/transactions"
+                className={({ isActive }) =>
+                  clsx(
+                    'block px-4 py-2',
+                    isActive ? 'bg-[var(--Colors-Background-bg-active,#FAFAFA)]' : 'bg-white',
+                  )
+                }
+              >
+                Transactions
+              </NavLink>
+            </li>
+          </ul>
+
+          <Outlet />
         </div>
       </section>
     </Page>

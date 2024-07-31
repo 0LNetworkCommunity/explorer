@@ -7,7 +7,6 @@ import ChartComponent from './ChartComponent';
 import StatItem from './components/StatItem';
 import StatsContainer from './components/StatsContainer';
 import Page from '../../../ui/Page';
-import AccountAddress from '../../../ui/AccountAddress';
 
 const getData = async () => {
   const res = await fetch(`${config.apiHost}/stats`);

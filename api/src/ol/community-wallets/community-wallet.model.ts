@@ -1,5 +1,13 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
+interface CommunityWalletInput {
+  rank: number;
+  address: string;
+  name?: string;
+  description?: string;
+  balance: number;
+}
+
 @ObjectType()
 export class CommunityWallet {
   @Field()
@@ -17,9 +25,20 @@ export class CommunityWallet {
   @Field()
   balance: number;
 
-  constructor(partial: Partial<CommunityWallet>) {
-    Object.assign(this, partial);
+  public constructor(input: CommunityWalletInput) {
+    this.rank = input.rank;
+    this.address = input.address;
+    this.name = input.name;
+    this.description = input.description;
+    this.balance = input.balance;
   }
+}
+
+interface CommunityWalletStatsInput {
+  totalBalance: number;
+  totalPaid: number;
+  totalPending: number;
+  totalVetoed: number;
 }
 
 @ObjectType()
@@ -36,9 +55,20 @@ export class CommunityWalletStats {
   @Field()
   totalVetoed: number;
 
-  constructor(partial: Partial<CommunityWalletStats>) {
-    Object.assign(this, partial);
+  public constructor(input: CommunityWalletStatsInput) {
+    this.totalBalance = input.totalBalance;
+    this.totalPaid = input.totalPaid;
+    this.totalPending = input.totalPending;
+    this.totalVetoed = input.totalVetoed;
   }
+}
+
+interface PaymentInput {
+  deadline: string;
+  payee: string;
+  value: number;
+  description: string;
+  status: string;
 }
 
 @ObjectType()
@@ -58,8 +88,12 @@ export class Payment {
   @Field()
   status: string;
 
-  constructor(partial: Partial<Payment>) {
-    Object.assign(this, partial);
+  public constructor(input: PaymentInput) {
+    this.deadline = input.deadline;
+    this.payee = input.payee;
+    this.value = input.value;
+    this.description = input.description;
+    this.status = input.status;
   }
 }
 
@@ -92,8 +126,6 @@ export class CommunityWalletDetails {
   @Field()
   isMultiAction: boolean;
 
-  // also nullable
-  // @Field(() => [Number])
   @Field(() => [Number], { nullable: true })
   threshold?: number[];
 

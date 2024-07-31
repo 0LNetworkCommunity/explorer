@@ -108,7 +108,7 @@ nvm use
 
 ## PostgreSQL
 
-We use (Primsa)[https://www.prisma.io/].
+We use [Primsa](https://www.prisma.io/).
 
 - Run `npx prisma generate` if you update `api/prisma/schema.prisma`.
 - Run `npx prisma db push` to migrate the database.

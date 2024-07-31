@@ -28,9 +28,6 @@ export class CommunityWalletsProcessor extends WorkerHost implements OnModuleIni
         },
       }
     );
-
-    // Execute the job immediately on startup
-    await this.updateCommunityWalletsCaches();
   }
 
   public async process(job: Job<void, any, string>) {

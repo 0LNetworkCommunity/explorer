@@ -153,7 +153,7 @@ export class CommunityWalletsService implements ICommunityWalletsService {
         });
 
         resource.data['scheduled'].forEach((payment) => {
-          if (payment.deadline > currentEpoch) {
+          if (payment.deadline >= currentEpoch) {
             totalPending += Number(payment['tx']['value']);
           }
         });
@@ -210,7 +210,7 @@ export class CommunityWalletsService implements ICommunityWalletsService {
       status: string;
     }[] => {
       return payments
-        .filter((payment) => status !== 'pending' || payment.deadline > currentEpoch)
+        .filter((payment) => status !== 'pending' || payment.deadline >= currentEpoch)
         .map((payment) => ({
           deadline: payment.deadline,
           payee: payment.tx.payee,

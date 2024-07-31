@@ -37,6 +37,6 @@ const server = app.listen(port, () => {
     const host = (addr.family === 'IPv6')
       ? `[${addr.address}]:${addr.port}`
       : `${addr.address}:${addr.port}`;
-    this.logger.log(`Serving at http://${host}"`);
+    console.log(`Serving at http://${host}"`);
   }
 });

@@ -36,7 +36,7 @@ const columns = [
 
 const TopAccountsTable: FC<TopAccountsTableProps> = () => {
   const [sortColumn, setSortColumn] = useState('rank');
-  const [sortOrder, setSortOrder] = useState(SortOrder.Desc);
+  const [sortOrder, setSortOrder] = useState(SortOrder.Asc);
   const [sortedAccounts, setSortedAccounts] = useState<ITopAccount[]>([]);
 
   const { data } = useQuery(GET_TOP_ACCOUNTS);

@@ -23,7 +23,7 @@ interface PaymentsTableProps {
 
 const PaymentsTable: React.FC<PaymentsTableProps> = ({ payments, status }) => {
   const [sortColumn, setSortColumn] = useState<string>('deadline');
-  const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.Asc);
+  const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.Desc);
   const [sortedPayments, setSortedPayments] = useState<IFlatPayment[]>([]);
 
   const filteredPayments = useMemo(() => {

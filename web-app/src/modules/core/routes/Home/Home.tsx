@@ -35,6 +35,13 @@ const Transactions: FC = () => {
 const Home: FC = () => {
   return (
     <Page>
+      <section className="pt-5 lg:pt-20 pb-12 lg:pb-8 px-3">
+        <div className="flex flex-col lg:flex-row justify-between gap-6">
+          <div className="max-w-max lg:max-w-2xl">
+            <h1 className="pb-3 font-medium text-5xl text-[#141414]">Open Libra Explorer</h1>
+          </div>
+        </div>
+      </section>
       <Stats />
       <section className="mt-2 overflow-x-auto">
         <div className="my-6 px-2	flex flex-row justify-between align-center gap-3">

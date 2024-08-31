@@ -356,7 +356,7 @@ CREATE TABLE "donor_voice_registry" (
     "change_index" UInt64,
     "registry" Array(UInt256)
 )
-ENGINE = ReplicatedMergeTree
+ENGINE = MergeTree
 PRIMARY KEY (
     "version"
 )

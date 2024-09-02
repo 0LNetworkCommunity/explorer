@@ -106,32 +106,32 @@ export class ValidatorsService {
   }
 
   public async getVouches(address: Buffer): Promise<Vouches> {
-    const allVouchersRes = await this.olService.aptosClient.getAccountResource(
+    const receivedVouchesRes = await this.olService.aptosClient.getAccountResource(
       `0x${address.toString('hex')}`,
-      '0x1::vouch::MyVouches',
+      '0x1::vouch::ReceivedVouches',
     );
 
-    const allVouchers = allVouchersRes.data as {
+    const receivedVouches = receivedVouchesRes.data as {
       epoch_vouched: string[];
-      my_buddies: string[];
+      incoming_vouches: string[];
     };
 
-    const all = allVouchers.my_buddies.map((address, index) => {
+    const all = receivedVouches.incoming_vouches.map((address, index) => {
       return {
         address: parseAddress(address).toString('hex').toLocaleUpperCase(),
-        epoch: Number(allVouchers.epoch_vouched[index]),
+        epoch: Number(receivedVouches.epoch_vouched[index]),
       };
     });
 
-    const validVouchersRes = await this.olService.aptosClient.view({
+    const validVouchesRes = await this.olService.aptosClient.view({
       function: '0x1::proof_of_fee::get_valid_vouchers_in_set',
       type_arguments: [],
       arguments: [`0x${address.toString('hex')}`],
     });
 
     return new Vouches({
-      compliant: validVouchersRes[0] as boolean,
-      valid: Number(validVouchersRes[1]),
+      compliant: validVouchesRes[0] as boolean,
+      valid: Number(validVouchesRes[1]),
       total: all.length,
       vouchers: all.map((vouch) => {
         return new Voucher({

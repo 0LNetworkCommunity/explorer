@@ -22,6 +22,7 @@ export class ValidatorsProcessor extends WorkerHost {
         every: 30 * 1000, // 30 seconds
       },
     });
+    this.updateValidatorsCache();
   }
 
   public async process(job: Job<void, any, string>) {

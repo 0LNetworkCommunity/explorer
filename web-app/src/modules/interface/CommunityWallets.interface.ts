@@ -7,7 +7,7 @@ export interface ICommunityWallet {
 }
 
 export interface IPayment {
-  deadline: string;
+  deadline: number;
   payee: string;
   description: string;
   value: number;

@@ -19,15 +19,12 @@ export class CommunityWalletsProcessor extends WorkerHost implements OnModuleIni
   }
 
   public async onModuleInit() {
-    await this.communityWalletsQueue.add(
-      'updateCommunityWalletsCaches',
-      undefined,
-      {
-        repeat: {
-          every: 60 * 60 * 1_000, // 1 hour
-        },
-      }
-    );
+    await this.communityWalletsQueue.add('updateCommunityWalletsCaches', undefined, {
+      repeat: {
+        every: 60 * 60 * 1_000, // 1 hour
+      },
+    });
+    this.updateCommunityWalletsCaches();
   }
 
   public async process(job: Job<void, any, string>) {

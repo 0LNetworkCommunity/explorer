@@ -64,7 +64,7 @@ export class CommunityWalletStats {
 }
 
 interface PaymentInput {
-  deadline: string;
+  deadline: number;
   payee: string;
   value: number;
   description: string;
@@ -74,7 +74,7 @@ interface PaymentInput {
 @ObjectType()
 export class Payment {
   @Field()
-  deadline: string;
+  deadline: number;
 
   @Field()
   payee: string;

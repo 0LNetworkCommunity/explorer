@@ -146,7 +146,7 @@ type CommunityWalletStats {
 }
 
 type Payment {
-  deadline: String!
+  deadline: Float!
   payee: String!
   value: Float!
   description: String!

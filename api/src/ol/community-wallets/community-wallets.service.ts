@@ -203,7 +203,7 @@ export class CommunityWalletsService implements ICommunityWalletsService {
       status: string,
       currentEpoch: number,
     ): {
-      deadline: string;
+      deadline: number;
       payee: string;
       value: number;
       description: string;
@@ -212,7 +212,7 @@ export class CommunityWalletsService implements ICommunityWalletsService {
       return payments
         .filter((payment) => status !== 'pending' || payment.deadline >= currentEpoch)
         .map((payment) => ({
-          deadline: payment.deadline,
+          deadline: Number(payment.deadline),
           payee: payment.tx.payee,
           value: formatCoin(payment.tx.value),
           description: Buffer.from(parseHexString(payment.tx.description)).toString('utf-8'),
@@ -227,7 +227,6 @@ export class CommunityWalletsService implements ICommunityWalletsService {
             '0x' + wallet.address,
             '0x1::donor_voice_txs::TxSchedule',
           );
-
           const payments: CommunityWalletPayments = {
             address: wallet.address,
             name: wallet.name,

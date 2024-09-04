@@ -1,4 +1,4 @@
-FROM rust:1.76.0 as transformerBuilder
+FROM rust:1.80.1 as transformerBuilder
 WORKDIR /usr/src/myapp
 COPY ./transformer .
 RUN cargo install --path .

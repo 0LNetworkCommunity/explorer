@@ -67,7 +67,7 @@ export class OlParquetProducerProcessor extends WorkerHost implements OnModuleIn
     );
 
     const parquets = (await this.s3Service.listFiles(`${PARQUETS_DIR}/`)).map(
-      (it) => it.split('/')[0],
+      (it) => it.split('/')[0].split('.')[0],
     );
 
     const missing = _.difference(json, parquets).map((it) => parseInt(it.split('-')[0], 10));

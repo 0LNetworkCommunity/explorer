@@ -100,6 +100,18 @@ type ValidatorVouches {
   givenVouches: [VouchDetails!]!
 }
 
+type ThermostatMeasure {
+  nextEpoch: Float!
+  amount: Float!
+  percentage: Float!
+  didIncrease: Boolean!
+}
+
+type ValidatorUtils {
+  vouchPrice: Float!
+  thermostatMeasure: ThermostatMeasure!
+}
+
 type Account {
   address: Bytes!
   balance: Decimal
@@ -276,6 +288,7 @@ type Query {
   getTopAccounts(limit: Float! = 100): [TopAccount!]!
   getValidators: [Validator!]!
   getValidatorsVouches: [ValidatorVouches!]!
+  getValidatorUtils: ValidatorUtils!
   getCommunityWallets: [CommunityWallet!]!
   getCommunityWalletsStats: CommunityWalletStats!
   getCommunityWalletsPayments: [CommunityWalletPayments!]!

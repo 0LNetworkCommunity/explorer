@@ -291,3 +291,51 @@ export class ValidVouches {
   @Field(() => Boolean)
   compliant: boolean;
 }
+
+interface ThermostatMeasureInput {
+  nextEpoch: number;
+  amount: number;
+  percentage: number; // 0-100
+  didIncrease: boolean;
+}
+
+@ObjectType()
+export class ThermostatMeasure {
+  public constructor(input: ThermostatMeasureInput) {
+    this.nextEpoch = input.nextEpoch;
+    this.amount = input.amount;
+    this.percentage = input.percentage;
+    this.didIncrease = input.didIncrease;
+  }
+
+  @Field(() => Number)
+  nextEpoch: number;
+
+  @Field(() => Number)
+  amount: number;
+
+  @Field(() => Number)
+  percentage: number;
+
+  @Field(() => Boolean)
+  didIncrease: boolean;
+}
+
+interface ValidatorUtilsInput {
+  vouchPrice: number;
+  thermostatMeasure: ThermostatMeasure;
+}
+
+@ObjectType()
+export class ValidatorUtils {
+  public constructor(input: ValidatorUtilsInput) {
+    this.vouchPrice = input.vouchPrice;
+    this.thermostatMeasure = input.thermostatMeasure;
+  }
+
+  @Field(() => Number)
+  vouchPrice: number;
+
+  @Field(() => ThermostatMeasure)
+  thermostatMeasure: ThermostatMeasure;
+}

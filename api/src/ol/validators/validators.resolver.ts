@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { Query, Resolver } from '@nestjs/graphql';
 
 import { ValidatorsService } from './validators.service.js';
-import { Validator, ValidatorVouches } from '../models/validator.model.js';
+import { Validator, ValidatorVouches, ValidatorUtils } from '../models/validator.model.js';
 import { redisClient } from '../../redis/redis.service.js';
 import { VALIDATORS_CACHE_KEY } from '../constants.js';
 
@@ -33,5 +33,10 @@ export class ValidatorsResolver {
   @Query(() => [ValidatorVouches])
   async getValidatorsVouches(): Promise<ValidatorVouches[]> {
     return this.validatorsService.getValidatorsVouches();
+  }
+
+  @Query(() => ValidatorUtils)
+  async getValidatorUtils(): Promise<ValidatorUtils> {
+    return this.validatorsService.getValidatorUtils();
   }
 }

@@ -12,6 +12,8 @@ import {
   Vouch,
   VouchDetails,
   ValidVouches,
+  ValidatorUtils,
+  ThermostatMeasure,
 } from '../models/validator.model.js';
 import { parseAddress } from '../../utils.js';
 
@@ -317,6 +319,48 @@ export class ValidatorsService {
         });
       }),
     );
+  }
+
+  public async getValidatorUtils(): Promise<ValidatorUtils> {
+    // Get Vouch Price
+    const priceRes = await this.olService.aptosClient.getAccountResource(
+      '0x1',
+      '0x1::vouch::VouchPrice',
+    );
+    const vouchPriceRes = priceRes.data as {
+      amount: string;
+    };
+
+    // Get current reward
+    const rewardRes = await this.olService.aptosClient.view({
+      function: '0x1::proof_of_fee::get_consensus_reward',
+      type_arguments: [],
+      arguments: [],
+    });
+    const nominalReward = rewardRes[0];
+
+    // Check Thermostat
+    const measureRes = await this.olService.aptosClient.view({
+      function: '0x1::proof_of_fee::query_reward_adjustment',
+      type_arguments: [],
+      arguments: [],
+    });
+    const didIncrement = measureRes[1] as boolean;
+    const amount = measureRes[2];
+
+    // Get current epoch
+    const epochRes = await this.olService.aptosClient.getLedgerInfo();
+    const currentEpoch = Number(epochRes.epoch);
+
+    // Create ThermostatMeasure object
+    const thermostatMeasure = new ThermostatMeasure({
+      nextEpoch: currentEpoch + 1,
+      amount: Number(nominalReward) + (didIncrement ? +1 : -1) * Number(amount),
+      percentage: Math.round((Number(amount) / Number(nominalReward)) * 100),
+      didIncrease: didIncrement,
+    });
+
+    return new ValidatorUtils({ vouchPrice: Number(vouchPriceRes.amount), thermostatMeasure });
   }
 
   loadValidatorHandles = (): Map<string, string> => {

@@ -1,27 +1,21 @@
 import { FC, useState } from 'react';
 import { IValidator } from '../../../../interface/Validator.interface';
-import ToggleButton from '../../../../ui/ToggleButton';
 import SortableTh from './SortableTh';
 import ValidatorRow from './ValidatorRow';
 import ValidatorRowSkeleton from './ValidatorRowSkeleton';
 
 interface ValidatorsTableProps {
   validators?: IValidator[];
+  activeValue: string;
 }
 
 type SortOrder = 'asc' | 'desc';
 
-const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
+const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators, activeValue }) => {
   const [sortColumn, setSortColumn] = useState<string>('index');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [previousSortColumn, setPreviousSortColumn] = useState<string>('vouches');
   const [isActive] = useState(true);
-  const [activeValue, setActiveValue] = useState<string>('active');
-
-  const toggleOptions = [
-    { label: 'Active', value: 'active' },
-    { label: 'Inactive', value: 'inactive' },
-  ];
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -74,6 +68,10 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
       case 'address':
         value1 = a.address;
         value2 = b.address;
+        break;
+      case 'handle':
+        value1 = a.handle;
+        value2 = b.handle;
         break;
       case 'index':
         value1 = Number(a.index);
@@ -153,6 +151,7 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
 
   const columns = [
     { key: 'address', label: 'Address', className: '' },
+    { key: 'handle', label: 'Handle', className: 'text-center' },
     ...(activeValue === 'active'
       ? [{ key: 'grade', label: 'Grade', className: 'text-center' }]
       : [{ key: 'audit', label: 'Audit', className: 'text-center' }]),
@@ -173,40 +172,37 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators }) => {
   ];
 
   return (
-    <div className="py-8">
-      <ToggleButton options={toggleOptions} activeValue={activeValue} onToggle={setActiveValue} />
-      <div className="overflow-x-auto">
-        <div className="inline-block min-w-full py-2 align-middle">
-          <div className="overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-[#FAFAFA]">
-                <tr className="text-left text-sm">
-                  {columns.map((col) => (
-                    <SortableTh
-                      key={col.key}
-                      column={col.key}
-                      sortColumn={sortColumn}
-                      sortOrder={sortOrder}
-                      onSort={handleSort}
-                      className={col.className}
-                    >
-                      {col.label}
-                    </SortableTh>
+    <div className="overflow-x-auto">
+      <div className="inline-block min-w-full py-2 align-middle">
+        <div className="overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-[#FAFAFA]">
+              <tr className="text-left text-sm">
+                {columns.map((col) => (
+                  <SortableTh
+                    key={col.key}
+                    column={col.key}
+                    sortColumn={sortColumn}
+                    sortOrder={sortOrder}
+                    onSort={handleSort}
+                    className={col.className}
+                  >
+                    {col.label}
+                  </SortableTh>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 bg-white">
+              {cumulativeValidators
+                ? cumulativeValidators.map((validator) => (
+                    <ValidatorRow key={validator.address} validator={validator} />
+                  ))
+                : Array.from({ length: 10 }).map((_, index) => (
+                    <ValidatorRowSkeleton key={index} isActive={isActive} />
                   ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {cumulativeValidators
-                  ? cumulativeValidators.map((validator) => (
-                      <ValidatorRow key={validator.address} validator={validator} />
-                    ))
-                  : Array.from({ length: 10 }).map((_, index) => (
-                      <ValidatorRowSkeleton key={index} isActive={isActive} />
-                    ))}
-              </tbody>
-            </table>
-            {activeValue === 'inactive' && <AuditLegend />}
-          </div>
+            </tbody>
+          </table>
+          {activeValue === 'inactive' && <AuditLegend />}
         </div>
       </div>
     </div>

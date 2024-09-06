@@ -10,6 +10,11 @@
         "include": "**/*.sql",
         "outDir": "dist/src/",
         "watchAssets": true
+      },
+      {
+        "include": "assets/**/*",
+        "outDir": "dist/",
+        "watchAssets": true
       }
     ]
   }

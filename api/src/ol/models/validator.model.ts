@@ -96,6 +96,7 @@ interface ValidatorInput {
   inSet: boolean;
   index: BN;
   address: string;
+  handle: string | null;
   balance?: number;
   unlocked?: number;
   votingPower: BN;
@@ -113,6 +114,7 @@ export class Validator {
     this.inSet = input.inSet;
     this.index = input.index;
     this.address = input.address;
+    this.handle = input.handle;
     this.balance = input.balance;
     this.unlocked = input.unlocked;
     this.votingPower = input.votingPower;
@@ -132,6 +134,9 @@ export class Validator {
 
   @Field(() => String)
   public address: string;
+
+  @Field(() => String, { nullable: true })
+  public handle: string | null;
 
   @Field(() => String, { nullable: true })
   public city?: string | null;
@@ -159,4 +164,130 @@ export class Validator {
 
   @Field(() => [String], { nullable: true })
   public auditQualification?: [string] | null;
+}
+
+interface VouchInput {
+  address: string;
+  epoch: number;
+}
+
+@ObjectType()
+export class Vouch {
+  public constructor(input: VouchInput) {
+    this.address = input.address;
+    this.epoch = input.epoch;
+  }
+
+  @Field(() => String)
+  address: string;
+
+  @Field(() => Number)
+  epoch: number;
+}
+
+interface VouchDetailsInput {
+  address: string;
+  handle?: string | null;
+  compliant: boolean;
+  epoch: number;
+  epochsToExpire: number;
+  family?: string;
+  inSet: boolean;
+}
+
+@ObjectType()
+export class VouchDetails {
+  public constructor(input: VouchDetailsInput) {
+    this.address = input.address;
+    this.handle = input.handle;
+    this.compliant = input.compliant;
+    this.epoch = input.epoch;
+    this.epochsToExpire = input.epochsToExpire;
+    this.family = input.family;
+    this.inSet = input.inSet;
+  }
+
+  @Field(() => String)
+  address: string;
+
+  @Field(() => String, { nullable: true })
+  handle?: string | null;
+
+  @Field(() => Boolean)
+  compliant: boolean;
+
+  @Field(() => Number)
+  epoch: number;
+
+  @Field(() => Number)
+  epochsToExpire: number;
+
+  @Field(() => String, { nullable: true })
+  family?: string | null;
+
+  @Field(() => Boolean)
+  inSet: boolean;
+}
+
+interface ValidatorVouchesInput {
+  address: string;
+  handle: string | null;
+  inSet: boolean;
+  validVouches: number;
+  compliant: boolean;
+  receivedVouches: VouchDetails[];
+  givenVouches: VouchDetails[];
+}
+
+@ObjectType()
+export class ValidatorVouches {
+  public constructor(input: ValidatorVouchesInput) {
+    this.address = input.address;
+    this.handle = input.handle;
+    this.inSet = input.inSet;
+    this.validVouches = input.validVouches;
+    this.compliant = input.compliant;
+    this.receivedVouches = input.receivedVouches;
+    this.givenVouches = input.givenVouches;
+  }
+
+  @Field(() => String)
+  address: string;
+
+  @Field(() => String, { nullable: true })
+  handle?: string | null;
+
+  @Field(() => Boolean)
+  inSet: boolean;
+
+  @Field(() => Number)
+  validVouches: number;
+
+  @Field(() => Boolean)
+  compliant: boolean;
+
+  @Field(() => [VouchDetails])
+  receivedVouches: VouchDetails[];
+
+  @Field(() => [VouchDetails])
+  givenVouches: VouchDetails[];
+}
+
+interface ValidVouchesInput {
+  valid: number;
+  compliant: boolean;
+}
+
+@ObjectType()
+export class ValidVouches {
+  public constructor(input: ValidVouchesInput) {
+    this.valid = input.valid;
+    this.compliant = input.compliant;
+  }
+
+  @Field(() => Number)
+  valid: number;
+
+  @Field(() => Boolean)
+  compliant: boolean;
 }

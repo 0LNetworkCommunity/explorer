@@ -17,6 +17,7 @@ const ValidatorRow: FC<ValidatorRowProps> = ({ validator }) => {
       <td className="px-2 md:px-4 lg:px-6 py-4">
         <AccountAddress address={validator.address} />
       </td>
+      <td className="px-2 md:px-4 lg:px-6 py-4">{validator.handle}</td>
       {validator.inSet ? (
         <td className="px-2 md:px-4 lg:px-6 py-4 text-center">
           {validator.grade.compliant ? (

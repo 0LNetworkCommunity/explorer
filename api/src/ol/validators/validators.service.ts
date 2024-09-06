@@ -4,8 +4,20 @@ import BN from 'bn.js';
 
 import { OlService } from '../ol.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import { Validator, Vouches, Voucher } from '../models/validator.model.js';
+import {
+  Validator,
+  Vouches,
+  Voucher,
+  ValidatorVouches,
+  Vouch,
+  VouchDetails,
+  ValidVouches,
+} from '../models/validator.model.js';
 import { parseAddress } from '../../utils.js';
+
+import { join } from 'path';
+import { readFileSync } from 'fs';
+import { forEach } from 'lodash';
 
 @Injectable()
 export class ValidatorsService {
@@ -69,6 +81,7 @@ export class ValidatorsService {
       }),
     );
 
+    let handles = this.loadValidatorHandles();
     let allValidators = [...currentValidators, ...eligibleValidators];
     return await Promise.all(
       allValidators.map(async (validator) => {
@@ -79,10 +92,13 @@ export class ValidatorsService {
         let vouches = await this.getVouches(validator.address);
 
         const currentBid = await this.olService.getCurrentBid(validator.address);
+        const addr = validator.address.toString('hex').toLocaleUpperCase();
+        const handle = handles.get(addr) || null;
         return new Validator({
           inSet: validator.inSet,
           index: validator.index,
-          address: validator.address.toString('hex').toLocaleUpperCase(),
+          address: addr,
+          handle: handle,
           votingPower: validator.votingPower,
           balance: Number(balance),
           unlocked: unlocked,
@@ -141,4 +157,183 @@ export class ValidatorsService {
       }),
     });
   }
+
+  public async getValidVouchesInSet(address: Buffer): Promise<ValidVouches> {
+    const validVouchesRes = await this.olService.aptosClient.view({
+      function: '0x1::proof_of_fee::get_valid_vouchers_in_set',
+      type_arguments: [],
+      arguments: [`0x${address.toString('hex')}`],
+    });
+
+    return new ValidVouches({
+      valid: Number(validVouchesRes[1]),
+      compliant: validVouchesRes[0] as boolean,
+    });
+  }
+
+  public async getGivenVouches(address: Buffer): Promise<Vouch[]> {
+    const givenVouchesRes = await this.olService.aptosClient.getAccountResource(
+      `0x${address.toString('hex')}`,
+      '0x1::vouch::GivenVouches',
+    );
+
+    const givenVouches = givenVouchesRes.data as {
+      epoch_vouched: string[];
+      outgoing_vouches: string[];
+    };
+
+    return givenVouches.outgoing_vouches.map((address, index) => {
+      return new Vouch({
+        address: parseAddress(address).toString('hex').toLocaleUpperCase(),
+        epoch: Number(givenVouches.epoch_vouched[index]),
+      });
+    });
+  }
+
+  public async getReceivedVouches(address: Buffer): Promise<Vouch[]> {
+    const receivedVouchesRes = await this.olService.aptosClient.getAccountResource(
+      `0x${address.toString('hex')}`,
+      '0x1::vouch::ReceivedVouches',
+    );
+
+    const receivedVouches = receivedVouchesRes.data as {
+      epoch_vouched: string[];
+      incoming_vouches: string[];
+    };
+
+    return receivedVouches.incoming_vouches.map((address, index) => {
+      return new Vouch({
+        address: parseAddress(address).toString('hex').toLocaleUpperCase(),
+        epoch: Number(receivedVouches.epoch_vouched[index]),
+      });
+    });
+  }
+
+  public async getAncestry(address: string): Promise<string[]> {
+    try {
+      const ancestryRes = await this.olService.aptosClient.getAccountResource(
+        `0x${address.toLocaleUpperCase()}`,
+        '0x1::ancestry::Ancestry',
+      );
+
+      const ancestry = ancestryRes.data as {
+        tree: string[];
+      };
+
+      return ancestry.tree;
+    } catch (error) {
+      return [];
+    }
+  }
+
+  public async getValidatorsVouches(): Promise<ValidatorVouches[]> {
+    const eligible = await this.olService.getEligibleValidators();
+    const active = await this.olService.getValidatorSet();
+    const handles = this.loadValidatorHandles();
+    const currentEpoch = await this.olService.aptosClient
+      .getLedgerInfo()
+      .then((info) => Number(info.epoch));
+
+    const validVouches = new Map<string, ValidVouches>();
+    await Promise.all(
+      eligible.map(async (address) => {
+        validVouches.set(
+          address.toString('hex').toUpperCase(),
+          await this.getValidVouchesInSet(address),
+        );
+      }),
+    );
+
+    const getVouchDetails = async (vouch: Vouch): Promise<VouchDetails> => {
+      const vouchAddress = vouch.address.toLocaleUpperCase();
+      const handle = handles.get(vouchAddress) || null;
+      const ancestry = await this.getAncestry(vouchAddress.toLocaleLowerCase());
+      return new VouchDetails({
+        address: vouchAddress,
+        epoch: vouch.epoch,
+        handle: handle,
+        compliant: validVouches.get(vouchAddress)?.compliant || false,
+        epochsToExpire: vouch.epoch + 45 - currentEpoch,
+        inSet: active.activeValidators.some(
+          (validator) => validator.addr.toString('hex').toUpperCase() === vouchAddress,
+        ),
+        family: ancestry[0],
+      });
+    };
+
+    const getSortedVouchesDetails = async (vouches: Vouch[]): Promise<VouchDetails[]> => {
+      // Map vouches to VouchDetails objects and resolve them
+      const vouchDetailsList = await Promise.all(
+        vouches.map(async (vouch) => await getVouchDetails(vouch)),
+      );
+
+      // Sort the VouchDetails list based on the provided criteria
+      return vouchDetailsList.sort((a, b) => {
+        // 1. Sort by inSet (first those that are in the set)
+        if (a.inSet !== b.inSet) return a.inSet ? -1 : 1;
+
+        // 2. Sort by compliant (first those that are compliant)
+        if (a.compliant !== b.compliant) return a.compliant ? -1 : 1;
+
+        // 3. Sort by family
+        if (a.family !== b.family) return a.family?.localeCompare(b.family || '') ? -1 : 1;
+
+        // 4. Sort by epochsToExpire (highest number of epochs to expire first)
+        if (a.epochsToExpire !== b.epochsToExpire) return b.epochsToExpire - a.epochsToExpire;
+
+        // 5. If tied, sort alphabetically by handle
+        if (a.handle && b.handle) {
+          return a.handle.localeCompare(b.handle);
+        }
+
+        return 0;
+      });
+    };
+
+    return await Promise.all(
+      eligible.map(async (address) => {
+        // get received vouches
+        const received = await this.getReceivedVouches(address);
+        const receivedDetails = await getSortedVouchesDetails(received);
+
+        // get given vouches
+        const given = await this.getGivenVouches(address);
+        let givenDetails = await getSortedVouchesDetails(given);
+
+        // get validator handle
+        const handle = handles.get(address.toString('hex').toLocaleUpperCase()) || null;
+
+        const addr = address.toString('hex').toLocaleUpperCase();
+        return new ValidatorVouches({
+          address: addr,
+          handle: handle,
+          inSet: active.activeValidators.some(
+            (validator) => validator.addr.toString('hex').toLocaleUpperCase() === addr,
+          ),
+          validVouches: validVouches.get(addr)?.valid || 0,
+          compliant: validVouches.get(addr)?.compliant || false,
+          receivedVouches: receivedDetails,
+          givenVouches: givenDetails,
+        });
+      }),
+    );
+  }
+
+  loadValidatorHandles = (): Map<string, string> => {
+    // Get the current working directory (root of the project)
+    const filePath = join(process.cwd(), 'dist', 'assets', 'validator-handle.json');
+
+    // Read and parse the JSON file
+    const data = JSON.parse(readFileSync(filePath, 'utf-8'));
+
+    // Create a Map from the parsed data
+    const validatorMap = new Map<string, string>();
+
+    // Assuming the JSON structure is like: { "validators": { "address": "handle" } }
+    Object.keys(data.validators).forEach((address) => {
+      validatorMap.set(address.toUpperCase(), data.validators[address]);
+    });
+
+    return validatorMap;
+  };
 }

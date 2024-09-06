@@ -10,6 +10,7 @@ interface Vouches {
 
 export interface IValidator {
   address: string;
+  handle?: string;
   inSet: boolean;
   index: number;
   votingPower: number;

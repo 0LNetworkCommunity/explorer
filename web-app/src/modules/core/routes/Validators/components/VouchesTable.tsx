@@ -3,6 +3,8 @@ import { gql, useQuery } from '@apollo/client';
 import SortableTh from './SortableTh';
 import VouchesRow from './VouchesRow';
 import { ValidatorVouches } from '../../../../interface/Validator.interface';
+import VouchesRowSkeleton from './VouchesRowSkeleton';
+import VouchesLegend from './VouchesLegend';
 
 const GET_VALIDATORS = gql`
   query GetValidatorsVouches {
@@ -161,11 +163,23 @@ const VouchesTable: React.FC = () => {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {sortedValidators.map((validator: ValidatorVouches) => (
-            <VouchesRow validator={validator} showExpired={showExpired} />
-          ))}
+          {data
+            ? sortedValidators.map((validator: ValidatorVouches, index: number) => (
+                <VouchesRow
+                  key={'vouch_row_' + index}
+                  validator={validator}
+                  showExpired={showExpired}
+                />
+              ))
+            : [...Array(5)].map((_each, index) => (
+                <VouchesRowSkeleton key={'vouch_skeleton_row_' + index} />
+              ))}
         </tbody>
       </table>
+      <VouchesLegend />
+      <p className="text-sm text-gray-500 mt-2">
+        The data in this table is updated every 60 seconds.
+      </p>
     </>
   );
 };

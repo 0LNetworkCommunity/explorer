@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import Bluebird from 'bluebird';
 import BN from 'bn.js';
+import { ConfigService } from '@nestjs/config';
 
 import { OlService } from '../ol.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
@@ -19,16 +20,63 @@ import { parseAddress } from '../../utils.js';
 
 import { join } from 'path';
 import { readFileSync } from 'fs';
-import { forEach } from 'lodash';
+import { redisClient } from '../../redis/redis.service.js';
+import { VALIDATORS_CACHE_KEY, VALIDATORS_VOUCHES_CACHE_KEY } from '../constants.js';
 
 @Injectable()
 export class ValidatorsService {
+  private readonly cacheEnabled: boolean;
   public constructor(
     private readonly olService: OlService,
     private readonly prisma: PrismaService,
-  ) {}
+    config: ConfigService,
+  ) {
+    this.cacheEnabled = config.get<boolean>('cacheEnabled')!;
+  }
+
+  private async getFromCache<T>(key: string): Promise<T | null> {
+    const cachedData = await redisClient.get(key);
+    if (cachedData) {
+      return JSON.parse(cachedData) as T;
+    }
+    return null;
+  }
+
+  private async setCache<T>(key: string, data: T): Promise<void> {
+    await redisClient.set(key, JSON.stringify(data));
+  }
 
   public async getValidators(): Promise<Validator[]> {
+    if (this.cacheEnabled) {
+      const cachedValidators = await this.getFromCache<Validator[]>(VALIDATORS_CACHE_KEY);
+      if (cachedValidators) {
+        return cachedValidators;
+      }
+    }
+
+    const validators = await this.queryValidators();
+    await this.setCache('validators', validators);
+
+    return validators;
+  }
+
+  public async getValidatorsVouches(): Promise<ValidatorVouches[]> {
+    if (this.cacheEnabled) {
+      const cachedVouches = await this.getFromCache<ValidatorVouches[]>(
+        VALIDATORS_VOUCHES_CACHE_KEY,
+      );
+      if (cachedVouches) {
+        return cachedVouches;
+      }
+    }
+
+    const vouches = await this.queryValidatorsVouches();
+    await this.setCache(VALIDATORS_VOUCHES_CACHE_KEY, vouches);
+
+    return vouches;
+  }
+
+  public async queryValidators(): Promise<Validator[]> {
     const validatorSet = await this.olService.getValidatorSet();
     const nodes = await this.prisma.node.findMany({
       select: {
@@ -58,7 +106,7 @@ export class ValidatorsService {
           city,
           country,
           grade,
-          auditQualification: null,
+          auditQualification: await this.getAuditQualification(validator.addr),
         };
       },
     );
@@ -228,13 +276,21 @@ export class ValidatorsService {
     }
   }
 
-  public async getValidatorsVouches(): Promise<ValidatorVouches[]> {
+  public async queryValidatorsVouches(): Promise<ValidatorVouches[]> {
     const eligible = await this.olService.getEligibleValidators();
     const active = await this.olService.getValidatorSet();
     const handles = this.loadValidatorHandles();
     const currentEpoch = await this.olService.aptosClient
       .getLedgerInfo()
       .then((info) => Number(info.epoch));
+
+    const auditVals = new Map<string, boolean>();
+    await Promise.all(
+      eligible.map(async (address) => {
+        const audit: string[] = await this.getAuditQualification(address);
+        auditVals.set(address.toString('hex').toUpperCase(), audit.length === 0 ? true : false);
+      }),
+    );
 
     const validVouches = new Map<string, ValidVouches>();
     await Promise.all(
@@ -254,7 +310,7 @@ export class ValidatorsService {
         address: vouchAddress,
         epoch: vouch.epoch,
         handle: handle,
-        compliant: validVouches.get(vouchAddress)?.compliant || false,
+        compliant: auditVals.get(vouchAddress) || false,
         epochsToExpire: vouch.epoch + 45 - currentEpoch,
         inSet: active.activeValidators.some(
           (validator) => validator.addr.toString('hex').toUpperCase() === vouchAddress,
@@ -340,7 +396,7 @@ export class ValidatorsService {
     const nominalReward = rewardRes[0];
 
     // Check Thermostat
-    const measureRes = await this.olService.aptosClient.view({
+    /*const measureRes = await this.olService.aptosClient.view({
       function: '0x1::proof_of_fee::query_reward_adjustment',
       type_arguments: [],
       arguments: [],
@@ -358,9 +414,11 @@ export class ValidatorsService {
       amount: Number(nominalReward) + (didIncrement ? +1 : -1) * Number(amount),
       percentage: Math.round((Number(amount) / Number(nominalReward)) * 100),
       didIncrease: didIncrement,
-    });
+    });*/
 
-    return new ValidatorUtils({ vouchPrice: Number(vouchPriceRes.amount), thermostatMeasure });
+    return new ValidatorUtils({
+      vouchPrice: Number(vouchPriceRes.amount) /*, thermostatMeasure */,
+    });
   }
 
   loadValidatorHandles = (): Map<string, string> => {

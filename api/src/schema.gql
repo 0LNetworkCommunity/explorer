@@ -100,16 +100,8 @@ type ValidatorVouches {
   givenVouches: [VouchDetails!]!
 }
 
-type ThermostatMeasure {
-  nextEpoch: Float!
-  amount: Float!
-  percentage: Float!
-  didIncrease: Boolean!
-}
-
 type ValidatorUtils {
   vouchPrice: Float!
-  thermostatMeasure: ThermostatMeasure!
 }
 
 type Account {

@@ -8,15 +8,17 @@ const GET_VALIDATOR_UTILS = gql`
   query ValidatorUtils {
     getValidatorUtils {
       vouchPrice
-      thermostatMeasure {
+    }
+  }
+`;
+
+/*    thermostatMeasure {
         nextEpoch
         amount
         percentage
         didIncrease
       }
-    }
-  }
-`;
+*/
 
 interface ValidatorsStatsProps {
   validators?: IValidator[];
@@ -40,9 +42,9 @@ const ValidatorsStats: FC<ValidatorsStatsProps> = ({ validators }) => {
   // utils
   const utils = data ? data.getValidatorUtils : null;
 
-  const thermostatTitle = utils
+  /*const thermostatTitle = utils
     ? `Next Epoch Reward (${utils.thermostatMeasure.nextEpoch})`
-    : 'Next Epoch Reward';
+    : 'Next Epoch Reward';*/
 
   return (
     <div className="grid grid-cols-2 gap-[4px] md:grid-cols-3 lg:grid-cols-4 pb-8">
@@ -57,7 +59,7 @@ const ValidatorsStats: FC<ValidatorsStatsProps> = ({ validators }) => {
       <StatsCard title="Vouch Price" value={utils ? utils.vouchPrice : null}>
         {utils && <Money>{Math.ceil(utils.vouchPrice / 1_000_000)}</Money>}
       </StatsCard>
-      <StatsCard title={thermostatTitle} value={utils ? utils.vouchPrice : null}>
+      {/* <StatsCard title={thermostatTitle} value={utils ? utils.vouchPrice : null}>
         {utils && <Money>{Math.ceil(utils.thermostatMeasure.amount / 1_000_000)}</Money>}{' '}
         <span style={{ fontSize: '16px' }}>
           (
@@ -69,17 +71,17 @@ const ValidatorsStats: FC<ValidatorsStatsProps> = ({ validators }) => {
             )}
           )
         </span>
-      </StatsCard>
+      </StatsCard>*/}
     </div>
   );
 };
 
 // print percentage 0-100
-function formatPercentage(value: number, didChange: boolean, didIncrease: boolean) {
+/*function formatPercentage(value: number, didChange: boolean, didIncrease: boolean) {
   if (didChange) {
     return didIncrease ? `+${value}%` : `-${value}%`;
   }
   return `${value}%`;
-}
+}*/
 
 export default ValidatorsStats;

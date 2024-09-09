@@ -18,7 +18,7 @@ const ValidatorRow: FC<ValidatorRowProps> = ({ validator }) => {
         <AccountAddress address={validator.address} />
       </td>
       <td className="px-2 md:px-4 lg:px-6 py-4">{validator.handle}</td>
-      {validator.inSet ? (
+      {validator.inSet && (
         <td className="px-2 md:px-4 lg:px-6 py-4 text-center">
           {validator.grade.compliant ? (
             <CheckIcon className="w-5 h-5 text-green-500 inline" style={{ marginTop: '-3px' }} />
@@ -30,18 +30,26 @@ const ValidatorRow: FC<ValidatorRowProps> = ({ validator }) => {
           </span>{' '}
           / {validator.grade.proposedBlocks.toLocaleString()}
         </td>
-      ) : (
-        <td className="px-2 md:px-4 lg:px-6 py-4 text-center">
-          {validator.auditQualification?.toLocaleString()}
-        </td>
       )}
+      <td className="px-2 md:px-4 lg:px-6 py-4 text-center">
+        {validator.auditQualification?.toLocaleString() ? (
+          <XMarkIcon className="w-5 h-5 text-red-500 inline" style={{ marginTop: '-3px' }} />
+        ) : (
+          <CheckIcon className="w-5 h-5 text-green-500 inline" style={{ marginTop: '-3px' }} />
+        )}
+        {validator.auditQualification?.toLocaleString()}
+      </td>
       <td className="px-2 md:px-4 lg:px-6 py-4 text-center">
         <Vouches vouches={validator.vouches} />
       </td>
       <td className="px-2 md:px-4 lg:px-6 py-4 text-right">
-        {`${validator.currentBid && formatPercentage(validator.currentBid.currentBid)} (${
-          validator.currentBid && validator.currentBid.expirationEpoch.toLocaleString()
-        })`}
+        {validator.currentBid
+          ? `${formatPercentage(validator.currentBid.currentBid)} (${
+              validator.currentBid.expirationEpoch > 10000
+                ? '> 10,000'
+                : validator.currentBid.expirationEpoch.toLocaleString()
+            })`
+          : ''}
       </td>
       <td className="px-2 md:px-4 lg:px-6 py-4 text-right">
         <Money>{Number(validator.balance)}</Money>

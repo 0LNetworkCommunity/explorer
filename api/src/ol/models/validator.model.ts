@@ -323,19 +323,19 @@ export class ThermostatMeasure {
 
 interface ValidatorUtilsInput {
   vouchPrice: number;
-  thermostatMeasure: ThermostatMeasure;
+  //thermostatMeasure: ThermostatMeasure;
 }
 
 @ObjectType()
 export class ValidatorUtils {
   public constructor(input: ValidatorUtilsInput) {
     this.vouchPrice = input.vouchPrice;
-    this.thermostatMeasure = input.thermostatMeasure;
+    //this.thermostatMeasure = input.thermostatMeasure;
   }
 
   @Field(() => Number)
   vouchPrice: number;
-
+  /*
   @Field(() => ThermostatMeasure)
-  thermostatMeasure: ThermostatMeasure;
+  thermostatMeasure: ThermostatMeasure;*/
 }

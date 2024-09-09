@@ -4,7 +4,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue, Job } from 'bullmq';
 import { redisClient } from '../../redis/redis.service.js';
 import { ValidatorsService } from './validators.service.js';
-import { VALIDATORS_CACHE_KEY } from '../constants.js';
+import { VALIDATORS_CACHE_KEY, VALIDATORS_VOUCHES_CACHE_KEY } from '../constants.js';
 
 @Processor('validators')
 export class ValidatorsProcessor extends WorkerHost {
@@ -23,6 +23,13 @@ export class ValidatorsProcessor extends WorkerHost {
       },
     });
     this.updateValidatorsCache();
+
+    await this.validatorsQueue.add('updateValidatorsVouchesCache', undefined, {
+      repeat: {
+        every: 60 * 1000, // 60 seconds
+      },
+    });
+    this.updateValidatorsVouchesCache();
   }
 
   public async process(job: Job<void, any, string>) {
@@ -37,7 +44,12 @@ export class ValidatorsProcessor extends WorkerHost {
   }
 
   private async updateValidatorsCache() {
-    const validators = await this.validatorsService.getValidators();
+    const validators = await this.validatorsService.queryValidators();
     await redisClient.set(VALIDATORS_CACHE_KEY, JSON.stringify(validators));
+  }
+
+  private async updateValidatorsVouchesCache() {
+    const validatorsVouches = await this.validatorsService.queryValidatorsVouches();
+    await redisClient.set(VALIDATORS_VOUCHES_CACHE_KEY, JSON.stringify(validatorsVouches));
   }
 }

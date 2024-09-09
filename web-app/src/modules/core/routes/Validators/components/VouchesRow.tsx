@@ -1,5 +1,11 @@
 import React from 'react';
-import { CheckIcon, XMarkIcon, ShieldCheckIcon } from '@heroicons/react/20/solid';
+import {
+  CheckIcon,
+  XMarkIcon,
+  ExclamationTriangleIcon,
+  ClockIcon,
+  GlobeAltIcon,
+} from '@heroicons/react/20/solid';
 import clsx from 'clsx';
 import AccountAddress from '../../../../ui/AccountAddress';
 import { ValidatorVouches, VouchDetails } from '../../../../interface/Validator.interface';
@@ -18,7 +24,7 @@ const VouchesRow: React.FC<VouchesRowProps> = ({ validator, showExpired }) => {
       <td className="px-2 md:px-4 lg:px-6 py-4">
         <AccountAddress address={validator.address} />
       </td>
-      <td className="px-2 md:px-4 lg:px-6 py-4">{validator.handle}</td>
+      <td className="px-2 md:px-4 lg:px-6 py-4">{validator.handle || '<unknown>'}</td>
       <td className="px-2 md:px-4 lg:px-6 py-4">
         {validator.inSet ? (
           <CheckIcon className="w-5 h-5 text-green-500 inline" style={{ marginTop: '-3px' }} />
@@ -69,19 +75,31 @@ const VouchChip: React.FC<{ vouch: VouchDetails; index: number }> = ({ vouch, in
         'inline-flex items-center px-2 py-1 rounded-full text-sm font-medium text-black',
       )}
       style={{
-        backgroundColor: bgColor,
+        backgroundColor: '#F0F0F0',
         marginRight: '8px',
         marginBottom: '8px',
       }}
     >
-      {vouch.inSet && <ShieldCheckIcon className="w-4 h-4 text-blue-500 mr-1" />}
+      {vouch.inSet && <GlobeAltIcon className="w-4 h-4 text-blue-500 mr-1" />}
       {vouch.compliant ? (
         <CheckIcon className="w-4 h-4 text-green-500 mr-1" />
       ) : (
         <XMarkIcon className="w-4 h-4 text-red-500 mr-1" />
       )}
-      {vouch.handle} {vouch.family.slice(0, 4)}
+
+      {vouch.epochsToExpire <= 7 && vouch.epochsToExpire > 0 && (
+        <ExclamationTriangleIcon className="w-4 h-4 text-yellow-500 mr-1" />
+      )}
+
+      {vouch.epochsToExpire <= 0 && <ClockIcon className="w-4 h-4 text-red-500 mr-1" />}
+
+      {vouch.handle}
       <span style={{ fontSize: 8 }}> ({vouch.epochsToExpire})</span>
+
+      <span
+        className="inline-block w-3 h-3 rounded-full ml-2"
+        style={{ backgroundColor: bgColor }}
+      ></span>
     </span>
   );
 };

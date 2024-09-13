@@ -188,10 +188,10 @@ export class Vouch {
 interface VouchDetailsInput {
   address: string;
   handle?: string | null;
+  family?: string | null;
   compliant: boolean;
   epoch: number;
   epochsToExpire: number;
-  family?: string;
   inSet: boolean;
 }
 
@@ -200,10 +200,10 @@ export class VouchDetails {
   public constructor(input: VouchDetailsInput) {
     this.address = input.address;
     this.handle = input.handle;
+    this.family = input.family;
     this.compliant = input.compliant;
     this.epoch = input.epoch;
     this.epochsToExpire = input.epochsToExpire;
-    this.family = input.family;
     this.inSet = input.inSet;
   }
 
@@ -213,6 +213,9 @@ export class VouchDetails {
   @Field(() => String, { nullable: true })
   handle?: string | null;
 
+  @Field(() => String, { nullable: true })
+  family?: string | null;
+
   @Field(() => Boolean)
   compliant: boolean;
 
@@ -222,9 +225,6 @@ export class VouchDetails {
   @Field(() => Number)
   epochsToExpire: number;
 
-  @Field(() => String, { nullable: true })
-  family?: string | null;
-
   @Field(() => Boolean)
   inSet: boolean;
 }
@@ -232,6 +232,7 @@ export class VouchDetails {
 interface ValidatorVouchesInput {
   address: string;
   handle: string | null;
+  family: string | null;
   inSet: boolean;
   validVouches: number;
   compliant: boolean;
@@ -244,6 +245,7 @@ export class ValidatorVouches {
   public constructor(input: ValidatorVouchesInput) {
     this.address = input.address;
     this.handle = input.handle;
+    this.family = input.family;
     this.inSet = input.inSet;
     this.validVouches = input.validVouches;
     this.compliant = input.compliant;
@@ -256,6 +258,9 @@ export class ValidatorVouches {
 
   @Field(() => String, { nullable: true })
   handle?: string | null;
+
+  @Field(() => String, { nullable: true })
+  family?: string | null;
 
   @Field(() => Boolean)
   inSet: boolean;

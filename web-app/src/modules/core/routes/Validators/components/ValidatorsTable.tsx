@@ -158,14 +158,15 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators, activeValue }) 
     { key: 'audit', label: 'Audit', className: 'text-center' },
     { key: 'vouches', label: 'Vouches', className: 'text-center' },
     { key: 'currentBid', label: 'Bid (Exp. Epoch)', className: 'text-right' },
+    { key: 'unlocked', label: 'Unlocked', className: 'text-right' },
     { key: 'balance', label: 'Balance', className: 'text-right' },
     ...(activeValue === 'active'
       ? [
-          {
+          /*{
             key: 'cumulativeShare',
             label: 'Cumulative Share (%)',
             className: 'text-left whitespace-nowrap',
-          },
+          },*/
           { key: 'location', label: 'Location', className: 'text-left' },
         ]
       : []),

@@ -24,7 +24,9 @@ const VouchesRow: React.FC<VouchesRowProps> = ({ validator, showExpired }) => {
       <td className="px-2 md:px-4 lg:px-6 py-4">
         <AccountAddress address={validator.address} />
       </td>
-      <td className="px-2 md:px-4 lg:px-6 py-4">{validator.handle || '<unknown>'}</td>
+      <td className="px-2 md:px-4 lg:px-6 py-4">
+        {validator.handle || '<unknown>'} <FamilyIcon family={validator.family} />{' '}
+      </td>
       <td className="px-2 md:px-4 lg:px-6 py-4">
         {validator.inSet ? (
           <CheckIcon className="w-5 h-5 text-green-500 inline" style={{ marginTop: '-3px' }} />
@@ -64,10 +66,18 @@ const VouchesRow: React.FC<VouchesRowProps> = ({ validator, showExpired }) => {
   );
 };
 
+const FamilyIcon: React.FC<{ family: string }> = ({ family }) => {
+  const bgColor = family && family.length > 8 ? `#${family.slice(2, 8)}` : `#f87171`;
+  return (
+    <span
+      className="inline-block w-3 h-3 rounded-full ml-2"
+      style={{ backgroundColor: bgColor }}
+    ></span>
+  );
+};
+
 const VouchChip: React.FC<{ vouch: VouchDetails; index: number }> = ({ vouch, index }) => {
   // Generate background color for the chip based on the family (hexadecimal)
-  const bgColor =
-    vouch.family && vouch.family.length > 8 ? `#${vouch.family.slice(2, 8)}` : `#f87171`;
   return (
     <span
       key={index}
@@ -96,10 +106,7 @@ const VouchChip: React.FC<{ vouch: VouchDetails; index: number }> = ({ vouch, in
       {vouch.handle}
       <span style={{ fontSize: 8 }}> ({vouch.epochsToExpire})</span>
 
-      <span
-        className="inline-block w-3 h-3 rounded-full ml-2"
-        style={{ backgroundColor: bgColor }}
-      ></span>
+      <FamilyIcon family={vouch.family} />
     </span>
   );
 };

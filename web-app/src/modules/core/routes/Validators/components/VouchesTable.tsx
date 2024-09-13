@@ -11,6 +11,7 @@ const GET_VALIDATORS = gql`
     getValidatorsVouches {
       address
       handle
+      family
       inSet
       validVouches
       compliant

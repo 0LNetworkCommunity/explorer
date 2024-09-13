@@ -302,10 +302,18 @@ export class ValidatorsService {
       }),
     );
 
-    const getVouchDetails = async (vouch: Vouch): Promise<VouchDetails> => {
+    const families = new Map<string, string>();
+    await Promise.all(
+      eligible.map(async (address) => {
+        const ancestry = await this.getAncestry(address.toString('hex').toLocaleUpperCase());
+        families.set(address.toString('hex').toLocaleUpperCase(), ancestry[0]);
+      }),
+    );
+
+    const getVouchDetails = (vouch: Vouch): VouchDetails => {
       const vouchAddress = vouch.address.toLocaleUpperCase();
       const handle = handles.get(vouchAddress) || null;
-      const ancestry = await this.getAncestry(vouchAddress.toLocaleLowerCase());
+      const family = families.get(vouchAddress) || null;
       return new VouchDetails({
         address: vouchAddress,
         epoch: vouch.epoch,
@@ -315,15 +323,13 @@ export class ValidatorsService {
         inSet: active.activeValidators.some(
           (validator) => validator.addr.toString('hex').toUpperCase() === vouchAddress,
         ),
-        family: ancestry[0],
+        family: family,
       });
     };
 
     const getSortedVouchesDetails = async (vouches: Vouch[]): Promise<VouchDetails[]> => {
-      // Map vouches to VouchDetails objects and resolve them
-      const vouchDetailsList = await Promise.all(
-        vouches.map(async (vouch) => await getVouchDetails(vouch)),
-      );
+      // Map vouches to VouchDetails objects
+      const vouchDetailsList = vouches.map((vouch) => getVouchDetails(vouch));
 
       // Sort the VouchDetails list based on the provided criteria
       return vouchDetailsList.sort((a, b) => {
@@ -358,12 +364,17 @@ export class ValidatorsService {
         const given = await this.getGivenVouches(address);
         let givenDetails = await getSortedVouchesDetails(given);
 
-        // get validator handle
-        const handle = handles.get(address.toString('hex').toLocaleUpperCase()) || null;
-
         const addr = address.toString('hex').toLocaleUpperCase();
+
+        // get validator handle
+        const handle = handles.get(addr) || null;
+
+        // get validator family
+        const family = families.get(addr) || null;
+
         return new ValidatorVouches({
           address: addr,
+          family: family,
           handle: handle,
           inSet: active.activeValidators.some(
             (validator) => validator.addr.toString('hex').toLocaleUpperCase() === addr,

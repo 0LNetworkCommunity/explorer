@@ -83,16 +83,17 @@ type Validator {
 type VouchDetails {
   address: String!
   handle: String
+  family: String
   compliant: Boolean!
   epoch: Float!
   epochsToExpire: Float!
-  family: String
   inSet: Boolean!
 }
 
 type ValidatorVouches {
   address: String!
   handle: String
+  family: String
   inSet: Boolean!
   validVouches: Float!
   compliant: Boolean!

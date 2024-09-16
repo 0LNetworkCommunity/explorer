@@ -14,6 +14,7 @@ const GET_VALIDATORS = gql`
       address
       handle
       votingPower
+      vfnStatus
       balance
       unlocked
       grade {

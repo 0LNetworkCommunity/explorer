@@ -72,6 +72,7 @@ type Validator {
   city: String
   country: String
   votingPower: BigInt!
+  vfnStatus: String!
   grade: ValidatorGrade
   vouches: Vouches
   currentBid: ValidatorCurrentBid
@@ -103,6 +104,9 @@ type ValidatorVouches {
 
 type ValidatorUtils {
   vouchPrice: Float!
+  entryFee: Float!
+  clearingBid: Float!
+  netReward: Float!
 }
 
 type Account {

@@ -91,6 +91,10 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators, activeValue }) 
         value1 = a.auditQualification ? a.auditQualification.length : 0;
         value2 = b.auditQualification ? b.auditQualification.length : 0;
         break;
+      case 'vfnStatus':
+        value1 = a.vfnStatus;
+        value2 = b.vfnStatus;
+        break;
       case 'vouches':
         value1 = a.vouches.valid;
         value2 = b.vouches.valid;
@@ -158,6 +162,7 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators, activeValue }) 
     { key: 'audit', label: 'Audit', className: 'text-center' },
     { key: 'vouches', label: 'Vouches', className: 'text-center' },
     { key: 'currentBid', label: 'Bid (Exp. Epoch)', className: 'text-right' },
+    { key: 'vfnStatus', label: 'VFN', className: 'text-center' },
     { key: 'unlocked', label: 'Unlocked', className: 'text-right' },
     { key: 'balance', label: 'Balance', className: 'text-right' },
     ...(activeValue === 'active'

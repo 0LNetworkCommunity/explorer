@@ -3,9 +3,22 @@ import clsx from 'clsx';
 import AccountAddress from '../../../../ui/AccountAddress';
 import Money from '../../../../ui/Money';
 import { IValidator } from '../../../../interface/Validator.interface';
-import { CheckIcon, XMarkIcon } from '@heroicons/react/20/solid';
-import ProgressBar from './ProgressBar';
+import {
+  CheckIcon,
+  XMarkIcon,
+  CheckCircleIcon,
+  ExclamationCircleIcon,
+  XCircleIcon,
+} from '@heroicons/react/20/solid';
+// import ProgressBar from './ProgressBar';
 import Vouches from './Vouches';
+
+// Define icons for each status
+const statusIcons = {
+  accessible: <CheckCircleIcon className="h-5 w-5 text-green-500" />,
+  notAccessible: <ExclamationCircleIcon className="h-5 w-5 text-yellow-500" />,
+  invalidAddress: <XCircleIcon className="h-5 w-5 text-red-500" />,
+};
 
 interface ValidatorRowProps {
   validator: IValidator;
@@ -51,6 +64,7 @@ const ValidatorRow: FC<ValidatorRowProps> = ({ validator }) => {
             })`
           : ''}
       </td>
+      <td className="px-2 md:px-4 lg:px-6 py-4 text-center">{statusIcons[validator.vfnStatus]}</td>
       <td className="px-2 md:px-4 lg:px-6 py-4 text-right">
         <Money>{Number(validator.unlocked)}</Money>
       </td>

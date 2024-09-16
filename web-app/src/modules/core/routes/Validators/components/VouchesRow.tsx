@@ -104,7 +104,10 @@ const VouchChip: React.FC<{ vouch: VouchDetails; index: number }> = ({ vouch, in
       {vouch.epochsToExpire <= 0 && <ClockIcon className="w-4 h-4 text-red-500 mr-1" />}
 
       {vouch.handle}
-      <span style={{ fontSize: 8 }}> ({vouch.epochsToExpire})</span>
+      <span className="ml-1" style={{ fontSize: 8 }}>
+        {' '}
+        ({vouch.epochsToExpire})
+      </span>
 
       <FamilyIcon family={vouch.family} />
     </span>

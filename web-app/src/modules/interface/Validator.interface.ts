@@ -15,6 +15,7 @@ export interface IValidator {
   inSet: boolean;
   index: number;
   votingPower: number;
+  vfnStatus: string;
   balance?: number;
   unlocked?: number;
   vouches: Vouches;
@@ -48,6 +49,7 @@ export type ValidatorVouches = {
   address: string;
   handle: string;
   inSet: boolean;
+  family: string;
   compliant: boolean;
   validVouches: number;
   receivedVouches: VouchDetails[];

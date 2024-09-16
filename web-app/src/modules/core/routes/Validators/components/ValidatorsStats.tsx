@@ -8,6 +8,9 @@ const GET_VALIDATOR_UTILS = gql`
   query ValidatorUtils {
     getValidatorUtils {
       vouchPrice
+      entryFee
+      clearingBid
+      netReward
     }
   }
 `;
@@ -59,6 +62,15 @@ const ValidatorsStats: FC<ValidatorsStatsProps> = ({ validators }) => {
       <StatsCard title="Vouch Price" value={utils ? utils.vouchPrice : null}>
         {utils && <Money>{Math.ceil(utils.vouchPrice / 1_000_000)}</Money>}
       </StatsCard>
+      <StatsCard title="Entry Fee" value={utils ? utils.entryFee : null}>
+        {utils && <Money>{Math.ceil(utils.entryFee / 1_000_000)}</Money>}
+        <span className="ml-2" style={{ fontSize: '16px' }}>
+          ({utils && formatPercentage(utils.clearingBid)})
+        </span>
+      </StatsCard>
+      <StatsCard title="Net Reward" value={utils ? utils.netReward : null}>
+        {utils && <Money>{Math.ceil(utils.netReward / 1_000_000)}</Money>}
+      </StatsCard>
       {/* <StatsCard title={thermostatTitle} value={utils ? utils.vouchPrice : null}>
         {utils && <Money>{Math.ceil(utils.thermostatMeasure.amount / 1_000_000)}</Money>}{' '}
         <span style={{ fontSize: '16px' }}>
@@ -75,6 +87,12 @@ const ValidatorsStats: FC<ValidatorsStatsProps> = ({ validators }) => {
     </div>
   );
 };
+
+// format percentage 1 decimal
+function formatPercentage(value: number) {
+  console.log('value', value);
+  return `${(value / 10).toFixed(1)}%`;
+}
 
 // print percentage 0-100
 /*function formatPercentage(value: number, didChange: boolean, didIncrease: boolean) {

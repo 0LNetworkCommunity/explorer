@@ -100,6 +100,7 @@ interface ValidatorInput {
   balance?: number;
   unlocked?: number;
   votingPower: BN;
+  vfnStatus: string;
   grade?: GqlValidatorGrade | null;
   vouches: Vouches;
   currentBid: GqlValidatorCurrentBid;
@@ -118,6 +119,7 @@ export class Validator {
     this.balance = input.balance;
     this.unlocked = input.unlocked;
     this.votingPower = input.votingPower;
+    this.vfnStatus = input.vfnStatus;
     this.grade = input.grade;
     this.vouches = input.vouches;
     this.currentBid = input.currentBid;
@@ -146,6 +148,9 @@ export class Validator {
 
   @Field(() => BN)
   public votingPower: BN;
+
+  @Field(() => String)
+  public vfnStatus: string;
 
   @Field(() => GqlValidatorGrade, { nullable: true })
   public grade?: GqlValidatorGrade | null;
@@ -328,6 +333,9 @@ export class ThermostatMeasure {
 
 interface ValidatorUtilsInput {
   vouchPrice: number;
+  entryFee: number;
+  clearingBid: number;
+  netReward: number;
   //thermostatMeasure: ThermostatMeasure;
 }
 
@@ -335,11 +343,24 @@ interface ValidatorUtilsInput {
 export class ValidatorUtils {
   public constructor(input: ValidatorUtilsInput) {
     this.vouchPrice = input.vouchPrice;
+    this.entryFee = input.entryFee;
+    this.clearingBid = input.clearingBid;
+    this.netReward = input.netReward;
     //this.thermostatMeasure = input.thermostatMeasure;
   }
 
   @Field(() => Number)
   vouchPrice: number;
+
+  @Field(() => Number)
+  entryFee: number;
+
+  @Field(() => Number)
+  clearingBid: number;
+
+  @Field(() => Number)
+  netReward: number;
+
   /*
   @Field(() => ThermostatMeasure)
   thermostatMeasure: ThermostatMeasure;*/

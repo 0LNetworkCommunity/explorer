@@ -23,6 +23,10 @@ import { readFileSync } from 'fs';
 import { redisClient } from '../../redis/redis.service.js';
 import { VALIDATORS_CACHE_KEY, VALIDATORS_VOUCHES_CACHE_KEY } from '../constants.js';
 
+// Regex to match the fullnode address pattern
+const fullnodeRegex =
+  /^\/(ip4|dns)\/([\d\.]+|[\w\.-]+)\/tcp\/\d+\/noise-ik\/0x[a-fA-F0-9]+\/handshake\/\d+$/;
+
 @Injectable()
 export class ValidatorsService {
   private readonly cacheEnabled: boolean;
@@ -135,13 +139,13 @@ export class ValidatorsService {
     let allValidators = [...currentValidators, ...eligibleValidators];
     return await Promise.all(
       allValidators.map(async (validator) => {
+        const vouches = await this.getVouches(validator.address);
+        const vfnStatus = await this.getFullnodeStatus(validator['fullnodeAddresses']);
         const balance = await this.olService.getAccountBalance(validator.address);
+        const currentBid = await this.olService.getCurrentBid(validator.address);
         const slowWallet = await this.olService.getSlowWallet(validator.address);
         const unlocked = Number(slowWallet?.unlocked);
 
-        let vouches = await this.getVouches(validator.address);
-
-        const currentBid = await this.olService.getCurrentBid(validator.address);
         const addr = validator.address.toString('hex').toLocaleUpperCase();
         const handle = handles.get(addr) || null;
         return new Validator({
@@ -150,6 +154,7 @@ export class ValidatorsService {
           address: addr,
           handle: handle,
           votingPower: validator.votingPower,
+          vfnStatus: vfnStatus,
           balance: Number(balance),
           unlocked: unlocked,
           grade: validator.grade,
@@ -404,7 +409,9 @@ export class ValidatorsService {
       type_arguments: [],
       arguments: [],
     });
-    const nominalReward = rewardRes[0];
+    const nominalReward = Number(rewardRes[0]);
+    const entryFee = Number(rewardRes[1]);
+    const clearingBid = Number(rewardRes[2]);
 
     // Check Thermostat
     /*const measureRes = await this.olService.aptosClient.view({
@@ -428,7 +435,11 @@ export class ValidatorsService {
     });*/
 
     return new ValidatorUtils({
-      vouchPrice: Number(vouchPriceRes.amount) /*, thermostatMeasure */,
+      vouchPrice: Number(vouchPriceRes.amount),
+      entryFee: entryFee,
+      clearingBid: clearingBid,
+      netReward: nominalReward - entryFee,
+      /*, thermostatMeasure */
     });
   }
 
@@ -449,4 +460,60 @@ export class ValidatorsService {
 
     return validatorMap;
   };
+
+  async getFullnodeStatus(fullnodeAddress: String): Promise<string> {
+    //const fullnodeAddress = validator.config.fullnodeAddresses;
+
+    // Variable to store the status
+    let status: 'invalidAddress' | 'accessible' | 'notAccessible';
+
+    // Check the VFN address
+    const match = fullnodeAddress && fullnodeAddress.match(fullnodeRegex);
+
+    if (match) {
+      // Extract the IP or DNS
+      const valIp = match[2];
+
+      // Check if the address is accessible
+      status = await checkAddressAccessibility(valIp, 6182)
+        .then((res) => {
+          return res ? 'accessible' : 'notAccessible';
+        })
+        .catch(() => {
+          return 'notAccessible';
+        });
+    } else {
+      status = 'invalidAddress';
+    }
+
+    return status.toString();
+  }
+}
+
+import * as net from 'net';
+
+function checkAddressAccessibility(ip: string, port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = new net.Socket();
+
+    // Timeout in case the server is not accessible
+    socket.setTimeout(1000);
+
+    // Try to connect to the IP and port
+    socket.connect(port, ip, () => {
+      //console.log(`Connected to ${ip}:${port}`);
+      socket.end();
+      resolve(true);
+    });
+
+    socket.on('error', () => {
+      //console.log(`Failed to connect to ${ip}:${port}`);
+      resolve(false);
+    });
+
+    socket.on('timeout', () => {
+      //console.log(`Connection to ${ip}:${port} timed out`);
+      resolve(false);
+    });
+  });
 }

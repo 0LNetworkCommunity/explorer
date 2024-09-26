@@ -64,7 +64,11 @@ const ValidatorRow: FC<ValidatorRowProps> = ({ validator }) => {
             })`
           : ''}
       </td>
-      <td className="px-2 md:px-4 lg:px-6 py-4 text-center">{statusIcons[validator.vfnStatus]}</td>
+      {validator.inSet && (
+        <td className="px-2 md:px-4 lg:px-6 py-4 text-center">
+          {statusIcons[validator.vfnStatus]}
+        </td>
+      )}
       <td className="px-2 md:px-4 lg:px-6 py-4 text-right">
         <Money>{Number(validator.unlocked)}</Money>
       </td>

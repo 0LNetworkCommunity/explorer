@@ -72,7 +72,7 @@ type Validator {
   city: String
   country: String
   votingPower: BigInt!
-  vfnStatus: String!
+  vfnStatus: String
   grade: ValidatorGrade
   vouches: Vouches
   currentBid: ValidatorCurrentBid

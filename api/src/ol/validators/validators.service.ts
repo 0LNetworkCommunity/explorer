@@ -15,13 +15,18 @@ import {
   ValidVouches,
   ValidatorUtils,
   ThermostatMeasure,
+  VfnStatus,
 } from '../models/validator.model.js';
 import { parseAddress } from '../../utils.js';
 
 import { join } from 'path';
 import { readFileSync } from 'fs';
 import { redisClient } from '../../redis/redis.service.js';
-import { VALIDATORS_CACHE_KEY, VALIDATORS_VOUCHES_CACHE_KEY } from '../constants.js';
+import {
+  VALIDATORS_CACHE_KEY,
+  VALIDATORS_VFN_STATUS_CACHE_KEY,
+  VALIDATORS_VOUCHES_CACHE_KEY,
+} from '../constants.js';
 
 // Regex to match the fullnode address pattern
 const fullnodeRegex =
@@ -99,6 +104,7 @@ export class ValidatorsService {
         const city = node && node['city'] ? node['city'] : null;
         const country = node && node['country'] ? node['country'] : null;
         const grade = await this.olService.getValidatorGrade(validator.addr);
+        const vfnStatus = await this.getVfnStatus(validator.addr.toString('hex').toUpperCase());
 
         return {
           address: validator.addr,
@@ -110,6 +116,7 @@ export class ValidatorsService {
           city,
           country,
           grade,
+          vfnStatus,
           auditQualification: await this.getAuditQualification(validator.addr),
         };
       },
@@ -128,6 +135,7 @@ export class ValidatorsService {
           inSet: false,
           index: new BN(-1),
           auditQualification: await this.getAuditQualification(address),
+          vfnStatus: null,
           grade: null,
           city: null,
           country: null,
@@ -140,21 +148,20 @@ export class ValidatorsService {
     return await Promise.all(
       allValidators.map(async (validator) => {
         const vouches = await this.getVouches(validator.address);
-        const vfnStatus = await this.getFullnodeStatus(validator['fullnodeAddresses']);
         const balance = await this.olService.getAccountBalance(validator.address);
         const currentBid = await this.olService.getCurrentBid(validator.address);
         const slowWallet = await this.olService.getSlowWallet(validator.address);
         const unlocked = Number(slowWallet?.unlocked);
-
         const addr = validator.address.toString('hex').toLocaleUpperCase();
         const handle = handles.get(addr) || null;
+
         return new Validator({
           inSet: validator.inSet,
           index: validator.index,
           address: addr,
           handle: handle,
           votingPower: validator.votingPower,
-          vfnStatus: vfnStatus,
+          vfnStatus: validator.vfnStatus,
           balance: Number(balance),
           unlocked: unlocked,
           grade: validator.grade,
@@ -461,9 +468,36 @@ export class ValidatorsService {
     return validatorMap;
   };
 
-  async getFullnodeStatus(fullnodeAddress: String): Promise<string> {
-    //const fullnodeAddress = validator.config.fullnodeAddresses;
+  public async queryValidatorsVfnStatus(): Promise<VfnStatus[]> {
+    let ret: VfnStatus[] = [];
+    const active = await this.olService.getValidatorSet();
+    for (const validator of active.activeValidators) {
+      let fullnode = validator.config.fullnodeAddresses;
+      if (fullnode) {
+        const vfnStatus = await this.queryVfnStatus(fullnode);
+        ret.push(
+          new VfnStatus({
+            address: validator.addr.toString('hex').toUpperCase(),
+            status: vfnStatus,
+          }),
+        );
+      }
+    }
 
+    return ret;
+  }
+
+  async getVfnStatus(address: string): Promise<string | null> {
+    const cacheData = await this.getFromCache<VfnStatus[]>(VALIDATORS_VFN_STATUS_CACHE_KEY);
+    if (cacheData) {
+      const vfnStatus = cacheData.find((item) => item.address === address);
+      return vfnStatus ? vfnStatus.status : null;
+    }
+
+    return null;
+  }
+
+  async queryVfnStatus(fullnodeAddress: String): Promise<string> {
     // Variable to store the status
     let status: 'invalidAddress' | 'accessible' | 'notAccessible';
 

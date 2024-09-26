@@ -100,7 +100,7 @@ interface ValidatorInput {
   balance?: number;
   unlocked?: number;
   votingPower: BN;
-  vfnStatus: string;
+  vfnStatus?: String | null;
   grade?: GqlValidatorGrade | null;
   vouches: Vouches;
   currentBid: GqlValidatorCurrentBid;
@@ -149,8 +149,8 @@ export class Validator {
   @Field(() => BN)
   public votingPower: BN;
 
-  @Field(() => String)
-  public vfnStatus: string;
+  @Field(() => String, { nullable: true })
+  public vfnStatus?: String | null;
 
   @Field(() => GqlValidatorGrade, { nullable: true })
   public grade?: GqlValidatorGrade | null;
@@ -232,6 +232,25 @@ export class VouchDetails {
 
   @Field(() => Boolean)
   inSet: boolean;
+}
+
+interface VfnStatusInput {
+  address: string;
+  status: string;
+}
+
+@ObjectType()
+export class VfnStatus {
+  public constructor(input: VfnStatusInput) {
+    this.address = input.address;
+    this.status = input.status;
+  }
+
+  @Field(() => String)
+  address: string;
+
+  @Field(() => String)
+  status: string;
 }
 
 interface ValidatorVouchesInput {

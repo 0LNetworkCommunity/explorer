@@ -162,7 +162,9 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators, activeValue }) 
     { key: 'audit', label: 'Audit', className: 'text-center' },
     { key: 'vouches', label: 'Vouches', className: 'text-center' },
     { key: 'currentBid', label: 'Bid (Exp. Epoch)', className: 'text-right' },
-    { key: 'vfnStatus', label: 'VFN', className: 'text-center' },
+    ...(activeValue === 'active'
+      ? [{ key: 'vfnStatus', label: 'VFN', className: 'text-center' }]
+      : []),
     { key: 'unlocked', label: 'Unlocked', className: 'text-right' },
     { key: 'balance', label: 'Balance', className: 'text-right' },
     ...(activeValue === 'active'
@@ -210,9 +212,6 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators, activeValue }) 
             </tbody>
           </table>
           <AuditLegend />
-          <p className="text-sm text-gray-500 mt-2">
-            The data in this table is updated every 30 seconds.
-          </p>
         </div>
       </div>
     </div>

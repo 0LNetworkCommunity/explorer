@@ -4,7 +4,11 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue, Job } from 'bullmq';
 import { redisClient } from '../../redis/redis.service.js';
 import { ValidatorsService } from './validators.service.js';
-import { VALIDATORS_CACHE_KEY, VALIDATORS_VOUCHES_CACHE_KEY } from '../constants.js';
+import {
+  VALIDATORS_CACHE_KEY,
+  VALIDATORS_VOUCHES_CACHE_KEY,
+  VALIDATORS_VFN_STATUS_CACHE_KEY,
+} from '../constants.js';
 
 @Processor('validators')
 export class ValidatorsProcessor extends WorkerHost {
@@ -17,12 +21,12 @@ export class ValidatorsProcessor extends WorkerHost {
   }
 
   public async onModuleInit() {
-    await this.validatorsQueue.add('updateValidatorsCache', undefined, {
+    await this.validatorsQueue.add('updateVfnStatusCache', undefined, {
       repeat: {
-        every: 30 * 1000, // 30 seconds
+        every: 5 * 60 * 1000, // 5 minutes
       },
     });
-    this.updateValidatorsCache();
+    this.updateVfnStatusCache();
 
     await this.validatorsQueue.add('updateValidatorsVouchesCache', undefined, {
       repeat: {
@@ -30,6 +34,13 @@ export class ValidatorsProcessor extends WorkerHost {
       },
     });
     this.updateValidatorsVouchesCache();
+
+    await this.validatorsQueue.add('updateValidatorsCache', undefined, {
+      repeat: {
+        every: 30 * 1000, // 30 seconds
+      },
+    });
+    this.updateValidatorsCache();
   }
 
   public async process(job: Job<void, any, string>) {
@@ -41,6 +52,11 @@ export class ValidatorsProcessor extends WorkerHost {
       default:
         throw new Error(`Invalid job name ${job.name}`);
     }
+  }
+
+  private async updateVfnStatusCache() {
+    const vfnStatus = await this.validatorsService.queryValidatorsVfnStatus();
+    await redisClient.set(VALIDATORS_VFN_STATUS_CACHE_KEY, JSON.stringify(vfnStatus));
   }
 
   private async updateValidatorsCache() {

@@ -5,9 +5,10 @@ import ChartContainer from './ChartContainer';
 interface Props {
   title: string;
   data: { value: number; timestamp: number }[];
+  showHorizontalLine?: boolean;
 }
 
-const LineChart: FC<Props> = ({ data, title }) => {
+const LineChart: FC<Props> = ({ data, title, showHorizontalLine = false }) => {
   const option = {
     animation: false,
     tooltip: {
@@ -41,30 +42,14 @@ const LineChart: FC<Props> = ({ data, title }) => {
       axisTick: {
         alignWithLabel: true,
       },
-      axisLine: {
-        lineStyle: {
-          // color: '#E8595C'
-        },
-      },
     },
     yAxis: {
       type: 'value',
-      axisLine: {
-        lineStyle: {
-          // color: '#E8595C'
-        },
-      },
-      splitLine: {
-        lineStyle: {
-          // color: '#ced6e0'
-        },
-      },
     },
     series: [
       {
         data: data.map((item) => item.value),
         type: 'line',
-        smooth: false,
         symbol: 'circle',
         symbolSize: 8,
         itemStyle: {
@@ -75,6 +60,27 @@ const LineChart: FC<Props> = ({ data, title }) => {
         lineStyle: {
           width: 3,
         },
+        markLine: showHorizontalLine
+          ? {
+            data: [
+              {
+                yAxis: 35000,
+                label: {
+                  formatter: '35K',
+                  fontSize: 15,
+                  // fontWeight: 'bold',
+                },
+              },
+            ],
+            lineStyle: {
+              type: 'dashed',
+              color: 'red',
+              width: 1.2,
+            },
+            symbol: ['none', 'diamond'],
+            symbolSize: 7,
+          }
+          : undefined,
       },
     ],
   };

@@ -126,13 +126,21 @@ const Coinstats = () => {
             <dl className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
               <ChartComponent
                 type="LineChart"
-                title="Rewards Over Time"
+                title="Gross Rewards Over Time"
                 data={data.rewardsOverTime}
               />
               <ChartComponent
                 type="LineChart"
                 title="Clearing bid Over Time"
-                data={data.clearingBidoverTime}
+                data={data.clearingBidOverTime}
+              />
+            </dl>
+            <dl className="w-full mt-5 grid grid-cols-1 gap-5">
+              <ChartComponent
+                type="LineChart"
+                title="Net Rewards Over Time"
+                data={data.netRewardOverTime}
+                showHorizontalLine={true}
               />
             </dl>
           </div>

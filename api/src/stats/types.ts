@@ -32,7 +32,8 @@ export interface Stats {
   communityCapital: NameValue[];
   communityWalletsBalanceBreakdown: NameValue[];
   rewardsOverTime: TimestampValue[];
-  clearingBidoverTime: TimestampValue[];
+  clearingBidOverTime: TimestampValue[];
+  netRewardOverTime: TimestampValue[];
   liquidSupplyConcentration: BinRange[];
   lockedSupplyConcentration: {
     accountsLocked: BinRange[];

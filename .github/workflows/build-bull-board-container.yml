@@ -23,7 +23,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/${{ github.repository }}/api
+            ghcr.io/${{ github.repository }}/bull-board
           tags: |
             type=sha,enable=true,priority=100,prefix=,suffix=,format=long
 

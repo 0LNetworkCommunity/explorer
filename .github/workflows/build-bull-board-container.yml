@@ -1,10 +1,10 @@
-name: Build API Container Image
+name: Build Bull Board Container Image
 
 on:
   push:
     paths:
-      - api/**
-      - .github/workflows/build-api-container.yml
+      - packages/bull-board/**
+      - .github/workflows/build-bull-board-container.yml
     branches:
       - main
       - build-test
@@ -23,7 +23,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/${{ github.repository }}/api
+            ghcr.io/${{ github.repository }}/bull-board
           tags: |
             type=sha,enable=true,priority=100,prefix=,suffix=,format=long
 
@@ -37,11 +37,10 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: ./api
-          file: ./api/Dockerfile
+          context: ./pacakges/bull-board
+          file: ./pacakges/bull-board/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             CI_COMMIT_SHA=${{ github.sha }}
-

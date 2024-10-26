@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import Bluebird from 'bluebird';
+import axios from 'axios';
 import BN from 'bn.js';
 import { ConfigService } from '@nestjs/config';
-
 import { OlService } from '../ol.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import {
@@ -14,13 +14,10 @@ import {
   VouchDetails,
   ValidVouches,
   ValidatorUtils,
-  ThermostatMeasure,
+  //ThermostatMeasure,
   VfnStatus,
 } from '../models/validator.model.js';
 import { parseAddress } from '../../utils.js';
-
-import { join } from 'path';
-import { readFileSync } from 'fs';
 import { redisClient } from '../../redis/redis.service.js';
 import {
   VALIDATORS_CACHE_KEY,
@@ -35,12 +32,14 @@ const fullnodeRegex =
 @Injectable()
 export class ValidatorsService {
   private readonly cacheEnabled: boolean;
+  private readonly validatorHandlesUrl: string | undefined;
   public constructor(
     private readonly olService: OlService,
     private readonly prisma: PrismaService,
     config: ConfigService,
   ) {
     this.cacheEnabled = config.get<boolean>('cacheEnabled')!;
+    this.validatorHandlesUrl = config.get<OlConfig>('ol')?.validatorHandlesUrl;
   }
 
   private async getFromCache<T>(key: string): Promise<T | null> {
@@ -143,7 +142,7 @@ export class ValidatorsService {
       }),
     );
 
-    let handles = this.loadValidatorHandles();
+    let handles = await this.loadValidatorHandles();
     let allValidators = [...currentValidators, ...eligibleValidators];
     return await Promise.all(
       allValidators.map(async (validator) => {
@@ -291,7 +290,7 @@ export class ValidatorsService {
   public async queryValidatorsVouches(): Promise<ValidatorVouches[]> {
     const eligible = await this.olService.getEligibleValidators();
     const active = await this.olService.getValidatorSet();
-    const handles = this.loadValidatorHandles();
+    const handles = await this.loadValidatorHandles();
     const currentEpoch = await this.olService.aptosClient
       .getLedgerInfo()
       .then((info) => Number(info.epoch));
@@ -450,23 +449,27 @@ export class ValidatorsService {
     });
   }
 
-  loadValidatorHandles = (): Map<string, string> => {
-    // Get the current working directory (root of the project)
-    const filePath = join(process.cwd(), 'dist', 'assets', 'validator-handle.json');
+  // TODO cache this
+  async loadValidatorHandles(): Promise<Map<string, string>> {
+    if (!this.validatorHandlesUrl) {
+      return new Map<string, string>();
+    }
+    try {
+      const response = await axios.get(this.validatorHandlesUrl);
+      const data = response.data;
 
-    // Read and parse the JSON file
-    const data = JSON.parse(readFileSync(filePath, 'utf-8'));
+      const validatorMap = new Map<string, string>();
+      // Supondo que a estrutura JSON seja { "validators": { "address": "handle" } }
+      Object.keys(data.validators).forEach((address) => {
+        validatorMap.set(address.toUpperCase(), data.validators[address]);
+      });
 
-    // Create a Map from the parsed data
-    const validatorMap = new Map<string, string>();
-
-    // Assuming the JSON structure is like: { "validators": { "address": "handle" } }
-    Object.keys(data.validators).forEach((address) => {
-      validatorMap.set(address.toUpperCase(), data.validators[address]);
-    });
-
-    return validatorMap;
-  };
+      return validatorMap;
+    } catch (error) {
+      console.error('Error loading validator handles from URL:', error);
+      return new Map<string, string>();
+    }
+  }
 
   public async queryValidatorsVfnStatus(): Promise<VfnStatus[]> {
     let ret: VfnStatus[] = [];
@@ -525,6 +528,7 @@ export class ValidatorsService {
 }
 
 import * as net from 'net';
+import { OlConfig } from '../../config/config.interface.js';
 
 function checkAddressAccessibility(ip: string, port: number): Promise<boolean> {
   return new Promise((resolve) => {

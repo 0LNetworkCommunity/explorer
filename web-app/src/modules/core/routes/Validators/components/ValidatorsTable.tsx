@@ -3,6 +3,7 @@ import { IValidator } from '../../../../interface/Validator.interface';
 import SortableTh from './SortableTh';
 import ValidatorRow from './ValidatorRow';
 import ValidatorRowSkeleton from './ValidatorRowSkeleton';
+import { CheckCircleIcon, ExclamationCircleIcon, XCircleIcon } from '@heroicons/react/20/solid';
 
 interface ValidatorsTableProps {
   validators?: IValidator[];
@@ -212,6 +213,7 @@ const ValidatorsTable: FC<ValidatorsTableProps> = ({ validators, activeValue }) 
             </tbody>
           </table>
           <AuditLegend />
+          <VfnLegend />
         </div>
       </div>
     </div>
@@ -238,6 +240,28 @@ const AuditLegend: FC = () => {
             <strong>{item.code}:</strong> {item.description}
           </li>
         ))}
+      </ul>
+    </div>
+  );
+};
+
+const VfnLegend: FC = () => {
+  return (
+    <div className="mt-4 p-4 bg-[#F5F5F5] text-[#525252] rounded-md">
+      <h2 className="text-lg font-bold mb-2">VFN Legend</h2>
+      <ul className="list-disc pl-5 space-y-1">
+        <li key={1} className="flex items-center space-x-2">
+          <CheckCircleIcon className="h-5 w-5 text-green-500" />
+          <span className="font-bold">Accessible</span>
+        </li>
+        <li key={2} className="flex items-center space-x-2">
+          <ExclamationCircleIcon className="h-5 w-5 text-yellow-500" />
+          <span className="font-bold">Not Accessible</span>
+        </li>
+        <li key={3} className="flex items-center space-x-2">
+          <XCircleIcon className="h-5 w-5 text-red-500" />
+          <span className="font-bold">Invalid Configuration</span>
+        </li>
       </ul>
     </div>
   );

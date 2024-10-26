@@ -53,11 +53,13 @@
     "d3-array": "^3.2.4",
     "decimal.js": "^10.4.3",
     "firebase-admin": "^12.1.1",
+    "fs": "^0.0.1-security",
     "graphql": "^16.8.2",
     "graphql-ws": "^5.16.0",
     "lodash": "^4.17.21",
     "maxmind": "^4.3.20",
     "nats": "^2.26.0",
+    "path": "^0.12.7",
     "qs": "^6.12.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"

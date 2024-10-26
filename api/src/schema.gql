@@ -68,15 +68,45 @@ type Validator {
   inSet: Boolean!
   index: BigInt!
   address: String!
+  handle: String
   city: String
   country: String
   votingPower: BigInt!
+  vfnStatus: String
   grade: ValidatorGrade
   vouches: Vouches
   currentBid: ValidatorCurrentBid
   balance: Float
   unlocked: Float
   auditQualification: [String!]
+}
+
+type VouchDetails {
+  address: String!
+  handle: String
+  family: String
+  compliant: Boolean!
+  epoch: Float!
+  epochsToExpire: Float!
+  inSet: Boolean!
+}
+
+type ValidatorVouches {
+  address: String!
+  handle: String
+  family: String
+  inSet: Boolean!
+  validVouches: Float!
+  compliant: Boolean!
+  receivedVouches: [VouchDetails!]!
+  givenVouches: [VouchDetails!]!
+}
+
+type ValidatorUtils {
+  vouchPrice: Float!
+  entryFee: Float!
+  clearingBid: Float!
+  netReward: Float!
 }
 
 type Account {
@@ -254,6 +284,8 @@ type Query {
   account(address: Bytes!): Account
   getTopAccounts(limit: Float! = 100): [TopAccount!]!
   getValidators: [Validator!]!
+  getValidatorsVouches: [ValidatorVouches!]!
+  getValidatorUtils: ValidatorUtils!
   getCommunityWallets: [CommunityWallet!]!
   getCommunityWalletsStats: CommunityWalletStats!
   getCommunityWalletsPayments: [CommunityWalletPayments!]!

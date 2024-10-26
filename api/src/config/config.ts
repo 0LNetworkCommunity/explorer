@@ -3,6 +3,7 @@ import { Config } from './config.interface.js';
 
 export default (): Config => {
   const ENV = process.env;
+  console.log(ENV);
 
   const config: Config = {
     port: ENV.PORT !== undefined ? parseInt(ENV.PORT, 10) : 3000,
@@ -16,6 +17,7 @@ export default (): Config => {
     ol: {
       provider: 'https://rpc.0l.fyi',
       dataApiHost: ENV.DATA_API_HOST!,
+      validatorHandlesUrl: ENV.VALIDATOR_HANDLES_URL || undefined,
     },
 
     s3: {

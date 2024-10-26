@@ -19,6 +19,7 @@ export interface InfoConfig {
 export interface OlConfig {
   provider: string;
   dataApiHost: string;
+  validatorHandlesUrl?: string | undefined;
 }
 
 export interface S3Config {

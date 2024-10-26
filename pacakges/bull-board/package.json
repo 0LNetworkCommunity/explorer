@@ -1,0 +1,17 @@
+{
+  "name": "@ol-explorer/bull-board",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@bull-board/api": "^5.21.1",
+    "@bull-board/express": "^5.21.1",
+    "bullmq": "^5.11.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "ioredis": "^5.4.1"
+  }
+}

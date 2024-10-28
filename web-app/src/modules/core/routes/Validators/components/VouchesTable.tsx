@@ -17,6 +17,7 @@ const GET_VALIDATORS = gql`
       compliant
       receivedVouches {
         handle
+        address
         compliant
         epochsToExpire
         inSet
@@ -24,6 +25,7 @@ const GET_VALIDATORS = gql`
       }
       givenVouches {
         handle
+        address
         compliant
         epochsToExpire
         inSet

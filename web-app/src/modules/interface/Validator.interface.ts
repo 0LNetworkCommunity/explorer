@@ -39,6 +39,7 @@ export interface IValidator {
 
 export type VouchDetails = {
   handle: string;
+  address: string;
   compliant: boolean;
   epochsToExpire: number;
   inSet: boolean;

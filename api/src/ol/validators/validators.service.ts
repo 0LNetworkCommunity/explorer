@@ -459,9 +459,9 @@ export class ValidatorsService {
       const data = response.data;
 
       const validatorMap = new Map<string, string>();
-      // Supondo que a estrutura JSON seja { "validators": { "address": "handle" } }
       Object.keys(data.validators).forEach((address) => {
-        validatorMap.set(address.toUpperCase(), data.validators[address]);
+        let addressStr = address.replace(/^0x/, '').toUpperCase();
+        validatorMap.set(addressStr, data.validators[address]);
       });
 
       return validatorMap;

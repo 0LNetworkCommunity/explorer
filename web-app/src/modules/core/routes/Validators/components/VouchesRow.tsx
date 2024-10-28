@@ -15,6 +15,10 @@ type VouchesRowProps = {
   showExpired: boolean;
 };
 
+function formatAddress(address: string): string {
+  return address.slice(0, 4) + '...' + address.slice(-4);
+}
+
 const VouchesRow: React.FC<VouchesRowProps> = ({ validator, showExpired }) => {
   return (
     <tr
@@ -25,7 +29,8 @@ const VouchesRow: React.FC<VouchesRowProps> = ({ validator, showExpired }) => {
         <AccountAddress address={validator.address} />
       </td>
       <td className="px-2 md:px-4 lg:px-6 py-4">
-        {validator.handle || '<unknown>'} <FamilyIcon family={validator.family} />{' '}
+        {validator.handle || formatAddress(validator.address)}{' '}
+        <FamilyIcon family={validator.family} />{' '}
       </td>
       <td className="px-2 md:px-4 lg:px-6 py-4">
         {validator.inSet ? (
@@ -103,7 +108,8 @@ const VouchChip: React.FC<{ vouch: VouchDetails; index: number }> = ({ vouch, in
 
       {vouch.epochsToExpire <= 0 && <ClockIcon className="w-4 h-4 text-red-500 mr-1" />}
 
-      {vouch.handle}
+      {/* handle or address 1234...5678*/}
+      {vouch.handle || formatAddress(vouch.address)}
       <span className="ml-1" style={{ fontSize: 8 }}>
         {' '}
         ({vouch.epochsToExpire})

@@ -1,5 +1,10 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
+export interface CommunityWalletInfo {
+  name?: string;
+  description?: string;
+}
+
 interface CommunityWalletInput {
   rank: number;
   address: string;

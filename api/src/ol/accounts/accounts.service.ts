@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ClickhouseService } from '../../clickhouse/clickhouse.service.js';
 import { OlService } from '../ol.service.js';
-import { communityWallets } from '../community-wallets/community-wallets.js';
+import { CommunityWalletsService } from '../community-wallets/community-wallets.service.js';
 import { CumulativeShare, TopAccount } from './accounts.model.js';
 
 @Injectable()
@@ -9,6 +9,7 @@ export class AccountsService {
   constructor(
     private readonly clickhouseService: ClickhouseService,
     private readonly olService: OlService,
+    private readonly communityWalletsService: CommunityWalletsService,
   ) {}
 
   public async getTopBalanceAccounts(limit: number): Promise<TopAccount[]> {
@@ -45,9 +46,11 @@ export class AccountsService {
         publicName: string;
       }> = await resultSet.json();
 
+      const cwsInfo = await this.communityWalletsService.loadCommunityWallets();
+
       let cumulativeBalanceAmount = 0;
       const accountsWithCumulative = rows.map((account) => {
-        const name = communityWallets.get(account.address)?.name;
+        const name = cwsInfo.get(account.address)?.name;
         account.publicName = name ?? '';
         cumulativeBalanceAmount += account.balance;
         const cumulativeShare = new CumulativeShare({

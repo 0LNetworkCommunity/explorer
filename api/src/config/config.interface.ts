@@ -20,6 +20,8 @@ export interface OlConfig {
   provider: string;
   dataApiHost: string;
   validatorHandlesUrl?: string | undefined;
+  communityWalletsUrl?: string | undefined;
+  knwonAddressesUrl?: string | undefined;
 }
 
 export interface S3Config {

@@ -49,3 +49,7 @@ export interface Stats {
   currentClearingBid: number;
   lockedCoins: [number, number][];
 }
+
+export interface WellKnownAddress {
+  name: string;
+}

@@ -75,14 +75,6 @@ const ValidatorRow: FC<ValidatorRowProps> = ({ validator }) => {
       <td className="px-2 md:px-4 lg:px-6 py-4 text-right">
         <Money>{Number(validator.balance)}</Money>
       </td>
-      {/*validator.inSet && (
-        <td className="px-2 md:px-4 lg:px-6 py-4">
-          <ProgressBar
-            percentage={validator.cumulativeBalance ? validator.cumulativeBalance.percentage : 0}
-            amount={validator.cumulativeBalance ? validator.cumulativeBalance.amount : 0}
-          />
-        </td>
-      )*/}
       {validator.inSet && (
         <td className="px-2 md:px-4 lg:px-6 py-4 text-left">
           {validator.city ? `${validator.city}, ${validator.country}` : 'Unknown'}

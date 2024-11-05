@@ -15,14 +15,6 @@ const GET_VALIDATOR_UTILS = gql`
   }
 `;
 
-/*    thermostatMeasure {
-        nextEpoch
-        amount
-        percentage
-        didIncrease
-      }
-*/
-
 interface ValidatorsStatsProps {
   validators?: IValidator[];
 }
@@ -41,13 +33,7 @@ const ValidatorsStats: FC<ValidatorsStatsProps> = ({ validators }) => {
   const eligible = validators && validatorSet && validators.length - validatorSet.length;
   const totalLibra = validators && validators.reduce((acc, it) => acc + Number(it.balance), 0);
   const liquidLibra = validators && validators.reduce((acc, it) => acc + Number(it.unlocked), 0);
-
-  // utils
   const utils = data ? data.getValidatorUtils : null;
-
-  /*const thermostatTitle = utils
-    ? `Next Epoch Reward (${utils.thermostatMeasure.nextEpoch})`
-    : 'Next Epoch Reward';*/
 
   return (
     <div className="grid grid-cols-2 gap-[4px] md:grid-cols-3 lg:grid-cols-4 pb-8">
@@ -71,19 +57,6 @@ const ValidatorsStats: FC<ValidatorsStatsProps> = ({ validators }) => {
       <StatsCard title="Net Reward" value={utils ? utils.netReward : null}>
         {utils && <Money>{Math.ceil(utils.netReward / 1_000_000)}</Money>}
       </StatsCard>
-      {/* <StatsCard title={thermostatTitle} value={utils ? utils.vouchPrice : null}>
-        {utils && <Money>{Math.ceil(utils.thermostatMeasure.amount / 1_000_000)}</Money>}{' '}
-        <span style={{ fontSize: '16px' }}>
-          (
-          {utils &&
-            formatPercentage(
-              utils.thermostatMeasure.percentage,
-              utils.thermostatMeasure.amount !== 0,
-              utils.thermostatMeasure.didIncrease,
-            )}
-          )
-        </span>
-      </StatsCard>*/}
     </div>
   );
 };

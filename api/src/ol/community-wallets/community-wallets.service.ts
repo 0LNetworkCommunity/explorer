@@ -12,7 +12,6 @@ import {
   CommunityWalletPayments,
 } from './community-wallet.model.js';
 import { parseAddress, parseHexString } from '../../utils.js';
-// import { communityWallets } from './community-wallets.js';
 import { ICommunityWalletsService } from './interfaces.js';
 import {
   COMMUNITY_WALLETS_CACHE_KEY,

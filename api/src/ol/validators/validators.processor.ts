@@ -48,6 +48,12 @@ export class ValidatorsProcessor extends WorkerHost {
       case 'updateValidatorsCache':
         await this.updateValidatorsCache();
         break;
+      case 'updateValidatorsVouchesCache':
+        await this.updateValidatorsVouchesCache();
+        break;
+      case 'updateVfnStatusCache':
+        await this.updateVfnStatusCache();
+        break;
 
       default:
         throw new Error(`Invalid job name ${job.name}`);

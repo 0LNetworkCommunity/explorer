@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import Bluebird from 'bluebird';
 import axios from 'axios';
-import axios from 'axios';
 import BN from 'bn.js';
-import { ConfigService } from '@nestjs/config';
 import { ConfigService } from '@nestjs/config';
 import { OlService } from '../ol.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
@@ -21,16 +19,6 @@ import {
   VfnStatusType,
 } from '../models/validator.model.js';
 import { parseAddress } from '../../utils.js';
-import { redisClient } from '../../redis/redis.service.js';
-import {
-  VALIDATORS_CACHE_KEY,
-  VALIDATORS_VFN_STATUS_CACHE_KEY,
-  VALIDATORS_VOUCHES_CACHE_KEY,
-} from '../constants.js';
-
-// Regex to match the fullnode address pattern
-const fullnodeRegex =
-  /^\/(ip4|dns)\/([\d\.]+|[\w\.-]+)\/tcp\/\d+\/noise-ik\/0x[a-fA-F0-9]+\/handshake\/\d+$/;
 import { redisClient } from '../../redis/redis.service.js';
 import {
   VALIDATORS_CACHE_KEY,

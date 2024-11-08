@@ -92,6 +92,12 @@ export class GqlValidatorGrade {
   public failedBlocks: number;
 }
 
+export enum VfnStatusType {
+  InvalidAddress = 'invalidAddress',
+  Accessible = 'accessible',
+  NotAccessible = 'notAccessible',
+}
+
 interface ValidatorInput {
   inSet: boolean;
   index: BN;
@@ -100,7 +106,7 @@ interface ValidatorInput {
   balance?: number;
   unlocked?: number;
   votingPower: BN;
-  vfnStatus?: String | null;
+  vfnStatus?: VfnStatusType | null;
   grade?: GqlValidatorGrade | null;
   vouches: Vouches;
   currentBid: GqlValidatorCurrentBid;
@@ -150,7 +156,7 @@ export class Validator {
   public votingPower: BN;
 
   @Field(() => String, { nullable: true })
-  public vfnStatus?: String | null;
+  public vfnStatus?: VfnStatusType | null;
 
   @Field(() => GqlValidatorGrade, { nullable: true })
   public grade?: GqlValidatorGrade | null;
@@ -236,7 +242,7 @@ export class VouchDetails {
 
 interface VfnStatusInput {
   address: string;
-  status: string;
+  status: VfnStatusType;
 }
 
 @ObjectType()

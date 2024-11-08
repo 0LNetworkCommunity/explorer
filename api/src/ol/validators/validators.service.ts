@@ -16,6 +16,7 @@ import {
   ValidatorUtils,
   //ThermostatMeasure,
   VfnStatus,
+  VfnStatusType,
 } from '../models/validator.model.js';
 import { parseAddress } from '../../utils.js';
 import { redisClient } from '../../redis/redis.service.js';
@@ -490,19 +491,19 @@ export class ValidatorsService {
     return ret;
   }
 
-  async getVfnStatus(address: string): Promise<string | null> {
+  async getVfnStatus(address: string): Promise<VfnStatusType | null> {
     const cacheData = await this.getFromCache<VfnStatus[]>(VALIDATORS_VFN_STATUS_CACHE_KEY);
     if (cacheData) {
       const vfnStatus = cacheData.find((item) => item.address === address);
-      return vfnStatus ? vfnStatus.status : null;
+      return vfnStatus ? (vfnStatus.status as VfnStatusType) : null;
     }
 
     return null;
   }
 
-  async queryVfnStatus(fullnodeAddress: String): Promise<string> {
+  async queryVfnStatus(fullnodeAddress: String): Promise<VfnStatusType> {
     // Variable to store the status
-    let status: 'invalidAddress' | 'accessible' | 'notAccessible';
+    let status: VfnStatusType;
 
     // Check the VFN address
     const match = fullnodeAddress && fullnodeAddress.match(fullnodeRegex);
@@ -514,16 +515,16 @@ export class ValidatorsService {
       // Check if the address is accessible
       status = await checkAddressAccessibility(valIp, 6182)
         .then((res) => {
-          return res ? 'accessible' : 'notAccessible';
+          return res ? VfnStatusType.Accessible : VfnStatusType.NotAccessible;
         })
         .catch(() => {
-          return 'notAccessible';
+          return VfnStatusType.NotAccessible;
         });
     } else {
-      status = 'invalidAddress';
+      status = VfnStatusType.InvalidAddress;
     }
 
-    return status.toString();
+    return status;
   }
 }
 

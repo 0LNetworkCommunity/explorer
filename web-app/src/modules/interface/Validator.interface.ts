@@ -10,9 +10,12 @@ interface Vouches {
 
 export interface IValidator {
   address: string;
+  family: string;
+  handle?: string;
   inSet: boolean;
   index: number;
   votingPower: number;
+  vfnStatus: string;
   balance?: number;
   unlocked?: number;
   vouches: Vouches;
@@ -33,3 +36,23 @@ export interface IValidator {
   country: string | null;
   auditQualification: [string] | null;
 }
+
+export type VouchDetails = {
+  handle: string;
+  address: string;
+  compliant: boolean;
+  epochsToExpire: number;
+  inSet: boolean;
+  family: string;
+};
+
+export type ValidatorVouches = {
+  address: string;
+  handle: string;
+  inSet: boolean;
+  family: string;
+  compliant: boolean;
+  validVouches: number;
+  receivedVouches: VouchDetails[];
+  givenVouches: VouchDetails[];
+};

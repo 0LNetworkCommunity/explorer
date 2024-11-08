@@ -17,6 +17,7 @@ import {
   BinRange,
   BalanceItem,
   SupplyStats,
+  WellKnownAddress,
 } from './types.js';
 import { ClickhouseService } from '../clickhouse/clickhouse.service.js';
 import { OlService } from '../ol/ol.service.js';
@@ -24,12 +25,13 @@ import { ICommunityWalletsService } from '../ol/community-wallets/interfaces.js'
 import { Types } from '../types.js';
 import _ from 'lodash';
 import { TopLiquidAccount } from './stats.model.js';
-import { publicWallets } from './public-wallets.js';
+import { OlConfig } from '../config/config.interface.js';
 
 @Injectable()
 export class StatsService {
   private readonly dataApiHost: string;
   private readonly cacheEnabled: boolean;
+  private readonly knownAddressesUrl?: string | undefined;
 
   public constructor(
     private readonly clickhouseService: ClickhouseService,
@@ -42,6 +44,7 @@ export class StatsService {
   ) {
     this.dataApiHost = config.get('dataApiHost')!;
     this.cacheEnabled = config.get<boolean>('cacheEnabled')!;
+    this.knownAddressesUrl = config.get<OlConfig>('ol')?.knwonAddressesUrl;
   }
 
   private async setCache<T>(key: string, data: T): Promise<void> {
@@ -1286,6 +1289,9 @@ export class StatsService {
         return address.slice(-15).toUpperCase();
       }
 
+      // Get the list of well known addresses
+      const knownAddresses = await this.loadKnownAddresses();
+
       // Get the list of community wallets
       const communityWallets = await this.communityWalletsService.getCommunityWallets();
       const communityAddresses = new Set(communityWallets.map((wallet) => wallet.address));
@@ -1367,7 +1373,7 @@ export class StatsService {
           new TopLiquidAccount({
             rank: index + 1,
             address: item.address,
-            name: publicWallets.get(item.address)?.name,
+            name: knownAddresses.get(item.address)?.name,
             unlocked: item.unlockedBalance,
             balance: item.unlockedBalance,
             liquidShare: item.percentOfCirculating,
@@ -1378,6 +1384,25 @@ export class StatsService {
       console.error('Error in getTopUnlockedBalanceWallets:', error);
       throw error;
     }
+  }
+
+  async loadKnownAddresses(): Promise<Map<string, WellKnownAddress>> {
+    const wka = new Map<string, WellKnownAddress>();
+    if (!this.knownAddressesUrl) {
+      return wka;
+    }
+    try {
+      const response = await axios.get(this.knownAddressesUrl);
+      const data = response.data;
+      Object.keys(data.wellKnownAddresses).forEach((address) => {
+        let addressStr = address.replace(/^0x/, '').toUpperCase();
+        wka.set(addressStr, data.wellKnownAddresses[address] as WellKnownAddress);
+      });
+    } catch (error) {
+      console.error('Error loading validator handles from URL:', error);
+      return new Map<string, WellKnownAddress>();
+    }
+    return wka;
   }
 
   public async updateCache(): Promise<void> {

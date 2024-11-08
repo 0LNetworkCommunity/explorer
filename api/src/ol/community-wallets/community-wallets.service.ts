@@ -6,12 +6,12 @@ import { redisClient } from '../../redis/redis.service.js';
 import { OlService } from '../ol.service.js';
 import {
   CommunityWallet,
+  CommunityWalletInfo,
   CommunityWalletStats,
-  CommunityWalletPayments,
   CommunityWalletDetails,
+  CommunityWalletPayments,
 } from './community-wallet.model.js';
 import { parseAddress, parseHexString } from '../../utils.js';
-import { communityWallets } from './community-wallets.js';
 import { ICommunityWalletsService } from './interfaces.js';
 import {
   COMMUNITY_WALLETS_CACHE_KEY,
@@ -19,6 +19,8 @@ import {
   COMMUNITY_WALLETS_PAYMENTS_CACHE_KEY,
   COMMUNITY_WALLETS_DETAILS_CACHE_KEY,
 } from '../constants.js';
+import { OlConfig } from '../../config/config.interface.js';
+import axios from 'axios';
 
 function formatCoin(value: number): number {
   return Math.floor(value / 1e6);
@@ -27,12 +29,14 @@ function formatCoin(value: number): number {
 @Injectable()
 export class CommunityWalletsService implements ICommunityWalletsService {
   private readonly cacheEnabled: boolean;
+  private readonly communityWalletsUrl?: string;
 
   public constructor(
     private readonly olService: OlService,
     config: ConfigService,
   ) {
     this.cacheEnabled = config.get<boolean>('cacheEnabled')!;
+    this.communityWalletsUrl = config.get<OlConfig>('ol')?.communityWalletsUrl;
   }
 
   private async getFromCache<T>(key: string): Promise<T | null> {
@@ -62,6 +66,7 @@ export class CommunityWalletsService implements ICommunityWalletsService {
   }
 
   private async queryCommunityWallets(): Promise<CommunityWallet[]> {
+    const communityWallets = await this.loadCommunityWallets();
     const donorVoiceRegistry = (await this.olService.aptosClient.getAccountResource(
       '0x1',
       '0x1::donor_voice::Registry',
@@ -133,6 +138,25 @@ export class CommunityWalletsService implements ICommunityWalletsService {
       totalPending: formatCoin(totalPending),
       totalVetoed: formatCoin(totalVetoed),
     });
+  }
+
+  async loadCommunityWallets(): Promise<Map<string, CommunityWalletInfo>> {
+    const cwsMap = new Map<string, CommunityWalletInfo>();
+    if (!this.communityWalletsUrl) {
+      return cwsMap;
+    }
+    try {
+      const response = await axios.get(this.communityWalletsUrl);
+      const data = response.data;
+      Object.keys(data.communityWallets).forEach((address) => {
+        let addressStr = address.replace(/^0x/, '').toUpperCase();
+        cwsMap.set(addressStr, data.communityWallets[address] as CommunityWalletInfo);
+      });
+    } catch (error) {
+      console.error('Error loading validator handles from URL:', error);
+      return new Map<string, CommunityWalletInfo>();
+    }
+    return cwsMap;
   }
 
   private async queryPayments(wallets: CommunityWallet[]) {

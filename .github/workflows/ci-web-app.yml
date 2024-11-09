@@ -1,0 +1,41 @@
+name: CI-Web-App
+
+on:
+  push:
+    branches:
+      - main
+      - build-test
+  pull_request:
+    branches:
+      - main
+      - build-test
+
+jobs:
+  build-web-app:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Clean up node_modules and package-lock
+        run: |
+          rm -rf web-app/node_modules
+          rm -f web-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: web-app
+
+      - name: Build project
+        run: npm run build
+        working-directory: web-app
+
+      # TODO: run tests for this app
+      #- name: Run tests
+      #  run: npm test
+      #  working-directory: web-app

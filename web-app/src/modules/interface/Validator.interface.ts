@@ -8,6 +8,12 @@ interface Vouches {
   }[];
 }
 
+export enum VfnStatus {
+  InvalidAddress = 'invalidAddress',
+  Accessible = 'accessible',
+  NotAccessible = 'notAccessible',
+}
+
 export interface IValidator {
   address: string;
   family: string;
@@ -15,7 +21,7 @@ export interface IValidator {
   inSet: boolean;
   index: number;
   votingPower: number;
-  vfnStatus: string;
+  vfnStatus: VfnStatus;
   balance?: number;
   unlocked?: number;
   vouches: Vouches;

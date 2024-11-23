@@ -29,3 +29,7 @@ export const normalizeAddress = (address: string): string => {
 
   return addr;
 };
+
+export function formatAddress(address: string): string {
+  return address.slice(0, 4) + '...' + address.slice(-4);
+}

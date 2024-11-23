@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { gql, useQuery } from '@apollo/client';
-import SortableTh from './SortableTh';
+import SortableTh from '../SortableTh';
 import VouchesRow from './VouchesRow';
-import { ValidatorVouches } from '../../../../interface/Validator.interface';
+import { ValidatorVouches } from '../../../../../interface/Validator.interface';
 import VouchesRowSkeleton from './VouchesRowSkeleton';
-import VouchesLegend from './VouchesLegend';
+import VouchLegend from './VouchLegend';
 
 const GET_VALIDATORS = gql`
   query GetValidatorsVouches {
@@ -179,7 +179,7 @@ const VouchesTable: React.FC = () => {
               ))}
         </tbody>
       </table>
-      <VouchesLegend />
+      <VouchLegend />
       <p className="text-sm text-gray-500 mt-2">
         The data in this table is updated every 60 seconds.
       </p>

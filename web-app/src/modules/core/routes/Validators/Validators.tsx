@@ -3,7 +3,7 @@ import { gql, useQuery } from '@apollo/client';
 import Page from '../../../ui/Page';
 import ValidatorsTable from './components/ValidatorsTable';
 import ValidatorsStats from './components/ValidatorsStats';
-import VouchesTable from './components/VouchesTable';
+import VouchesTable from './components/Vouch/VouchesTable';
 import ToggleButton from '../../../ui/ToggleButton';
 
 const GET_VALIDATORS = gql`

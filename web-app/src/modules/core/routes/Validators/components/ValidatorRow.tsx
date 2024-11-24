@@ -11,7 +11,7 @@ import {
   XCircleIcon,
 } from '@heroicons/react/20/solid';
 // import ProgressBar from './ProgressBar';
-import Vouches from './Vouches';
+import Vouches from './Vouch/Vouches';
 
 // Define icons for each status
 const statusIcons = {

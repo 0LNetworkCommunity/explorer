@@ -2,7 +2,7 @@ import { FC, useState } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
-import AccountAddress from '../../../../ui/AccountAddress';
+import AccountAddress from '../../../../../ui/AccountAddress';
 
 interface Vouches {
   compliant: boolean;

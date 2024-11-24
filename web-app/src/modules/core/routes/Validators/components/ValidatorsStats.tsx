@@ -67,12 +67,4 @@ function formatPercentage(value: number) {
   return `${(value / 10).toFixed(1)}%`;
 }
 
-// print percentage 0-100
-/*function formatPercentage(value: number, didChange: boolean, didIncrease: boolean) {
-  if (didChange) {
-    return didIncrease ? `+${value}%` : `-${value}%`;
-  }
-  return `${value}%`;
-}*/
-
 export default ValidatorsStats;

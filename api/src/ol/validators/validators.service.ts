@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import Bluebird from 'bluebird';
 import axios from 'axios';
 import BN from 'bn.js';
@@ -24,7 +24,11 @@ import {
   VALIDATORS_CACHE_KEY,
   VALIDATORS_VFN_STATUS_CACHE_KEY,
   VALIDATORS_VOUCHES_CACHE_KEY,
+  VALIDATORS_HANDLERS_CACHE_KEY,
 } from '../constants.js';
+
+import * as net from 'net';
+import { OlConfig } from '../../config/config.interface.js';
 
 // Regex to match the fullnode address pattern
 const fullnodeRegex =
@@ -34,6 +38,7 @@ const fullnodeRegex =
 export class ValidatorsService {
   private readonly cacheEnabled: boolean;
   private readonly validatorHandlesUrl: string | undefined;
+  private readonly logger = new Logger(ValidatorsService.name);
   public constructor(
     private readonly olService: OlService,
     private readonly prisma: PrismaService,
@@ -67,6 +72,38 @@ export class ValidatorsService {
     await this.setCache('validators', validators);
 
     return validators;
+  }
+
+  public async getValidatorsHandlers(): Promise<Map<string, string>> {
+    if (this.cacheEnabled) {
+      const cacheHandlersString = await this.getFromCache<string>(VALIDATORS_HANDLERS_CACHE_KEY);
+      if (cacheHandlersString) {
+        try {
+          const map = new Map<string, string>();
+          const entries: [string, string][] = JSON.parse(cacheHandlersString);
+          entries.forEach((entry) => {
+            map.set(entry[0], entry[1]);
+          });
+          return map;
+        } catch (parseError) {
+          this.logger.error('Error parsing validators handlers cache', parseError);
+        }
+      }
+    }
+
+    let handlers = new Map<string, string>();
+    try {
+      handlers = await this.loadValidatorHandles();
+    } catch (error) {
+      this.logger.error('Error loading validators handlers', error);
+    } finally {
+      await this.setCache(
+        VALIDATORS_HANDLERS_CACHE_KEY,
+        JSON.stringify(Array.from(handlers.entries())),
+      );
+    }
+
+    return handlers;
   }
 
   public async getValidatorsVouches(): Promise<ValidatorVouches[]> {
@@ -143,7 +180,7 @@ export class ValidatorsService {
       }),
     );
 
-    let handles = await this.loadValidatorHandles();
+    let handles = await this.getValidatorsHandlers();
     let allValidators = [...currentValidators, ...eligibleValidators];
     return await Promise.all(
       allValidators.map(async (validator) => {
@@ -291,7 +328,7 @@ export class ValidatorsService {
   public async queryValidatorsVouches(): Promise<ValidatorVouches[]> {
     const eligible = await this.olService.getEligibleValidators();
     const active = await this.olService.getValidatorSet();
-    const handles = await this.loadValidatorHandles();
+    const handles = await this.getValidatorsHandlers();
     const currentEpoch = await this.olService.aptosClient
       .getLedgerInfo()
       .then((info) => Number(info.epoch));
@@ -420,56 +457,29 @@ export class ValidatorsService {
     const entryFee = Number(rewardRes[1]);
     const clearingBid = Number(rewardRes[2]);
 
-    // Check Thermostat
-    /*const measureRes = await this.olService.aptosClient.view({
-      function: '0x1::proof_of_fee::query_reward_adjustment',
-      type_arguments: [],
-      arguments: [],
-    });
-    const didIncrement = measureRes[1] as boolean;
-    const amount = measureRes[2];
-
-    // Get current epoch
-    const epochRes = await this.olService.aptosClient.getLedgerInfo();
-    const currentEpoch = Number(epochRes.epoch);
-
-    // Create ThermostatMeasure object
-    const thermostatMeasure = new ThermostatMeasure({
-      nextEpoch: currentEpoch + 1,
-      amount: Number(nominalReward) + (didIncrement ? +1 : -1) * Number(amount),
-      percentage: Math.round((Number(amount) / Number(nominalReward)) * 100),
-      didIncrease: didIncrement,
-    });*/
-
     return new ValidatorUtils({
       vouchPrice: Number(vouchPriceRes.amount),
       entryFee: entryFee,
       clearingBid: clearingBid,
       netReward: nominalReward - entryFee,
-      /*, thermostatMeasure */
     });
   }
 
-  // TODO cache this
   async loadValidatorHandles(): Promise<Map<string, string>> {
     if (!this.validatorHandlesUrl) {
       return new Map<string, string>();
     }
-    try {
-      const response = await axios.get(this.validatorHandlesUrl);
-      const data = response.data;
 
-      const validatorMap = new Map<string, string>();
-      Object.keys(data.validators).forEach((address) => {
-        let addressStr = address.replace(/^0x/, '').toUpperCase();
-        validatorMap.set(addressStr, data.validators[address]);
-      });
+    const response = await axios.get(this.validatorHandlesUrl);
+    const data = response.data;
 
-      return validatorMap;
-    } catch (error) {
-      console.error('Error loading validator handles from URL:', error);
-      return new Map<string, string>();
-    }
+    const validatorMap = new Map<string, string>();
+    Object.keys(data.validators).forEach((address) => {
+      let addressStr = address.replace(/^0x/, '').toUpperCase();
+      validatorMap.set(addressStr, data.validators[address]);
+    });
+
+    return validatorMap;
   }
 
   public async queryValidatorsVfnStatus(): Promise<VfnStatus[]> {
@@ -513,7 +523,7 @@ export class ValidatorsService {
       const valIp = match[2];
 
       // Check if the address is accessible
-      status = await checkAddressAccessibility(valIp, 6182)
+      status = await this.checkAddressAccessibility(valIp, 6182)
         .then((res) => {
           return res ? VfnStatusType.Accessible : VfnStatusType.NotAccessible;
         })
@@ -526,33 +536,29 @@ export class ValidatorsService {
 
     return status;
   }
-}
 
-import * as net from 'net';
-import { OlConfig } from '../../config/config.interface.js';
+  async checkAddressAccessibility(ip: string, port: number): Promise<boolean> {
+    return new Promise((resolve) => {
+      const socket = new net.Socket();
 
-function checkAddressAccessibility(ip: string, port: number): Promise<boolean> {
-  return new Promise((resolve) => {
-    const socket = new net.Socket();
+      // Timeout in case the server is not accessible
+      socket.setTimeout(1000);
 
-    // Timeout in case the server is not accessible
-    socket.setTimeout(1000);
+      // Try to connect to the IP and port
+      socket.connect(port, ip, () => {
+        socket.end();
+        resolve(true);
+      });
 
-    // Try to connect to the IP and port
-    socket.connect(port, ip, () => {
-      //console.log(`Connected to ${ip}:${port}`);
-      socket.end();
-      resolve(true);
+      socket.on('error', () => {
+        this.logger.warn(`Error connecting to ${ip}:${port}`);
+        resolve(false);
+      });
+
+      socket.on('timeout', () => {
+        this.logger.warn(`Timeout connecting to ${ip}:${port}`);
+        resolve(false);
+      });
     });
-
-    socket.on('error', () => {
-      //console.log(`Failed to connect to ${ip}:${port}`);
-      resolve(false);
-    });
-
-    socket.on('timeout', () => {
-      //console.log(`Connection to ${ip}:${port} timed out`);
-      resolve(false);
-    });
-  });
+  }
 }

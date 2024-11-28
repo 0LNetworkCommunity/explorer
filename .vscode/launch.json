@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Explorer API - Debug",
+      "type": "node-terminal",
+      "request": "launch",
+      "skipFiles": ["<node_internals>/**"],
+      "command": "npm run start:dev",
+      "cwd": "${workspaceFolder}/api",
+      "sourceMaps": true
+    }
+  ]
+}

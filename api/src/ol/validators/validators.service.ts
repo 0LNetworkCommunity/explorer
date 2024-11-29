@@ -77,18 +77,9 @@ export class ValidatorsService {
   public async getValidatorsHandlers(): Promise<Map<string, string>> {
     if (this.cacheEnabled) {
       const cacheHandlersString = await this.getFromCache<string>(VALIDATORS_HANDLERS_CACHE_KEY);
-      if (cacheHandlersString) {
-        try {
-          const map = new Map<string, string>();
-          const entries: [string, string][] = JSON.parse(cacheHandlersString);
-          entries.forEach((entry) => {
-            map.set(entry[0], entry[1]);
-          });
-          return map;
-        } catch (parseError) {
-          this.logger.error('Error parsing validators handlers cache', parseError);
-        }
-      }
+      return cacheHandlersString
+        ? new Map<string, string>(Object.entries(cacheHandlersString))
+        : new Map();
     }
 
     let handlers = new Map<string, string>();
@@ -97,10 +88,9 @@ export class ValidatorsService {
     } catch (error) {
       this.logger.error('Error loading validators handlers', error);
     } finally {
-      await this.setCache(
-        VALIDATORS_HANDLERS_CACHE_KEY,
-        JSON.stringify(Array.from(handlers.entries())),
-      );
+      const obj = Object.fromEntries(handlers);
+      await redisClient.set(VALIDATORS_HANDLERS_CACHE_KEY, JSON.stringify(obj));
+      this.logger.log('Validators handlers cache updated');
     }
 
     return handlers;

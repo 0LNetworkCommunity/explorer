@@ -24,33 +24,38 @@ export class ValidatorsProcessor extends WorkerHost {
   }
 
   public async onModuleInit() {
+    // Note: this order is important
+    await this.updateValidatorsHandlersCache();
+    await this.updateVfnStatusCache();
+    await this.updateValidatorsCache();
+    await this.updateValidatorsVouchesCache();
+
+    // Clear all jobs in the queue
+    this.validatorsQueue.drain(true);
+
     await this.validatorsQueue.add('updateValidatorsHandlersCache', undefined, {
       repeat: {
         every: 12 * 60 * 60 * 1000, // 12 hours
       },
     });
-    this.updateValidatorsHandlersCache();
 
     await this.validatorsQueue.add('updateValidatorsCache', undefined, {
       repeat: {
         every: 30 * 1000, // 30 seconds
       },
     });
-    this.updateValidatorsCache();
 
     await this.validatorsQueue.add('updateVfnStatusCache', undefined, {
       repeat: {
         every: 5 * 60 * 1000, // 5 minutes
       },
     });
-    this.updateVfnStatusCache();
 
     await this.validatorsQueue.add('updateValidatorsVouchesCache', undefined, {
       repeat: {
         every: 60 * 1000, // 60 seconds
       },
     });
-    this.updateValidatorsVouchesCache();
 
     this.logger.log('ValidatorsProcessor initialized');
   }
@@ -75,43 +80,50 @@ export class ValidatorsProcessor extends WorkerHost {
     }
   }
 
+  private async updateValidatorsHandlersCache() {
+    const start = Date.now();
+    try {
+      const validatorsHandlers = await this.validatorsService.loadValidatorHandles();
+      const obj = Object.fromEntries(validatorsHandlers);
+      await redisClient.set(VALIDATORS_HANDLERS_CACHE_KEY, JSON.stringify(obj));
+      const duration = Date.now() - start;
+      this.logger.log(`Validators handlers cache updated in ${duration}ms`);
+    } catch (error) {
+      this.logger.error('Error updating validators handlers cache', error);
+    }
+  }
+
   private async updateVfnStatusCache() {
+    const start = Date.now();
     try {
       const vfnStatus = await this.validatorsService.queryValidatorsVfnStatus();
       await redisClient.set(VALIDATORS_VFN_STATUS_CACHE_KEY, JSON.stringify(vfnStatus));
-      this.logger.log('VFN status cache updated');
+      const duration = Date.now() - start;
+      this.logger.log(`VFN status cache updated in ${duration}ms`);
     } catch (error) {
       this.logger.error('Error updating VFN status cache', error);
     }
   }
 
   private async updateValidatorsCache() {
+    const start = Date.now();
     try {
       const validators = await this.validatorsService.queryValidators();
       await redisClient.set(VALIDATORS_CACHE_KEY, JSON.stringify(validators));
-      this.logger.log('Validators cache updated');
+      const duration = Date.now() - start;
+      this.logger.log(`Validators cache updated in ${duration}ms`);
     } catch (error) {
       this.logger.error('Error updating validators cache', error);
     }
   }
 
-  private async updateValidatorsHandlersCache() {
-    try {
-      const validatorsHandlers = await this.validatorsService.loadValidatorHandles();
-      await redisClient.set(
-        VALIDATORS_HANDLERS_CACHE_KEY,
-        JSON.stringify(JSON.stringify(Array.from(validatorsHandlers.entries()))),
-      );
-      this.logger.log('Validators handlers cache updated');
-    } catch (error) {
-      this.logger.error('Error updating validators handlers cache', error);
-    }
-  }
-
   private async updateValidatorsVouchesCache() {
+    const start = Date.now();
     try {
       const validatorsVouches = await this.validatorsService.queryValidatorsVouches();
       await redisClient.set(VALIDATORS_VOUCHES_CACHE_KEY, JSON.stringify(validatorsVouches));
+      const duration = Date.now() - start;
+      this.logger.log(`Validators vouches cache updated in ${duration}ms`);
     } catch (error) {
       this.logger.error('Error updating validators vouches cache', error);
     }

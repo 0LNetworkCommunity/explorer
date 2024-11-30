@@ -127,8 +127,9 @@ export class StatsService {
       individualsCapital: supplyAndCapital.individualsCapital,
       communityCapital: supplyAndCapital.communityCapital,
       communityWalletsBalanceBreakdown: communityWalletsBalanceBreakdown,
-      rewardsOverTime: pofValues.nominalRewardOverTime, // net rewards? also available on the pofValues object
-      clearingBidoverTime: pofValues.clearingBidOverTime, // net rewards? also available on the pofValues object
+      rewardsOverTime: pofValues.nominalRewardOverTime,
+      clearingBidOverTime: pofValues.clearingBidOverTime,
+      netRewardOverTime: pofValues.netRewardOverTime,
       liquidSupplyConcentration: liquidSupplyConcentration,
       lockedSupplyConcentration: lockedSupplyConcentration,
 
@@ -148,6 +149,7 @@ export class StatsService {
       infrastructureEscrow,
       lockedCoins,
     };
+
     return res;
   }
 

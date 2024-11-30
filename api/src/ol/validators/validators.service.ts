@@ -84,7 +84,7 @@ export class ValidatorsService {
       if (cacheHandlersString) {
         this.logger.debug(`Entries are: ${JSON.stringify(Object.entries(cacheHandlersString))}`)
         result = new Map<string, string>(Object.entries(cacheHandlersString))
-        this.logger.debug('Created map from entries')
+        this.logger.debug(`Created map from entries: ${JSON.stringify(result)}`)
       } else {
         result = new Map();
         this.logger.debug('Created empty map')

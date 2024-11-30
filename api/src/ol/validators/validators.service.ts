@@ -82,6 +82,7 @@ export class ValidatorsService {
       this.logger.debug(`Fetched this from redis: ${JSON.stringify(cacheHandlersString)}`)
       let result:Map<string, string> = new Map();
       if (cacheHandlersString) {
+        this.logger.debug(`Entries are: ${JSON.stringify(Object.entries(cacheHandlersString))}`)
         result = new Map<string, string>(Object.entries(cacheHandlersString))
         this.logger.debug('Created map from entries')
       } else {

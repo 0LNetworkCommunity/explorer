@@ -76,10 +76,14 @@ export class ValidatorsService {
 
   public async getValidatorsHandlers(): Promise<Map<string, string>> {
     if (this.cacheEnabled) {
+      this.logger.debug('Cache is enabled')
       const cacheHandlersString = await this.getFromCache<string>(VALIDATORS_HANDLERS_CACHE_KEY);
-      return cacheHandlersString
+      this.logger.debug(`Fetched this from redis: ${cacheHandlersString}`)
+      let result = cacheHandlersString
         ? new Map<string, string>(Object.entries(cacheHandlersString))
         : new Map();
+      this.logger.debug(`returning this: ${result}`)
+      return result;
     }
 
     let handlers = new Map<string, string>();

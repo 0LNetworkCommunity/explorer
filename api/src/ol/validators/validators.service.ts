@@ -70,7 +70,7 @@ export class ValidatorsService {
     }
 
     const validators = await this.queryValidators();
-    await this.setCache('validators', validators);
+    await this.setCache(VALIDATORS_CACHE_KEY, validators);
     this.logger.debug('Stored validators in cache')
     this.logger.debug(`This data stored: ${JSON.stringify(validators)}`)
 
@@ -194,6 +194,9 @@ export class ValidatorsService {
         const slowWallet = await this.olService.getSlowWallet(validator.address);
         const unlocked = Number(slowWallet?.unlocked);
         const addr = validator.address.toString('hex').toLocaleUpperCase();
+        if (!handles.get(addr)) {
+          this.logger.debug(`handles miss for address ${addr}`)
+        }
         const handle = handles.get(addr) || null;
 
         return new Validator({

@@ -64,12 +64,15 @@ export class ValidatorsService {
     if (this.cacheEnabled) {
       const cachedValidators = await this.getFromCache<Validator[]>(VALIDATORS_CACHE_KEY);
       if (cachedValidators) {
+        this.logger.debug('Returning cached validators')
         return cachedValidators;
       }
     }
 
     const validators = await this.queryValidators();
     await this.setCache('validators', validators);
+    this.logger.debug('Stored validators in cache')
+    this.logger.debug(`This data stored: ${JSON.stringify(validators)}`)
 
     return validators;
   }
@@ -192,7 +195,6 @@ export class ValidatorsService {
         const unlocked = Number(slowWallet?.unlocked);
         const addr = validator.address.toString('hex').toLocaleUpperCase();
         const handle = handles.get(addr) || null;
-        this.logger.debug(`Setting handle as: ${handle}`)
 
         return new Validator({
           inSet: validator.inSet,

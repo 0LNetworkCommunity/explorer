@@ -80,11 +80,12 @@ export class ValidatorsService {
       const cacheHandlersString = await this.getFromCache<string>(VALIDATORS_HANDLERS_CACHE_KEY);
       // NOTE: cacheHandlersString is NOT a string (it is an Object)
       this.logger.debug(`Fetched this from redis: ${JSON.stringify(cacheHandlersString)}`)
-      let result:Map<string, string> = new Map();
+      let result:Map<string, string> = new Map([['bad', 'data']]);
       if (cacheHandlersString) {
-        this.logger.debug(`Entries are: ${JSON.stringify(Object.entries(cacheHandlersString))}`)
-        result = new Map<string, string>(Object.entries(cacheHandlersString))
-        this.logger.debug(`Created map from entries: ${JSON.stringify(result)}`)
+        let entries = Object.entries(cacheHandlersString);
+        this.logger.debug(`Entries are: ${entries}, ${JSON.stringify(entries)}`)
+        result = new Map<string, string>(entries)
+        this.logger.debug(`Created map from entries: ${result}, ${JSON.stringify(result)}`)
       } else {
         result = new Map();
         this.logger.debug('Created empty map')

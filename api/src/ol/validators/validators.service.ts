@@ -65,6 +65,7 @@ export class ValidatorsService {
       const cachedValidators = await this.getFromCache<Validator[]>(VALIDATORS_CACHE_KEY);
       if (cachedValidators) {
         this.logger.debug('Returning cached validators')
+        this.logger.debug(`Read this data from cache: ${JSON.stringify(cachedValidators)}`)
         return cachedValidators;
       }
     }

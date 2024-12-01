@@ -86,7 +86,7 @@ export class ValidatorsService {
         this.logger.debug(`Entries have type: ${typeof entries} and is an array: ${Array.isArray(entries)}`)
         this.logger.debug(`and the first element is: ${entries[0]} and are: ${entries}, ${JSON.stringify(entries)}`)
         result = new Map<string, string>(entries)
-        this.logger.debug(`Created map from entries: ${result}, ${JSON.stringify(result)}`)
+        this.logger.debug(`Created map from entries: ${result}, ${JSON.stringify(Array.from(result.entries()))}`)
       } else {
         result = new Map();
         this.logger.debug('Created empty map')

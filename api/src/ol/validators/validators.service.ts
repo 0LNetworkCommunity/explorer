@@ -79,11 +79,12 @@ export class ValidatorsService {
       this.logger.debug('Cache is enabled')
       const cacheHandlersString = await this.getFromCache<string>(VALIDATORS_HANDLERS_CACHE_KEY);
       // NOTE: cacheHandlersString is NOT a string (it is an Object)
-      this.logger.debug(`Fetched this from redis: ${JSON.stringify(cacheHandlersString)}`)
+      this.logger.debug(`Fetched this from redis: ${cacheHandlersString},  ${JSON.stringify(cacheHandlersString)}`)
       let result:Map<string, string> = new Map([['bad', 'data']]);
       if (cacheHandlersString) {
         let entries = Object.entries(cacheHandlersString);
-        this.logger.debug(`Entries are: ${entries}, ${JSON.stringify(entries)}`)
+        this.logger.debug(`Entries have type: ${typeof entries} and is an array: ${Array.isArray(entries)}`)
+        this.logger.debug(`and the first element is: ${entries[0]} and are: ${entries}, ${JSON.stringify(entries)}`)
         result = new Map<string, string>(entries)
         this.logger.debug(`Created map from entries: ${result}, ${JSON.stringify(result)}`)
       } else {
@@ -97,10 +98,12 @@ export class ValidatorsService {
     let handlers = new Map<string, string>();
     try {
       handlers = await this.loadValidatorHandles();
+      this.logger.debug(`Loaded validator handles: ${handlers}, ${JSON.stringify(handlers)}`)
     } catch (error) {
       this.logger.error('Error loading validators handlers', error);
     } finally {
       const obj = Object.fromEntries(handlers);
+      this.logger.debug(`Storing validator handles: ${obj}, ${JSON.stringify(obj)}`)
       await redisClient.set(VALIDATORS_HANDLERS_CACHE_KEY, JSON.stringify(obj));
       this.logger.log('Validators handlers cache updated');
     }

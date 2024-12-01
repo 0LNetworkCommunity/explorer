@@ -65,7 +65,7 @@ export class ValidatorsService {
       const cachedValidators = await this.getFromCache<Validator[]>(VALIDATORS_CACHE_KEY);
       if (cachedValidators) {
         this.logger.debug('Returning cached validators')
-        this.logger.debug(`Read this data from cache: ${JSON.stringify(cachedValidators)}`)
+        this.logger.debug(`Read this data from cache: ${JSON.stringify(cachedValidators).slice(0, 200)}`)
         return cachedValidators;
       }
     }
@@ -73,7 +73,7 @@ export class ValidatorsService {
     const validators = await this.queryValidators();
     await this.setCache(VALIDATORS_CACHE_KEY, validators);
     this.logger.debug('Stored validators in cache')
-    this.logger.debug(`This data stored: ${JSON.stringify(validators)}`)
+    this.logger.debug(`This data written back: ${JSON.stringify(validators).slice(0, 200)}`)
 
     return validators;
   }

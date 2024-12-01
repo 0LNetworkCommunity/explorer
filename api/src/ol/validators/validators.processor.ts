@@ -110,7 +110,7 @@ export class ValidatorsProcessor extends WorkerHost {
     try {
       const validators = await this.validatorsService.queryValidators();
       await redisClient.set(VALIDATORS_CACHE_KEY, JSON.stringify(validators));
-      this.logger.debug(`Wrote this to the cache: ${JSON.stringify(validators)}`)
+      this.logger.debug(`Wrote this to the cache: ${JSON.stringify(validators).slice(0, 200)}`)
       const duration = Date.now() - start;
       this.logger.log(`Validators cache updated in ${duration}ms`);
     } catch (error) {

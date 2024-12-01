@@ -79,19 +79,14 @@ export class ValidatorsService {
       this.logger.debug('Cache is enabled')
       const cacheHandlersString = await this.getFromCache<string>(VALIDATORS_HANDLERS_CACHE_KEY);
       // NOTE: cacheHandlersString is NOT a string (it is an Object)
-      this.logger.debug(`Fetched this from redis: ${cacheHandlersString},  ${JSON.stringify(cacheHandlersString)}`)
       let result:Map<string, string> = new Map([['bad', 'data']]);
       if (cacheHandlersString) {
         let entries = Object.entries(cacheHandlersString);
-        this.logger.debug(`Entries have type: ${typeof entries} and is an array: ${Array.isArray(entries)}`)
-        this.logger.debug(`and the first element is: ${entries[0]} and are: ${entries}, ${JSON.stringify(entries)}`)
         result = new Map<string, string>(entries)
-        this.logger.debug(`Created map from entries: ${result}, ${JSON.stringify(Array.from(result.entries()))}`)
       } else {
         result = new Map();
-        this.logger.debug('Created empty map')
       }
-      this.logger.debug(`returning this: ${JSON.stringify(result)}`)
+      this.logger.debug(`returning handles map with ${result.size} entries`)
       return result;
     }
 
@@ -186,6 +181,7 @@ export class ValidatorsService {
     );
 
     let handles = await this.getValidatorsHandlers();
+    this.logger.debug(`handles map has ${handles.size} entries`)
     let allValidators = [...currentValidators, ...eligibleValidators];
     return await Promise.all(
       allValidators.map(async (validator) => {
@@ -196,6 +192,7 @@ export class ValidatorsService {
         const unlocked = Number(slowWallet?.unlocked);
         const addr = validator.address.toString('hex').toLocaleUpperCase();
         const handle = handles.get(addr) || null;
+        this.logger.debug(`Setting handle as: ${handle}`)
 
         return new Validator({
           inSet: validator.inSet,
@@ -334,6 +331,7 @@ export class ValidatorsService {
     const eligible = await this.olService.getEligibleValidators();
     const active = await this.olService.getValidatorSet();
     const handles = await this.getValidatorsHandlers();
+    this.logger.debug(`handles map has ${handles.size} entries`)
     const currentEpoch = await this.olService.aptosClient
       .getLedgerInfo()
       .then((info) => Number(info.epoch));

@@ -476,6 +476,7 @@ export class ValidatorsService {
 
   async loadValidatorHandles(): Promise<Map<string, string>> {
     if (!this.validatorHandlesUrl) {
+      this.logger.warn('Validator handles URL is not configured')
       return new Map<string, string>();
     }
 

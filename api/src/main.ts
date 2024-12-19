@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import process from 'node:process';
-import { NestFactory, LogLevel } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
+import { LogLevel } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app/app.module.js';
 import getConfig from './config/config.js';

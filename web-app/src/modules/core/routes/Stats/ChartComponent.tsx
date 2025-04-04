@@ -14,9 +14,10 @@ interface Props {
   title: string;
   type: string;
   data: any;
+  showHorizontalLine?: boolean;
 }
 
-const ChartComponent: FC<Props> = ({ type, data, title }) => {
+const ChartComponent: FC<Props> = ({ type, data, title, showHorizontalLine }) => {
   const chart = (() => {
     switch (type) {
       case 'BarChart':
@@ -24,7 +25,7 @@ const ChartComponent: FC<Props> = ({ type, data, title }) => {
       case 'PieChart':
         return <PieChart data={data} title={title} />;
       case 'LineChart':
-        return <LineChart data={data} title={title} />;
+        return <LineChart data={data} title={title} showHorizontalLine={showHorizontalLine} />;
       case 'LineAndBarChart':
         return <LineAndBarChart data={data} title={title} />;
       case 'LineAndAreaChart':

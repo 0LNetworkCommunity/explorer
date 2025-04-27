@@ -14,7 +14,9 @@ export default (): Config => {
     },
 
     ol: {
-      provider: 'https://rpc.0l.fyi',
+      // provider: 'https://rpc.0l.fyi',
+      // provider: 'https://twin-rpc.openlibra.space/v1',
+      provider: 'https://rpc.scan.openlibra.world',
       dataApiHost: ENV.DATA_API_HOST!,
       validatorHandlesUrl: ENV.VALIDATOR_HANDLES_URL || undefined,
       communityWalletsUrl: ENV.COMMUNITY_WALLETS_URL || undefined,

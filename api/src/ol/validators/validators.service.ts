@@ -64,23 +64,18 @@ export class ValidatorsService {
     if (this.cacheEnabled) {
       const cachedValidators = await this.getFromCache<Validator[]>(VALIDATORS_CACHE_KEY);
       if (cachedValidators) {
-        this.logger.debug('Returning cached validators')
-        this.logger.debug(`Read this data from cache: ${JSON.stringify(cachedValidators).slice(0, 200)}`)
         return cachedValidators;
       }
     }
 
     const validators = await this.queryValidators();
     await this.setCache(VALIDATORS_CACHE_KEY, validators);
-    this.logger.debug('Stored validators in cache')
-    this.logger.debug(`This data written back: ${JSON.stringify(validators).slice(0, 200)}`)
 
     return validators;
   }
 
   public async getValidatorsHandlers(): Promise<Map<string, string>> {
     if (this.cacheEnabled) {
-      this.logger.debug('Cache is enabled')
       const cacheHandlersString = await this.getFromCache<string>(VALIDATORS_HANDLERS_CACHE_KEY);
       // NOTE: cacheHandlersString is NOT a string (it is an Object)
       let result:Map<string, string> = new Map([['bad', 'data']]);
@@ -90,19 +85,19 @@ export class ValidatorsService {
       } else {
         result = new Map();
       }
-      this.logger.debug(`returning handles map with ${result.size} entries`)
+      // this.logger.debug(`returning handles map with ${result.size} entries`)
       return result;
     }
 
     let handlers = new Map<string, string>();
     try {
       handlers = await this.loadValidatorHandles();
-      this.logger.debug(`Loaded validator handles: ${handlers}, ${JSON.stringify(handlers)}`)
+      // this.logger.debug(`Loaded validator handles: ${handlers}, ${JSON.stringify(handlers)}`)
     } catch (error) {
       this.logger.error('Error loading validators handlers', error);
     } finally {
       const obj = Object.fromEntries(handlers);
-      this.logger.debug(`Storing validator handles: ${obj}, ${JSON.stringify(obj)}`)
+      // this.logger.debug(`Storing validator handles: ${obj}, ${JSON.stringify(obj)}`)
       await redisClient.set(VALIDATORS_HANDLERS_CACHE_KEY, JSON.stringify(obj));
       this.logger.log('Validators handlers cache updated');
     }
@@ -185,7 +180,6 @@ export class ValidatorsService {
     );
 
     let handles = await this.getValidatorsHandlers();
-    this.logger.debug(`handles map has ${handles.size} entries`)
     let allValidators = [...currentValidators, ...eligibleValidators];
     return await Promise.all(
       allValidators.map(async (validator) => {
@@ -196,7 +190,7 @@ export class ValidatorsService {
         const unlocked = Number(slowWallet?.unlocked);
         const addr = validator.address.toString('hex').toLocaleUpperCase();
         if (!handles.get(addr)) {
-          this.logger.debug(`handles miss for address ${addr}`)
+          // this.logger.debug(`handles miss for address ${addr}`)
         }
         const handle = handles.get(addr) || null;
 
@@ -337,7 +331,6 @@ export class ValidatorsService {
     const eligible = await this.olService.getEligibleValidators();
     const active = await this.olService.getValidatorSet();
     const handles = await this.getValidatorsHandlers();
-    this.logger.debug(`handles map has ${handles.size} entries`)
     const currentEpoch = await this.olService.aptosClient
       .getLedgerInfo()
       .then((info) => Number(info.epoch));

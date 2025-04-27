@@ -15,8 +15,8 @@ const configMap = new Map<string, Config>([
   [
     '0l.fyi',
     {
-      apiHost: 'https://api.0l.fyi',
-      dataApiHost: 'https://data.0l.fyi',
+      apiHost: 'https://api.scan.openlibra.world',
+      dataApiHost: 'https://data.scan.openlibra.world',
     },
   ],
   [

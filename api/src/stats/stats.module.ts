@@ -6,7 +6,7 @@ import { StatsResolver } from './stats.resolver.js';
 import { StatsController } from './stats.controller.js';
 import { ClickhouseModule } from '../clickhouse/clickhouse.module.js';
 import { OlModule } from '../ol/ol.module.js';
-import { redisClient } from '../redis/redis.service.js';
+import { redisConnectionOptions } from '../redis/redis.service.js';
 import loadConfig from '../config/config.js';
 import { StatsProcessor } from './stats.processor.js';
 
@@ -19,7 +19,9 @@ const config = loadConfig();
 
     BullModule.registerQueue({
       name: 'stats',
-      connection: redisClient,
+      // Use redisConnectionOptions instead of redisClient
+      connection: redisConnectionOptions,
+      // ...other options...
     }),
   ],
   providers: [StatsService, StatsResolver, ...(config.cacheEnabled ? [StatsProcessor] : [])],

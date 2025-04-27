@@ -1,39 +1,46 @@
-import 'dotenv/config';
-import process from 'node:process';
 import { NestFactory } from '@nestjs/core';
-import { LogLevel } from '@nestjs/common';
-import { NestExpressApplication } from '@nestjs/platform-express';
+import express from 'express';
+import { ExpressAdapter } from '@nestjs/platform-express';
+import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app/app.module.js';
-import getConfig from './config/config.js';
-
-function makeLogLevelList(): LogLevel[] {
-  // From: https://github.com/nestjs/nest/blob/master/packages/common/services/logger.service.ts#L9
-  const allLogLevels: LogLevel[] = ['verbose', 'debug', 'log', 'warn', 'error', 'fatal'];
-  // From: https://stackoverflow.com/a/78585135/1701505
-  const levels = allLogLevels.slice(
-    // TODO: possibly the env var shoud come via dotenv, or Config?
-    allLogLevels.indexOf((process.env.NESTJS_LOG_LEVEL || 'log') as LogLevel),
-    allLogLevels.length,
-  );
-  return levels;
-}
 
 async function bootstrap() {
-  const config = getConfig();
+  // Create Express instance
+  const expressApp = express();
 
-  const app = await NestFactory.create<NestExpressApplication>(
-    AppModule,
-    {
-      logger: makeLogLevelList()
-    }
-  );
+  // These Express-specific settings should be applied to the Express instance
+  expressApp.disable('x-powered-by');
+  expressApp.set('trust proxy', 1);
 
-  app.enableShutdownHooks();
+  // Create NestJS app with the Express adapter
+  const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
 
-  app.disable('x-powered-by');
-  app.set('trust proxy', 1);
-  app.enableCors();
+  // Get environment from config service
+  const configService = app.get(ConfigService);
+  const environment = configService.get('NODE_ENV') || 'development';
 
-  await app.listen(config.port);
+  // Enable CORS only for development environment
+  if (environment === 'development') {
+    app.enableCors({
+      origin: true,
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+      credentials: true,
+    });
+    console.log('CORS enabled for development environment');
+  } else {
+    // For production, either disable CORS or use a strict configuration
+    app.enableCors({
+      origin: configService.get('ALLOWED_ORIGINS')?.split(',') || false,
+      methods: 'GET,HEAD,POST,OPTIONS',
+      credentials: false,
+    });
+    console.log(`CORS configured for ${environment} environment`);
+  }
+
+  const port = configService.get('PORT') || 3000;
+
+  await app.listen(port);
+  console.log(`Application is running on: http://localhost:${port}`);
 }
+
 bootstrap();

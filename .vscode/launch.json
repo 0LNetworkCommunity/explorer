@@ -8,7 +8,64 @@
       "skipFiles": ["<node_internals>/**"],
       "command": "npm run start:dev",
       "cwd": "${workspaceFolder}/api",
-      "sourceMaps": true
+      "sourceMaps": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/api/**",
+        "!**/node_modules/**"
+      ],
+      "outFiles": ["${workspaceFolder}/api/dist/**/*.js"],
+    },
+    {
+      "name": "Explorer API - Attach",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/api/**",
+        "!**/node_modules/**"
+      ],
+      "outFiles": ["${workspaceFolder}/api/dist/**/*.js"],
+      "restart": true
+    },
+    {
+      "name": "Explorer Web-App - Debug",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run dev",
+      "cwd": "${workspaceFolder}/web-app",
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/web-app/**",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "name": "Explorer Web-App - Chrome Debug",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/web-app/src",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack:///./src/*": "${webRoot}/*"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Explorer Full Stack - Debug",
+      "configurations": [
+        "Explorer API - Debug",
+        "Explorer Web-App - Debug"
+      ],
+      "stopAll": true,
+      "presentation": {
+        "hidden": false,
+        "group": "explorer"
+      }
     }
   ]
 }

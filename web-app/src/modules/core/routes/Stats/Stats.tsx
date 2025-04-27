@@ -25,8 +25,7 @@ const Coinstats = () => {
 
         const data = await getData();
 
-        const lockedCoins = data.lockedCoins.map((it: [number, number]) => [it[0] * 1e3, it[1]]);
-        setData({ ...data, lockedCoins });
+        setData(data);
       } catch (error) {
         console.error(error);
       } finally {
@@ -202,24 +201,52 @@ const Coinstats = () => {
                       grid: { top: 28, right: 30, bottom: 80, left: 120 },
                       xAxis: {
                         type: 'time',
+                        axisLabel: {
+                          formatter: '{MMM} {dd}, {yyyy}'
+                        },
+                        // Fix for timestamps showing January 1970
+                        min: function(value: any) {
+                          // Find a reasonable minimum date range (skip extreme values)
+                          return value.min > 946684800 ? value.min : 946684800; // Jan 1, 2000 as fallback
+                        }
                       },
                       yAxis: {
                         type: 'value',
                         scale: true,
+                        name: 'Locked Amount',
+                        axisLabel: {
+                          formatter: function(value: any) {
+                            return Math.round(value).toLocaleString();
+                          }
+                        }
                       },
                       series: [
                         {
-                          data: data.lockedCoins,
+                          data: data.lockedCoins.map((point: any) => {
+                            // Ensure timestamps are in milliseconds for ECharts
+                            return [point[0] * 1000, point[1]];
+                          }),
                           type: 'line',
+                          name: 'Locked Supply',
                         },
                       ],
                       tooltip: {
                         trigger: 'axis',
+                        formatter: function(params: any) {
+                          const point = params[0];
+                          // The timestamp is already in milliseconds in the mapped data
+                          const date = new Date(point.value[0]);
+
+                          // Format number with commas and drop decimal places
+                          const formattedAmount = Math.round(point.value[1]).toLocaleString();
+
+                          return `${date.toLocaleDateString()}<br/>Locked Amount: ${formattedAmount}`;
+                        }
                       },
                       dataZoom: [
                         {
                           type: 'inside',
-                          start: 90,
+                          start: 0,
                           end: 100,
                         },
                         {},

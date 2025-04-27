@@ -39,7 +39,7 @@ Once you are set, follow the steps:
 - Navigate to the `ol-fyi-local-infra` directory.
 
    ```bash
-   cd ./ol-fyi-local-infra  
+   cd ./ol-fyi-local-infra
    ```
 
 - Once you are in the `ol-fyi-local-infra` directory, run:
@@ -67,25 +67,28 @@ Running Clickhouse Migrations
 Once the Clickhouse database is up and running,
 you can connect to it and execute using:
 
-```bash 
+```bash
 docker compose exec -it clickhouse clickhouse client -h "127.0.0.1" --port 9000 -u "olfyi" --password "olfyi" -n
 ```
 
 After connecting to the clickhouse client, execute the queries to
 run the migrations stored in the `tables_local.sql` file manually.
+```bash
+docker compose exec -T clickhouse clickhouse-client --database=olfyi -n < ../api/tables_local.sql
+```
 
 Building the Transformer Binary
 ---------------------------------
 
 Navigate to the transformer directory and build the project:
 
-```bash 
+```bash
 cd ./api/transformer
 ```
 
 Build the binary:
 
-```bash 
+```bash
 cargo build
 ```
 

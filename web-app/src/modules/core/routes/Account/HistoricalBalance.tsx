@@ -14,15 +14,21 @@ const HistoricalBalance: FC<Props> = ({ address }) => {
 
   useEffect(() => {
     const load = async () => {
+      // Use relative URL which will be handled by the proxy in development
+      const apiUrl = process.env.NODE_ENV === 'development'
+        ? `/api/historical-balance/${address}`  // Will be proxied
+        : `${config.dataApiHost}/historical-balance/${address}`;
+
       const res = await axios<{
         timestamp: number[];
         balance: number[];
         unlocked: number[];
         locked: number[];
       }>({
-        url: `${config.dataApiHost}/historical-balance/${address}`,
+        url: apiUrl,
       });
 
+      debugger;
       const historicalBalance = res.data.balance.map((it, index) => [
         res.data.timestamp[index] * 1e3,
         it / 1e6,

@@ -13,17 +13,17 @@ const localhost = {
 
 const configMap = new Map<string, Config>([
   [
-    '0l.fyi',
+    'scan.openlibra.world',
     {
-      apiHost: 'https://api.0l.fyi',
-      dataApiHost: 'https://data.0l.fyi',
+      apiHost: 'https://api.scan.openlibra.world',
+      dataApiHost: 'https://data.scan.openlibra.world',
     },
   ],
   [
-    'canary.0l.fyi',
+    'canary.scan.openlibra.world',
     {
-      apiHost: 'https://canary.api.0l.fyi',
-      dataApiHost: 'https://canary.data.0l.fyi',
+      apiHost: 'https://canary.api.scan.openlibra.world',
+      dataApiHost: 'https://canary.data.scan.openlibra.world',
     },
   ],
   [
@@ -36,4 +36,4 @@ const configMap = new Map<string, Config>([
   ],
 ]);
 
-export const config = configMap.get(window.location.hostname) ?? configMap.get('0l.fyi')!;
+export const config = configMap.get(window.location.hostname) ?? configMap.get('scan.openlibra.world')!;

@@ -45,7 +45,7 @@ interface TransactionOptions {
 export class PosteroWallet implements AdapterPlugin {
   public readonly name = PosteroWalletName;
 
-  public readonly url = 'https://0l.fyi';
+  public readonly url = 'https://scan.openlibra.world';
 
   public readonly icon = goose;
 
@@ -75,7 +75,7 @@ export class PosteroWallet implements AdapterPlugin {
   }
 
   public deeplinkProvider(data: { url: string }): string {
-    return `https://wallet.0l.fyi/explore?link=${data.url}`;
+    return `https://wallet.scan.openlibra.world/explore?link=${data.url}`;
   }
 
   public async connect(): Promise<AccountInfo> {

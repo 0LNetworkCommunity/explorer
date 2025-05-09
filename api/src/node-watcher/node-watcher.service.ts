@@ -12,13 +12,12 @@ import { S3Service } from '../s3/s3.service.js';
 import axios from 'axios';
 
 const LEDGER_VERSION_LIMIT = 30n;
+// Updated from https://github.com/petticur/seed-peers/blob/main/fullnode_seed_playlist.json
 const DEFAULT_UPSTREAMS = [
   '172.104.211.8',
-  '160.202.129.29',
-  '209.38.172.53',
-  '38.242.137.192',
-  '136.243.93.42',
-  '65.109.80.179',
+  '70.15.242.6',
+  '91.99.73.45',
+  '66.165.238.146',
 ];
 
 @Injectable()

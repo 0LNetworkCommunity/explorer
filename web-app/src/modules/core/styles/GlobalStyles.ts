@@ -1,5 +1,12 @@
 // src/styles/GlobalStyles.ts
 import { createGlobalStyle } from 'styled-components';
+import theme from './themes';
+
+type ThemeType = typeof theme;
+
+declare module "styled-components" {
+ export interface DefaultTheme extends ThemeType {}
+}
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');

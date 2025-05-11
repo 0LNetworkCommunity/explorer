@@ -35,7 +35,7 @@ export class ValidatorsProcessor extends WorkerHost {
 
     await this.validatorsQueue.add('updateValidatorsHandlersCache', undefined, {
       repeat: {
-        every: 12 * 60 * 60 * 1000, // 12 hours
+        every: 1 * 60 * 60 * 1000, // 1 hour -- beware if this triggers github rate limits
       },
     });
 

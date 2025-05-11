@@ -17,6 +17,7 @@ arrow = { version = "51" }
 parquet = { version = "51" }
 arrow-array = { version = "51" }
 arrow-schema = { version = "51" }
+chrono = "= 0.4.39" # chrono released a breaking change at 0.4.40 so we have to pin here. Remove this once they get their act together.
 regex = "^1.7.0"
 
 # v7

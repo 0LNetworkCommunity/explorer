@@ -250,6 +250,15 @@ export class OlService {
     }
   }
 
+  public async getReauthorized(address: Uint8Array): Promise<boolean> {
+    const res = await this.aptosClient.view({
+      function: '0x1::reauthorization::is_v8_authorized',
+      type_arguments: [],
+      arguments: [`0x${Buffer.from(address).toString('hex')}`],
+    });
+    return res[0] as boolean;
+  }
+
   public async getLatestStableVersion(): Promise<null | BN> {
     const js = this.natsService.jetstream;
     const kv = await js.views.kv('ol');

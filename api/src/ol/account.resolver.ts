@@ -36,6 +36,11 @@ export class AccountResolver {
     return this.olService.getSlowWallet(account.address);
   }
 
+  @ResolveField(() => Boolean, { nullable: true })
+  public async reauthorized(@Parent() account: Account): Promise<Boolean | null> {
+    return this.olService.getReauthorized(account.address);
+  }
+
   @ResolveField(() => PaginatedMovements)
   public async movements(
     @Parent() account: Account,

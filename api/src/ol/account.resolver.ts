@@ -37,8 +37,8 @@ export class AccountResolver {
   }
 
   @ResolveField(() => Boolean, { nullable: true })
-  public async reauthorized(@Parent() account: Account): Promise<Boolean | null> {
-    return this.olService.getReauthorized(account.address);
+  public async initialized(@Parent() account: Account): Promise<Boolean | null> {
+    return this.olService.getInitialized(account.address);
   }
 
   @ResolveField(() => PaginatedMovements)

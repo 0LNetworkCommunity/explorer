@@ -16,7 +16,7 @@ const GET_ACCOUNT = gql`
     account(address: $address) {
       address
       balance
-      reauthorized
+      initialized
       slowWallet {
         unlocked
       }

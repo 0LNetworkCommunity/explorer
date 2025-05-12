@@ -250,9 +250,9 @@ export class OlService {
     }
   }
 
-  public async getReauthorized(address: Uint8Array): Promise<boolean> {
+  public async getInitialized(address: Uint8Array): Promise<boolean> {
     const res = await this.aptosClient.view({
-      function: '0x1::reauthorization::is_v8_authorized',
+      function: '0x1::activity::is_initialized',
       type_arguments: [],
       arguments: [`0x${Buffer.from(address).toString('hex')}`],
     });

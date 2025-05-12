@@ -193,7 +193,9 @@ export class ValidatorsService {
         const balance = await this.olService.getAccountBalance(validator.address);
         const currentBid = await this.olService.getCurrentBid(validator.address);
         const slowWallet = await this.olService.getSlowWallet(validator.address);
-        const unlocked = Number(slowWallet?.unlocked);
+        // If we hit an uninitialized V7 slow wallet we need to override the unlocked balance as zero
+        const initialized = await this.olService.getInitialized(validator.address);
+        const unlocked = initialized ? Number(slowWallet?.unlocked) : Number(0);
         const addr = validator.address.toString('hex').toLocaleUpperCase();
         if (!handles.get(addr)) {
           this.logger.debug(`handles miss for address ${addr}`)

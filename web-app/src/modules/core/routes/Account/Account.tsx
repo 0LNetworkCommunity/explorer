@@ -95,8 +95,13 @@ const Account: FC<Props> = ({ accountAddress }) => {
       }
     >
 
-      // Correct balance display for un-migrated V7 slow wallets:
-      // If it's a slow wallet and not initialized then display unlocked as zero and balance as correct, add a note that account is not initialized
+      {
+        // Correct balance display for un-migrated V7 slow wallets:
+        // If it's a slow wallet and not initialized then display unlocked as zero and balance as correct,
+        // add a note that account is not initialized
+        account.initialized && ( <div>Note: this account has not been initialized</div> )
+      }
+
       <div className="grid grid-cols-12 gap-4">
         {data.account.balance !== null && (
           <div className="col-span-12 md:col-span-3 mt-5 gap-5">

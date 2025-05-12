@@ -94,6 +94,9 @@ const Account: FC<Props> = ({ accountAddress }) => {
         </div>
       }
     >
+
+      // Correct balance display for un-migrated V7 slow wallets:
+      // If it's a slow wallet and not initialized then display unlocked as zero and balance as correct, add a note that account is not initialized
       <div className="grid grid-cols-12 gap-4">
         {data.account.balance !== null && (
           <div className="col-span-12 md:col-span-3 mt-5 gap-5">
@@ -103,7 +106,11 @@ const Account: FC<Props> = ({ accountAddress }) => {
               </dt>
               <dd className="mt-1 md:text-2xl font-semibold tracking-tight text-gray-900">
                 {account.slowWallet ? (
-                  <LibraAmount>{new Decimal(account.slowWallet.unlocked)}</LibraAmount>
+                  account.initialized ? (
+                    <LibraAmount>{new Decimal(account.slowWallet.unlocked)}</LibraAmount>
+                  ) : (
+                    <LibraAmount>{new Decimal(0)}</LibraAmount>
+                  )
                 ) : (
                   <LibraAmount>{new Decimal(data.account.balance)}</LibraAmount>
                 )}
@@ -116,11 +123,17 @@ const Account: FC<Props> = ({ accountAddress }) => {
             <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
               <dt className="truncate text-sm font-medium text-gray-500">Locked</dt>
               <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
+                {account.initialized ? (
                 <LibraAmount>
-                  {new Decimal(data.account.balance).minus(
-                    new Decimal(account.slowWallet.unlocked),
-                  )}
-                </LibraAmount>
+                {new Decimal(data.account.balance).minus(
+                  new Decimal(account.slowWallet.unlocked),
+                )}
+              </LibraAmount>
+                ) : (
+                  <LibraAmount>{new Decimal(data.account.balance)}</LibraAmount>
+                )
+
+                }
               </dd>
             </div>
           </div>

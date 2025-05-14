@@ -99,6 +99,7 @@ const Account: FC<Props> = ({ accountAddress }) => {
         // Correct balance display for un-migrated V7 slow wallets:
         // If it's a slow wallet and not initialized then display unlocked as zero and balance as correct,
         // add a note that account is not initialized
+        // Also all uninitialized accounts should be displayed as if they were slow wallets.
         !account.initialized && ( <div>Note: this account has not been initialized</div> )
       }
 
@@ -107,7 +108,7 @@ const Account: FC<Props> = ({ accountAddress }) => {
           <div className="col-span-12 md:col-span-3 mt-5 gap-5">
             <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
               <dt className="truncate text-sm font-medium text-gray-500">
-                {account.slowWallet ? <>Unlocked Balance</> : <>Balance</>}
+                {account.slowWallet || !account.initialized ? <>Unlocked Balance</> : <>Balance</>}
               </dt>
               <dd className="mt-1 md:text-2xl font-semibold tracking-tight text-gray-900">
                 {account.slowWallet ? (
@@ -117,27 +118,30 @@ const Account: FC<Props> = ({ accountAddress }) => {
                     <LibraAmount>{new Decimal(0)}</LibraAmount>
                   )
                 ) : (
-                  <LibraAmount>{new Decimal(data.account.balance)}</LibraAmount>
+                  account.initialized ? (
+                    <LibraAmount>{new Decimal(data.account.balance)}</LibraAmount>
+                  ) : (
+                    <LibraAmount>{new Decimal(0)}</LibraAmount>
+                  )
                 )}
               </dd>
             </div>
           </div>
         )}
-        {data.account.balance && account.slowWallet && (
+        {data.account.balance && (account.slowWallet || !account.initialized) && (
           <div className="col-span-12 md:col-span-3 mt-5 gap-5">
             <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
               <dt className="truncate text-sm font-medium text-gray-500">Locked</dt>
               <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
-                {account.initialized ? (
+                {account.initialized && account.slowWallet ? (
                 <LibraAmount>
                 {new Decimal(data.account.balance).minus(
                   new Decimal(account.slowWallet.unlocked),
                 )}
-              </LibraAmount>
+                </LibraAmount>
                 ) : (
                   <LibraAmount>{new Decimal(data.account.balance)}</LibraAmount>
                 )
-
                 }
               </dd>
             </div>

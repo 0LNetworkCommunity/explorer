@@ -70,7 +70,7 @@ const router = createBrowserRouter([
         element: <Block />,
       },
       {
-        path: '/accounts',
+        path: '/accounts-test',
         element: <Accounts />,
       },
       {

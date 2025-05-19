@@ -14,7 +14,7 @@ const navigation = [
   { name: 'Transactions', to: '/transactions' },
   { name: 'Validators', to: '/validators' },
   { name: 'Community Wallets', to: '/community-wallets' },
-  { name: 'Accounts', to: '/accounts' },
+  // Removed until it displays correctly { name: 'Accounts', to: '/accounts' },
   { name: 'Stats', to: '/stats' },
 ];
 

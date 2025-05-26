@@ -28,7 +28,6 @@ const HistoricalBalance: FC<Props> = ({ address }) => {
         url: apiUrl,
       });
 
-      debugger;
       const historicalBalance = res.data.balance.map((it, index) => [
         res.data.timestamp[index] * 1e3,
         it / 1e6,
@@ -45,7 +44,16 @@ const HistoricalBalance: FC<Props> = ({ address }) => {
       setOptions({
         animation: false,
         color: ['#DAE1FA', '#5A68FF', '#9BAEF1'],
-        grid: { top: 28, right: 30, bottom: 80, left: 120 },
+        title: {
+          text: 'Balance over time',
+          left: 'center',
+          top: 20,
+          textStyle: {
+            fontSize: 16,
+            fontWeight: 'bold',
+          },
+        },
+        grid: { top: 60, right: 30, bottom: 80, left: 120 },
         xAxis: {
           type: 'time',
         },

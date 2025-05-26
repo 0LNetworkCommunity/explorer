@@ -29,7 +29,7 @@ export class OlController {
         SELECT
           "version",
           "balance" / 1e6 AS "value"
-        FROM "coin_balance"
+        FROM olfyi."coin_balance"
         WHERE "address" = reinterpretAsUInt256(reverse(unhex('${address}')))
         AND "coin_module" = 'libra_coin'
         ORDER BY "version" ASC
@@ -57,32 +57,32 @@ export class OlController {
         WITH
           "gen_txs" AS (
             SELECT ("version" + 1) as "version"
-            FROM "genesis_transaction"
+            FROM olfyi."genesis_transaction"
             WHERE
             "genesis_transaction"."version" IN (${versions.join(',')})
           ),
 
           "txs" AS (
             SELECT "timestamp", "version"
-            FROM "block_metadata_transaction"
+            FROM olfyi."block_metadata_transaction"
             WHERE "version" IN (SELECT "version" FROM "gen_txs")
 
             UNION ALL
 
             SELECT "timestamp", "version"
-            FROM "state_checkpoint_transaction"
+            FROM olfyi."state_checkpoint_transaction"
             WHERE "version" IN (SELECT "version" FROM "gen_txs")
 
             UNION ALL
 
             SELECT "timestamp", "version"
-            FROM "user_transaction"
+            FROM olfyi."user_transaction"
             WHERE "version" IN (SELECT "version" FROM "gen_txs")
 
             UNION ALL
 
             SELECT "timestamp", "version"
-            FROM "script"
+            FROM olfyi."script"
             WHERE "version" IN (SELECT "version" FROM "gen_txs")
           ),
 
@@ -95,25 +95,25 @@ export class OlController {
             UNION ALL
 
             SELECT "timestamp", "version"
-            FROM "block_metadata_transaction"
+            FROM olfyi."block_metadata_transaction"
             WHERE "version" IN (${versions.join(',')})
 
             UNION ALL
 
             SELECT "timestamp", "version"
-            FROM "state_checkpoint_transaction"
+            FROM olfyi."state_checkpoint_transaction"
             WHERE "version" IN (${versions.join(',')})
 
             UNION ALL
 
             SELECT "timestamp", "version"
-            FROM "user_transaction"
+            FROM olfyi."user_transaction"
             WHERE "version" IN (${versions.join(',')})
 
             UNION ALL
 
             SELECT "timestamp", "version"
-            FROM "script"
+            FROM olfyi."script"
             WHERE "version" IN (${versions.join(',')})
           )
 
@@ -148,7 +148,7 @@ export class OlController {
           SELECT
             "version",
             "unlocked" / 1e6 AS "unlocked"
-          FROM "slow_wallet"
+          FROM olfyi."slow_wallet"
           WHERE "address" = reinterpretAsUInt256(reverse(unhex('${address}')))
           ORDER BY "version" ASC
         `;

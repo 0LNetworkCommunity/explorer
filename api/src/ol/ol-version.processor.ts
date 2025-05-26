@@ -377,13 +377,13 @@ export class OlVersionProcessor extends WorkerHost implements OnModuleInit {
         SELECT DISTINCT hex("address") as "address"
         FROM (
           SELECT "address"
-            FROM "coin_balance"
+            FROM olfyi."coin_balance"
             WHERE "version" = {version:UInt64}
 
           UNION ALL
 
           SELECT "address"
-            FROM "slow_wallet"
+            FROM olfyi."slow_wallet"
             WHERE "version" = {version:UInt64}
         )
       `,

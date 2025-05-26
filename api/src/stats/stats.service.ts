@@ -175,7 +175,7 @@ export class StatsService {
               ),
               -1
             ) AS "entry"
-          FROM "coin_balance"
+          FROM olfyi."coin_balance"
           WHERE
             has(
               arrayMap(
@@ -291,7 +291,7 @@ export class StatsService {
           nominal_reward / 1e6 AS nominalReward,
           net_reward / 1e6 AS netReward,
           clearing_bid AS clearingBid
-        FROM consensus_reward
+        FROM olfyi.consensus_reward
         ORDER BY version ASC
       `;
 
@@ -374,7 +374,7 @@ export class StatsService {
         SELECT
           "version",
           divide("lifetime_burned", 1000000) AS "value"
-        FROM "burn_counter"
+        FROM olfyi."burn_counter"
         ORDER BY "version" ASC
       `;
 
@@ -429,7 +429,7 @@ export class StatsService {
         SELECT
           hex(SW.address) AS address,
           max(SW.unlocked) / 1e6 AS unlocked_balance
-        FROM slow_wallet SW
+        FROM olfyi.slow_wallet SW
         GROUP BY SW.address
       `;
 
@@ -460,7 +460,7 @@ export class StatsService {
           SELECT
             hex(address) AS address,
             argMax(balance, version) / 1e6 AS latest_balance
-          FROM coin_balance
+          FROM olfyi.coin_balance
           WHERE coin_module = 'libra_coin' AND address IN (${formattedAddresses})
           GROUP BY address
         `;
@@ -525,32 +525,32 @@ export class StatsService {
 
         "gen_txs" AS (
           SELECT ("version" + 1) as "version"
-          FROM "genesis_transaction"
+          FROM olfyi."genesis_transaction"
           WHERE
           "genesis_transaction"."version" IN (${versionsString})
         ),
 
         "txs" AS (
           SELECT "timestamp", "version"
-          FROM "block_metadata_transaction"
+          FROM olfyi."block_metadata_transaction"
           WHERE "version" IN (SELECT "version" FROM "gen_txs")
 
           UNION ALL
 
           SELECT "timestamp", "version"
-          FROM "state_checkpoint_transaction"
+          FROM olfyi."state_checkpoint_transaction"
           WHERE "version" IN (SELECT "version" FROM "gen_txs")
 
           UNION ALL
 
           SELECT "timestamp", "version"
-          FROM "user_transaction"
+          FROM olfyi."user_transaction"
           WHERE "version" IN (SELECT "version" FROM "gen_txs")
 
           UNION ALL
 
           SELECT "timestamp", "version"
-          FROM "script"
+          FROM olfyi."script"
           WHERE "version" IN (SELECT "version" FROM "gen_txs")
 
         ),
@@ -564,25 +564,25 @@ export class StatsService {
           UNION ALL
 
           SELECT "timestamp", "version"
-          FROM "block_metadata_transaction"
+          FROM olfyi."block_metadata_transaction"
           WHERE "version" IN (${versionsString})
 
           UNION ALL
 
           SELECT "timestamp", "version"
-          FROM "state_checkpoint_transaction"
+          FROM olfyi."state_checkpoint_transaction"
           WHERE "version" IN (${versionsString})
 
           UNION ALL
 
           SELECT "timestamp", "version"
-          FROM "user_transaction"
+          FROM olfyi."user_transaction"
           WHERE "version" IN (${versionsString})
 
           UNION ALL
 
           SELECT "timestamp", "version"
-          FROM "script"
+          FROM olfyi."script"
           WHERE "version" IN (${versionsString})
         )
 
@@ -614,7 +614,7 @@ export class StatsService {
               SELECT
                 "version",
                 "list_count" AS "value"
-              FROM "slow_wallet_list"
+              FROM olfyi."slow_wallet_list"
               ORDER BY "version" ASC
             `,
         format: 'JSONEachRow',
@@ -667,7 +667,7 @@ export class StatsService {
         SELECT
           version,
           address
-        FROM coin_balance
+        FROM olfyi.coin_balance
         WHERE coin_module = 'libra_coin'
         ORDER BY version ASC
       `;
@@ -770,7 +770,7 @@ export class StatsService {
         SELECT
           version,
           address
-        FROM coin_balance
+        FROM olfyi.coin_balance
         WHERE coin_module = 'libra_coin'
         ORDER BY version ASC
       `;
@@ -843,7 +843,7 @@ export class StatsService {
     try {
       const query = `
         SELECT COUNT(DISTINCT address) AS unique_accounts
-        FROM coin_balance
+        FROM olfyi.coin_balance
         WHERE coin_module = 'libra_coin'
       `;
 
@@ -935,7 +935,7 @@ export class StatsService {
         address,
         argMax(balance, version) AS latest_balance,
         max(version) AS latest_version
-      FROM coin_balance
+      FROM olfyi.coin_balance
       WHERE coin_module = 'libra_coin'
       GROUP BY address
     `;
@@ -985,7 +985,7 @@ export class StatsService {
       SELECT
         hex(SW.address) AS address,
         max(SW.unlocked) / 1e6 AS unlocked_balance
-      FROM slow_wallet SW
+      FROM olfyi.slow_wallet SW
       GROUP BY SW.address
     `;
 
@@ -1052,7 +1052,7 @@ export class StatsService {
           hex(address) AS address,
           argMax(balance, version) / 1e6 AS balance,
           max(version) AS latest_version
-        FROM coin_balance
+        FROM olfyi.coin_balance
         WHERE coin_module = 'libra_coin'
         GROUP BY address
       `;
@@ -1197,7 +1197,7 @@ export class StatsService {
     try {
       const query = `
         SELECT DISTINCT hex(address) AS address
-        FROM slow_wallet
+        FROM olfyi.slow_wallet
       `;
 
       const resultSet = await this.clickhouseService.client.query({
@@ -1301,7 +1301,7 @@ export class StatsService {
         SELECT
           address,
           argMax(balance, version) AS latest_balance
-        FROM coin_balance
+        FROM olfyi.coin_balance
         WHERE coin_module = 'libra_coin'
         GROUP BY address
       `;
@@ -1334,7 +1334,7 @@ export class StatsService {
         SELECT
           hex(address) AS address,
           argMax(unlocked, version) / 1e6 AS unlocked_balance
-        FROM slow_wallet
+        FROM olfyi.slow_wallet
         GROUP BY address
       `;
 

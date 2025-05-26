@@ -47,7 +47,7 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
           "arguments",
           "gas_used",
           "gas_unit_price"
-        FROM "user_transaction"
+        FROM olfyi."user_transaction"
         WHERE
           "version" IN {versions:Array(UInt64)}
       `,
@@ -94,7 +94,7 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
             "version",
             "epoch",
             hex("hash") as "hash"
-          FROM "block_metadata_transaction"
+          FROM olfyi."block_metadata_transaction"
           WHERE
             "version" IN {versions:Array(UInt64)}
         `,
@@ -139,7 +139,7 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
           "version",
           "success",
           hex("hash") as "hash"
-        FROM "script"
+        FROM olfyi."script"
         WHERE
           "version" IN {versions:Array(UInt64)}
       `,
@@ -178,7 +178,7 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
         SELECT
           "version",
           hex("hash") as "hash"
-        FROM genesis_transaction
+        FROM olfyi.genesis_transaction
         WHERE
           "version" IN {versions:Array(UInt64)}
       `,
@@ -212,7 +212,7 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
       query: `
         WITH
           "hashes" AS (
-            SELECT 
+            SELECT
               arrayJoin(
                 arrayMap(
                   x -> reinterpretAsUInt256(reverse(unhex(x))),
@@ -235,9 +235,9 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
           "gas_unit_price"
         FROM "hashes"
         INNER JOIN
-          "user_transaction"
+          olfyi."user_transaction"
         ON
-          "user_transaction"."hash" = "hashes"."hash"
+          olfyi."user_transaction"."hash" = "hashes"."hash"
       `,
       query_params: {
         hashes: hashes.map((hash) => Buffer.from(hash).toString('hex')),
@@ -275,7 +275,7 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
         WITH "txs" AS (
           (
             SELECT "timestamp"
-            FROM "user_transaction"
+            FROM olfyi."user_transaction"
             WHERE "version" = {version:UInt64}
             ORDER BY "version" DESC
             LIMIT 1
@@ -285,7 +285,7 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
 
           (
             SELECT "timestamp"
-            FROM "block_metadata_transaction"
+            FROM olfyi."block_metadata_transaction"
             WHERE "version" = {version:UInt64}
             ORDER BY "version" DESC
             LIMIT 1
@@ -305,7 +305,7 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
 
           (
             SELECT "timestamp"
-            FROM "script"
+            FROM olfyi."script"
             WHERE "version" = {version:UInt64}
             ORDER BY "version" DESC
             LIMIT 1

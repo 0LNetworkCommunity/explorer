@@ -1,2 +1,6 @@
 node_modules
 *service_account*.json
+
+
+# LLM stuff
+.github/copilot-instructions.md

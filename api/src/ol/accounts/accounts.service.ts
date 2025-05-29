@@ -26,7 +26,7 @@ export class AccountsService {
           SELECT
             hex(address) AS address,
             max(balance) / 1e6 AS balance
-          FROM coin_balance
+          FROM olfyi.coin_balance
           WHERE coin_module = 'libra_coin'
           GROUP BY address
         )

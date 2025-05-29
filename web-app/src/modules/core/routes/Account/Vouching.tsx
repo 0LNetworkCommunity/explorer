@@ -151,6 +151,16 @@ const Vouching: FC<Props> = ({ address }) => {
 
               return `${roleText}<br/>Address: ${params.data.value}${epochInfo}${clickInfo}`;
             },
+            backgroundColor: 'rgba(50, 50, 50, 0.95)',
+            borderColor: 'transparent',
+            borderRadius: 12,
+            textStyle: {
+              color: '#ffffff',
+              fontSize: 12,
+            },
+            padding: [8, 12],
+            confine: true,
+            extraCssText: 'box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);',
           },
           legend: {
             data: [

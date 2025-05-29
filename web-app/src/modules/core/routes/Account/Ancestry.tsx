@@ -110,6 +110,16 @@ const Ancestry: FC<Props> = ({ address }) => {
               const isCurrentAccount = params.data.value === address;
               return `${isCurrentAccount ? 'Current Account' : 'Ancestor'}: ${params.data.value}${!isCurrentAccount ? '<br/>Click to view account' : ''}`;
             },
+            backgroundColor: 'rgba(50, 50, 50, 0.95)',
+            borderColor: 'transparent',
+            borderRadius: 12,
+            textStyle: {
+              color: '#ffffff',
+              fontSize: 12,
+            },
+            padding: [8, 12],
+            confine: true,
+            extraCssText: 'box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);',
           },
         });
       } catch (error) {

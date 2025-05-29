@@ -10,6 +10,13 @@ import { redisConnectionOptions } from '../redis/redis.service.js';
 import loadConfig from '../config/config.js';
 import { StatsProcessor } from './stats.processor.js';
 
+// Import new services
+import { StatsUtils } from './utils/stats.utils.js';
+import { AccountsService } from './services/accounts.service.js';
+import { LiquidityService } from './services/liquidity.service.js';
+import { TimeSeriesService } from './services/time-series.service.js';
+import { TopAccountsService } from './services/top-accounts.service.js';
+
 const config = loadConfig();
 
 @Module({
@@ -19,12 +26,20 @@ const config = loadConfig();
 
     BullModule.registerQueue({
       name: 'stats',
-      // Use redisConnectionOptions instead of redisClient
       connection: redisConnectionOptions,
-      // ...other options...
     }),
   ],
-  providers: [StatsService, StatsResolver, ...(config.cacheEnabled ? [StatsProcessor] : [])],
+  providers: [
+    StatsService,
+    StatsResolver,
+    // Add new specialized services
+    StatsUtils,
+    AccountsService,
+    LiquidityService,
+    TimeSeriesService,
+    TopAccountsService,
+    ...(config.cacheEnabled ? [StatsProcessor] : [])
+  ],
   exports: [StatsService],
   controllers: [StatsController],
 })

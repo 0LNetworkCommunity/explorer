@@ -152,7 +152,6 @@ export class StatsService {
 
     // Further filter to only include one entry per day
     const lockedCoins = this.filterUniqueDays(timestampedCoins);
-    console.log(`Further reduced to ${lockedCoins.length} data points after filtering by day`);
 
     const res: Stats = {
       // charts

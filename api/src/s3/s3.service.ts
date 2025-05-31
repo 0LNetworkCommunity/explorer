@@ -19,9 +19,7 @@ export class S3Service {
   public readonly client: S3Client;
   private readonly bucket: string;
   private readonly storageClass: string;
-  // Increase timeout for large files - 20 minutes instead of 10
   private readonly uploadTimeoutMs = 20 * 60 * 1000;
-  // Maximum number of upload retries
   private readonly maxRetries = 3;
 
   public constructor(configService: ConfigService) {
@@ -68,7 +66,7 @@ export class S3Service {
 
       // If we haven't exceeded max retries, try again with exponential backoff
       if (retryCount < this.maxRetries) {
-        const backoff = Math.pow(2, retryCount) * 5000; // 5s, 10s, 20s
+        const backoff = Math.pow(2, retryCount) * 5000; // 5s, 10s, 20s...
         this.logger.warn(
           `Upload of ${dest} failed after ${duration}s: ${error.message}. Retrying in ${backoff/1000}s (${retryCount+1}/${this.maxRetries})`,
         );

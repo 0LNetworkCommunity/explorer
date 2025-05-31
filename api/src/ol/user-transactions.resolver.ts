@@ -14,7 +14,7 @@ export class UserTransactionsResolver {
   async userTransactionsCount(): Promise<number> {
     const result = await this.clickhouseService.client
       .query({
-        query: 'SELECT COUNT(*) as "total" FROM olfyi.user_transaction',
+        query: 'SELECT COUNT(*) as "total" FROM user_transaction',
         format: 'JSONEachRow',
       })
       .then((res) => res.json<{ total: string }[]>());
@@ -43,7 +43,7 @@ export class UserTransactionsResolver {
     const [total, items] = await Promise.all([
       this.clickhouseService.client
         .query({
-          query: 'SELECT COUNT(*) as "total" FROM olfyi.user_transaction',
+          query: 'SELECT COUNT(*) as "total" FROM user_transaction',
           format: 'JSONEachRow',
         })
         .then((res) => res.json<{ total: string }>())
@@ -70,7 +70,7 @@ export class UserTransactionsResolver {
               "module_name",
               "function_name",
               "timestamp"
-            FROM olfyi."user_transaction"
+            FROM "user_transaction"
             ORDER BY "version" ${order === 'ASC' ? 'ASC' : 'DESC'}
             LIMIT {limit:Int32} OFFSET {offset:Int32}
           `,

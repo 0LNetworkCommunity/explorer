@@ -69,7 +69,7 @@ export class WalletSubscriptionService {
                 ),
                 -1
               ) AS "entry"
-            FROM olfyi."coin_balance"
+            FROM "coin_balance"
             WHERE
               "version" = {version: UInt64}
             AND

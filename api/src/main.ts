@@ -1,25 +1,24 @@
+import 'dotenv/config';
+import process from 'node:process';
 import { NestFactory } from '@nestjs/core';
-import express from 'express';
-import { ExpressAdapter } from '@nestjs/platform-express';
+import { LogLevel } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app/app.module.js';
 
-async function bootstrap() {
-  // Create Express instance
-  const expressApp = express();
+function makeLogLevelList(): LogLevel[] {
+  const allLogLevels: LogLevel[] = ['verbose', 'debug', 'log', 'warn', 'error', 'fatal'];
+  const configuredLevel = (process.env.NESTJS_LOG_LEVEL || 'log') as LogLevel;
 
-  // These Express-specific settings should be applied to the Express instance
-  expressApp.disable('x-powered-by');
-  expressApp.set('trust proxy', 1);
+  return allLogLevels.slice(
+    allLogLevels.indexOf(configuredLevel),
+    allLogLevels.length,
+  );
+}
 
-  // Create NestJS app with the Express adapter
-  const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
-
-  // Get environment from config service
-  const configService = app.get(ConfigService);
+function configureCors(app: NestExpressApplication, configService: ConfigService) {
   const environment = configService.get('NODE_ENV') || 'development';
 
-  // Enable CORS only for development environment
   if (environment === 'development') {
     app.enableCors({
       origin: true,
@@ -28,19 +27,44 @@ async function bootstrap() {
     });
     console.log('CORS enabled for development environment');
   } else {
-    // For production, either disable CORS or use a strict configuration
+    const allowedOrigins = configService.get('ALLOWED_ORIGINS');
     app.enableCors({
-      origin: configService.get('ALLOWED_ORIGINS')?.split(',') || false,
+      origin: allowedOrigins ? allowedOrigins.split(',') : false,
       methods: 'GET,HEAD,POST,OPTIONS',
       credentials: false,
     });
     console.log(`CORS configured for ${environment} environment`);
   }
+}
+
+async function bootstrap() {
+  const app = await NestFactory.create<NestExpressApplication>(
+    AppModule,
+    {
+      logger: makeLogLevelList()
+    }
+  );
+
+  const configService = app.get(ConfigService);
+
+  // Enable graceful shutdown
+  app.enableShutdownHooks();
+
+  app.disable('x-powered-by');
+  app.set('trust proxy', 1);
+
+  // Environment-aware CORS configuration
+  configureCors(app, configService);
 
   const port = configService.get('PORT') || 3000;
 
   await app.listen(port);
-  console.log(`Application is running on: http://localhost:${port}`);
+
+  const environment = configService.get('NODE_ENV') || 'development';
+  console.log(`Application running on port ${port} in ${environment} mode`);
 }
 
-bootstrap();
+bootstrap().catch(error => {
+  console.error('Application failed to start:', error);
+  process.exit(1);
+});

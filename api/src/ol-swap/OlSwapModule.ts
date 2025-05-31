@@ -21,9 +21,7 @@ if (roles.includes('swap-processor')) {
 
     BullModule.registerQueue({
       name: 'ol-swap',
-      // Use redisConnectionOptions instead of redisClient
       connection: redisConnectionOptions,
-      // ...other options...
     }),
   ],
   providers: workers,

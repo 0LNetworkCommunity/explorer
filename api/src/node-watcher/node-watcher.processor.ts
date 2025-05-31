@@ -47,7 +47,7 @@ export class NodeWatcherProcessor extends WorkerHost implements OnModuleInit {
       this.logger.log('Cleaning up active, waiting, delayed, and stalled jobs');
 
       // Use obliterate to completely clean the queue if there are issues
-      // This is a more aggressive approach but helps resolve lock renewal problems
+      // Aggressive but helps resolve lock renewal problems
       if (counts.active > 0 || counts.stalled > 0) {
         this.logger.warn(`Found active or stalled jobs, using obliterate to clean queue`);
         await this.nodeWatcherQueue.obliterate({ force: true });

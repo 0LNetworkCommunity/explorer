@@ -10,7 +10,6 @@ import { redisConnectionOptions } from '../redis/redis.service.js';
 import loadConfig from '../config/config.js';
 import { StatsProcessor } from './stats.processor.js';
 
-// Import new services
 import { StatsUtils } from './utils/stats.utils.js';
 import { AccountsService } from './services/accounts.service.js';
 import { LiquidityService } from './services/liquidity.service.js';
@@ -32,7 +31,6 @@ const config = loadConfig();
   providers: [
     StatsService,
     StatsResolver,
-    // Add new specialized services
     StatsUtils,
     AccountsService,
     LiquidityService,

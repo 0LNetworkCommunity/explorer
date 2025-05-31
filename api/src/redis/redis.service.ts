@@ -18,7 +18,7 @@ export function createRedisConnectionOptions(configService: ConfigService): Conn
     // BullMQ specific settings for reliability
     enableReadyCheck: true,
     retryStrategy: (times) => {
-      // conservative retry strategy
+      // retry strategy
       const delay = Math.min(Math.pow(2, times) * 500, 30000); // Start with shorter delays
       if (times > 50) {
         logger.warn(`Redis retry attempts exceeding 50, consider checking server status`);
@@ -36,12 +36,12 @@ export class SafeRedisClient {
   private connected = false;
   private connecting = false;
   private readonly maxRetries = 3;
-  private readonly operationTimeout = 5000; // 5 seconds timeout for operations
+  private readonly operationTimeout = 5000; // 5 seconds
 
   constructor(private readonly configService: ConfigService) {
     const host = this.configService.get('REDIS_HOST') || 'localhost';
     const port = parseInt(this.configService.get('REDIS_PORT') || '6379', 10);
-    const password = this.configService.get('REDIS_PASSWORD'); // Get password from env if set
+    const password = this.configService.get('REDIS_PASSWORD');
 
     this.logger.log(`Initializing Redis client for ${host}:${port}`);
 
@@ -49,12 +49,11 @@ export class SafeRedisClient {
       socket: {
         host,
         port,
-        connectTimeout: 10000, // 10 seconds connect timeout
+        connectTimeout: 10000, // 10 seconds
         reconnectStrategy: (retries) => {
-          // More conservative retry approach
           if (retries > 10) {
-            // After 10 retries, slow down significantly
-            const delay = Math.min(5000 + (retries - 10) * 1000, 30000);
+            // After 5 retries, slow down significantly
+            const delay = Math.min(5000 + (retries - 5) * 1000, 30000);
             this.logger.log(`Redis reconnecting in ${delay}ms (attempt ${retries})`);
             return delay;
           }
@@ -217,7 +216,7 @@ export class SafeRedisClient {
   }
 }
 
-// Create a singleton instance
+// Singleton instance
 export const redisClient = new SafeRedisClient(new ConfigService());
 
 // Export connection options for BullMQ - this should be used in all queue registrations

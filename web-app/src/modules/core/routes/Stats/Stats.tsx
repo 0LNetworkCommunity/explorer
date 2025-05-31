@@ -25,7 +25,6 @@ const Coinstats = () => {
 
         const data = await getData();
 
-        // No need to transform lockedCoins data here since it's now properly formatted in the backend
         setData(data);
       } catch (error) {
         console.error(error);
@@ -247,7 +246,7 @@ const Coinstats = () => {
                       dataZoom: [
                         {
                           type: 'inside',
-                          start: 90,
+                          start: 0,
                           end: 100,
                         },
                         {},

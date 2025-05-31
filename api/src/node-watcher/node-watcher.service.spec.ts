@@ -17,12 +17,7 @@ describe('NodeWatcherService', () => {
   beforeEach(async () => {
     // Create mock implementations
     olServiceMock = {};
-    prismaServiceMock = {
-      node: {
-        findMany: jest.fn().mockResolvedValue([]),
-        update: jest.fn().mockResolvedValue({}),
-      },
-    };
+    prismaServiceMock = {};
     s3ServiceMock = {
       upload: jest.fn().mockResolvedValue({}),
     };
@@ -50,6 +45,4 @@ describe('NodeWatcherService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
-
-  // Add additional tests here for your service methods
 });

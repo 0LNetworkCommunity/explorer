@@ -250,7 +250,7 @@ export class OlService {
     }
   }
 
-  public async getIsInitialized(address: Uint8Array): Promise<boolean> {
+  public async getInitialized(address: Uint8Array): Promise<boolean> {
     const res = await this.aptosClient.view({
       function: '0x1::activity::is_initialized',
       type_arguments: [],

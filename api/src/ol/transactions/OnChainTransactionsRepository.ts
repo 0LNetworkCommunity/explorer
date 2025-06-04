@@ -212,7 +212,7 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
       query: `
         WITH
           "hashes" AS (
-            SELECT
+            SELECT 
               arrayJoin(
                 arrayMap(
                   x -> reinterpretAsUInt256(reverse(unhex(x))),

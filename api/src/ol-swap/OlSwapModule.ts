@@ -3,8 +3,7 @@ import process from 'node:process';
 import { BullModule } from '@nestjs/bullmq';
 import { Module, Type } from '@nestjs/common';
 
-import { redisConnectionOptions } from '../redis/redis.service.js';
-
+import { redisClient } from '../redis/redis.service.js';
 import { ClickhouseModule } from '../clickhouse/clickhouse.module.js';
 import { OlSwapProcessor } from './OlSwapProcessor.js';
 
@@ -21,7 +20,7 @@ if (roles.includes('swap-processor')) {
 
     BullModule.registerQueue({
       name: 'ol-swap',
-      connection: redisConnectionOptions,
+      connection: redisClient,
     }),
   ],
   providers: workers,

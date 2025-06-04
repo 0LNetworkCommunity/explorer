@@ -1,7 +1,7 @@
 import { Module, Type } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 
-import { redisConnectionOptions } from '../redis/redis.service.js';
+import { redisClient } from '../redis/redis.service.js';
 import { WalletSubscriptionService } from './wallet-subscription.service.js';
 import { WalletSubscriptionResolver } from './wallet-subscription.resolver.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
@@ -24,7 +24,7 @@ if (roles.includes('wallet-subscription-processor')) {
 
     BullModule.registerQueue({
       name: 'wallet-subscription',
-      connection: redisConnectionOptions,
+      connection: redisClient,
     }),
   ],
   providers: [WalletSubscriptionResolver, WalletSubscriptionService, ...workers],

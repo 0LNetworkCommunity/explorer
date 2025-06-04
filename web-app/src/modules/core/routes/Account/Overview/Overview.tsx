@@ -5,8 +5,6 @@ import { Types } from 'aptos';
 import useAptos from '../../../../aptos';
 import HistoricalBalance from '../HistoricalBalance';
 import Movements from '../Movements';
-import Ancestry from '../Ancestry';
-import Vouching from '../Vouching';
 
 const Overview: FC = () => {
   const { accountAddress } = useParams();
@@ -31,8 +29,6 @@ const Overview: FC = () => {
             </div>
             <div className="col-span-12 md:col-span-5 space-y-6">
               <HistoricalBalance address={accountAddress!} />
-              <Ancestry address={accountAddress!} />
-              <Vouching address={accountAddress!} />
             </div>
           </div>
         </div>

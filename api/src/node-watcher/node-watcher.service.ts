@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 import { Readable } from 'node:stream';
-import path from 'node:path';
 
 import _ from 'lodash';
 import { Injectable, Logger } from '@nestjs/common';
@@ -18,7 +17,7 @@ const DEFAULT_UPSTREAMS = [
   '172.104.211.8',
   '70.15.242.6',
   '91.99.73.45',
-  '66.165.238.146'
+  '66.165.238.146',
 ];
 
 @Injectable()
@@ -31,10 +30,6 @@ export class NodeWatcherService {
     private readonly s3Service: S3Service,
   ) {}
 
-  /**
-   * Get a list of upstream nodes that are currently online
-   * Returns the most up-to-date nodes based on their ledger version
-   */
   public async getUpstreams(): Promise<string[]> {
     let nodes = await this.prisma.node.findMany({
       where: {
@@ -111,12 +106,7 @@ export class NodeWatcherService {
     }
   }
 
-  /**
-   * Updates validator node locations in the database using GeoIP lookup
-   */
   public async updateValidatorLocations() {
-    this.logger.log('Updating validator locations');
-
     await this.downloadGeoIpDb();
     const res = await this.prisma.$queryRaw<{ ip: string }[]>`
       SELECT "validatorIp" as "ip"
@@ -173,6 +163,7 @@ export class NodeWatcherService {
         "longitude" = EXCLUDED."longitude",
         "city" = EXCLUDED."city",
         "country" = EXCLUDED."country"
+    
     `;
 
     await this.prisma.$queryRawUnsafe(query, ...params);
@@ -183,16 +174,9 @@ export class NodeWatcherService {
         ${nodeIps.map((it) => `'${it}'`).join(',')}
       )
     `);
-
-    this.logger.log(`Updated location data for ${nodes.length} nodes`);
   }
 
-  /**
-   * Updates the list of validators in the database
-   */
   public async updateValidatorsList() {
-    this.logger.log('Updating validators list');
-
     const validatorSet = await this.olService.getValidatorSet();
     const validators: {
       address: Buffer;
@@ -250,50 +234,28 @@ export class NodeWatcherService {
         ${validatorAddresses.map((it) => `'\\x${it.toString('hex')}'`).join(',')}
       )
     `);
-
-    this.logger.log(`Updated ${validators.length} validators`);
   }
 
-  /**
-   * Check nodes for availability and updates their status in the database
-   * This is the main method for monitoring node health
-   */
   public async checkNodes() {
-    this.logger.log('Starting to check nodes for availability');
-
-    try {
-      // Fetch nodes to check, ordered by least recently checked
-      const nodes = await this.prisma.node.findMany({
-        orderBy: {
-          lastCheck: {
-            sort: 'asc',
-            nulls: 'first',
-          },
+    const nodes = await this.prisma.node.findMany({
+      orderBy: {
+        lastCheck: {
+          sort: 'asc',
+          nulls: 'first',
         },
-        take: 10,
-      });
-
-      const checkResults = await Promise.allSettled(nodes.map((node) => this.checkNode(node.ip)));
-      const successfulNodes = checkResults.filter(r => r.status === 'fulfilled').length;
-
-      this.logger.log(`Checked ${nodes.length} nodes, ${successfulNodes} are responsive`);
-    } catch (error) {
-      this.logger.error(`Error in node check process: ${error.message}`);
-      throw error;
-    }
+      },
+      take: 10,
+    });
+    await Promise.allSettled(nodes.map((node) => this.checkNode(node.ip)));
   }
 
-  /**
-   * Check a specific node and update its status in the database
-   * Tests connectivity and retrieves current ledger version
-   */
   private async checkNode(ip: string) {
     const now = new Date();
     try {
       const res = await axios({
         method: 'GET',
         url: `http://${ip}:8080/v1`,
-        signal: AbortSignal.timeout(5000), // Aborts request after 5 seconds
+        signal: AbortSignal.timeout(5000), //Aborts request after 5 seconds
         validateStatus: (status) => status === 200,
       });
 
@@ -307,9 +269,6 @@ export class NodeWatcherService {
           ledgerVersion: res.data.ledger_version,
         },
       });
-
-      this.logger.debug(`Node ${ip} is up, ledger version: ${res.data.ledger_version}`);
-      return { success: true, ip, data: res.data };
     } catch (error) {
       await this.prisma.node.update({
         where: {
@@ -320,9 +279,6 @@ export class NodeWatcherService {
           lastCheck: now,
         },
       });
-
-      this.logger.debug(`Node ${ip} is down: ${error.message}`);
-      return { success: false, ip, error: error.message };
     }
   }
 }

@@ -39,7 +39,7 @@ ENV CLICKHOUSE_PASSWORD="********************************"
 ENV CLICKHOUSE_PORT="8123"
 ENV CLICKHOUSE_DATABASE="olfyi"
 
-ENV DATA_API_HOST="https://data.0l.fyi"
+ENV DATA_API_HOST="https://data.scan.openlibra.world"
 
 ENV PORT="3000"
 

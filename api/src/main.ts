@@ -3,24 +3,41 @@ import process from 'node:process';
 import { NestFactory } from '@nestjs/core';
 import { LogLevel } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app/app.module.js';
-import getConfig from './config/config.js';
 
 function makeLogLevelList(): LogLevel[] {
-  // From: https://github.com/nestjs/nest/blob/master/packages/common/services/logger.service.ts#L9
   const allLogLevels: LogLevel[] = ['verbose', 'debug', 'log', 'warn', 'error', 'fatal'];
-  // From: https://stackoverflow.com/a/78585135/1701505
-  const levels = allLogLevels.slice(
-    // TODO: possibly the env var shoud come via dotenv, or Config?
-    allLogLevels.indexOf((process.env.NESTJS_LOG_LEVEL || 'log') as LogLevel),
+  const configuredLevel = (process.env.NESTJS_LOG_LEVEL || 'log') as LogLevel;
+
+  return allLogLevels.slice(
+    allLogLevels.indexOf(configuredLevel),
     allLogLevels.length,
   );
-  return levels;
+}
+
+function configureCors(app: NestExpressApplication, configService: ConfigService) {
+  const environment = configService.get('NODE_ENV') || 'development';
+
+  if (environment === 'development') {
+    app.enableCors({
+      origin: true,
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+      credentials: true,
+    });
+    console.log('CORS enabled for development environment');
+  } else {
+    const allowedOrigins = configService.get('ALLOWED_ORIGINS');
+    app.enableCors({
+      origin: allowedOrigins ? allowedOrigins.split(',') : false,
+      methods: 'GET,HEAD,POST,OPTIONS',
+      credentials: false,
+    });
+    console.log(`CORS configured for ${environment} environment`);
+  }
 }
 
 async function bootstrap() {
-  const config = getConfig();
-
   const app = await NestFactory.create<NestExpressApplication>(
     AppModule,
     {
@@ -28,12 +45,26 @@ async function bootstrap() {
     }
   );
 
+  const configService = app.get(ConfigService);
+
+  // Enable graceful shutdown
   app.enableShutdownHooks();
 
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
-  app.enableCors();
 
-  await app.listen(config.port);
+  // Environment-aware CORS configuration
+  configureCors(app, configService);
+
+  const port = configService.get('PORT') || 3000;
+
+  await app.listen(port);
+
+  const environment = configService.get('NODE_ENV') || 'development';
+  console.log(`Application running on port ${port} in ${environment} mode`);
 }
-bootstrap();
+
+bootstrap().catch(error => {
+  console.error('Application failed to start:', error);
+  process.exit(1);
+});

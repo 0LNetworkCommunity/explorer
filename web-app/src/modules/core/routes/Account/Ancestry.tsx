@@ -39,9 +39,6 @@ const Ancestry: FC<Props> = ({ address }) => {
         // Create the full ancestry chain including current account
         const fullAncestryChain = [...ancestryTree, address];
 
-        // Get base URL for account links
-        const baseUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}`;
-
         // Transform data for ECharts graph visualization
         const nodes = fullAncestryChain.map((addr, index) => ({
           name: `${addr.slice(0, 8)}...`,

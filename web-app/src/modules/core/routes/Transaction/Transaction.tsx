@@ -34,7 +34,7 @@ const Transaction: FC = () => {
           } catch (txError) {
             console.error('Error loading transaction by hash:', txError);
 
-            // If transaction not found, check if it's a valid account address
+            // If transaction not found, check if it's a valid account address (v6 onward format)
             try {
               await aptos.getAccount(version);
               // If account exists, redirect to account page

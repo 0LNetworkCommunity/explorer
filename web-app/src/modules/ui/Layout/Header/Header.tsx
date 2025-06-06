@@ -203,7 +203,7 @@ const Header: React.FC = () => {
                 id="search"
                 className={clsx(
                   'ring-1',
-                  'block w-full rounded-md border-0 bg-white py-1.5 pl-10 pr-3', // Increased vertical padding
+                  'block w-full rounded-md border-0 bg-white py-1.5 pl-10 pr-3',
                   'text-gray-900 text-sm',
                   'focus:ring-2 ring-white ring-offset-2 ring-offset-primary-600',
                 )}

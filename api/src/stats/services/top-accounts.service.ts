@@ -55,7 +55,7 @@ export class TopAccountsService {
         SELECT
           address,
           argMax(balance, version) AS latest_balance
-        FROM olfyi.coin_balance
+        FROM coin_balance
         WHERE coin_module = 'libra_coin'
         GROUP BY address
       `;
@@ -86,7 +86,7 @@ export class TopAccountsService {
         SELECT
           hex(address) AS address,
           argMax(unlocked, version) / 1e6 AS unlocked_balance
-        FROM olfyi.slow_wallet
+        FROM slow_wallet
         GROUP BY address
       `;
 

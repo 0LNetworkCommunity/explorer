@@ -23,7 +23,7 @@ export class TimeSeriesService {
               SELECT
                 "version",
                 "list_count" AS "value"
-              FROM olfyi."slow_wallet_list"
+              FROM "slow_wallet_list"
               ORDER BY "version" ASC
             `,
         format: 'JSONEachRow',
@@ -76,7 +76,7 @@ export class TimeSeriesService {
         SELECT
           "version",
           divide("lifetime_burned", 1000000) AS "value"
-        FROM olfyi."burn_counter"
+        FROM "burn_counter"
         ORDER BY "version" ASC
       `;
 
@@ -136,7 +136,7 @@ export class TimeSeriesService {
           nominal_reward / 1e6 AS nominalReward,
           net_reward / 1e6 AS netReward,
           clearing_bid AS clearingBid
-        FROM olfyi.consensus_reward
+        FROM consensus_reward
         ORDER BY version ASC
       `;
 
@@ -287,7 +287,7 @@ export class TimeSeriesService {
         SELECT
           hex(SW.address) AS address,
           max(SW.unlocked) / 1e6 AS unlocked_balance
-        FROM olfyi.slow_wallet SW
+        FROM slow_wallet SW
         GROUP BY SW.address
       `;
 
@@ -318,7 +318,7 @@ export class TimeSeriesService {
           SELECT
             hex(address) AS address,
             argMax(balance, version) / 1e6 AS latest_balance
-          FROM olfyi.coin_balance
+          FROM coin_balance
           WHERE coin_module = 'libra_coin' AND address IN (${formattedAddresses})
           GROUP BY address
         `;
@@ -388,7 +388,7 @@ export class TimeSeriesService {
               ),
               -1
             ) AS "entry"
-          FROM olfyi."coin_balance"
+          FROM "coin_balance"
           WHERE
             has(
               arrayMap(

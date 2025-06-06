@@ -42,7 +42,7 @@ export class LiquidityService {
         address,
         argMax(balance, version) AS latest_balance,
         max(version) AS latest_version
-      FROM olfyi.coin_balance
+      FROM coin_balance
       WHERE coin_module = 'libra_coin'
       GROUP BY address
     `;
@@ -88,7 +88,7 @@ export class LiquidityService {
       SELECT
         hex(SW.address) AS address,
         max(SW.unlocked) / 1e6 AS unlocked_balance
-      FROM olfyi.slow_wallet SW
+      FROM slow_wallet SW
       GROUP BY SW.address
     `;
 
@@ -145,7 +145,7 @@ export class LiquidityService {
           hex(address) AS address,
           argMax(balance, version) / 1e6 AS balance,
           max(version) AS latest_version
-        FROM olfyi.coin_balance
+        FROM coin_balance
         WHERE coin_module = 'libra_coin'
         GROUP BY address
       `;
@@ -272,7 +272,7 @@ export class LiquidityService {
     try {
       const query = `
         SELECT DISTINCT hex(address) AS address
-        FROM olfyi.slow_wallet
+        FROM slow_wallet
       `;
 
       const resultSet = await this.clickhouseService.client.query({
@@ -312,7 +312,7 @@ export class LiquidityService {
               ),
               -1
             ) AS "entry"
-          FROM olfyi."coin_balance"
+          FROM "coin_balance"
           WHERE
             has(
               arrayMap(

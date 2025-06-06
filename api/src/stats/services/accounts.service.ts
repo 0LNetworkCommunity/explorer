@@ -105,7 +105,7 @@ export class AccountsService {
         SELECT
           version,
           address
-        FROM olfyi.coin_balance
+        FROM coin_balance
         WHERE coin_module = 'libra_coin'
         ORDER BY version ASC
       `;
@@ -179,7 +179,7 @@ export class AccountsService {
     try {
       const query = `
         SELECT COUNT(DISTINCT address) AS unique_accounts
-        FROM olfyi.coin_balance
+        FROM coin_balance
         WHERE coin_module = 'libra_coin'
       `;
 

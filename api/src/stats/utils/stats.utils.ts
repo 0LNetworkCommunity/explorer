@@ -29,31 +29,31 @@ export class StatsUtils {
       WITH
         "gen_txs" AS (
           SELECT ("version" + 1) as "version"
-          FROM olfyi."genesis_transaction"
+          FROM "genesis_transaction"
           WHERE
           "genesis_transaction"."version" IN (${versionsString})
         ),
         "txs" AS (
           SELECT "timestamp", "version"
-          FROM olfyi."block_metadata_transaction"
+          FROM "block_metadata_transaction"
           WHERE "version" IN (SELECT "version" FROM "gen_txs")
 
           UNION ALL
 
           SELECT "timestamp", "version"
-          FROM olfyi."state_checkpoint_transaction"
+          FROM "state_checkpoint_transaction"
           WHERE "version" IN (SELECT "version" FROM "gen_txs")
 
           UNION ALL
 
           SELECT "timestamp", "version"
-          FROM olfyi."user_transaction"
+          FROM "user_transaction"
           WHERE "version" IN (SELECT "version" FROM "gen_txs")
 
           UNION ALL
 
           SELECT "timestamp", "version"
-          FROM olfyi."script"
+          FROM "script"
           WHERE "version" IN (SELECT "version" FROM "gen_txs")
         ),
         "tx_timestamps" AS (
@@ -65,25 +65,25 @@ export class StatsUtils {
           UNION ALL
 
           SELECT "timestamp", "version"
-          FROM olfyi."block_metadata_transaction"
+          FROM "block_metadata_transaction"
           WHERE "version" IN (${versionsString})
 
           UNION ALL
 
           SELECT "timestamp", "version"
-          FROM olfyi."state_checkpoint_transaction"
+          FROM "state_checkpoint_transaction"
           WHERE "version" IN (${versionsString})
 
           UNION ALL
 
           SELECT "timestamp", "version"
-          FROM olfyi."user_transaction"
+          FROM "user_transaction"
           WHERE "version" IN (${versionsString})
 
           UNION ALL
 
           SELECT "timestamp", "version"
-          FROM olfyi."script"
+          FROM "script"
           WHERE "version" IN (${versionsString})
         )
 

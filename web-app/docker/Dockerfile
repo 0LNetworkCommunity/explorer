@@ -8,7 +8,7 @@ WORKDIR /app
 ARG CI_COMMIT_SHA=""
 ENV VITE_CI_COMMIT_SHA $CI_COMMIT_SHA
 
-COPY ./
+COPY ./ ./
 # RUN npm ci
 RUN npm install
 

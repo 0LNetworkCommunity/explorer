@@ -20,7 +20,7 @@ const AccountDoesntExist: FC<Props> = ({ address }) => {
           The crypto account associated with the specified address (
           <span className="font-mono">{address}</span>) could not be found.
           <br />
-          This may be because the account was recently created and our system is still updating.
+          This may be because the account was recently created and our system is still indexing it.
           <br />
           <br />
           <span className="text-sm font-medium text-red-800 text-xl">

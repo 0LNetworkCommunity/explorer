@@ -16,27 +16,6 @@ function makeLogLevelList(): LogLevel[] {
   );
 }
 
-function configureCors(app: NestExpressApplication, configService: ConfigService) {
-  const environment = configService.get('NODE_ENV') || 'development';
-
-  if (environment === 'development') {
-    app.enableCors({
-      origin: true,
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-      credentials: true,
-    });
-    console.log('CORS enabled for development environment');
-  } else {
-    const allowedOrigins = configService.get('ALLOWED_ORIGINS');
-    app.enableCors({
-      origin: allowedOrigins ? allowedOrigins.split(',') : false,
-      methods: 'GET,HEAD,POST,OPTIONS',
-      credentials: false,
-    });
-    console.log(`CORS configured for ${environment} environment`);
-  }
-}
-
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(
     AppModule,
@@ -52,9 +31,6 @@ async function bootstrap() {
 
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
-
-  // Environment-aware CORS configuration
-  configureCors(app, configService);
 
   const port = configService.get('PORT') || 3000;
 

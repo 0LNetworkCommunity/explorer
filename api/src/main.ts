@@ -31,6 +31,7 @@ async function bootstrap() {
 
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
+  app.enableCors();
 
   const port = configService.get('PORT') || 3000;
 

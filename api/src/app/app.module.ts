@@ -7,6 +7,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import config from '../config/config.js';
 import { AppService } from './app.service.js';
 import { ClickhouseModule } from '../clickhouse/clickhouse.module.js';
+import { Neo4jModule } from '../neo4j/neo4j.module.js';
 import { OlModule } from '../ol/ol.module.js';
 import { S3Module } from '../s3/s3.module.js';
 import { NodeWatcherModule } from '../node-watcher/node-watcher.module.js';
@@ -40,6 +41,7 @@ import { MultiSigModule } from '../multi-sig/multi-sig.module.js';
 
     S3Module,
     ClickhouseModule,
+    Neo4jModule,
     OlModule,
     NodeWatcherModule,
     StatsModule,

@@ -59,6 +59,7 @@ const Account: FC<Props> = ({ accountAddress }) => {
     { name: 'Transactions', to: `/accounts/${accountAddress}/transactions` },
     { name: 'Resources', to: `/accounts/${accountAddress}/resources` },
     { name: 'Modules', to: `/accounts/${accountAddress}/modules` },
+    { name: 'Connections', to: `/accounts/${accountAddress}/connections` }, // Add new Connections tab
   ];
 
   const { data, error, loading } = useQuery<IAccountInfo>(GET_ACCOUNT, {

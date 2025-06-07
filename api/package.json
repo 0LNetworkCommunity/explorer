@@ -50,6 +50,8 @@
     "bluebird": "^3.7.2",
     "bn.js": "^5.2.1",
     "bullmq": "^5.8.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
     "csv-stringify": "^6.5.0",
     "d3-array": "^3.2.4",
     "decimal.js": "^10.4.3",

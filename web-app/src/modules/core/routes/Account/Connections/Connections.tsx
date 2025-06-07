@@ -5,12 +5,34 @@ import ReactECharts from 'echarts-for-react';
 
 import neo4jService from '../../../../../services/neo4j.service';
 
+interface Link {
+  source: string;
+  target: string;
+  lineStyle: {
+    width: number;
+    color: string;
+    curveness: number;
+    type?: 'solid' | 'dashed';
+  };
+  tooltip: {
+    formatter: () => string;
+  };
+}
+
+interface RelationColors {
+  CREATED: string;
+  AUTOPAY: string;
+  TRANSFERRED: string;
+  VOUCHED: string;
+  DEFAULT: string;
+  [key: string]: string; // Add index signature
+}
+
 const Connections: FC = () => {
   const { accountAddress } = useParams();
   const [options, setOptions] = useState<any>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTypes, setSelectedTypes] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const load = async () => {
@@ -32,7 +54,7 @@ const Connections: FC = () => {
 
         // Find the current account node
         const currentAccountNode = connectionData.nodes.find(node =>
-          node.address.toUpperCase() === sanitizedAddress.toUpperCase()
+          node.address && node.address.toUpperCase() === sanitizedAddress.toUpperCase()
         );
 
         if (!currentAccountNode) {
@@ -41,8 +63,7 @@ const Connections: FC = () => {
           return;
         }
 
-        // Define colors for different relationship types
-        const relationColors = {
+        const relationColors: RelationColors = {
           'CREATED': '#6B7280', // Gray for CREATED
           'AUTOPAY': '#10B981', // Green for AUTOPAY
           'TRANSFERRED': '#EF4444', // Red for TRANSFERRED
@@ -50,7 +71,7 @@ const Connections: FC = () => {
           'DEFAULT': '#6B7280', // Default gray for unknown types
         };
 
-        // Find the minimum and maximum balance values for node size scaling
+        // Calculate min/max balance for node size scaling
         let minBalance = Number.MAX_VALUE;
         let maxBalance = 0;
 
@@ -59,7 +80,6 @@ const Connections: FC = () => {
           if (node.balance < minBalance) minBalance = node.balance;
         });
 
-        // Prevent division by zero if all balances are the same
         const balanceRange = maxBalance - minBalance > 0 ? maxBalance - minBalance : 1;
 
         // List of commswap addresses (colored green)
@@ -69,37 +89,29 @@ const Connections: FC = () => {
           'C6E97E7EF03A9162BEF775C9A77848DF83AFAF68350F0AFECB237BED495FBED7'
         ];
 
-        // Extract unique relationship types and initialize them all as selected
-        const types = Array.from(new Set(connectionData.relationships.map(rel => rel.type)));
-        const initialSelectedTypes = types.reduce((acc, type) => {
-          acc[type] = true;
-          return acc;
-        }, {} as Record<string, boolean>);
-        setSelectedTypes(initialSelectedTypes);
-
-        // Prepare nodes data
+        // Process nodes
         const nodes = connectionData.nodes.map(node => {
+          // Skip nodes without an address
+          if (!node.address) {
+            return null;
+          }
+
           const isCurrentAccount = node.address.toUpperCase() === sanitizedAddress.toUpperCase();
           const isSpecialNode = commswapAddresses.includes(node.address.toUpperCase());
 
-          // Calculate node size based on normalized balance (range 10-25)
           const normalizedSize = isCurrentAccount
             ? 25
             : 10 + ((node.balance - minBalance) / balanceRange) * 15;
 
           return {
             id: node.id,
-            name: isCurrentAccount ? 'Current Account' : node.address.slice(0, 8) + '...',
-            value: node.address,
+            name: node.address.slice(0, 8) + '...',
             symbolSize: normalizedSize,
             itemStyle: {
               color: isSpecialNode ? '#10B981' : (isCurrentAccount ? '#5A68FF' : '#64748B'),
             },
-            label: {
-              show: false,
-            },
             tooltip: {
-              formatter: (params: any) => {
+              formatter: () => {
                 return `Address: ${node.address}<br/>` +
                        `Balance: ${node.balance.toLocaleString()} Ƚ<br/>` +
                        `Locked: ${node.locked.toLocaleString()} Ƚ<br/>` +
@@ -108,47 +120,41 @@ const Connections: FC = () => {
                        (isCurrentAccount ? '' : 'Click to view account');
               }
             },
-            category: isSpecialNode ? 2 : (isCurrentAccount ? 0 : 1),
+            value: node.address,
             fixed: false
           };
+        }).filter(Boolean); // Remove null nodes
+
+        // Process edges and handle multiple relationships
+        const links: Link[] = [];
+        const edgeCounts: Record<string, number> = {};
+
+        // Calculate max transfer amount for scaling edge width
+        let maxTransferAmount = 0;
+        connectionData.relationships.forEach(rel => {
+          if (rel.type === 'TRANSFERRED' && typeof rel.amount === 'number' && rel.amount > maxTransferAmount) {
+            maxTransferAmount = rel.amount;
+          }
         });
 
-        // Calculate max transfer amount for edge thickness scaling
-        let maxTransferAmount = 0;
-        const transferRelationships = connectionData.relationships.filter(rel =>
-          rel.type === 'TRANSFERRED' && typeof rel.amount === 'number'
-        );
+        // Create edges with properly styled relationships
+        connectionData.relationships.forEach(rel => {
+          const key = `${rel.startNodeId}-${rel.endNodeId}`;
+          edgeCounts[key] = (edgeCounts[key] || 0) + 1;
 
-        if (transferRelationships.length > 0) {
-          maxTransferAmount = Math.max(...transferRelationships.map(rel => rel.amount));
-        }
-
-        // Handle multiple edges between the same nodes
-        const multiEdges = new Map<string, number>();
-
-        // Prepare edges data with unique relationship/edge IDs
-        const edges = connectionData.relationships.map((rel, index) => {
-          // Create a unique key for this edge pair to track multiple edges
-          const edgeKey = `${rel.startNodeId}-${rel.endNodeId}`;
-
-          // Count occurrences of this edge pair
-          const count = multiEdges.get(edgeKey) || 0;
-          multiEdges.set(edgeKey, count + 1);
-
-          // Adjust curveness based on the count of edges between these nodes
-          const curveness = count * 0.1 + 0.1;
-
-          // Calculate line width based on amount for TRANSFERRED relationships
+          // Calculate line width for TRANSFERRED relationships
           const lineWidth = rel.type === 'TRANSFERRED' && typeof rel.amount === 'number' && maxTransferAmount > 0
             ? 1 + (rel.amount / maxTransferAmount) * 4
             : 1;
 
-          // Set color based on relationship type
-          const color = relationColors[rel.type as keyof typeof relationColors] || relationColors.DEFAULT;
+          // Calculate curveness based on number of edges between these nodes
+          const curveness = edgeCounts[key] > 1 ? 0.2 + ((edgeCounts[key] - 1) * 0.1) : 0.2;
 
-          return {
-            id: `edge-${index}`, // Ensure each edge has a unique ID
-            name: rel.type,      // Important: name must match legend data
+          // Set edge color based on relationship type
+          // Safely access the relationColors object
+          const color = rel.type in relationColors ? relationColors[rel.type] : relationColors.DEFAULT;
+
+          links.push({
             source: rel.startNodeId,
             target: rel.endNodeId,
             lineStyle: {
@@ -156,10 +162,9 @@ const Connections: FC = () => {
               color: color,
               curveness: curveness,
               type: rel.type === 'CREATED' ? 'dashed' : 'solid',
-              opacity: 0.8,
             },
             tooltip: {
-              formatter: (params: any) => {
+              formatter: () => {
                 let tooltip = `Type: ${rel.type}<br/>`;
 
                 if (rel.amount) {
@@ -171,7 +176,6 @@ const Connections: FC = () => {
                 }
 
                 if (rel.timestamp) {
-                  // Format date with proper timezone handling
                   const date = new Date(rel.timestamp * 1000);
                   tooltip += `Date: ${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
                 }
@@ -179,29 +183,11 @@ const Connections: FC = () => {
                 return tooltip;
               }
             }
-          };
+          });
         });
 
-        // Prepare legend data
-        const legendData = types.map(type => ({
-          name: type,
-          icon: 'circle',
-          itemStyle: {
-            color: relationColors[type as keyof typeof relationColors] || relationColors.DEFAULT
-          }
-        }));
-
-        // Create chart options
+        // Create the chart options
         setOptions({
-          title: {
-            text: '',
-            left: 'center',
-            top: 10,
-            textStyle: {
-              fontSize: 16,
-              fontWeight: 'bold',
-            },
-          },
           tooltip: {
             trigger: 'item',
             backgroundColor: 'rgba(50, 50, 50, 0.95)',
@@ -214,49 +200,29 @@ const Connections: FC = () => {
             padding: [8, 12],
             confine: true,
           },
-          legend: {
-            data: legendData,
-            bottom: 10,
-            icon: 'circle',
-            textStyle: {
-              fontSize: 10,
+          series: [{
+            type: 'graph',
+            layout: 'force',
+            data: nodes,
+            links: links,
+            roam: true,
+            draggable: true,
+            label: {
+              show: false,
             },
-            selected: initialSelectedTypes,
-            selector: false,
-          },
-          series: [
-            {
-              type: 'graph',
-              layout: 'force',
-              data: nodes,
-              links: edges,
-              categories: [
-                { name: 'Current Account' },
-                { name: 'Connected Account' },
-                { name: 'Special Account' },
-              ],
-              roam: true,
-              draggable: true,
-              label: {
-                show: false,
-              },
-              force: {
-                repulsion: 200,
-                edgeLength: [80, 150],
-                gravity: 0.1,
-                layoutAnimation: true,
-                friction: 0.6,
-              },
-              edgeSymbol: ['none', 'arrow'],
-              edgeSymbolSize: [0, 6],
-              emphasis: {
-                focus: 'adjacency',
-                lineStyle: {
-                  width: 2,
-                },
-              },
+            force: {
+              repulsion: 200,
+              edgeLength: [80, 150],
+              gravity: 0.1,
+              layoutAnimation: true,
+              friction: 0.6
+            },
+            edgeSymbol: ['none', 'arrow'],
+            edgeSymbolSize: [0, 6],
+            emphasis: {
+              focus: 'adjacency',
             }
-          ],
+          }]
         });
       } catch (error) {
         console.error('Failed to load connection data:', error);
@@ -269,26 +235,30 @@ const Connections: FC = () => {
     load();
   }, [accountAddress]);
 
-  // Chart events
+  // Handle clicks on nodes (for navigation to that account)
   const onChartEvents = {
-    'click': (params: any) => {
-      // Handle click on nodes to navigate to account page
-      if (params.data && params.data.value && params.data.category !== 0) {
-        const baseUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}`;
-        const accountUrl = `${baseUrl}/accounts/${params.data.value}`;
-        window.open(accountUrl, '_blank');
+    'click': (eventParams: any) => {
+      if (eventParams.dataType === 'node' && eventParams.data && eventParams.data.value) {
+        const currentAddress = accountAddress?.startsWith('0x')
+          ? accountAddress.substring(2).toUpperCase()
+          : accountAddress?.toUpperCase();
+
+        // Don't navigate when clicking on current account node
+        if (eventParams.data.value.toUpperCase() !== currentAddress) {
+          const baseUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}`;
+          const accountUrl = `${baseUrl}/accounts/${eventParams.data.value}`;
+          window.open(accountUrl, '_blank');
+        }
       }
     },
-    'legendselectchanged': (params: any) => {
-      setSelectedTypes(params.selected);
-    },
-    'dragstart': (params: any) => {
-      if (params.data) {
-        params.data.fixed = true;
+    'dragstart': (eventParams: any) => {
+      if (eventParams.data) {
+        eventParams.data.fixed = true;
       }
     }
   };
 
+  // Display states
   if (loading) {
     return (
       <div className="w-full rounded-md shadow overflow-hidden h-[600px] ring-1 ring-black ring-opacity-5 bg-white">
@@ -331,7 +301,7 @@ const Connections: FC = () => {
         option={options}
         style={{ height: '100%', width: '100%' }}
         onEvents={onChartEvents}
-        notMerge={true}
+        opts={{ renderer: 'canvas' }}
       />
     </div>
   );

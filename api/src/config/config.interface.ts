@@ -10,6 +10,7 @@ export interface Config {
   apn?: ApnConfig;
   firebase?: FirebaseConfig;
   nats: NatsConfig;
+  neo4j: Neo4jConfig;
 }
 
 export interface InfoConfig {
@@ -55,4 +56,10 @@ export interface FirebaseConfig {
 
 export interface NatsConfig {
   servers: string;
+}
+
+export interface Neo4jConfig {
+  url: string;
+  username: string;
+  password: string;
 }

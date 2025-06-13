@@ -4,7 +4,7 @@ import { Link, NavLink } from 'react-router-dom';
 import useAptos from '../../../../aptos';
 import {
   useLedgerInfo,
-  useTotalSupply,
+  useCirculatingSupply,
   useValidatorSet,
   useAccountsStats,
   useTotalTransactions,
@@ -56,7 +56,7 @@ const Stats: FC = () => {
   const [nextEpoch, setNextEpoch] = useState<Date>();
   const [nextEpochDate, setNextEpochDate] = useState<string>();
 
-  const totalSupply = useTotalSupply();
+  const circulatingSupply = useCirculatingSupply();
   const ledgerInfo = useLedgerInfo();
   const accountsStats = useAccountsStats();
   const totalTransactions = useTotalTransactions();
@@ -114,13 +114,13 @@ const Stats: FC = () => {
         </div>
 
         <div className="flex flex-col bg-[#F5F5F5] p-5 gap-2">
-          <span className="text-sm font-medium text-[#525252]">Total Supply</span>
+          <span className="text-sm font-medium text-[#525252]">Circulating Supply</span>
           <span
             className={`text-2xl md:text-3xl tracking-tight text-[#141414] h-8 rounded ${
-              !totalSupply ? 'animate-pulse bg-gray-300 text-2xl space-y-4' : ''
+              !circulatingSupply ? 'animate-pulse bg-gray-300 text-2xl space-y-4' : ''
             }`}
           >
-            {totalSupply ? `${d3Format('.3f')(Math.floor(totalSupply.amount / 1e6) / 1e3)}B` : null}
+            {circulatingSupply ? `${d3Format('.3f')(Math.floor(circulatingSupply.amount / 1e3) / 1e3)}M` : null}
           </span>
         </div>
 

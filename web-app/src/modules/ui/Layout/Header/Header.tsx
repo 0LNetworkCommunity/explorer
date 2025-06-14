@@ -60,7 +60,7 @@ const Header: React.FC = () => {
 
       // Default case: treat as an account address
       const addr = normalizeAddress(input);
-      navigate(`/accounts/${encodeURIComponent(addr)}/resources`);
+      navigate(`/accounts/${encodeURIComponent(addr)}`);
       setSearchAddress('');
       if (searchInput.current) {
         searchInput.current.blur();

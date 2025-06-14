@@ -16,6 +16,9 @@ export interface ClickhouseQueryResponse<T> {
   statistics: { elapsed: number; rows_read: number; bytes_read: number };
 }
 
+// Version 0's timestamp is calculated by subtracting the interval between epoch 2 and 3 from epoch 2's timestamp
+const V0_TIMESTAMP = 1701203279;
+
 @Injectable()
 export class ClickhouseService implements OnModuleInit, OnApplicationShutdown {
   private insertQueries = new Map<string, string>();
@@ -147,6 +150,119 @@ export class ClickhouseService implements OnModuleInit, OnApplicationShutdown {
     } catch (error) {
       const duration = Date.now() - startTime;
       this.logger.error(`Failed to insert parquet file ${queryName} after ${duration}ms: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Convert transaction versions to timestamps using the same method as ol.controller.ts
+   * @param versions Array of transaction versions to convert
+   * @returns Mapping of versions to timestamps (in seconds)
+   */
+  public async convertVersionsToTimestamps(versions: number[]): Promise<Map<number, number>> {
+    if (!versions || versions.length === 0) {
+      return new Map();
+    }
+
+    try {
+      // Using the same query approach as in ol.controller.ts
+      const timestampQuery = `
+        WITH
+          "gen_txs" AS (
+            SELECT ("version" + 1) as "version"
+            FROM "genesis_transaction"
+            WHERE
+            "genesis_transaction"."version" IN (${versions.join(',')})
+          ),
+
+          "txs" AS (
+            SELECT "timestamp", "version"
+            FROM "block_metadata_transaction"
+            WHERE "version" IN (SELECT "version" FROM "gen_txs")
+
+            UNION ALL
+
+            SELECT "timestamp", "version"
+            FROM "state_checkpoint_transaction"
+            WHERE "version" IN (SELECT "version" FROM "gen_txs")
+
+            UNION ALL
+
+            SELECT "timestamp", "version"
+            FROM "user_transaction"
+            WHERE "version" IN (SELECT "version" FROM "gen_txs")
+
+            UNION ALL
+
+            SELECT "timestamp", "version"
+            FROM "script"
+            WHERE "version" IN (SELECT "version" FROM "gen_txs")
+          ),
+
+          "tx_timestamps" AS (
+            SELECT
+              toUInt64("txs"."timestamp" - 1) as "timestamp",
+              toUInt64("version" - 1) as "version"
+            FROM "txs"
+
+            UNION ALL
+
+            SELECT "timestamp", "version"
+            FROM "block_metadata_transaction"
+            WHERE "version" IN (${versions.join(',')})
+
+            UNION ALL
+
+            SELECT "timestamp", "version"
+            FROM "state_checkpoint_transaction"
+            WHERE "version" IN (${versions.join(',')})
+
+            UNION ALL
+
+            SELECT "timestamp", "version"
+            FROM "user_transaction"
+            WHERE "version" IN (${versions.join(',')})
+
+            UNION ALL
+
+            SELECT "timestamp", "version"
+            FROM "script"
+            WHERE "version" IN (${versions.join(',')})
+          )
+
+          SELECT "timestamp", "version"
+          FROM "tx_timestamps"
+          ORDER BY "version" ASC
+      `;
+
+      const resultSet = await this.client.query({
+        query: timestampQuery,
+        format: 'JSONEachRow',
+      });
+
+      const rows = await resultSet.json<{
+        timestamp: string;
+        version: string;
+      }>();
+
+      // Create a map of version to timestamp (converted to seconds)
+      const versionToTimestampMap = new Map<number, number>();
+
+      rows.forEach(row => {
+        const version = parseInt(row.version, 10);
+        // Convert from microseconds to seconds
+        const timestamp = Math.floor(parseInt(row.timestamp, 10) / 1_000_000);
+        versionToTimestampMap.set(version, timestamp);
+      });
+
+      // Handle version 0 with hardcoded timestamp if needed
+      if (versions.includes(0) && !versionToTimestampMap.has(0)) {
+        versionToTimestampMap.set(0, V0_TIMESTAMP);
+      }
+
+      return versionToTimestampMap;
+    } catch (error) {
+      this.logger.error(`Error converting versions to timestamps: ${error.message}`);
       throw error;
     }
   }

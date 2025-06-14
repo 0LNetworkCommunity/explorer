@@ -8,6 +8,7 @@ import AccountOverview from './routes/Account/Overview';
 import AccountTransactions from './routes/Account/UserTransactions';
 import AccountResources from './routes/Account/Resources';
 import AccountModules from './routes/Account/Modules';
+import AccountConnections from './routes/Account/Connections';
 import Block from './routes/Block';
 import Root from './Root';
 import Validators from './routes/Validators';
@@ -54,6 +55,10 @@ const router = createBrowserRouter([
                 element: <Module />,
               },
             ],
+          },
+          {
+            path: 'connections',
+            element: <AccountConnections />,
           },
         ],
       },

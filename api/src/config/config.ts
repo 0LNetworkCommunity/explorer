@@ -57,6 +57,12 @@ export default (): Config => {
     nats: {
       servers: ENV.NATS_SERVERS!,
     },
+
+    neo4j: {
+      url: ENV.NEO4J_URL || 'bolt://localhost:7687',
+      username: ENV.NEO4J_USERNAME || 'neo4j',
+      password: ENV.NEO4J_PASSWORD || 'password',
+    },
   };
 
   return config;

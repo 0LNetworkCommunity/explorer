@@ -114,30 +114,22 @@ export const useTotalSupply = (): Money | undefined => {
   return value;
 };
 
-// Code below copied from api/src/ol/ol.service.ts
-// TODO: fold this function into a common library used by both web-app and api
 export const useCirculatingSupply = (): Money | undefined => {
   const aptos = useAptos();
   const [value, setValue] = useState<Money>();
 
   useEffect(() => {
     const load = async () => {
-      const supplyStats = await aptos.view({
-        function: '0x1::supply::get_stats',
+      const supplyResponse = await aptos.view({
+        function: '0x1::supply::get_circulating',
         type_arguments: [],
         arguments: [],
       });
 
-      const supplyInfo =  {
-        totalSupply: parseFloat(supplyStats[0] as string) / 1e6,
-        slowLockedSupply: parseFloat(supplyStats[1] as string) / 1e6,
-        cwSupply: parseFloat(supplyStats[2] as string) / 1e6,
-        infraEscrowSupply: parseFloat(supplyStats[3] as string) / 1e6,
-        circulatingSupply: parseFloat(supplyStats[4] as string) / 1e6,
-      }
+      const circulatingSupply = parseFloat(supplyResponse[0] as string) / 1e6
 
       setValue({
-        amount: supplyInfo.circulatingSupply,
+        amount: circulatingSupply,
         symbol: "LIBRA",
       });
     };

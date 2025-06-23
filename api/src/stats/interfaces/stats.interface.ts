@@ -14,6 +14,7 @@ export interface SupplyStats {
   cwSupply: number;
   infraEscrowSupply: number;
   circulatingSupply: number;
+  unlockedSupply: number;
 }
 
 export interface WalletBalance {
@@ -60,6 +61,7 @@ export interface Stats {
     avgTotalVestingTime: BinRange[];
   };
   circulatingSupply: RelativeValue;
+  unlockedSupply: RelativeValue;
   totalBurned: RelativeValue;
   communityWalletsBalance: RelativeValue;
   currentSlowWalletsCount: number;

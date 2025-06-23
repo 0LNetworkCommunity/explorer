@@ -24,6 +24,7 @@ export interface SupplyStats {
   cwSupply: number;
   infraEscrowSupply: number;
   circulatingSupply: number;
+  unlockedSupply: number;
 }
 
 export interface ConsensusReward {

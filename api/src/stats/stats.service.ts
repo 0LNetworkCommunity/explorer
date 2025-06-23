@@ -79,6 +79,11 @@ export class StatsService {
       percentage: parseFloat(((supplyStats.circulatingSupply / totalSupply) * 100).toFixed(3)),
     };
 
+    const unlockedSupply = {
+      nominal: parseFloat(supplyStats.unlockedSupply.toFixed(3)),
+      percentage: parseFloat(((supplyStats.unlockedSupply / totalSupply) * 100).toFixed(3)),
+    };
+
     const communityWalletsBalance = {
       nominal: parseFloat(supplyStats.cwSupply.toFixed(3)),
       percentage: parseFloat(((supplyStats.cwSupply / totalSupply) * 100).toFixed(3)),
@@ -169,6 +174,7 @@ export class StatsService {
 
       // kpis
       circulatingSupply,
+      unlockedSupply,
       totalBurned,
       communityWalletsBalance,
       currentSlowWalletsCount: slowWalletsCountOverTime[slowWalletsCountOverTime.length - 1].value,
@@ -267,7 +273,9 @@ export class StatsService {
     communityCapital: NameValue[];
   }> {
     const totalSupply = supplyStats.totalSupply;
+    const unlocked = supplyStats.unlockedSupply;
     const circulating = supplyStats.circulatingSupply;
+
     const communityWalletsBalances = supplyStats.cwSupply;
     const infraEscrowBalance = supplyStats.infraEscrowSupply;
     const slowLocked = supplyStats.slowLockedSupply;
@@ -277,12 +285,13 @@ export class StatsService {
         { name: 'Community Wallets', value: communityWalletsBalances },
         { name: 'Locked', value: slowLocked },
         { name: 'Infrastructure escrow', value: infraEscrowBalance },
-        { name: 'Circulating', value: circulating },
+        { name: 'Unlocked', value: unlocked },
+        { name: 'Borrowable', value: circulating - unlocked },
       ];
 
       const individualsCapital = [
         { name: 'Locked', value: slowLocked },
-        { name: 'Circulating', value: circulating },
+        { name: 'Unlocked', value: unlocked },
       ];
 
       const communityCapital = [

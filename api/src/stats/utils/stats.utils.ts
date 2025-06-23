@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ClickhouseService } from '../../clickhouse/clickhouse.service.js';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class StatsUtils {
   constructor(private readonly clickhouseService: ClickhouseService) {}
+  private readonly logger = new Logger("StatsUtils");
 
   chunkArray<T>(array: T[], chunkSize: number): T[][] {
     const results: T[][] = [];

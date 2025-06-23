@@ -279,14 +279,15 @@ export class StatsService {
     const communityWalletsBalances = supplyStats.cwSupply;
     const infraEscrowBalance = supplyStats.infraEscrowSupply;
     const slowLocked = supplyStats.slowLockedSupply;
+    const cwCredit = circulating - unlocked;
 
     try {
       const supplyAllocation = [
-        { name: 'Community Wallets', value: communityWalletsBalances },
+        { name: 'Community Wallets net of credit', value: communityWalletsBalances - cwCredit },
         { name: 'Locked', value: slowLocked },
         { name: 'Infrastructure escrow', value: infraEscrowBalance },
         { name: 'Unlocked', value: unlocked },
-        { name: 'Borrowable', value: circulating - unlocked },
+        { name: 'CW credit', value: cwCredit },
       ];
 
       const individualsCapital = [

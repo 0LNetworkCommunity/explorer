@@ -19,7 +19,7 @@ const Overview: FC = () => {
       setAccount(account);
     };
     load();
-  }, []);
+  }, [accountAddress]);
 
   return (
     <div>

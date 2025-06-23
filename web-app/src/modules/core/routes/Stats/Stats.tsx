@@ -63,7 +63,7 @@ const Coinstats = () => {
             <dl className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-3">
               <ChartComponent
                 type="PieChart"
-                title="Individuals capital"
+                title="User allocation"
                 data={data.individualsCapital}
               />
 

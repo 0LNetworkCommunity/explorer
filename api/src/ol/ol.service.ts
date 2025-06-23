@@ -39,7 +39,7 @@ export class OlService {
       type_arguments: [],
       arguments: [],
     });
-    const circulating = await this.aptosClient.view({
+    const circulatingResult = await this.aptosClient.view({
       function: '0x1::supply::get_circulating',
       type_arguments: [],
       arguments: [],
@@ -49,8 +49,8 @@ export class OlService {
       slowLockedSupply: parseFloat(supplyStats[1] as string) / 1e6,
       cwSupply: parseFloat(supplyStats[2] as string) / 1e6,
       infraEscrowSupply: parseFloat(supplyStats[3] as string) / 1e6,
-      circulatingSupply: parseFloat(circulating[0] as string) / 1e6,
       unlockedSupply: parseFloat(supplyStats[4] as string) / 1e6,
+      circulatingSupply: parseFloat(circulatingResult[0] as string) / 1e6,
     };
   }
 

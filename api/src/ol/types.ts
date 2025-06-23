@@ -23,8 +23,8 @@ export interface SupplyStats {
   slowLockedSupply: number;
   cwSupply: number;
   infraEscrowSupply: number;
-  circulatingSupply: number;
   unlockedSupply: number;
+  circulatingSupply: number; // unlocked supply plus funds available from CWs
 }
 
 export interface ConsensusReward {

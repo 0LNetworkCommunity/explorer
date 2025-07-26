@@ -44,7 +44,7 @@ export class StatsService {
   ) {
     this.dataApiHost = config.get('dataApiHost')!;
     this.cacheEnabled = config.get<boolean>('cacheEnabled')!;
-    this.knownAddressesUrl = config.get<OlConfig>('ol')?.knwonAddressesUrl;
+    this.knownAddressesUrl = config.get<OlConfig>('ol')?.knownAddressesUrl;
   }
 
   private async setCache<T>(key: string, data: T): Promise<void> {
@@ -197,10 +197,10 @@ export class StatsService {
       },
       format: 'JSONEachRow',
     });
-    const rows = await resultSet.json<{
+    const rows = await resultSet.json() as {
       balance: number;
       address: string;
-    }>();
+    }[];
 
     return rows;
   }
@@ -300,12 +300,12 @@ export class StatsService {
         format: 'JSONEachRow',
       });
 
-      const rows = await resultSet.json<{
+      const rows = await resultSet.json() as {
         version: string;
         nominalReward: string;
         netReward: string;
         clearingBid: string;
-      }>();
+      }[];
 
       if (!rows.length) {
         return {
@@ -316,15 +316,15 @@ export class StatsService {
       }
 
       // Clean and parse the rows
-      const cleanedRows = rows.map((row) => ({
-        version: parseInt(String(row.version).replace('\n', ''), 10),
-        nominalReward: parseFloat(String(row.nominalReward).replace('\n', '')),
-        netReward: parseFloat(String(row.netReward).replace('\n', '')),
-        clearingBid: parseFloat(String(row.clearingBid).replace('\n', '')),
+      const cleanedRows = rows.map((rowItem) => ({
+        version: parseInt(String(rowItem.version).replace('\n', ''), 10),
+        nominalReward: parseFloat(String(rowItem.nominalReward).replace('\n', '')),
+        netReward: parseFloat(String(rowItem.netReward).replace('\n', '')),
+        clearingBid: parseFloat(String(rowItem.clearingBid).replace('\n', '')),
       }));
 
       // Extract versions and convert them to timestamps
-      const versions = cleanedRows.map((row) => row.version);
+      const versions = cleanedRows.map((rowItem) => rowItem.version);
       const chunkSize = 1000; // Adjust chunk size as necessary
       const versionChunks = this.chunkArray<number>(versions, chunkSize);
 
@@ -383,10 +383,10 @@ export class StatsService {
         format: 'JSONEachRow',
       });
 
-      const rows = await resultSet.json<{
+      const rows = await resultSet.json() as {
         version: string;
         value: number;
-      }>();
+      }[];
 
       if (!rows.length) {
         return [];
@@ -438,10 +438,10 @@ export class StatsService {
         format: 'JSONEachRow',
       });
 
-      const slowWalletRows = await slowWalletResultSet.json<{
+      const slowWalletRows = await slowWalletResultSet.json() as {
         address: string;
         unlocked_balance: number;
-      }>();
+      }[];
 
       if (!slowWalletRows.length) {
         return 0;
@@ -470,10 +470,10 @@ export class StatsService {
           format: 'JSONEachRow',
         });
 
-        const balanceRows = await balanceResultSet.json<{
+        const balanceRows = await balanceResultSet.json() as {
           address: string;
           latest_balance: number;
-        }>();
+        }[];
         balanceResults.push(...balanceRows);
       }
 
@@ -596,10 +596,10 @@ export class StatsService {
       format: 'JSONEachRow',
     });
 
-    const rows = await resultSet.json<{
+    const rows = await resultSet.json() as {
       timestamp: string;
       version: string;
-    }>();
+    }[];
 
     return rows.map((row) => ({
       version: parseInt(row.version, 10),
@@ -619,10 +619,10 @@ export class StatsService {
             `,
         format: 'JSONEachRow',
       });
-      const rows = await resultSet.json<{
+      const rows = await resultSet.json() as {
         version: string;
         value: string;
-      }>();
+      }[];
 
       if (!rows.length) {
         console.warn('No data found for slow wallets over time.');
@@ -677,10 +677,10 @@ export class StatsService {
         format: 'JSONEachRow',
       });
 
-      const rows = await resultSet.json<{
+      const rows = await resultSet.json() as {
         version: string;
         address: string;
-      }>();
+      }[];
 
       if (!rows.length) {
         return [];
@@ -780,10 +780,10 @@ export class StatsService {
         format: 'JSONEachRow',
       });
 
-      const rows = await resultSet.json<{
+      const rows = await resultSet.json() as {
         version: string;
         address: string;
-      }>();
+      }[];
 
       if (!rows.length) {
         return {
@@ -852,12 +852,12 @@ export class StatsService {
         format: 'JSONEachRow',
       });
 
-      const rows = await resultSet.json<{ unique_accounts: number }[]>();
+      const rows = await resultSet.json() as { unique_accounts: number }[];
 
       if (rows.length === 0) {
         return 0;
       }
-      const uniqueAccountsCount = Number(rows[0]['unique_accounts']);
+      const uniqueAccountsCount = Number(rows[0].unique_accounts);
 
       return uniqueAccountsCount;
     } catch (error) {
@@ -945,11 +945,11 @@ export class StatsService {
         format: 'JSONEachRow',
       });
 
-      const rows = await resultSet.json<{
+      const rows = await resultSet.json() as {
         address: string;
         latest_balance: number;
         latest_version: number;
-      }>();
+      }[];
 
       if (!rows.length) {
         return [];
@@ -971,11 +971,11 @@ export class StatsService {
 
       // Create a map of address to latest balance and timestamp
       const addressBalanceMap = new Map<string, { latest_balance: number; timestamp: number }>();
-      rows.forEach((row) => {
-        const version = row.latest_version;
+      rows.forEach((rowItem) => {
+        const version = rowItem.latest_version;
         const timestamp = versionToTimestampMap.get(version) ?? 0;
-        addressBalanceMap.set(row.address, {
-          latest_balance: row.latest_balance / 1e6,
+        addressBalanceMap.set(rowItem.address, {
+          latest_balance: rowItem.latest_balance / 1e6,
           timestamp,
         });
       });
@@ -994,10 +994,10 @@ export class StatsService {
         format: 'JSONEachRow',
       });
 
-      const slowWalletRows = await slowWalletResultSet.json<{
+      const slowWalletRows = await slowWalletResultSet.json() as {
         address: string;
         unlocked_balance: number;
-      }>();
+      }[];
 
       // Combine data from both queries
       const result = slowWalletRows.map((row) => {
@@ -1062,11 +1062,11 @@ export class StatsService {
         format: 'JSONEachRow',
       });
 
-      const rows = await resultSet.json<{
+      const rows = await resultSet.json() as {
         address: string;
         balance: number;
         latest_version: number;
-      }>();
+      }[];
 
       if (!rows.length) {
         return [];
@@ -1205,7 +1205,7 @@ export class StatsService {
         format: 'JSONEachRow',
       });
 
-      const rows = await resultSet.json<{ address: string }>();
+      const rows = await resultSet.json() as { address: string }[];
 
       const addresses = rows.map((row) => row.address);
 
@@ -1311,10 +1311,10 @@ export class StatsService {
         format: 'JSONEachRow',
       });
 
-      const coinBalanceRows: Array<{
+      const coinBalanceRows = await coinBalanceResultSet.json() as Array<{
         address: string;
         latest_balance: number;
-      }> = await coinBalanceResultSet.json();
+      }>;
 
       if (!coinBalanceRows.length) {
         return [];
@@ -1343,10 +1343,10 @@ export class StatsService {
         format: 'JSONEachRow',
       });
 
-      const slowWalletRows: Array<{
+      const slowWalletRows = await slowWalletResultSet.json() as Array<{
         address: string;
         unlocked_balance: number;
-      }> = await slowWalletResultSet.json();
+      }>;
 
       // Adjust balances: replace balance with unlocked balance for slow wallets
       slowWalletRows.forEach((row) => {

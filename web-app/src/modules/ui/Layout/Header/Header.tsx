@@ -34,7 +34,31 @@ const Header: React.FC = () => {
 
     const input = searchAddress.trim();
 
+    // Don't process empty searches
+    if (!input) return;
+
     try {
+      // Check if it's a transaction hash (0x + 64 hex chars)
+      if (input.startsWith('0x') && input.length === 66 && /^0x[0-9a-fA-F]{64}$/.test(input)) {
+        navigate(`/transactions/${encodeURIComponent(input)}`);
+        setSearchAddress('');
+        if (searchInput.current) {
+          searchInput.current.blur();
+        }
+        return;
+      }
+
+      // Check if it's a transaction version (numeric only)
+      if (/^\d+$/.test(input)) {
+        navigate(`/transactions/${encodeURIComponent(input)}`);
+        setSearchAddress('');
+        if (searchInput.current) {
+          searchInput.current.blur();
+        }
+        return;
+      }
+
+      // Default case: treat as an account address
       const addr = normalizeAddress(input);
       navigate(`/accounts/${encodeURIComponent(addr)}/resources`);
       setSearchAddress('');
@@ -42,7 +66,7 @@ const Header: React.FC = () => {
         searchInput.current.blur();
       }
     } catch (error) {
-      console.warn(error);
+      console.warn('Search error:', error);
     }
   };
 
@@ -75,7 +99,30 @@ const Header: React.FC = () => {
             ))}
           </div>
 
-          <div className="justify-end items-center gap-2 hidden justify-self-end lg:flex">
+          <div className="justify-end items-center gap-2 hidden justify-self-end lg:flex flex-grow">
+            <form className="w-full max-w-2xl" onSubmit={onSearch}>
+              <div className="relative text-gray-400 focus-within:text-gray-600">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <MagnifyingGlassIcon className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <input
+                  id="search"
+                  className={clsx(
+                    'ring-1',
+                    'block w-full rounded-md border-0 bg-white py-1.5 pl-10 pr-3',
+                    'text-gray-900 text-sm',
+                    'focus:ring-2 ring-white ring-offset-2 ring-offset-primary-600',
+                  )}
+                  placeholder="Search Address / Hash / Version"
+                  type="search"
+                  name="search"
+                  ref={searchInput}
+                  value={searchAddress}
+                  onChange={(event) => setSearchAddress(event.target.value)}
+                />
+              </div>
+            </form>
+
             {localStorage.getItem('postero_enabled') === 'true' && (
               <div className="flex items-baseline gap-2">
                 <div className="flex items-baseline space-x-4">
@@ -109,29 +156,6 @@ const Header: React.FC = () => {
                 </div>
               </div>
             )}
-
-            <form className="w-full max-w-xs" onSubmit={onSearch}>
-              <div className="relative text-gray-400 focus-within:text-gray-600">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <MagnifyingGlassIcon className="h-5 w-5" aria-hidden="true" />
-                </div>
-                <input
-                  id="search"
-                  className={clsx(
-                    'ring-1',
-                    'block w-full rounded-md border-0 bg-white py-1 pl-10 pr-3',
-                    'text-gray-900 text-sm',
-                    'focus:ring-2 ring-white ring-offset-2 ring-offset-primary-600',
-                  )}
-                  placeholder="Search Address"
-                  type="search"
-                  name="search"
-                  ref={searchInput}
-                  value={searchAddress}
-                  onChange={(event) => setSearchAddress(event.target.value)}
-                />
-              </div>
-            </form>
           </div>
 
           <div className="flex flex-grow justify-end lg:hidden">
@@ -179,11 +203,11 @@ const Header: React.FC = () => {
                 id="search"
                 className={clsx(
                   'ring-1',
-                  'block w-full rounded-md border-0 bg-white py-1 pl-10 pr-3',
+                  'block w-full rounded-md border-0 bg-white py-1.5 pl-10 pr-3',
                   'text-gray-900 text-sm',
                   'focus:ring-2 ring-white ring-offset-2 ring-offset-primary-600',
                 )}
-                placeholder="Search Address"
+                placeholder="Search Address / Hash / Version"
                 type="search"
                 name="search"
                 ref={searchInput}

@@ -3,7 +3,7 @@ import process from 'node:process';
 import { BullModule } from '@nestjs/bullmq';
 import { Module, Scope, Type } from '@nestjs/common';
 
-import { redisClient } from '../redis/redis.service.js';
+import { redisConnectionOptions } from '../redis/redis.service.js';
 import { ClickhouseModule } from '../clickhouse/clickhouse.module.js';
 import { ModulesResolver } from './modules.resolver.js';
 import { OlService } from './ol.service.js';
@@ -83,42 +83,42 @@ for (const role of roles) {
 
     BullModule.registerQueue({
       name: 'ol-clickhouse-ingestor',
-      connection: redisClient,
+      connection: redisConnectionOptions,
     }),
 
     BullModule.registerQueue({
       name: 'ol-parquet-producer',
-      connection: redisClient,
+      connection: redisConnectionOptions,
     }),
 
     BullModule.registerQueue({
       name: 'ol-version-batch',
-      connection: redisClient,
+      connection: redisConnectionOptions,
     }),
 
     BullModule.registerQueue({
       name: 'ol-version',
-      connection: redisClient,
+      connection: redisConnectionOptions,
     }),
 
     BullModule.registerQueue({
       name: 'expired-transactions',
-      connection: redisClient,
+      connection: redisConnectionOptions,
     }),
 
     BullModule.registerQueue({
       name: 'accounts',
-      connection: redisClient,
+      connection: redisConnectionOptions,
     }),
 
     BullModule.registerQueue({
       name: 'community-wallets',
-      connection: redisClient,
+      connection: redisConnectionOptions,
     }),
 
     BullModule.registerQueue({
       name: 'validators',
-      connection: redisClient,
+      connection: redisConnectionOptions,
     }),
   ],
   providers: [

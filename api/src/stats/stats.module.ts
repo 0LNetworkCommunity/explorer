@@ -6,9 +6,15 @@ import { StatsResolver } from './stats.resolver.js';
 import { StatsController } from './stats.controller.js';
 import { ClickhouseModule } from '../clickhouse/clickhouse.module.js';
 import { OlModule } from '../ol/ol.module.js';
-import { redisClient } from '../redis/redis.service.js';
+import { redisConnectionOptions } from '../redis/redis.service.js';
 import loadConfig from '../config/config.js';
 import { StatsProcessor } from './stats.processor.js';
+
+import { StatsUtils } from './utils/stats.utils.js';
+import { AccountsService } from './services/accounts.service.js';
+import { LiquidityService } from './services/liquidity.service.js';
+import { TimeSeriesService } from './services/time-series.service.js';
+import { TopAccountsService } from './services/top-accounts.service.js';
 
 const config = loadConfig();
 
@@ -19,10 +25,19 @@ const config = loadConfig();
 
     BullModule.registerQueue({
       name: 'stats',
-      connection: redisClient,
+      connection: redisConnectionOptions,
     }),
   ],
-  providers: [StatsService, StatsResolver, ...(config.cacheEnabled ? [StatsProcessor] : [])],
+  providers: [
+    StatsService,
+    StatsResolver,
+    StatsUtils,
+    AccountsService,
+    LiquidityService,
+    TimeSeriesService,
+    TopAccountsService,
+    ...(config.cacheEnabled ? [StatsProcessor] : [])
+  ],
   exports: [StatsService],
   controllers: [StatsController],
 })

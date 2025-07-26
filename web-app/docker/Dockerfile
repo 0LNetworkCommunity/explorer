@@ -8,10 +8,9 @@ WORKDIR /app
 ARG CI_COMMIT_SHA=""
 ENV VITE_CI_COMMIT_SHA $CI_COMMIT_SHA
 
-COPY ./package.json ./package-lock.json ./
-# RUN npm ci
-RUN rm package-lock.json && npm install
 COPY ./ ./
+# RUN npm ci
+RUN npm install
 
 RUN npm run build
 

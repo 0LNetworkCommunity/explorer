@@ -114,6 +114,32 @@ export const useTotalSupply = (): Money | undefined => {
   return value;
 };
 
+export const useCirculatingSupply = (): Money | undefined => {
+  const aptos = useAptos();
+  const [value, setValue] = useState<Money>();
+
+  useEffect(() => {
+    const load = async () => {
+      const supplyResponse = await aptos.view({
+        function: '0x1::supply::get_circulating',
+        type_arguments: [],
+        arguments: [],
+      });
+
+      const circulatingSupply = parseFloat(supplyResponse[0] as string) / 1e6
+
+      setValue({
+        amount: circulatingSupply,
+        symbol: "LIBRA",
+      });
+    };
+
+    load();
+  }, []);
+
+  return value;
+};
+
 export const useLedgerInfo = (): Types.IndexResponse | undefined => {
   const [ledgerInfo, setLedgerInfo] = useState<Types.IndexResponse>();
   const aptos = useAptos();

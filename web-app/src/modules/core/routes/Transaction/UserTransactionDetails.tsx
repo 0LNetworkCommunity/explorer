@@ -14,6 +14,7 @@ const UserTransactionDetails: FC<Props> = ({ transaction }) => {
   return (
     <DetailsTable>
       <DetailRow label="Type" value="User Transaction" />
+      <DetailRow label="Version" value={transaction.version} />
       <DetailRow label="Hash" value={transaction.hash} />
       <DetailRow label="State Change Hash" value={transaction.state_change_hash} />
       <DetailRow label="Event Root Hash" value={transaction.event_root_hash} />

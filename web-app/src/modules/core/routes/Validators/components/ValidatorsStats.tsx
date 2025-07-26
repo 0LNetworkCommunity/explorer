@@ -63,7 +63,6 @@ const ValidatorsStats: FC<ValidatorsStatsProps> = ({ validators }) => {
 
 // format percentage 1 decimal
 function formatPercentage(value: number) {
-  console.log('value', value);
   return `${(value / 10).toFixed(1)}%`;
 }
 

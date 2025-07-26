@@ -9,6 +9,7 @@ import AccountTransactions from './routes/Account/UserTransactions';
 import AccountResources from './routes/Account/Resources';
 import AccountModules from './routes/Account/Modules';
 import Block from './routes/Block';
+import Blocks from './routes/Blocks';
 import Root from './Root';
 import Validators from './routes/Validators';
 import CommunityWallets from './routes/CommunityWallets';
@@ -64,6 +65,10 @@ const router = createBrowserRouter([
       {
         path: '/transactions/:version',
         element: <Transaction />,
+      },
+      {
+        path: '/blocks',
+        element: <Blocks />,
       },
       {
         path: '/blocks/:blockHeight',

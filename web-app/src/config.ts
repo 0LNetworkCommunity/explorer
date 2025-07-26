@@ -21,10 +21,10 @@ const configMap = new Map<string, Config>([
     },
   ],
   [
-    'canary.0l.fyi',
+    'canary.scan.openlibra.world',
     {
-      apiHost: 'https://canary.api.0l.fyi',
-      dataApiHost: 'https://canary.data.0l.fyi',
+      apiHost: 'https://canary.api.scan.openlibra.world',
+      dataApiHost: 'https://canary.data.scan.openlibra.world',
     },
   ],
   [

@@ -24,7 +24,7 @@ export class TopAccountsService {
     config: ConfigService,
   ) {
     this.cacheEnabled = config.get<boolean>('cacheEnabled')!;
-    this.knownAddressesUrl = config.get<OlConfig>('ol')?.knwonAddressesUrl;
+    this.knownAddressesUrl = config.get<OlConfig>('ol')?.knownAddressesUrl;
   }
 
   async getTopUnlockedBalanceWallets(circulatingSupply: number): Promise<TopLiquidAccount[]> {

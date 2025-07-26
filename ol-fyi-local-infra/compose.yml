@@ -15,8 +15,8 @@ services:
       CLICKHOUSE_PASSWORD: olfyi
     ulimits:
       nofile:
-        soft: "262144"
-        hard: "262144"
+        soft: 262144
+        hard: 262144
     ports:
       - 8123:8123
       - 9000:9000
@@ -32,7 +32,7 @@ services:
     volumes:
       - ./volumes/postgres/var/lib/postgresql/data:/var/lib/postgresql/data
     ports:
-      - 5432:5432
+      - 5434:5432
 
   redis:
     image: redis/redis-stack:7.2.0-v8

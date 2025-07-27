@@ -108,3 +108,11 @@ Component structure:
 - Frontend uses ESLint for code quality
 - Prisma for database schema management
 - Both projects use Prettier for code formatting
+
+## Code Quality Standards
+
+When working with files in this repository:
+
+- **ALWAYS ensure files end with a trailing newline** - This is required for proper POSIX compliance and prevents issues with git diffs and various tools
+- Follow existing code style and formatting conventions
+- Use the project's linting and formatting tools before committing

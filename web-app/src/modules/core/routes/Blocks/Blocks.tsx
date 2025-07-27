@@ -2,7 +2,6 @@ import { FC, useEffect, useState, useRef } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 import clsx from 'clsx';
 import { NavLink, useSearchParams, useNavigate } from 'react-router-dom';
-import { Types } from 'aptos';
 
 import Page from '../../../ui/Page/Page';
 import useAptos from '../../../aptos';
@@ -25,7 +24,6 @@ const BlocksPage: FC = () => {
   const [blocks, setBlocks] = useState<BlockInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [latestBlockHeight, setLatestBlockHeight] = useState<number>(0);
-  const [availableBlocksCount, setAvailableBlocksCount] = useState<number>(0);
   const [searchHeight, setSearchHeight] = useState<string>('');
   const searchInput = useRef<HTMLInputElement>(null);
 
@@ -125,10 +123,6 @@ const BlocksPage: FC = () => {
             console.log(`Trying fallback range starting from ${range.start} with step ${range.step}`);
             for (let testHeight = range.start; testHeight >= Math.max(0, range.start - 50000); testHeight -= range.step) {
               try {
-                console.log(`Testing block ${testHeight}`);
-                const testBlock = await aptos.getBlockByHeight(testHeight, false);
-                console.log(`Found available block at ${testHeight}, fetching nearby blocks...`);
-
                 // Found an available block, now get blocks around this area
                 for (let nearbyHeight = testHeight; nearbyHeight >= Math.max(0, testHeight - ITEMS_PER_PAGE) && blockData.length < ITEMS_PER_PAGE; nearbyHeight--) {
                   try {

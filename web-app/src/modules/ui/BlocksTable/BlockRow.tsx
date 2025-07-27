@@ -2,8 +2,6 @@ import { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 
-import { Types } from 'aptos';
-
 interface Props {
   block: {
     block_height: string;

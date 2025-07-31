@@ -12,16 +12,72 @@ import TransactionsTable from '../../../ui/TransactionsTable';
 const Block: FC = () => {
   const { blockHeight } = useParams();
   const [block, setBlock] = useState<Types.Block>();
+  const [error, setError] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
 
   const aptos = useAptos();
 
   useEffect(() => {
     const load = async () => {
-      const block = await aptos.getBlockByHeight(parseInt(blockHeight!, 10), true);
-      setBlock(block);
+      setIsLoading(true);
+      setError('');
+      try {
+        const block = await aptos.getBlockByHeight(parseInt(blockHeight!, 10), true);
+        setBlock(block);
+      } catch (err: any) {
+        if (err?.error_code === 'block_pruned' || err?.message?.includes('pruned')) {
+          setError(`Block ${blockHeight} has been pruned and is no longer available on this node.`);
+        } else {
+          setError(`Error loading block ${blockHeight}: ${err?.message || 'Unknown error'}`);
+        }
+        console.error('Error loading block:', err);
+      } finally {
+        setIsLoading(false);
+      }
     };
     load();
-  }, []);
+  }, [blockHeight, aptos]);
+
+  if (isLoading) {
+    return (
+      <Page title={`Block: ${blockHeight}`} __deprecated_grayBg>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-gray-500">Loading block...</div>
+        </div>
+      </Page>
+    );
+  }
+
+  if (error) {
+    return (
+      <Page title={`Block: ${blockHeight}`} __deprecated_grayBg>
+        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <div className="flex">
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">
+                Block Not Available
+              </h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>{error}</p>
+                <p className="mt-2">
+                  This usually happens when the node has pruned older blocks to save storage space. 
+                  Only recent blocks are available.
+                </p>
+              </div>
+              <div className="mt-4">
+                <Link
+                  to="/blocks"
+                  className="text-sm font-medium text-red-800 hover:text-red-600 underline"
+                >
+                  Go back to blocks list
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Page>
+    );
+  }
 
   return (
     <Page title={`Block: ${blockHeight}`} __deprecated_grayBg>

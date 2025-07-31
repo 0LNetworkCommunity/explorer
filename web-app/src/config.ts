@@ -14,17 +14,17 @@ const localhost = {
 // TODO: make these URLs configurable
 const configMap = new Map<string, Config>([
   [
-    'scan.openlibra.world',
+    'scan.openlibra.io',
     {
-      apiHost: 'https://api.scan.openlibra.world',
-      dataApiHost: 'https://data.scan.openlibra.world',
+      apiHost: 'https://api.scan.openlibra.io',
+      dataApiHost: 'https://data.scan.openlibra.io',
     },
   ],
   [
-    'canary.scan.openlibra.world',
+    'canary.scan.openlibra.io',
     {
-      apiHost: 'https://canary.api.scan.openlibra.world',
-      dataApiHost: 'https://canary.data.scan.openlibra.world',
+      apiHost: 'https://canary.api.scan.openlibra.io',
+      dataApiHost: 'https://canary.data.scan.openlibra.io',
     },
   ],
   [
@@ -37,4 +37,4 @@ const configMap = new Map<string, Config>([
   ],
 ]);
 
-export const config = configMap.get(window.location.hostname) ?? configMap.get('scan.openlibra.world')!;
+export const config = configMap.get(window.location.hostname) ?? configMap.get('scan.openlibra.io')!;

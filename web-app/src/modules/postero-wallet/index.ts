@@ -75,7 +75,7 @@ export class PosteroWallet implements AdapterPlugin {
   }
 
   public deeplinkProvider(data: { url: string }): string {
-    return `https://wallet.scan.openlibra.world/explore?link=${data.url}`;
+    return `https://wallet.scan.openlibra.io/explore?link=${data.url}`;
   }
 
   public async connect(): Promise<AccountInfo> {

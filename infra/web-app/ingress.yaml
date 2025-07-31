@@ -9,7 +9,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.middlewares: olfyi-redirect@kubernetescrd
 spec:
   rules:
-    - host: dev.scan.openlibra.world
+    - host: dev.scan.openlibra.io
       http:
         paths:
           - path: /
@@ -22,4 +22,4 @@ spec:
   tls:
     - secretName: explorer-web-app-dev-tls
       hosts:
-        - dev.scan.openlibra.world
+        - dev.scan.openlibra.io

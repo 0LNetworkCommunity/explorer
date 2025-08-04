@@ -18,7 +18,7 @@ export default (): Config => {
       dataApiHost: ENV.DATA_API_HOST!,
       validatorHandlesUrl: ENV.VALIDATOR_HANDLES_URL || undefined,
       communityWalletsUrl: ENV.COMMUNITY_WALLETS_URL || undefined,
-      knwonAddressesUrl: ENV.KNOWN_ADDRESSES_URL || undefined,
+      knownAddressesUrl: ENV.KNOWN_ADDRESSES_URL || undefined,
     },
 
     s3: {

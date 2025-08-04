@@ -56,23 +56,23 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
       },
       format: 'JSONEachRow',
     });
-    const userTransactionRows = await resUserTransaction.json<UserTransactionDbEntity>();
+    const userTransactionRows = await resUserTransaction.json() as UserTransactionDbEntity[];
 
     const userTransactions = new Map(
-      userTransactionRows.map((userTransaction) => [
-        userTransaction.version,
+      userTransactionRows.map((userTxRow: UserTransactionDbEntity) => [
+        userTxRow.version,
         new UserTransaction({
-          hash: Buffer.from(userTransaction.hash, 'hex'),
-          sender: Buffer.from(userTransaction.sender, 'hex'),
-          timestamp: new BN(userTransaction.timestamp),
-          version: new BN(userTransaction.version),
-          gasUsed: new BN(userTransaction.gas_used),
-          gasUnitPrice: new BN(userTransaction.gas_unit_price),
-          success: userTransaction.success,
-          moduleAddress: Buffer.from(userTransaction.module_address, 'hex'),
-          moduleName: userTransaction.module_name,
-          functionName: userTransaction.function_name,
-          arguments: userTransaction.arguments,
+          hash: new Uint8Array(Buffer.from(userTxRow.hash, 'hex')),
+          sender: Buffer.from(userTxRow.sender, 'hex'),
+          timestamp: new BN(userTxRow.timestamp),
+          version: new BN(userTxRow.version),
+          gasUsed: new BN(userTxRow.gas_used),
+          gasUnitPrice: new BN(userTxRow.gas_unit_price),
+          success: userTxRow.success,
+          moduleAddress: Buffer.from(userTxRow.module_address, 'hex'),
+          moduleName: userTxRow.module_name,
+          functionName: userTxRow.function_name,
+          arguments: userTxRow.arguments,
         }),
       ]),
     );
@@ -105,17 +105,17 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
     });
 
     const blockMetadataTransactionRows =
-      await blockMetadataTransactionRes.json<BlockMetadataTransactionDbEntity>();
+      await blockMetadataTransactionRes.json() as BlockMetadataTransactionDbEntity[];
 
     const blockMetadataTransactions = new Map(
-      blockMetadataTransactionRows.map((blockMetadataTransaction) => {
+      blockMetadataTransactionRows.map((blockTxRow: BlockMetadataTransactionDbEntity) => {
         return [
-          blockMetadataTransaction.version,
+          blockTxRow.version,
           new BlockMetadataTransaction({
-            timestamp: new BN(blockMetadataTransaction.timestamp),
-            version: new BN(blockMetadataTransaction.version),
-            epoch: new BN(blockMetadataTransaction.epoch),
-            hash: Buffer.from(blockMetadataTransaction.hash, 'hex'),
+            timestamp: new BN(blockTxRow.timestamp),
+            version: new BN(blockTxRow.version),
+            epoch: new BN(blockTxRow.epoch),
+            hash: new Uint8Array(Buffer.from(blockTxRow.hash, 'hex')),
           }),
         ];
       }),
@@ -150,17 +150,17 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
     });
 
     const scriptUserTransactionRows =
-      await scriptUserTransactionRes.json<ScriptUserTransactionDbEntity>();
+      await scriptUserTransactionRes.json() as ScriptUserTransactionDbEntity[];
 
     return new Map(
-      scriptUserTransactionRows.map((scriptUserTransaction) => [
-        scriptUserTransaction.version,
+      scriptUserTransactionRows.map((scriptTxRow: ScriptUserTransactionDbEntity) => [
+        scriptTxRow.version,
         new ScriptUserTransaction({
-          version: new BN(scriptUserTransaction.version),
-          hash: Buffer.from(scriptUserTransaction.hash, 'hex'),
-          sender: Buffer.from(scriptUserTransaction.sender, 'hex'),
-          timestamp: new BN(scriptUserTransaction.timestamp),
-          success: scriptUserTransaction.success,
+          version: new BN(scriptTxRow.version),
+          hash: new Uint8Array(Buffer.from(scriptTxRow.hash, 'hex')),
+          sender: Buffer.from(scriptTxRow.sender, 'hex'),
+          timestamp: new BN(scriptTxRow.timestamp),
+          success: scriptTxRow.success,
         }),
       ]),
     );
@@ -188,14 +188,14 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
       format: 'JSONEachRow',
     });
 
-    const genesisTransactionRows = await genesisTransactionRes.json<GenesisTransactionDbEntity>();
+    const genesisTransactionRows = await genesisTransactionRes.json() as GenesisTransactionDbEntity[];
 
     return new Map(
-      genesisTransactionRows.map((genesisTransaction) => [
-        genesisTransaction.version,
+      genesisTransactionRows.map((genesisTxRow: GenesisTransactionDbEntity) => [
+        genesisTxRow.version,
         new GenesisTransaction({
-          version: new BN(genesisTransaction.version),
-          hash: Buffer.from(genesisTransaction.hash, 'hex'),
+          version: new BN(genesisTxRow.version),
+          hash: new Uint8Array(Buffer.from(genesisTxRow.hash, 'hex')),
         }),
       ]),
     );
@@ -245,23 +245,23 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
       format: 'JSONEachRow',
     });
 
-    const userTransactionRows = await resUserTransaction.json<UserTransactionDbEntity>();
+    const userTransactionRows = await resUserTransaction.json() as UserTransactionDbEntity[];
 
     const userTransactions = new Map(
-      userTransactionRows.map((userTransaction) => [
-        Buffer.from(userTransaction.hash, 'hex').toString('hex').toUpperCase(),
+      userTransactionRows.map((userTxRow: UserTransactionDbEntity) => [
+        Buffer.from(userTxRow.hash, 'hex').toString('hex').toUpperCase(),
         new UserTransaction({
-          hash: Buffer.from(userTransaction.hash, 'hex'),
-          sender: Buffer.from(userTransaction.sender, 'hex'),
-          timestamp: new BN(userTransaction.timestamp),
-          version: new BN(userTransaction.version),
-          success: userTransaction.success,
-          moduleAddress: Buffer.from(userTransaction.module_address, 'hex'),
-          moduleName: userTransaction.module_name,
-          functionName: userTransaction.function_name,
-          arguments: userTransaction.arguments,
-          gasUsed: new BN(userTransaction.gas_used),
-          gasUnitPrice: new BN(userTransaction.gas_unit_price),
+          hash: new Uint8Array(Buffer.from(userTxRow.hash, 'hex')),
+          sender: Buffer.from(userTxRow.sender, 'hex'),
+          timestamp: new BN(userTxRow.timestamp),
+          version: new BN(userTxRow.version),
+          success: userTxRow.success,
+          moduleAddress: Buffer.from(userTxRow.module_address, 'hex'),
+          moduleName: userTxRow.module_name,
+          functionName: userTxRow.function_name,
+          arguments: userTxRow.arguments,
+          gasUsed: new BN(userTxRow.gas_used),
+          gasUnitPrice: new BN(userTxRow.gas_unit_price),
         }),
       ]),
     );
@@ -320,7 +320,7 @@ export class OnChainTransactionsRepository implements IOnChainTransactionsReposi
         version: version.toString(10),
       },
     });
-    const rows = await res.json<{ timestamp: string }>();
+    const rows = await res.json() as { timestamp: string }[];
 
     if (rows.length) {
       return new BN(rows[0].timestamp);
